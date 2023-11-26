@@ -1,0 +1,29 @@
+{
+  "name": "irondocks",
+  "version": "2.0.0",
+  "description": "JSON Template HTML Extension Library Framework",
+  "main": "irondocks.js",
+  "scripts": {
+    "test": "new irondocks(j.json,document.body);"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/irondocks/irondock.git"
+  },
+  "keywords": [
+    "JSON",
+    "Template",
+    "HTML",
+    "Extension",
+    "Library",
+    "Framework",
+    "ajax",
+    "DOM"
+  ],
+  "author": "Anthony David Pulse, Jr.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/irondocks/irondock/issues"
+  },
+  "homepage": "https://github.com/irondocks/irondock#readme"
+}

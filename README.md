@@ -1,3 +1,8 @@
+# Irondocks v2.0
+
+One very huge and important update here: { "modal": "foo.json" } is now the official nest key/value for inserting nested template files.
+Must use "onclick": "pipes(this)" at any point you're going to be using Invents. The name pipes() is not going to be deprecated. It will be an alias at some point.
+
 # Irondocks v1.0
 
 Irondocks is a JSON structure-mapped HTML translator where you can create templates, and offer more pages to users with less code. It's a run away hit when you notice how fun it is. Used with Invents it's as perfectly harmonizing as any other framework. Give it a go. It's at least worthy of a look. Just clone and use Invents. Affix the JSON of HTML to the function
