@@ -1,3 +1,4 @@
+<script src="pipes.js"></script>
 <script type="module">
     import { irondocks } from './irondocks.js';
     const f = {
@@ -25,6 +26,20 @@
                 "tagname": "tr",
                 "td0": {
                     "tagname": "td",
+                    "style": "background-color:green;width:150"
+                },
+                "td1": {
+                    "tagname": "td",
+                    "style": "background-color:blue;width:150"
+                }
+            },
+            "tr2": {
+                "tagname": "tr",
+                "td0": {
+                    "tagname": "td",
+                    "tdv": {
+                        "modal": "j.json"
+                    },
                     "style": "background-color:green;width:150"
                 },
                 "td1": {

@@ -36,7 +36,6 @@ class irondocks {
                     options.setAttribute("value", g[1]);
                     options.textContent = (g[0]);
                     temp.appendChild(options);
-                    console.log("d");
                 });
                 temp.appendChild(options);
                 console.log("*")
@@ -53,6 +52,14 @@ class irondocks {
                 js.setAttribute("defer", "true");
                 tempTag.appendChild(js);
             }
+            else if (k.toLowerCase() == "modal") {
+                fetch(v)
+                    .then(response => response.json())
+                    .then(data => {
+                        const tmp = this.create(data, temp, root, id);
+                        tempTag.appendChild(tmp);
+                    });
+            }
             else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
                 temp.setAttribute(k, v);
             }
@@ -61,6 +68,7 @@ class irondocks {
             }
         });
         tempTag.appendChild(temp);
+        return tempTag;
     }
 
 }
