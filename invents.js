@@ -10,6 +10,7 @@
   *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  callback..........= calls function set as attribute value
   *  query.............= default query string associated with url ex: <anyTag query="key0:value0;key1:value2;" ajax="page.foo">
+  *  modal.............= key for value pair: { "modal": "foo.json" } (ie. nest foo.json into Irondocks Modal)
   *  <download>........= tag for downloading files ex: <download file="foo.zip" directory="/home/bar/"> (needs ending with slash)
   *  file..............= filename to download
   *  directory.........= relative or full path of 'file'
