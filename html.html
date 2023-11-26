@@ -1,0 +1,39 @@
+<script type="module">
+    import { irondocks } from './irondocks.js';
+    const f = {
+        "test": {
+            "tagname": "select",
+            "id": "tester",
+            "options": "key:value;key2:val2;",
+            "style": "width:200;"
+        },
+        "table": {
+            "tagname": "table",
+            "style": "border:3px solid white;cell-spacing: 5px;height:308",
+            "tr0": {
+                "tagname": "tr",
+                "td0": {
+                    "tagname": "td",
+                    "style": "background-color:yellow;width:150"
+                },
+                "td1": {
+                    "tagname": "td",
+                    "style": "background-color:orange;width:150"
+                }
+            },
+            "tr1": {
+                "tagname": "tr",
+                "td0": {
+                    "tagname": "td",
+                    "style": "background-color:green;width:150"
+                },
+                "td1": {
+                    "tagname": "td",
+                    "style": "background-color:blue;width:150"
+                }
+            }
+        }
+    };
+
+    var iron = new irondocks(f, document.body);
+</script>
