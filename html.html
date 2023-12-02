@@ -1,4 +1,19 @@
 <script defer src="pipes.js"></script>
+
+<Style>
+    .csss {
+        background-color: antiquewhite;
+    }
+
+    .yellow {
+        background-color: yellow;
+    }
+
+    .green {
+        background-color: green;
+    }
+</Style>
+
 <script type="module">
     import { irondocks } from './irondocks.js';
     const f = {
@@ -14,8 +29,12 @@
             "tr0": {
                 "tagname": "tr",
                 "td0": {
+                    "id": "sample",
                     "tagname": "td",
-                    "style": "background-color:yellow;width:150"
+                    "textContent": "Click me!",
+                    "style": "width:150;height:33%;vertical-align:bottom",
+                    "class": "yellow",
+                    "x-toggle": "sample:yellow;sample2:green;sample2:csss;"
                 },
                 "td1": {
                     "tagname": "td",
@@ -25,8 +44,10 @@
             "tr1": {
                 "tagname": "tr",
                 "td0": {
+                    "id": "sample2",
                     "tagname": "td",
-                    "style": "background-color:green;width:150"
+                    "class": "green",
+                    "style": "width:150"
                 },
                 "td1": {
                     "tagname": "td",
