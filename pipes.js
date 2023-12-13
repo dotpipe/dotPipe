@@ -63,16 +63,22 @@
 
 // Just incase you get the hang of this file.
 // import { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
-
 //export { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
 
-document.addEventListener("DOMContentLoaded", function () {
-    document.addEventListener("click", (elem) => {
-        if (elem.target.id != undefined)
-            pipes(elem.target);
+function last() {
+
+    const irc = JSON.parse(document.body.innerText);
+    
+    document.body.innerText = "";
+    // document.head.append(modalaHead(irc, ""));
+    modala(irc, document.body);
+    document.body.style.display = "block";
+    document.addEventListener("click", function (elem) {
+        console.log(elem.target);
+        if (elem.target.id != undefined) { pipes(elem.target); }
     });
     return;
-});
+}
 
 let domContentLoad = (again = false) => {
     doc_set = document.getElementsByTagName("pipe");
@@ -150,16 +156,8 @@ let domContentLoad = (again = false) => {
     });
 }
 
-function modalaHead(value, tempTag, root, id) {
+function modalaHead(value) {
 
-    if (typeof (tempTag) == "string") {
-        tempTag = document.createElement(tempTag);
-    }
-    if (root === undefined)
-        root = tempTag;
-    if (tempTag == undefined) {
-        return;
-    }
     if (value == undefined) {
         console.error("value of reference incorrect");
         return;
@@ -169,7 +167,7 @@ function modalaHead(value, tempTag, root, id) {
     Object.entries(value).forEach((nest) => {
         const [k, v] = nest;
         if (v instanceof Object) {
-            modalaHead(v, temp, root, id);
+            modalaHead(v);
         }
         else if (k.toLowerCase() == "title") {
             var title = document.createElement("title");
@@ -177,10 +175,15 @@ function modalaHead(value, tempTag, root, id) {
             document.head.appendChild(title);
         }
         else if (k.toLowerCase() == "css") {
-            var cssvar = document.createElement("link");
-            cssvar.href = v;
-            cssvar.rel = "stylesheet";
-            document.head.appendChild(cssvar);
+            var optsArray = v.split(";");
+            console.log(v)
+            optsArray.forEach((e, f) => {
+                var cssvar = document.createElement("link");
+                cssvar.href = v;
+                cssvar.rel = "stylesheet";
+                document.head.appendChild(cssvar);
+            });
+           
         }
         else if (k.toLowerCase() == "js") {
             var optsArray = v.split(";");
@@ -210,8 +213,7 @@ function modalaHead(value, tempTag, root, id) {
     return;
 }
 
-// modala(jsonObj,rootNode)
-function modala(value, tempTag, root, head) {
+function modala(value, tempTag, root, id) {
     if (typeof (tempTag) == "string") {
         tempTag = document.getElementById(tempTag);
     }
@@ -237,11 +239,11 @@ function modala(value, tempTag, root, head) {
         const [k, v] = nest;
         if (k.toLowerCase() == "header");
         else if (v instanceof Object)
-            modala(v, temp, root, head);
+            modala(v, temp, root, id);
         else if (k.toLowerCase() == "select") {
             var select = document.createElement("select");
             temp.appendChild(select);
-            modala(v, temp, root, head);
+            modala(v, temp, root, id);
         }
         else if (k.toLowerCase() == "options" && temp.tagName.toLowerCase() == "select") {
             var optsArray = v.split(";");
@@ -257,11 +259,23 @@ function modala(value, tempTag, root, head) {
             temp.appendChild(options);
             console.log("*")
         }
+        else if (k.toLowerCase() == "css") {
+            var cssvar = document.createElement("link");
+            cssvar.href = v;
+            cssvar.rel = "stylesheet";
+            tempTag.appendChild(cssvar);
+        }
+        else if (k.toLowerCase() == "js") {
+            var js = document.createElement("script");
+            js.src = v;
+            js.setAttribute("defer", "true");
+            tempTag.appendChild(js);
+        }
         else if (k.toLowerCase() == "modal") {
             fetch(v)
                 .then(response => response.json())
                 .then(data => {
-                    const tmp = modala(data, temp, root, head);
+                    const tmp = modala(data, temp, root, id);
                     tempTag.appendChild(tmp);
                 });
         }
@@ -272,11 +286,7 @@ function modala(value, tempTag, root, head) {
             (k.toLowerCase() == "textcontent") ? temp.textContent = v : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = v : temp.innerText = v;
         }
     });
-    // header.forEach((nest) => {
-    //     document.head.appendChild(nest);
-    // });
     tempTag.appendChild(temp);
-    domContentLoad(true);
     return tempTag;
 }
 
@@ -745,7 +755,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 var allText = ""; // JSON.parse(rawFile.responseText);
                 allText = JSON.parse(rawFile.responseText);
                 // console.log(allText);
-                var x = document.getElementById(elem.getAttribute("insert"));
+                document.getElementById(elem.getAttribute("insert")).innerHTML = "";
                 modala(allText, elem.getAttribute("insert"));
                 if (elem.hasAttribute("callback")) {
                     var func = elem.getAttribute("callback");
@@ -789,3 +799,5 @@ function navigate(elem, opts = null, query = "", classname = "") {
         // console.log(e);
     }
 }
+
+last();

@@ -697,7 +697,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 var allText = ""; // JSON.parse(rawFile.responseText);
                 allText = JSON.parse(rawFile.responseText);
                 // console.log(allText);
-                var x = document.getElementById(elem.getAttribute("insert"));
+                document.getElementById(elem.getAttribute("insert")) = "";
                 modala(allText, elem.getAttribute("insert"));
                 if (elem.hasAttribute("callback")) {
                     var func = elem.getAttribute("callback");
