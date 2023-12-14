@@ -16,8 +16,11 @@
   *  file..............= filename to download
   *  x-toggle..........= toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
   *  directory.........= relative or full path of 'file'
+  *  clear-node........= clear nodes. delimited in insert="first;second;thirdnode" by ';'
   *  redirect..........= "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
-  *  multi-part........= Class to create ajax calls ex: <tag id="something" ajax="foo.bar:insertIn0;foo.bar:insertIn1;bar.foo:insertIn3">Click me!</tag>
+  *  multi-part........= Class to create multi-ajax calls ex: <tag id="something" ajax="foo.bar:insertIn0;foo.bar:insertIn1;bar.foo:insertIn3">Click me!</tag>
+  *  modala-multi-last.= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
+  *  modala-multi-first= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
   *  br................= [Specifically a] Modala key/value pair. "br": "x" where x is the number of breaks in succession.
   *  js................= [Specifically a] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest.
   *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
@@ -504,7 +507,14 @@ function pipes(elem, stop = false) {
 
     if (elem.id === null)
         return;
-    //    domContentLoad(true);
+    
+    if (elem.classList.contains("clear-node")) {
+        var pages = elem.getAttribute("insert").split(";");
+        pages.forEach((e) => {
+            console.log(e);
+            document.getElementById(e).innerHTML = "";
+        });
+    }
     if (elem.classList.contains("multi-part") == true) {
         var pages = elem.getAttribute("ajax").split(";");
         pages.forEach((e) => {
@@ -513,8 +523,17 @@ function pipes(elem, stop = false) {
             stag.classList.toggle("multi-part");
             stag.setAttribute("insert", g[1]);
             stag.setAttribute("ajax", g[0]);
+            if (g[2] !== undefined)
+            {
+                stag.setAttribute("boxes", g[2]);
+            }
+            else {
+                stag.setAttribute("boxes", 1);
+            }
+            
             pipes(stag);
         });
+        return;
     }
     if (elem.tagName == "lnk") {
         window.open(elem.getAttribute("ajax") + (elem.hasAttribute("query") ? "?" + elem.getAttribute("query") : ""), "_blank");
@@ -691,15 +710,6 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 var allText = "";// JSON.parse(rawFile.responseText);
                 try {
                     allText = (rawFile.responseText);
-                    if (elem.hasAttribute("callback")) {
-                        var func = elem.getAttribute("callback");
-                        var fn = window[func];
-
-                        // check if object a function? 
-                        if (typeof fn === "function") {
-                            fn.apply(null, allText);
-                        }
-                    }
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).innerHTML = (rawFile.responseText);
                     }
@@ -718,15 +728,6 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 try {
                     var f = "";
                     allText = (rawFile.responseText);
-                    if (elem.hasAttribute("callback")) {
-                        var func = elem.getAttribute("callback");
-                        var fn = window[func];
-
-                        // check if object a function? 
-                        if (typeof fn === "function") {
-                            fn.apply(null, allText);
-                        }
-                    }
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
                     }
@@ -745,15 +746,6 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 try {
                     console.log(rawFile.responseText);
                     allText = JSON.parse(rawFile.responseText);
-                    if (elem.hasAttribute("callback")) {
-                        var func = elem.getAttribute("callback");
-                        var fn = window[func];
-
-                        // check if object a function? 
-                        if (typeof fn === "function") {
-                            fn.apply(null, allText);
-                        }
-                    }
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
                     }
@@ -769,19 +761,28 @@ function navigate(elem, opts = null, query = "", classname = "") {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
                 var allText = ""; // JSON.parse(rawFile.responseText);
-                allText = JSON.parse(rawFile.responseText);
-                // console.log(allText);
-                document.getElementById(elem.getAttribute("insert")).innerHTML = "";
-                modala(allText, elem.getAttribute("insert"));
-                if (elem.hasAttribute("callback")) {
-                    var func = elem.getAttribute("callback");
-                    var fn = window[func];
-
-                    // check if object a function? 
-                    if (typeof fn === "function") {
-                        fn.apply(null, allText);
-                    }
+                var html = "";
+                try {
+                    allText = JSON.parse(rawFile.responseText);
+                } catch (e) {
+                    html = rawFile.responseText;
                 }
+                var boxOF = false;
+                console.log(elem.getAttribute("boxes") + " " + document.getElementById(elem.getAttribute("insert")).childElementCount);
+                if (elem.hasAttribute("boxes") && elem.getAttribute("boxes") <= document.getElementById(elem.getAttribute("insert")).childElementCount)
+                    boxOF = true;
+                if (!elem.classList.contains("modala-multi-first") && !elem.classList.contains("modala-multi-last")) {
+                    document.getElementById(elem.getAttribute("insert")).innerHTML = "";
+                }
+                else if (elem.classList.contains("modala-multi-first") && boxOF)
+                {
+                    document.getElementById(elem.getAttribute("insert")).lastChild.remove();
+                }
+                else if (elem.classList.contains("modala-multi-last") && boxOF)
+                {
+                    document.getElementById(elem.getAttribute("insert")).firstChild.remove();
+                }
+                modala(allText, document.getElementById(elem.getAttribute("insert")));
             }
         }
     }
@@ -791,21 +792,6 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 var allText = rawFile.responseText;
                 if (document.getElementById(elem.getAttribute("insert")) !== null)
                     document.getElementById(elem.getAttribute("insert")).innerHTML = allText;
-            }
-        }
-    }
-    else {
-        rawFile.onreadystatechange = function () {
-            if (rawFile.readyState === 4) {
-                var allText = JSON.parse(rawFile.responseText);
-                console.log(allText);
-                var func = elem.getAttribute("callback");
-                var fn = window[func];
-
-                // check if object a function? 
-                if (typeof fn === "function") {
-                    fn.apply(null, allText);
-                }
             }
         }
     }
