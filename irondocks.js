@@ -17,6 +17,8 @@
   *  x-toggle..........= toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
   *  directory.........= relative or full path of 'file'
   *  redirect..........= "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
+  *  multi-part........= Class to create ajax calls ex: <tag id="something" ajax="foo.bar:insertIn0;foo.bar:insertIn1;bar.foo:insertIn3">Click me!</tag>
+  *  br................= [Specifically a] Modala key/value pair. "br": "x" where x is the number of breaks in succession.
   *  js................= [Specifically a] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest.
   *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
   *  <lnk>.............= tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
@@ -175,10 +177,15 @@ function modalaHead(value) {
             document.head.appendChild(title);
         }
         else if (k.toLowerCase() == "css") {
-            var cssvar = document.createElement("link");
-            cssvar.href = v;
-            cssvar.rel = "stylesheet";
-            document.head.appendChild(cssvar);
+            var optsArray = v.split(";");
+            console.log(v)
+            optsArray.forEach((e, f) => {
+                var cssvar = document.createElement("link");
+                cssvar.href = v;
+                cssvar.rel = "stylesheet";
+                document.head.appendChild(cssvar);
+            });
+           
         }
         else if (k.toLowerCase() == "js") {
             var optsArray = v.split(";");
@@ -235,6 +242,13 @@ function modala(value, tempTag, root, id) {
         if (k.toLowerCase() == "header");
         else if (v instanceof Object)
             modala(v, temp, root, id);
+        else if (k.toLowerCase() == "br") {
+            let brs = v;
+            while (brs) {
+                temp.appendChild(document.createElement("br"));
+                brs--;
+            }
+        }
         else if (k.toLowerCase() == "select") {
             var select = document.createElement("select");
             temp.appendChild(select);
@@ -491,12 +505,19 @@ function pipes(elem, stop = false) {
     if (elem.id === null)
         return;
     //    domContentLoad(true);
-    if (elem.tagName == "lnk" && elem.classList.contains("new-win")) {
-        let lnk_win = (elem.hasAttribute("win-name") && elem.getAttribute("win-name")) ? elem.getAttribute("win-name") : "_blank";
-        window.open(elem.getAttribute("ajax") + (elem.hasAttribute("query") ? "?" + elem.getAttribute("query") : ""), lnk_win);
+    if (elem.classList.contains("multi-part") == true) {
+        var pages = elem.getAttribute("ajax").split(";");
+        pages.forEach((e) => {
+            var g = e.split(":");
+            var stag = elem.cloneNode();
+            stag.classList.toggle("multi-part");
+            stag.setAttribute("insert", g[1]);
+            stag.setAttribute("ajax", g[0]);
+            pipes(stag);
+        });
     }
-    if (elem.tagName == "lnk" || elem.classList.contains("redirect")) {
-        window.location.href = elem.getAttribute("ajax") + (elem.hasAttribute("query") ? "?" + elem.getAttribute("query") : "");
+    if (elem.tagName == "lnk") {
+        window.open(elem.getAttribute("ajax") + (elem.hasAttribute("query") ? "?" + elem.getAttribute("query") : ""), "_blank");
     }
     if (elem.hasAttribute("display") && elem.getAttribute("display")) {
         var optsArray = elem.getAttribute("display").split(";");
