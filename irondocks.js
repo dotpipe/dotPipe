@@ -26,6 +26,7 @@
   *  <pipe>............= Tag (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  <dyn>.............= Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
   *  dyn-one...........= Class to stop recurring clicking activities 
+  *  \n................= RegEx emplacement to insert <br /> in Modala contents for innerHTML
   *  plain-text........= plain text returned to the insertion point
   *  plain-html........= returns as true HTML
   *  <timed>...........= Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
@@ -298,7 +299,8 @@ function modala(value, tempTag, root, id) {
             temp.setAttribute(k, v);
         }
         else if (!Number(k) && k.toLowerCase() != "tagname" && (k.toLowerCase() == "textcontent" || k.toLowerCase() == "innerhtml" || k.toLowerCase() == "innertext")) {
-            (k.toLowerCase() == "textcontent") ? temp.textContent = v : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = v : temp.innerText = v;
+            const val = v.replace(/\r?\n/g, "<br />");
+            (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
         }
     });
     tempTag.appendChild(temp);
