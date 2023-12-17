@@ -8,8 +8,6 @@
   *  -------------------------------------------------------------
   *  insert............= return ajax call to this id
   *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  callbacks.........= calls function set as attribute value
-  *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
   *  query.............= default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
   *  modal.............= Irondocks key. Inserts the Irondocks file in the value for template ease of use.
   *  download..........= class for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
@@ -283,6 +281,11 @@ function modala(value, tempTag, root, id) {
             js.setAttribute("defer", "true");
             tempTag.appendChild(js);
         }
+        else if (k.toLowerCase()[0] == "h" && k.length == 2) {
+            var h = document.createElement(k);
+            h.innerText = v;
+            tempTag.appendChild(h);
+        }
         else if (k.toLowerCase() == "modal") {
             fetch(v)
                 .then(response => response.json())
@@ -523,14 +526,13 @@ function pipes(elem, stop = false) {
             stag.classList.toggle("multi-part");
             stag.setAttribute("insert", g[1]);
             stag.setAttribute("ajax", g[0]);
-            if (g[2] !== undefined)
+            if (g.length == 3)
             {
                 stag.setAttribute("boxes", g[2]);
             }
             else {
                 stag.setAttribute("boxes", 1);
             }
-            
             pipes(stag);
         });
         return;
@@ -774,7 +776,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 if (!elem.classList.contains("modala-multi-first") && !elem.classList.contains("modala-multi-last")) {
                     document.getElementById(elem.getAttribute("insert")).innerHTML = "";
                 }
-                else if (elem.classList.contains("modala-multi-first") && boxOF)
+                if (elem.classList.contains("modala-multi-first") && boxOF)
                 {
                     document.getElementById(elem.getAttribute("insert")).lastChild.remove();
                 }
