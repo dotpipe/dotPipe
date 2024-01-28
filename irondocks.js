@@ -7,26 +7,23 @@
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
   *  insert............= return ajax call to this id
+  *  insert:<attr>.....= change attribute of target id (ex: insert="idOfImgElem:src")
   *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
+  *  callbacks.........= calls function set as attribute value
+  *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
   *  query.............= default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
   *  modal.............= Irondocks key. Inserts the Irondocks file in the value for template ease of use.
   *  download..........= class for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
   *  file..............= filename to download
   *  x-toggle..........= toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
   *  directory.........= relative or full path of 'file'
-  *  clear-node........= clear nodes. delimited in insert="first;second;thirdnode" by ';'
   *  redirect..........= "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
-  *  multi-part........= Class to create multi-ajax calls ex: <tag id="something" ajax="foo.bar:insertIn0;foo.bar:insertIn1;bar.foo:insertIn3">Click me!</tag>
-  *  modala-multi-last.= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
-  *  modala-multi-first= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
-  *  br................= [Specifically a] Modala key/value pair. "br": "x" where x is the number of breaks in succession.
   *  js................= [Specifically a] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest.
   *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
   *  <lnk>.............= tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
   *  <pipe>............= Tag (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  <dyn>.............= Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
   *  dyn-one...........= Class to stop recurring clicking activities 
-  *  \n................= RegEx emplacement to insert <br /> in Modala contents for innerHTML
   *  plain-text........= plain text returned to the insertion point
   *  plain-html........= returns as true HTML
   *  <timed>...........= Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
@@ -71,7 +68,9 @@
 
 function last() {
 
-    const irc = JSON.parse(document.body.innerText);
+    irc = {}
+    if (JSON.parse(document.body.innerText) != undefined)
+        irc = JSON.parse(document.body.innerText);
     
     document.body.innerText = "";
     // document.head.append(modalaHead(irc, ""));
@@ -85,6 +84,7 @@ function last() {
 }
 
 let domContentLoad = (again = false) => {
+    last();
     doc_set = document.getElementsByTagName("pipe");
     if (again == false) {
         Array.from(doc_set).forEach(function (elem) {
@@ -179,15 +179,10 @@ function modalaHead(value) {
             document.head.appendChild(title);
         }
         else if (k.toLowerCase() == "css") {
-            var optsArray = v.split(";");
-            console.log(v)
-            optsArray.forEach((e, f) => {
-                var cssvar = document.createElement("link");
-                cssvar.href = v;
-                cssvar.rel = "stylesheet";
-                document.head.appendChild(cssvar);
-            });
-           
+            var cssvar = document.createElement("link");
+            cssvar.href = v;
+            cssvar.rel = "stylesheet";
+            document.head.appendChild(cssvar);
         }
         else if (k.toLowerCase() == "js") {
             var optsArray = v.split(";");
@@ -244,13 +239,6 @@ function modala(value, tempTag, root, id) {
         if (k.toLowerCase() == "header");
         else if (v instanceof Object)
             modala(v, temp, root, id);
-        else if (k.toLowerCase() == "br") {
-            let brs = v;
-            while (brs) {
-                temp.appendChild(document.createElement("br"));
-                brs--;
-            }
-        }
         else if (k.toLowerCase() == "select") {
             var select = document.createElement("select");
             temp.appendChild(select);
@@ -282,11 +270,6 @@ function modala(value, tempTag, root, id) {
             js.setAttribute("defer", "true");
             tempTag.appendChild(js);
         }
-        else if (k.toLowerCase()[0] == "h" && k.length == 2) {
-            var h = document.createElement(k);
-            h.innerText = v;
-            tempTag.appendChild(h);
-        }
         else if (k.toLowerCase() == "modal") {
             fetch(v)
                 .then(response => response.json())
@@ -294,13 +277,12 @@ function modala(value, tempTag, root, id) {
                     const tmp = modala(data, temp, root, id);
                     tempTag.appendChild(tmp);
                 });
-        }
+        }   
         else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
             temp.setAttribute(k, v);
         }
         else if (!Number(k) && k.toLowerCase() != "tagname" && (k.toLowerCase() == "textcontent" || k.toLowerCase() == "innerhtml" || k.toLowerCase() == "innertext")) {
-            const val = v.replace(/\r?\n/g, "<br />");
-            (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
+            (k.toLowerCase() == "textcontent") ? temp.textContent = v : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = v : temp.innerText = v;
         }
     });
     tempTag.appendChild(temp);
@@ -509,38 +491,16 @@ function pipes(elem, stop = false) {
     var query = "";
     var headers = new Map();
     var formclass = "";
-
+    var INSERT_MOD = 0;
     if (elem.id === null)
         return;
-    
-    if (elem.classList.contains("clear-node")) {
-        var pages = elem.getAttribute("insert").split(";");
-        pages.forEach((e) => {
-            console.log(e);
-            document.getElementById(e).innerHTML = "";
-        });
+    //    domContentLoad(true);
+    if (elem.tagName == "lnk" && elem.classList.contains("new-win")) {
+        let lnk_win = (elem.hasAttribute("win-name") && elem.getAttribute("win-name")) ? elem.getAttribute("win-name") : "_blank";
+        window.open(elem.getAttribute("ajax") + (elem.hasAttribute("query") ? "?" + elem.getAttribute("query") : ""), lnk_win);
     }
-    if (elem.classList.contains("multi-part") == true) {
-        var pages = elem.getAttribute("ajax").split(";");
-        pages.forEach((e) => {
-            var g = e.split(":");
-            var stag = elem.cloneNode();
-            stag.classList.toggle("multi-part");
-            stag.setAttribute("insert", g[1]);
-            stag.setAttribute("ajax", g[0]);
-            if (g.length == 3)
-            {
-                stag.setAttribute("boxes", g[2]);
-            }
-            else {
-                stag.setAttribute("boxes", 1);
-            }
-            pipes(stag);
-        });
-        return;
-    }
-    if (elem.tagName == "lnk") {
-        window.open(elem.getAttribute("ajax") + (elem.hasAttribute("query") ? "?" + elem.getAttribute("query") : ""), "_blank");
+    if (elem.tagName == "lnk" || elem.classList.contains("redirect")) {
+        window.location.href = elem.getAttribute("ajax") + (elem.hasAttribute("query") ? "?" + elem.getAttribute("query") : "");
     }
     if (elem.hasAttribute("display") && elem.getAttribute("display")) {
         var optsArray = elem.getAttribute("display").split(";");
@@ -560,13 +520,14 @@ function pipes(elem, stop = false) {
                 document.getElementById(g[0]).classList.toggle(g[1]);
         });
     }
-    if (elem.hasAttribute("set-attr") && elem.getAttribute("set-attr")) {
-        var optsArray = elem.getAttribute("set-attr").split(";");
+    if (elem.hasAttribute("insert") && elem.getAttribute("insert")) {
+        var optsArray = elem.getAttribute("insert").split(";");
         optsArray.forEach((e, f) => {
             var g = e.split(":");
             if (g[0] != '' && g[0] != undefined)
-                document.getElementById(elem.getAttribute("insert")).setAttribute(g[0], g[1]);
+                document.getElementById(g[0]).setAttribute(g[0], g[1]);
         });
+	INSERT_MOD = 1;
     }
     if (elem.hasAttribute("remove") && elem.getAttribute("remove")) {
         var optsArray = elem.getAttribute("remove").split(";");
@@ -684,7 +645,8 @@ function navigate(elem, opts = null, query = "", classname = "") {
     opts.set("mode", (opts["mode"] !== undefined) ? opts["mode"] : '"Access-Control-Allow-Origin":"*"');
 
     var rawFile = new XMLHttpRequest();
-    rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + elem_qstring, true);
+    
+    rawFile.open(opts.get("method"), elem.getAttribute("ajax") + elem_qstring, true);
     console.log(elem);
 
     if (elem.classList.contains("set-attr")) {
@@ -692,7 +654,13 @@ function navigate(elem, opts = null, query = "", classname = "") {
             if (rawFile.readyState === 4) {
                 var allText = (rawFile.responseText);
                 try {
-                    if (elem.classList.contains("plain-html"))
+		    if (elem.getAttribute("insert")) {
+			var g = elem.getAttribute("insert").split(":");
+			if (g.length > 1) {
+				document.getElementById(g[0]).setAttribute(g[1],allText);
+			}
+		    }
+                    else if (elem.classList.contains("plain-html"))
                         document.getElementById(elem.getAttribute("insert")).innerHTML = (allText);
                     else if (elem.classList.contains("plain-text"))
                         document.getElementById(elem.getAttribute("insert")).textContent = (allText);
@@ -714,6 +682,15 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 var allText = "";// JSON.parse(rawFile.responseText);
                 try {
                     allText = (rawFile.responseText);
+                    if (elem.hasAttribute("callback")) {
+                        var func = elem.getAttribute("callback");
+                        var fn = window[func];
+
+                        // check if object a function? 
+                        if (typeof fn === "function") {
+                            fn.apply(null, allText);
+                        }
+                    }
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).innerHTML = (rawFile.responseText);
                     }
@@ -732,6 +709,15 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 try {
                     var f = "";
                     allText = (rawFile.responseText);
+                    if (elem.hasAttribute("callback")) {
+                        var func = elem.getAttribute("callback");
+                        var fn = window[func];
+
+                        // check if object a function? 
+                        if (typeof fn === "function") {
+                            fn.apply(null, allText);
+                        }
+                    }
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
                     }
@@ -750,6 +736,15 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 try {
                     console.log(rawFile.responseText);
                     allText = JSON.parse(rawFile.responseText);
+                    if (elem.hasAttribute("callback")) {
+                        var func = elem.getAttribute("callback");
+                        var fn = window[func];
+
+                        // check if object a function? 
+                        if (typeof fn === "function") {
+                            fn.apply(null, allText);
+                        }
+                    }
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
                     }
@@ -765,28 +760,19 @@ function navigate(elem, opts = null, query = "", classname = "") {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
                 var allText = ""; // JSON.parse(rawFile.responseText);
-                var html = "";
-                try {
-                    allText = JSON.parse(rawFile.responseText);
-                } catch (e) {
-                    html = rawFile.responseText;
+                allText = JSON.parse(rawFile.responseText);
+                // console.log(allText);
+                document.getElementById(elem.getAttribute("insert")).innerHTML = "";
+                modala(allText, elem.getAttribute("insert"));
+                if (elem.hasAttribute("callback")) {
+                    var func = elem.getAttribute("callback");
+                    var fn = window[func];
+
+                    // check if object a function? 
+                    if (typeof fn === "function") {
+                        fn.apply(null, allText);
+                    }
                 }
-                var boxOF = false;
-                console.log(elem.getAttribute("boxes") + " " + document.getElementById(elem.getAttribute("insert")).childElementCount);
-                if (elem.hasAttribute("boxes") && elem.getAttribute("boxes") <= document.getElementById(elem.getAttribute("insert")).childElementCount)
-                    boxOF = true;
-                if (!elem.classList.contains("modala-multi-first") && !elem.classList.contains("modala-multi-last")) {
-                    document.getElementById(elem.getAttribute("insert")).innerHTML = "";
-                }
-                if (elem.classList.contains("modala-multi-first") && boxOF)
-                {
-                    document.getElementById(elem.getAttribute("insert")).lastChild.remove();
-                }
-                else if (elem.classList.contains("modala-multi-last") && boxOF)
-                {
-                    document.getElementById(elem.getAttribute("insert")).firstChild.remove();
-                }
-                modala(allText, document.getElementById(elem.getAttribute("insert")));
             }
         }
     }
@@ -799,11 +785,24 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
         }
     }
+    else {
+        rawFile.onreadystatechange = function () {
+            if (rawFile.readyState === 4) {
+                var allText = JSON.parse(rawFile.responseText);
+                console.log(allText);
+                var func = elem.getAttribute("callback");
+                var fn = window[func];
+
+                // check if object a function? 
+                if (typeof fn === "function") {
+                    fn.apply(null, allText);
+                }
+            }
+        }
+    }
     try {
         rawFile.send();
     } catch (e) {
         // console.log(e);
     }
 }
-
-last();
