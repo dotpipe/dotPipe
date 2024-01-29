@@ -7,7 +7,7 @@
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
   *  insert............= return ajax call to this id
-  *  insert:<attr>.....= change attribute of target id (ex: insert="idOfImgElem:src")
+  *  insert.<attr>.....= change attribute of target id (ex: insert="idOfImgElem.src")
   *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  callbacks.........= calls function set as attribute value
   *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
@@ -512,6 +512,13 @@ function pipes(elem, stop = false) {
                 x.style.display = "block";
         });
     }
+    if (elem.hasAttribute("turn")) {
+	var optsArray = elem.getAttribute("turn").split(";");
+        optsArray.forEach((e, f) => {
+		pipes(document.getElementById(e));
+		console.log("**")
+	});
+    }
     if (elem.hasAttribute("x-toggle")) {
         var optsArray = elem.getAttribute("x-toggle").split(";");
         optsArray.forEach((e, f) => {
@@ -524,8 +531,10 @@ function pipes(elem, stop = false) {
         var optsArray = elem.getAttribute("insert").split(";");
         optsArray.forEach((e, f) => {
             var g = e.split(":");
-            if (g[0] != '' && g[0] != undefined)
+
+            if (g.length > 1 && g[0] != '' && g[0] != undefined)
                 document.getElementById(g[0]).setAttribute(g[0], g[1]);
+	   
         });
 	INSERT_MOD = 1;
     }
@@ -612,7 +621,7 @@ function setAJAXOpts(elem, opts) {
 }
 
 function formAJAX(elem, classname) {
-    var elem_qstring = "";
+    var elem_qstring = "?";
 
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
