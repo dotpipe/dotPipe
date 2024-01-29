@@ -1,3 +1,9 @@
+# Irondocks v3
+
+Thankfully, I noticed that the '?' was missing in the URLs being AJAXed to. That's now fixed. Please bring up issues to me here. I'd love to fix them
+
+Also, I figured that 'insert' is now a good way to address multi-changes. It's not necessary, but it's an addition. insert="id:incoming.foo;id2:incoming.bar;"
+
 # Irondocks v2.8.3
 
 Ahh how time flies. onclick is unnecessary. At all. If you wish to have a tag be active, ID it. It'll act with the rest of the code. Everything is good. But! Nested modals are a bit slow. Till a solution is found! goodnight!
