@@ -84,19 +84,6 @@
 </head>
 
 <body>
-    <table style="">
-        <tr>
-            <td style="grid-template-columns:500px 500px auto;display:inline-grid;grid-column-count:3">
-                <dyn id="i1" style="position:relative;width:300px;" ajax="https://github.com/wise-penny/pipes"
-                    class="redirect">GitHub</dyn>
-                <dyn id="i2" style="position:static;width:300px;" ajax="http://g0d.me/ivy" class="redirect">Ivy Seed
-                </dyn>
-                <dyn id="i3" style="position:relative;width:300px;" ajax="http://g0d.me/freqwave" class="redirect">
-                    Freqwave</dyn>
-            </td>
-        </tr>
-    </table>
-
     <div id="instr" style="position:absolute"></div>
     <table style="width:75%;z-index:-1">
         <tr>
