@@ -7,7 +7,7 @@
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
   *  insert............= return ajax call to this id
-  *  insert:<attr>.....= change attribute of target id (ex: insert="idOfImgElem:src")
+  *  turn..............= change attribute of target id (ex: turn="idOfImgElem:src")
   *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  callbacks.........= calls function set as attribute value
   *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
