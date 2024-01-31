@@ -8,6 +8,7 @@
   *  -------------------------------------------------------------
   *  insert............= return ajax call to this id
   *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
+  *  turn..............= creates a call to each Node with an id matching the listed, delimited with a semicolon in the 'turn' attribute
   *  callbacks.........= calls function set as attribute value
   *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
   *  query.............= default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
