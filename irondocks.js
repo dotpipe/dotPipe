@@ -7,7 +7,6 @@
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
   *  insert............= return ajax call to this id
-  *  insert:<attr>.....= change attribute of target id (ex: insert="idOfImgElem:src")
   *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  callbacks.........= calls function set as attribute value
   *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
@@ -66,25 +65,22 @@
 // import { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
 //export { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
 
-function last() {
+// function last() {
 
-    irc = {}
-    if (JSON.parse(document.body.innerText) != undefined)
-        irc = JSON.parse(document.body.innerText);
+//     const irc = JSON.parse(document.body.innerText);
     
-    document.body.innerText = "";
-    // document.head.append(modalaHead(irc, ""));
-    modala(irc, document.body);
-    document.body.style.display = "block";
-    document.addEventListener("click", function (elem) {
-        console.log(elem.target);
-        if (elem.target.id != undefined) { pipes(elem.target); }
-    });
-    return;
-}
+//     document.body.innerText = "";
+//     // document.head.append(modalaHead(irc, ""));
+//     modala(irc, document.body);
+//     document.body.style.display = "block";
+//     document.addEventListener("click", function (elem) {
+//         console.log(elem.target);
+//         if (elem.target.id != undefined) { pipes(elem.target); }
+//     });
+//     return;
+// }
 
 let domContentLoad = (again = false) => {
-    last();
     doc_set = document.getElementsByTagName("pipe");
     if (again == false) {
         Array.from(doc_set).forEach(function (elem) {
@@ -277,7 +273,7 @@ function modala(value, tempTag, root, id) {
                     const tmp = modala(data, temp, root, id);
                     tempTag.appendChild(tmp);
                 });
-        }   
+        }
         else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
             temp.setAttribute(k, v);
         }
@@ -491,7 +487,7 @@ function pipes(elem, stop = false) {
     var query = "";
     var headers = new Map();
     var formclass = "";
-    var INSERT_MOD = 0;
+
     if (elem.id === null)
         return;
     //    domContentLoad(true);
@@ -513,11 +509,10 @@ function pipes(elem, stop = false) {
         });
     }
     if (elem.hasAttribute("turn")) {
-	var optsArray = elem.getAttribute("turn").split(";");
+        var optsArray = elem.getAttribute("turn").split(";");
         optsArray.forEach((e, f) => {
-		pipes(document.getElementById(e));
-		console.log("**")
-	});
+            pipes(e);
+        });
     }
     if (elem.hasAttribute("x-toggle")) {
         var optsArray = elem.getAttribute("x-toggle").split(";");
@@ -527,16 +522,13 @@ function pipes(elem, stop = false) {
                 document.getElementById(g[0]).classList.toggle(g[1]);
         });
     }
-    if (elem.hasAttribute("insert") && elem.getAttribute("insert")) {
-        var optsArray = elem.getAttribute("insert").split(";");
+    if (elem.hasAttribute("set-attr") && elem.getAttribute("set-attr")) {
+        var optsArray = elem.getAttribute("set-attr").split(";");
         optsArray.forEach((e, f) => {
             var g = e.split(":");
-
-            if (g.length > 1 && g[0] != '' && g[0] != undefined)
-                document.getElementById(g[0]).setAttribute(g[0], g[1]);
-	   
+            if (g[0] != '' && g[0] != undefined)
+                document.getElementById(elem.getAttribute("insert")).setAttribute(g[0], g[1]);
         });
-	INSERT_MOD = 1;
     }
     if (elem.hasAttribute("remove") && elem.getAttribute("remove")) {
         var optsArray = elem.getAttribute("remove").split(";");
@@ -621,7 +613,7 @@ function setAJAXOpts(elem, opts) {
 }
 
 function formAJAX(elem, classname) {
-    var elem_qstring = "?";
+    var elem_qstring = "";
 
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
@@ -654,8 +646,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
     opts.set("mode", (opts["mode"] !== undefined) ? opts["mode"] : '"Access-Control-Allow-Origin":"*"');
 
     var rawFile = new XMLHttpRequest();
-    
-    rawFile.open(opts.get("method"), elem.getAttribute("ajax") + elem_qstring, true);
+    rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + elem_qstring, true);
     console.log(elem);
 
     if (elem.classList.contains("set-attr")) {
@@ -663,13 +654,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
             if (rawFile.readyState === 4) {
                 var allText = (rawFile.responseText);
                 try {
-		    if (elem.getAttribute("insert")) {
-			var g = elem.getAttribute("insert").split(":");
-			if (g.length > 1) {
-				document.getElementById(g[0]).setAttribute(g[1],allText);
-			}
-		    }
-                    else if (elem.classList.contains("plain-html"))
+                    if (elem.classList.contains("plain-html"))
                         document.getElementById(elem.getAttribute("insert")).innerHTML = (allText);
                     else if (elem.classList.contains("plain-text"))
                         document.getElementById(elem.getAttribute("insert")).textContent = (allText);
