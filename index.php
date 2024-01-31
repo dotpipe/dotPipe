@@ -102,7 +102,6 @@
         <tr>
             <td style="width:30%;vertical-align:bottom;">
                 <br><br><br><br>
-                Please Help us with a donation! $1 a month counts as a very helpful subscription!
             </td>
         </tr>
         <tr>
