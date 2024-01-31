@@ -1,4 +1,5 @@
-     only usage: onclick="pipes(this)"
+/**
+  *  only usage: onclick="pipes(this)"
   *  to begin using the PipesJS code in other ways than <dyn> <pipe> and <timed>.
   *  Usable DOM Attributes (almost all are optional
   *  upto x > 134,217,000 different configurations 
@@ -6,6 +7,7 @@
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
   *  insert............= return ajax call to this id
+  *  insert:<attr>.....= change attribute of target id (ex: insert="idOfImgElem:src")
   *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  callbacks.........= calls function set as attribute value
   *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
@@ -13,7 +15,7 @@
   *  modal.............= Irondocks key. Inserts the Irondocks file in the value for template ease of use.
   *  download..........= class for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
   *  file..............= filename to download
-  *  x-toggle..........= toggle values from class attribute that are listed in the toggle attribute
+  *  x-toggle..........= toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
   *  directory.........= relative or full path of 'file'
   *  redirect..........= "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
   *  js................= [Specifically a] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest.
@@ -58,3 +60,4 @@
   **** FILTERS aer go ahead code usually coded in other languages and just come back with a result. Not wholly different from AJAX. They are general purpose files.
   **** ALL HEADERS FOR AJAX are available. They will use defaults to
   **** go on if there is no input to replace them.
+  */
