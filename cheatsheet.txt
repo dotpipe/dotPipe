@@ -1,5 +1,5 @@
 /**
-  *  only usage: onclick="pipes(this)"
+  *  ?? only usage: onclick="pipes(this)" ?? <!-- Legacy -->
   *  to begin using the PipesJS code in other ways than <dyn> <pipe> and <timed>.
   *  Usable DOM Attributes (almost all are optional
   *  upto x > 134,217,000 different configurations 
