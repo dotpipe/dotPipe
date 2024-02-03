@@ -1,3 +1,11 @@
+# Irondocks v 3.0.5
+
+Small changes, reignited the Modala key of "br" for having "x" amount of HTML line breaks.
+
+Updated "HOWTO"
+
+Started automatic Listeners again
+
 # Irondocks v3
 
 Thankfully, I noticed that the '?' was missing in the URLs being AJAXed to. That's now fixed. Please bring up issues to me here. I'd love to fix them
