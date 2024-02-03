@@ -45,7 +45,7 @@
   *  incrIndex.........= increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  decrIndex.........= decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  interval..........= Take this many steps when stepping through file-order default = 1
-  *  set-attr..........= attribute to set in target HTML tag ex: <pipe id="thisOrSomeId" class="set-attr" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
+  *  set-attr..........= attribute to set in target HTML tag ex: <pipe id="thisOrSomeId" set-attr="id.attr:value" ajax="foo.bar" query="do0:reme0;" insert="thisOrSomeID">
   *  mode..............= "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
   *  pipe..............= creates a listener on the object. use listen="eventType" to relegate.
   *  multiple..........= states that this object has two or more key/value pairs use: states this is a multi-select form box
@@ -527,20 +527,23 @@ function pipes(elem, stop = false) {
             pipes(e);
         });
     }
+    if (elem.hasAttribute("set-attr") && elem.getAttribute("set-attr")) {
+        var optsArray = elem.getAttribute("insert").split(";");
+        optsArray.forEach((e, f) => {
+            var g = e.split(":");
+            var dot = g[0].split(".")
+            if (dot.length > 1 && dot[1] != '' && dot[0] != '' && g[1] != undefined)
+                document.getElementById(dot[0]).setAttribute(dot[1], g[1]);
+
+        });
+        INSERT_MOD = 1;
+    }
     if (elem.hasAttribute("x-toggle")) {
         var optsArray = elem.getAttribute("x-toggle").split(";");
         optsArray.forEach((e, f) => {
             var g = e.split(":");
             if (g[0] != '' && g[0] != undefined)
                 document.getElementById(g[0]).classList.toggle(g[1]);
-        });
-    }
-    if (elem.hasAttribute("set-attr") && elem.getAttribute("set-attr")) {
-        var optsArray = elem.getAttribute("set-attr").split(";");
-        optsArray.forEach((e, f) => {
-            var g = e.split(":");
-            if (g[0] != '' && g[0] != undefined)
-                document.getElementById(elem.getAttribute("insert")).setAttribute(g[0], g[1]);
         });
     }
     if (elem.hasAttribute("remove") && elem.getAttribute("remove")) {
