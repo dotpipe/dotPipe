@@ -1,5 +1,7 @@
 # Irondocks v 3.0.5
 
+"set-attr": now active in this way: set-attr="id.attr:value;id2.attr:val2;id.attr2:val3"
+
 Small changes, reignited the Modala key of "br" for having "x" amount of HTML line breaks.
 
 Updated "HOWTO"
