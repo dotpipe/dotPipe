@@ -255,6 +255,14 @@ function modala(value, tempTag, root, id) {
             temp.appendChild(options);
             console.log("*")
         }
+        else if (k.toLowerCase() == "br") {
+                var br = document.createElement("br");
+                var rows = parseInt(v);
+                while (rows > 0) {
+                        tempTag.appendChild(br);
+                        rows--;
+                }
+        }
         else if (k.toLowerCase() == "css") {
             var cssvar = document.createElement("link");
             cssvar.href = v;
