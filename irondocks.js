@@ -67,20 +67,22 @@
 // import { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
 //export { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
 
-// function last() {
+ function last() {
 
-//     const irc = JSON.parse(document.body.innerText);
+     // const irc = JSON.parse(document.body.innerText);
     
-//     document.body.innerText = "";
-//     // document.head.append(modalaHead(irc, ""));
-//     modala(irc, document.body);
-//     document.body.style.display = "block";
-//     document.addEventListener("click", function (elem) {
-//         console.log(elem.target);
-//         if (elem.target.id != undefined) { pipes(elem.target); }
-//     });
-//     return;
-// }
+     // document.body.innerText = "";
+     // document.head.append(modalaHead(irc, ""));
+     // modala(irc, document.body);
+     all = document.getElementById("*");
+     // document.body.style.display = "block";
+     for (i = 0 ; i < all.length ; i++) {
+         all[i].addEventListener("click", function (elem) {
+             if (elem.target.id != undefined) { pipes(elem.target); }
+         });
+     }
+     return;
+}
 
 let domContentLoad = (again = false) => {
     doc_set = document.getElementsByTagName("pipe");
