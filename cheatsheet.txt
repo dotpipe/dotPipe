@@ -1,5 +1,9 @@
 /**
-  *  ?? only usage: onclick="pipes(this)" ?? <!-- Legacy -->
+ *** Only donate through the js.fivy.org website 
+ *** It's safe and secure through Paypal, no Venmo or Cashapp
+ *** You can donate any amount.
+  *  ?? only usage: onclick="pipes(this)" ?? <!-- Legacy Instructions
+  *  All nodes to be active must have an ID. This injects the Automatic 'click' Listener
   *  to begin using the PipesJS code in other ways than <dyn> <pipe> and <timed>.
   *  Usable DOM Attributes (almost all are optional
   *  upto x > 134,217,000 different configurations 
@@ -7,12 +11,13 @@
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
   *  insert............= return ajax call to this id
-  *  turn..............= change attribute of target id (ex: turn="idOfImgElem;id2ofElem")
   *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
+  *  turn..............= creates a call to each Node with an id matching the listed, delimited with a semicolon in the 'turn' attribute
   *  callbacks.........= calls function set as attribute value
   *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
   *  query.............= default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
   *  modal.............= Irondocks key. Inserts the Irondocks file in the value for template ease of use.
+  *  br................= Irondocks key. Inserts 'x' amount of breaks successively. { "br": "x" }
   *  download..........= class for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
   *  file..............= filename to download
   *  x-toggle..........= toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
@@ -37,13 +42,20 @@
   *         -audio....= Class to make audio carousel
   *         -iframe...= Class to make iframe carousel
   *         -link.....= Class to make link carousel
-  *  boxes.............= <carousel> attribute to request for x boxes for pictures
+  *  direction.........= Right/left vs Up/down
+  *  vertical..........= (boolean) turns carousel vertical
+  *  auto..............= (boolean) auto scroll
+  *  sources...........= file list delimited by ';' 
+  *  type..............= type of objects in carousel
+  *  width.............= width of carousel frame
+  *  height............= height of carousel frame
+  *  boxes.............= <carousel> attribute to request x box cards
   *  file-order........= ajax to these files, iterating [0,1,2,3]%array.length per call (delimited by ';') ex: <pipe query="key0:value0;" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  file-index........= counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  incrIndex.........= increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  decrIndex.........= decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  interval..........= Take this many steps when stepping through file-order default = 1
-  *  set-attr..........= attribute to set in target HTML tag ex: <pipe id="thisOrSomeId" set-attr="id1.attr:value;id2.attr:value;id2.attr2:value2" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
+  *  iter..........= Take this many steps when stepping through file-order default = 1
+  *  set-attr..........= attribute to set in target HTML tag ex: <pipe id="thisOrSomeId" set-attr="id.attr:value" ajax="foo.bar" query="do0:reme0;" insert="thisOrSomeID">
   *  mode..............= "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
   *  pipe..............= creates a listener on the object. use listen="eventType" to relegate.
   *  multiple..........= states that this object has two or more key/value pairs use: states this is a multi-select form box

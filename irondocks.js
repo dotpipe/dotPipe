@@ -1,4 +1,7 @@
 /**
+ *** Only donate through the js.fivy.org website 
+ *** It's safe and secure through Paypal, no Venmo or Cashapp
+ *** You can donate any amount.
   *  ?? only usage: onclick="pipes(this)" ?? <!-- Legacy Instructions
   *  All nodes to be active must have an ID. This injects the Automatic 'click' Listener
   *  to begin using the PipesJS code in other ways than <dyn> <pipe> and <timed>.
