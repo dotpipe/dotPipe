@@ -119,7 +119,10 @@ let domContentLoad = (again = false) => {
         let auto = true;
         if (elem.classList.contains("carousel-auto-off"))
             auto = false;
-        setTimeout(carousel(elem, auto), elem.getAttribute("delay"));
+        if (elem.getAttribute("direction") == "left")
+            setTimeout(shiftFilesLeft(elem, auto), elem.getAttribute("delay"));
+        if (elem.getAttribute("direction") == "right")
+            setTimeout(shiftFilesLeft(elem, auto), elem.getAttribute("delay"));
     });
 
     let elementsArray_link = document.getElementsByTagName("lnk");
@@ -265,13 +268,12 @@ function modala(value, tempTag, root, id) {
             var i = (value['index'] == undefined) ? 0 : value['index'];
             temp.id = value['id'];
             optsArray.forEach((e, f) => {
-                if (value['vertical'] != undefined && value['vertical'] == true)
-                    temp.appendChild(document.createElement("br"));
                 if (value['type'] == "img") {
                         var gth = document.createElement("img");
                         gth.src = e;
                         gth.width = value['width'];
                         gth.height = value['height'];
+                        gth.style.display = "hidden"
                         temp.appendChild(gth);
                 }
                 else if (value['type'] == "audio") {
@@ -306,8 +308,8 @@ function modala(value, tempTag, root, id) {
             });
             var auto = (value['auto'] != undefined && value['auto'] != false) ? true : false;
             // carousel(temp, auto);
-            if (value['direction'] == "right")
-                shiftFilesRight(temp);
+            if (value['direction'].toLowerCase() == "right")
+                shiftFilesRight(temp, auto, value['delay']);
             else
                 shiftFilesLeft(temp, auto, value['delay']);
             
@@ -414,46 +416,60 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
         {
             // let n = elem.childNodes;
             var clone = elem.firstChild.cloneNode(true);
-
             elem.appendChild(clone);
             elem.removeChild(elem.firstChild);
         }
         h++;
     }
     h = 0;
-    for (var m of elem.childNodes)
+    while (h < b)
     {
-        if (h <= b)
-            m.style.display = "visible";
+        if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
+            elem.children[h].style.display = "block";
+        else 
+            elem.children[h].style.display = "visible";
+        // el = el.nextSibling
         h++;
     }
 
     elem.setAttribute("index", (i + j + 1) % b);
-    
     if (auto == true)
         setTimeout(() => { shiftFilesLeft(elem, auto, delay); }, (delay));
 
 }
 
-function shiftFilesRight(elem) {
+function shiftFilesRight(elem, auto = false, delay = 1000) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
-    var x = document.getElementById(elem.getAttribute("insert"));
-    console.error(x)
-    var mArray = x.getAttribute("sources").split(";");
-    var j = x.getAttribute("iter") ?? 1;
-    var i = x.getAttribute("index") ?? 0;
-    for (h = 0 ; j - h > 0 ; h++)
+    console.error(elem)
+    var j = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
+    var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
+    var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
+
+    var h = 0;
+    var g = 0;
+    while (g < b)
     {
-        elem.lastChild.style.display = "none";
-        elem.insertBefore(elem.lastChild, elem.firstChild);
+        var clone = elem.lastChild.cloneNode(true);
+        clone.style.display = "none";
+        elem.insertBefore(clone, elem.firstElementChild);
         elem.removeChild(elem.lastChild);
+        g++;
+        i++;
     }
-    for ( ; i < parseInt(elem.getAttribute("boxes")) ; i++)
+    h = 0;
+    while (h < b)
     {
-        elem.children[i].style.display = "visible";
+        if (h < b)
+            elem.children[h].style.display = "visible";
+        h += 1;
     }
-    elem.setAttribute("index", i);
+
+    elem.setAttribute("index", Math.abs(i + 1) % elem.children.length);
+    
+    if (auto == true)
+        setTimeout(() => { shiftFilesLeft(elem, auto, delay); }, (delay));
+
 }
 
 function ajaxCarousel(elem, ITER = 1, auto = true) {

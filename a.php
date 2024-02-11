@@ -11,14 +11,16 @@ var f = {
         "tagname": "card",
         "id": "idtag1",
         "type": "img",
-        "sources": "headstockfront.jpg;headstockback.jpg;backheel.jpg",
+        "sources": "headstockfront.jpg;headstockback.jpg;backheel.jpg;headstockback.jpg",
         "auto": true,
-        "delay": 2500,
-        "boxes": 2,
-        "iter": 1,
+        "delay": 1500,
+        "boxes": 3,
+        "iter": 2,
+        "vertical": true,
         "insert": "idtag1",
         "width": 200,
-        "height": 200
+        "height": 200,
+        "direction": "right"
     }
 }
 modala(f, document.body);
