@@ -1,3 +1,19 @@
+# Irondocks v 3.11.0
+
+the new set of key pairs for Modala are great
+
+sources="file;file1;file2"
+
+auto = true
+
+iter = 1
+
+vertical = false
+
+direction = right
+
+Some of the best I've ever done. (Still not using AI)
+
 # Irondocks v 3.0.5
 
 "set-attr": now active in this way: set-attr="id.attr:value;id2.attr:val2;id.attr2:val3"
