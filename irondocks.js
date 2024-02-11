@@ -438,7 +438,7 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
         if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
             elem.children[h].style.display = "block";
         else if (h + 1 < b)
-            elem.children[h].style.display = "visible";
+            elem.children[h].style.display = "inline-block";
         // el = el.nextSibling
         h++;
     }
