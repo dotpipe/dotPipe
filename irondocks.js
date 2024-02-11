@@ -39,12 +39,19 @@
   *         -audio....= Class to make audio carousel
   *         -iframe...= Class to make iframe carousel
   *         -link.....= Class to make link carousel
+  *  direction.........= Right/left vs Up/down
+  *  vertical..........= (boolean) turns carousel vertical
+  *  auto..............= (boolean) auto scroll
+  *  sources...........= file list delimited by ';' 
+  *  type..............= type of objects in carousel
+  *  width.............= width of carousel frame
+  *  height............= height of carousel frame
   *  boxes.............= <carousel> attribute to request x box cards
   *  file-order........= ajax to these files, iterating [0,1,2,3]%array.length per call (delimited by ';') ex: <pipe query="key0:value0;" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  file-index........= counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  incrIndex.........= increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  decrIndex.........= decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  interval..........= Take this many steps when stepping through file-order default = 1
+  *  iter..........= Take this many steps when stepping through file-order default = 1
   *  set-attr..........= attribute to set in target HTML tag ex: <pipe id="thisOrSomeId" set-attr="id.attr:value" ajax="foo.bar" query="do0:reme0;" insert="thisOrSomeID">
   *  mode..............= "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
   *  pipe..............= creates a listener on the object. use listen="eventType" to relegate.
@@ -122,7 +129,7 @@ let domContentLoad = (again = false) => {
         if (elem.getAttribute("direction") == "left")
             setTimeout(shiftFilesLeft(elem, auto), elem.getAttribute("delay"));
         if (elem.getAttribute("direction") == "right")
-            setTimeout(shiftFilesLeft(elem, auto), elem.getAttribute("delay"));
+            setTimeout(shiftFilesRight(elem, auto), elem.getAttribute("delay"));
     });
 
     let elementsArray_link = document.getElementsByTagName("lnk");
@@ -416,6 +423,7 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
         {
             // let n = elem.childNodes;
             var clone = elem.firstChild.cloneNode(true);
+            clone.style.display = "none"
             elem.appendChild(clone);
             elem.removeChild(elem.firstChild);
         }
@@ -424,15 +432,15 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     h = 0;
     while (h < b)
     {
-        if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
+        if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
             elem.children[h].style.display = "block";
-        else 
+        else if (h + 1 < b)
             elem.children[h].style.display = "visible";
         // el = el.nextSibling
         h++;
     }
 
-    elem.setAttribute("index", (i + j + 1) % b);
+    elem.setAttribute("index", (i + 1) % elem.children.length);
     if (auto == true)
         setTimeout(() => { shiftFilesLeft(elem, auto, delay); }, (delay));
 
@@ -460,11 +468,12 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
     h = 0;
     while (h < b)
     {
-        if (h < b)
+        if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
+            elem.children[h].style.display = "block";
+        else if (h + 1 < b)
             elem.children[h].style.display = "visible";
-        h += 1;
+        h++;
     }
-
     elem.setAttribute("index", Math.abs(i + 1) % elem.children.length);
     
     if (auto == true)

@@ -15,7 +15,7 @@ var f = {
         "auto": true,
         "delay": 1500,
         "boxes": 3,
-        "iter": 2,
+        "iter": 1,
         "vertical": true,
         "insert": "idtag1",
         "width": 200,
