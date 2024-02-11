@@ -16,7 +16,7 @@ var f = {
         "delay": 1500,
         "boxes": 4,
         "iter": 1,
-        "vertical": false,
+        "vertical": true,
         "insert": "idtag1",
         "width": 200,
         "height": 200,
