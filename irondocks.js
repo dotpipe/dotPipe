@@ -14,7 +14,7 @@
   *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
   *  query.............= default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
   *  modal.............= Irondocks key. Inserts the Irondocks file in the value for template ease of use.
-  *  be................= Irondocks key. Inserts 'x' amount of breaks successively. { "br": "x" }
+  *  br................= Irondocks key. Inserts 'x' amount of breaks successively. { "br": "x" }
   *  download..........= class for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
   *  file..............= filename to download
   *  x-toggle..........= toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
@@ -39,7 +39,7 @@
   *         -audio....= Class to make audio carousel
   *         -iframe...= Class to make iframe carousel
   *         -link.....= Class to make link carousel
-  *  boxes.............= <carousel> attribute to request for x boxes for pictures
+  *  boxes.............= <carousel> attribute to request x box cards
   *  file-order........= ajax to these files, iterating [0,1,2,3]%array.length per call (delimited by ';') ex: <pipe query="key0:value0;" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  file-index........= counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  incrIndex.........= increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
@@ -68,21 +68,21 @@
 // import { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
 //export { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
 
- function last() {
+function last() {
 
-     // const irc = JSON.parse(document.body.innerText);
-    
-     // document.body.innerText = "";
-     // document.head.append(modalaHead(irc, ""));
-     // modala(irc, document.body);
-     all = document.getElementById("*");
-     // document.body.style.display = "block";
-     for (i = 0 ; i < all.length ; i++) {
-         all[i].addEventListener("click", function (elem) {
-             if (elem.target.id != undefined) { pipes(elem.target); }
-         });
-     }
-     return;
+    // const irc = JSON.parse(document.body.innerText);
+
+    // document.body.innerText = "";
+    // document.head.append(modalaHead(irc, ""));
+    // modala(irc, document.body);
+    all = document.getElementById("*");
+    // document.body.style.display = "block";
+    for (i = 0; i < all.length; i++) {
+        all[i].addEventListener("click", function (elem) {
+            if (elem.target.id != undefined) { pipes(elem.target); }
+        });
+    }
+    return;
 }
 
 let domContentLoad = (again = false) => {
@@ -256,16 +256,69 @@ function modala(value, tempTag, root, id) {
                 options.textContent = (g[0]);
                 temp.appendChild(options);
             });
-            temp.appendChild(options);
             console.log("*")
         }
-        else if (k.toLowerCase() == "br") {
-                var br = document.createElement("br");
-                var rows = parseInt(v);
-                while (rows > 0) {
-                        tempTag.appendChild(br);
-                        rows--;
+        else if (k.toLowerCase() == "sources" && (temp.tagName.toLowerCase() == "card" || temp.tagName.toLowerCase() == "carousel")) {
+            console.log(value);
+            var optsArray = v.split(";");
+            var options = null;
+            var i = (value['index'] == undefined) ? 0 : value['index'];
+            temp.id = value['id'];
+            optsArray.forEach((e, f) => {
+                if (value['vertical'] != undefined && value['vertical'] == true)
+                    temp.appendChild(document.createElement("br"));
+                if (value['type'] == "img") {
+                        var gth = document.createElement("img");
+                        gth.src = e;
+                        gth.width = value['width'];
+                        gth.height = value['height'];
+                        temp.appendChild(gth);
                 }
+                else if (value['type'] == "audio") {
+                        var gth = document.createElement("source");
+                        gth.src = e;
+                        gth.width = value['width'];
+                        gth.height = value['height'];
+                        gth.type = "type/" + e.substring(-3);
+                        gth.controls = (value['controls'] != false) ?? false;
+                        temp.appendChild(gth);
+                    // temp.appendChild(grt);
+
+                }
+                else if (value['type'] == "video") {
+                        var gth = document.createElement("source");
+                        gth.src = e;
+                        gth.width = value['width'];
+                        gth.height = value['height'];
+                        gth.type = "type/" + e.substring(-3);
+                        gth.controls = (value['controls'] != false) ?? false;
+                        // gth.style.display = "none";
+                        temp.appendChild(gth);
+                }
+                else if (value['type'] == "modal") {
+                    fetch(e)
+                        .then(response => response.json())
+                        .then(data => {
+                            const tmp = modala(data, temp, root, id);
+                            tempTag.appendChild(tmp);
+                        });
+                }
+            });
+            var auto = (value['auto'] != undefined && value['auto'] != false) ? true : false;
+            // carousel(temp, auto);
+            if (value['direction'] == "right")
+                shiftFilesRight(temp);
+            else
+                shiftFilesLeft(temp, auto, value['delay']);
+            
+        }
+        else if (k.toLowerCase() == "br") {
+            var br = document.createElement("br");
+            var rows = parseInt(v);
+            while (rows > 0) {
+                tempTag.appendChild(br);
+                rows--;
+            }
         }
         else if (k.toLowerCase() == "css") {
             var cssvar = document.createElement("link");
@@ -294,6 +347,7 @@ function modala(value, tempTag, root, id) {
             (k.toLowerCase() == "textcontent") ? temp.textContent = v : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = v : temp.innerText = v;
         }
     });
+    
     tempTag.appendChild(temp);
     return tempTag;
 }
@@ -306,54 +360,156 @@ function setTimers(target) {
     }, delay);
 }
 
-function fileOrder(elem) {
-    arr = elem.getAttribute("file-order").split(";");
-    ppfc = document.getElementById(elem.getAttribute("insert").toString());
-    if (!ppfc.hasAttribute("file-index"))
-        ppfc.setAttribute("file-index", "0");
-    index = parseInt(ppfc.getAttribute("file-index").toString());
-    var interv = elem.getAttribute("interval");
-    if (elem.classList.contains("decrIndex"))
-        index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) - interv;
-    else
-        index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) + interv;
-    if (index < 0)
-        index = arr.length - 1;
-    index = index % arr.length;
-    ppfc.setAttribute("file-index", index.toString());
+// function fileOrder(elem) {
+//     arr = elem.getAttribute("file-order").split(";");
+//     ppfc = document.getElementById(elem.getAttribute("insert").toString());
+//     if (!ppfc.hasAttribute("file-index"))
+//         ppfc.setAttribute("file-index", "0");
+//     index = parseInt(ppfc.getAttribute("file-index").toString());
+//     var interv = elem.getAttribute("interval");
+//     if (elem.classList.contains("decrIndex"))
+//         index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) - interv;
+//     else
+//         index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) + interv;
+//     if (index < 0)
+//         index = arr.length - 1;
+//     index = index % arr.length;
+//     ppfc.setAttribute("file-index", index.toString());
 
-    // console.log(ppfc);
-    if (ppfc.tagName == "SOURCE" && ppfc.hasAttribute("src")) {
-        try {
-            // <Source> tag's parentNode will need to be paused and resumed
-            // to switch the video
-            ppfc.parentNode.pause();
-            ppfc.parentNode.setAttribute("src", arr[index].toString());
-            ppfc.parentNode.load();
-            ppfc.parentNode.play();
-        }
-        catch (e) {
-            ppfc.setAttribute("src", arr[index].toString());
-        }
-    }
-    else if (ppfc && ppfc.tagName == "IMG") {
+//     // console.log(ppfc);
+//     if (ppfc.tagName == "SOURCE" && ppfc.hasAttribute("src")) {
+//         try {
+//             // <Source> tag's parentNode will need to be paused and resumed
+//             // to switch the video
+//             ppfc.parentNode.pause();
+//             ppfc.parentNode.setAttribute("src", arr[index].toString());
+//             ppfc.parentNode.load();
+//             ppfc.parentNode.play();
+//         }
+//         catch (e) {
+//             ppfc.setAttribute("src", arr[index].toString());
+//         }
+//     }
+//     else if (ppfc && ppfc.tagName == "IMG") {
+//         ppfc.setAttribute("src", arr[index].toString());
+//     }
+//     else {
+//         var obj = document.createElement("img");
+//         obj.setAttribute("src", arr[index].toString());
+//         ppfc.appendChild(obj);
+//     }
+// }
 
-        ppfc.setAttribute("src", arr[index].toString());
-        // elem.setAttribute("ajax", arr[index].toString());
-        // pipes(elem);
+function shiftFilesLeft(elem, auto = false, delay = 1000) {
+    if (typeof (elem) == "string")
+        elem = document.getElementById(elem);
+    console.error(elem)
+    var j = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
+    var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
+    var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
+
+    var h = 0;
+
+    while (j * i + 1 > h) {
+        {
+            // let n = elem.childNodes;
+            var clone = elem.firstChild.cloneNode(true);
+
+            elem.appendChild(clone);
+            elem.removeChild(elem.firstChild);
+        }
+        h++;
     }
-    else {
-        var obj = document.createElement("img");
-        obj.setAttribute("src", arr[index].toString());
-        ppfc.appendChild(obj);
+    h = 0;
+    for (var m of elem.childNodes)
+    {
+        if (h <= b)
+            m.style.display = "visible";
+        h++;
     }
+
+    elem.setAttribute("index", (i + j + 1) % b);
+    
+    if (auto == true)
+        setTimeout(() => { shiftFilesLeft(elem, auto, delay); }, (delay));
+
+}
+
+function shiftFilesRight(elem) {
+    if (typeof (elem) == "string")
+        elem = document.getElementById(elem);
+    var x = document.getElementById(elem.getAttribute("insert"));
+    console.error(x)
+    var mArray = x.getAttribute("sources").split(";");
+    var j = x.getAttribute("iter") ?? 1;
+    var i = x.getAttribute("index") ?? 0;
+    for (h = 0 ; j - h > 0 ; h++)
+    {
+        elem.lastChild.style.display = "none";
+        elem.insertBefore(elem.lastChild, elem.firstChild);
+        elem.removeChild(elem.lastChild);
+    }
+    for ( ; i < parseInt(elem.getAttribute("boxes")) ; i++)
+    {
+        elem.children[i].style.display = "visible";
+    }
+    elem.setAttribute("index", i);
+}
+
+function ajaxCarousel(elem, ITER = 1, auto = true) {
+    if (typeof (elem) == "string")
+        elem = document.getElementById(elem);
+    var x = document.getElementById(elem.getAttribute("insert"));
+    console.error(x)
+    var mArray = x.getAttribute("sources").split(";");
+    var y = 1;
+    var crement = 1;
+    if (x.classList.contains("decrIndex"))
+        crement = (-1);
+    var i = (x.hasAttribute("file-index")) ? parseInt(x.getAttribute("file-index")) : 0;
+    var j = ITER ?? 1;
+    var multiVert = 1;
+    if (x.classList.contains("carousel-vert")) {
+        multiVert = 2;
+    }
+    while (x.hasChildNodes()) {
+        x.removeChild(x.firstChild);
+    }
+    var obj = document.createElement("card");
+
+    while (x.length < elem.getAttribute("boxes")) {
+        var t_Node = document.createElement("p");
+        t_Node.setAttribute("ajax", mArray[(i + ITER) % mArray.length]);
+        t_Node.setAttribute("insert", "self_" + (i + ITER).toString());
+        t_Node.classList.toggle("modala");
+        t_Node.id = "self_" + (i + ITER).toString();
+        t_Node.setAttribute("onclick", "pipes(this)");
+        t_Node.click();
+        if (x.classList.contains("carousel-images")) {
+            img.src = mArray[(i + j) % mArray.length];
+            img.style = x.style;
+            img.height = x.getAttribute("height");
+            img.width = x.getAttribute("width");
+        }
+        if (!t_Node.classList.contains("pipe-grid-child")) {
+            t_Node.classList.toggle("pipe-grid-child");
+            t_Node.classList.toggle("pipe");
+        }
+        obj.appendChild(t_Node);
+        i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
+        if (multiVert == 2)
+            obj.appendChild(br);
+    }
+    x.append(obj);
+    var w = i;
+    x.setAttribute("file-index", w % mArray.length);
 }
 
 function carousel(elem, auto = true) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
     var x = document.getElementById(elem.getAttribute("insert"));
-    var mArray = x.getAttribute("file-order").split(";");
+    var mArray = x.getAttribute("sources").split(";");
     var y = 1;
     var crement = 1;
     if (x.classList.contains("decrIndex"))
@@ -397,10 +553,17 @@ function carousel(elem, auto = true) {
             img.style = x.style;
             img.classList.add("pipe-grid-child");
             if (x.classList.contains("carousel-images")) {
+                img.src = mArray[(i + j) % mArray.length];
+                img.style = x.style;
                 img.height = x.getAttribute("height");
                 img.width = x.getAttribute("width");
             }
             obj.appendChild(img);
+            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
+            if (multiVert == 2) {
+                n++;
+                obj.appendChild(br);
+            }
         }
         else if (x.classList.contains("carousel-video") || elem.classList.contains("carousel-video")) {
             var video = document.createElement("video");
@@ -410,8 +573,13 @@ function carousel(elem, auto = true) {
             video.autoplay = true;
             video.loop = false;
             video.muted = true;
-            video.id = "self_" + obj.children.length + 1;
+            video.id = "self_" + obj.children.length;
             obj.appendChild(video);
+            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
+            if (multiVert == 2) {
+                n++;
+                obj.appendChild(br);
+            }
         }
         else if (x.classList.contains("carousel-audio") || elem.classList.contains("carousel-audio")) {
             var audio = document.createElement("audio");
@@ -421,16 +589,26 @@ function carousel(elem, auto = true) {
             audio.autoplay = true;
             audio.loop = false;
             audio.muted = true;
-            audio.id = "self_" + obj.children.length + 1;
+            audio.id = "self_" + obj.children.length;
             obj.appendChild(audio);
+            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
+            if (multiVert == 2) {
+                n++;
+                obj.appendChild(br);
+            }
         }
         else if (x.classList.contains("carousel-iframe") || elem.classList.contains("carousel-iframe")) {
             var iframe = document.createElement("iframe");
             iframe.src = mArray[(i + j) % mArray.length];
             iframe.style = x.style;
             iframe.classList.add("pipe-grid-child");
-            iframe.id = "self_" + obj.children.length + 1;
+            iframe.id = "self_" + obj.children.length;
             obj.appendChild(iframe);
+            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
+            if (multiVert == 2) {
+                n++;
+                obj.appendChild(br);
+            }
         }
         else if (x.classList.contains("carousel-link") || elem.classList.contains("carousel-link")) {
             var link = document.createElement("a");
@@ -438,17 +616,16 @@ function carousel(elem, auto = true) {
             link.textContent = mArray[(i + j) % mArray.length];
             link.style = x.style;
             link.classList.add("pipe-grid-child");
-            link.id = "self_" + obj.children.length + 1;
+            link.id = "self_" + obj.children.length;
             obj.appendChild(link);
+            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
+            if (multiVert == 2) {
+                n++;
+                obj.appendChild(br);
+            }
         }
-        i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
-        br = document.createElement("br");
-        if (multiVert == 2) {
-            n++;
-            obj.appendChild(br);
-        }
-        // console.log("OIWEWI");
     }
+    // console.log("OIWEWI");
     // while (x.children.length || (x.classList.contains("carousel-ajax") || elem.classList.contains("carousel-ajax")) && x.children.length > x.getAttribute("boxes") * multiVert)
     //     x.removeChild(x.children[x.children.length - 1]);
     x.append(obj);
@@ -602,7 +779,7 @@ function pipes(elem, stop = false) {
     if (stop == true)
         return;
     if (elem.hasAttribute("ajax"))
-        navigate(elem, headers, query, formclass);
+        return navigate(elem, headers, query, formclass);
 }
 
 function setAJAXOpts(elem, opts) {
@@ -812,6 +989,8 @@ function navigate(elem, opts = null, query = "", classname = "") {
     }
     try {
         rawFile.send();
+        if (rawFile.readyState === 4)
+            return rawFile.responseText;
     } catch (e) {
         // console.log(e);
     }

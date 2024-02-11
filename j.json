@@ -1,17 +1,11 @@
 {
-    "tagname": "div",
-    "lnk1": {
-        "tagname": "dyn",
-        "ajax": "https:\/\/github.com\/irondocks\/irondock",
-        "textContent": "GitHub + ",
-        "class": "redirect pipe",
-        "id": "necessary"
-    },
-    "lnk2": {
-        "tagname": "dyn",
-        "ajax": "https:\/\/paypal.me\/pirodock",
-        "textContent": "Donate",
-        "class": "redirect pipe",
-        "id": "ids-required"
+    "carousel": {
+        "tagname": "card",
+        "type": "img",
+        "sources": "headstockback.jpg;headstockfront.jpg",
+        "auto": false,
+        "timer": 2500,
+        "vertical": false,
+        "boxes": 3
     }
 }
