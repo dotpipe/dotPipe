@@ -291,24 +291,19 @@ function modala(value, tempTag, root, id) {
                         gth.src = e;
                         gth.width = value['width'];
                         gth.height = value['height'];
-                        if (e.substr(-4,1) == '.')
-                            gth.type = "type/" + e.substring(-3);
-                        else
-                            gth.type = "type/" + e.substring(-4);
+                        while (e.substr(-i,1) != '.') i++;
+                        gth.type = "audio/" + e.substring(-(i-1));
                         gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
                         temp.appendChild(gth);
-                    // temp.appendChild(grt);
-
                 }
                 else if (value['type'] == "video") {
                         var gth = document.createElement("source");
                         gth.src = e;
                         gth.width = value['width'];
                         gth.height = value['height'];
-                        if (e.substr(-4,1) == '.')
-                            gth.type = "type/" + e.substring(-3);
-                        else
-                            gth.type = "type/" + e.substring(-4);
+                        var i = 0;
+                        while (e.substr(-i,1) != '.') i++;
+                        gth.type = "video/" + e.substring(-(i-1));
                         gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
                         // gth.style.display = "none";
                         temp.appendChild(gth);
