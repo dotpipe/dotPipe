@@ -4,7 +4,8 @@
 <script src="irondocks.js"></script>
 </head>
 </html>
-
+<p id="thisone" class="json" onclick="pipes(this)" ajax-multi="j.json:thisone@modala;j.json:thatone@json">THICK</p>
+<p id="thatone">THIN</p>
 <script>
 var f = {
     "carousel": {

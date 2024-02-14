@@ -305,7 +305,6 @@ function modala(value, tempTag, root, id) {
                         while (e.substr(-i,1) != '.') i++;
                         gth.type = "video/" + e.substring(-(i-1));
                         gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
-                        // gth.style.display = "none";
                         temp.appendChild(gth);
                 }
                 else if (value['type'] == "modal") {
@@ -319,7 +318,7 @@ function modala(value, tempTag, root, id) {
             });
             var auto = (value['auto'] != undefined && value['auto'] != false) ? true : false;
             // carousel(temp, auto);
-            if (value['direction'].toLowerCase() == "right")
+            if (value['description'] != undefined && value['direction'].toLowerCase() == "right")
                 shiftFilesRight(temp, auto, value['delay']);
             else
                 shiftFilesLeft(temp, auto, value['delay']);
@@ -727,6 +726,29 @@ function pipes(elem, stop = false) {
                 x.style.display = "block";
         });
     }
+    if (elem.hasAttribute("ajax-multi") && elem.getAttribute("ajax-multi")) {
+        var optsArray = elem.getAttribute("ajax-multi").split(";");
+        optsArray.forEach((e, f) => {
+            var g = e.split(":");
+            if (g.length > 1 && g[1] != '' && g[0] != '' && g[1] != undefined)
+            {
+                var p = elem.cloneNode(true);
+                p.removeAttribute("ajax-multi");
+                p.setAttribute("ajax", g[0]);
+                
+                if (g[1].split("@").length > 1)
+                {
+                    p.classList.toggle(g[1].split("@")[1]);
+                    p.setAttribute("insert", g[1].split("@")[0]);
+                }
+                else
+                {
+                    p.setAttribute("insert", g[1]);
+                }
+                pipes(p)
+            }
+        });
+    }
     if (elem.hasAttribute("turn")) {
         var optsArray = elem.getAttribute("turn").split(";");
         optsArray.forEach((e, f) => {
@@ -945,10 +967,29 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
         }
     }
+    else if (elem.classList.contains("modala")) {
+        rawFile.onreadystatechange = function () {
+            if (rawFile.readyState === 4) {
+                var allText = ""; // JSON.parse(rawFile.responseText);
+                allText = JSON.parse(rawFile.responseText);
+                // console.log(allText);
+                document.getElementById(elem.getAttribute("insert")).innerHTML = "";
+                modala(allText, elem.getAttribute("insert"));
+                if (elem.hasAttribute("callback")) {
+                    var func = elem.getAttribute("callback");
+                    var fn = window[func];
+
+                    // check if object a function? 
+                    if (typeof fn === "function") {
+                        fn.apply(null, allText);
+                    }
+                }
+            }
+        }
+    }
     else if (elem.classList.contains("json")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
-                var allText = "";// JSON.parse(rawFile.responseText);
                 try {
                     console.log(rawFile.responseText);
                     allText = JSON.parse(rawFile.responseText);
@@ -968,26 +1009,6 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 }
                 catch (e) {
                     console.log("Response not a JSON");
-                }
-            }
-        }
-    }
-    else if (elem.classList.contains("modala")) {
-        rawFile.onreadystatechange = function () {
-            if (rawFile.readyState === 4) {
-                var allText = ""; // JSON.parse(rawFile.responseText);
-                allText = JSON.parse(rawFile.responseText);
-                // console.log(allText);
-                document.getElementById(elem.getAttribute("insert")).innerHTML = "";
-                modala(allText, elem.getAttribute("insert"));
-                if (elem.hasAttribute("callback")) {
-                    var func = elem.getAttribute("callback");
-                    var fn = window[func];
-
-                    // check if object a function? 
-                    if (typeof fn === "function") {
-                        fn.apply(null, allText);
-                    }
                 }
             }
         }
