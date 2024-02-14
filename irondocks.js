@@ -227,6 +227,22 @@ function modalaHead(value) {
     return;
 }
 
+function carouselButtonSlide(elem, direction) {
+    
+    if (direction.toLowerCase() == "right")
+        shiftFilesRight(elem.getAttribute("insert"), true, elem.getAttribute("delay"));
+    else
+        shiftFilesLeft(elem.getAttribute("insert"), true, elem.getAttribute("delay"));
+}
+
+function carouselButtonStep(elem, direction) {
+    
+    if (direction.toLowerCase() == "right")
+        shiftFilesRight(elem.getAttribute("insert"), false, elem.getAttribute("delay"));
+    else
+        shiftFilesLeft(elem.getAttribute("insert"), false, elem.getAttribute("delay"));
+}
+
 function modala(value, tempTag, root, id) {
     if (typeof (tempTag) == "string") {
         tempTag = document.getElementById(tempTag);
@@ -422,209 +438,35 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
 
     var h = 0;
     var g = 0;
-    while (g < b)
-    {
-        var clone = elem.lastChild.cloneNode(true);
-        clone.style.display = "none";
-        elem.insertBefore(clone, elem.firstElementChild);
-        elem.removeChild(elem.lastChild);
-        g++;
-        i++;
+
+    while (j * i + 1 > h) {
+        {
+            // let n = elem.childNodes;
+            var clone = elem.lastChild.cloneNode(true);
+            clone.style.display = "none";
+            elem.insertBefore(clone, elem.firstChild);
+            elem.removeChild(elem.lastChild);
+        }
+        h++;
     }
+
     h = 0;
+    
     while (h < b)
     {
-        if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
+        if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
             elem.children[h].style.display = "block";
         else if (h + 1 < b)
             elem.children[h].style.display = "inline-block";
+        // el = el.nextSibling
         h++;
     }
+
     elem.setAttribute("index", Math.abs(i + 1) % elem.children.length);
     
     if (auto == true)
         setTimeout(() => { shiftFilesRight(elem, auto, delay); }, (delay));
 
-}
-
-function ajaxCarousel(elem, ITER = 1, auto = true) {
-    if (typeof (elem) == "string")
-        elem = document.getElementById(elem);
-    var x = document.getElementById(elem.getAttribute("insert"));
-    console.error(x)
-    var mArray = x.getAttribute("sources").split(";");
-    var y = 1;
-    var crement = 1;
-    if (x.classList.contains("decrIndex"))
-        crement = (-1);
-    var i = (x.hasAttribute("file-index")) ? parseInt(x.getAttribute("file-index")) : 0;
-    var j = ITER ?? 1;
-    var multiVert = 1;
-    if (x.classList.contains("carousel-vert")) {
-        multiVert = 2;
-    }
-    while (x.hasChildNodes()) {
-        x.removeChild(x.firstChild);
-    }
-    var obj = document.createElement("card");
-
-    while (x.length < elem.getAttribute("boxes")) {
-        var t_Node = document.createElement("p");
-        t_Node.setAttribute("ajax", mArray[(i + ITER) % mArray.length]);
-        t_Node.setAttribute("insert", "self_" + (i + ITER).toString());
-        t_Node.classList.toggle("modala");
-        t_Node.id = "self_" + (i + ITER).toString();
-        t_Node.setAttribute("onclick", "pipes(this)");
-        t_Node.click();
-        if (x.classList.contains("carousel-images")) {
-            img.src = mArray[(i + j) % mArray.length];
-            img.style = x.style;
-            img.height = x.getAttribute("height");
-            img.width = x.getAttribute("width");
-        }
-        if (!t_Node.classList.contains("pipe-grid-child")) {
-            t_Node.classList.toggle("pipe-grid-child");
-            t_Node.classList.toggle("pipe");
-        }
-        obj.appendChild(t_Node);
-        i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
-        if (multiVert == 2)
-            obj.appendChild(br);
-    }
-    x.append(obj);
-    var w = i;
-    x.setAttribute("file-index", w % mArray.length);
-}
-
-function carousel(elem, auto = true) {
-    if (typeof (elem) == "string")
-        elem = document.getElementById(elem);
-    var x = document.getElementById(elem.getAttribute("insert"));
-    var mArray = x.getAttribute("sources").split(";");
-    var y = 1;
-    var crement = 1;
-    if (x.classList.contains("decrIndex"))
-        crement = (-1);
-    var i = (parseInt(x.getAttribute("file-index"))) ?? 0;
-    var j = parseInt(x.getAttribute("interval")) ?? 1;
-    var multiVert = 1;
-    if (x.classList.contains("carousel-vert")) {
-        multiVert = 2;
-    }
-    while (x.children.length) {
-        x.removeChild(x.children[0]);
-    }
-    var m = 0;
-    var obj = document.createElement("card");
-    // obj.id = "insert-" + elem.getAttribute("insert");
-    obj.classList.toggle("pipe-grid");
-    for (n = 0; obj.children.length < (x.getAttribute("boxes") * multiVert); n++) {
-        if (x.classList.contains("carousel-ajax") || elem.classList.contains("carousel-ajax")) // && x.children.length < elem.getAttribute("boxes")) {
-        {
-            p = document.createElement("p");
-            p.setAttribute("ajax", mArray[(i + j) % mArray.length]);
-            p.setAttribute("insert", "self_" + obj.children.length + 1);
-            p.classList.add("modala");
-            p.id = "self_" + obj.children.length + 1;
-            p.setAttribute("onclick", "pipes(this)");
-            p.click();
-            p.removeAttribute("onclick");
-            p.classList.add("pipe-grid-child");
-            p.classList.add("pipe");
-            obj.appendChild(p);
-            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
-            if (multiVert == 2) {
-                n++;
-                obj.appendChild(br);
-            }
-        }
-        else if (x.classList.contains("carousel-images") || elem.classList.contains("carousel-images")) {
-            img = document.createElement("img");
-            img.src = mArray[(i + j) % mArray.length];
-            img.style = x.style;
-            img.classList.add("pipe-grid-child");
-            if (x.classList.contains("carousel-images")) {
-                img.src = mArray[(i + j) % mArray.length];
-                img.style = x.style;
-                img.height = x.getAttribute("height");
-                img.width = x.getAttribute("width");
-            }
-            obj.appendChild(img);
-            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
-            if (multiVert == 2) {
-                n++;
-                obj.appendChild(br);
-            }
-        }
-        else if (x.classList.contains("carousel-video") || elem.classList.contains("carousel-video")) {
-            var video = document.createElement("video");
-            video.src = mArray[(i + j) % mArray.length];
-            video.style = x.style;
-            video.classList.add("pipe-grid-child");
-            video.autoplay = true;
-            video.loop = false;
-            video.muted = true;
-            video.id = "self_" + obj.children.length;
-            obj.appendChild(video);
-            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
-            if (multiVert == 2) {
-                n++;
-                obj.appendChild(br);
-            }
-        }
-        else if (x.classList.contains("carousel-audio") || elem.classList.contains("carousel-audio")) {
-            var audio = document.createElement("audio");
-            audio.src = mArray[(i + j) % mArray.length];
-            audio.style = x.style;
-            audio.classList.add("pipe-grid-child");
-            audio.autoplay = true;
-            audio.loop = false;
-            audio.muted = true;
-            audio.id = "self_" + obj.children.length;
-            obj.appendChild(audio);
-            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
-            if (multiVert == 2) {
-                n++;
-                obj.appendChild(br);
-            }
-        }
-        else if (x.classList.contains("carousel-iframe") || elem.classList.contains("carousel-iframe")) {
-            var iframe = document.createElement("iframe");
-            iframe.src = mArray[(i + j) % mArray.length];
-            iframe.style = x.style;
-            iframe.classList.add("pipe-grid-child");
-            iframe.id = "self_" + obj.children.length;
-            obj.appendChild(iframe);
-            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
-            if (multiVert == 2) {
-                n++;
-                obj.appendChild(br);
-            }
-        }
-        else if (x.classList.contains("carousel-link") || elem.classList.contains("carousel-link")) {
-            var link = document.createElement("a");
-            link.href = mArray[(i + j) % mArray.length];
-            link.textContent = mArray[(i + j) % mArray.length];
-            link.style = x.style;
-            link.classList.add("pipe-grid-child");
-            link.id = "self_" + obj.children.length;
-            obj.appendChild(link);
-            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
-            if (multiVert == 2) {
-                n++;
-                obj.appendChild(br);
-            }
-        }
-    }
-    // console.log("OIWEWI");
-    // while (x.children.length || (x.classList.contains("carousel-ajax") || elem.classList.contains("carousel-ajax")) && x.children.length > x.getAttribute("boxes") * multiVert)
-    //     x.removeChild(x.children[x.children.length - 1]);
-    x.append(obj);
-    var w = (Math.abs(i));
-    x.setAttribute("file-index", w % mArray.length);
-    var delay = x.getAttribute("delay");
-    if (!x.classList.contains("carousel-auto-off"))
-        setTimeout(() => { carousel(x.id, auto); }, delay);
 }
 
 function fileShift(elem) {
@@ -717,6 +559,34 @@ function pipes(elem, stop = false) {
         optsArray.forEach((e, f) => {
             pipes(e);
         });
+    }
+    if (elem.classList.contains("carousel-step-right")) {
+        if (elem.hasAttribute("insert"))
+        {
+            var x = document.getElementById(elem.getAttribute("insert"));
+            shiftFilesRight(x, false, parseInt(x.getAttribute("delay")));
+        }
+    }
+    if (elem.classList.contains("carousel-step-left")) {
+        if (elem.hasAttribute("insert"))
+        {
+            var x = document.getElementById(elem.getAttribute("insert"));
+            shiftFilesLeft(x, false, parseInt(x.getAttribute("delay")));
+        }
+    }
+    if (elem.classList.contains("carousel-slide-left")) {
+        if (elem.hasAttribute("insert"))
+        {
+            var x = document.getElementById(elem.getAttribute("insert"));
+            shiftFilesLeft(x, true, parseInt(x.getAttribute("delay")));
+        }
+    }
+    if (elem.classList.contains("carousel-slide-right")) {
+        if (elem.hasAttribute("insert"))
+        {
+            var x = document.getElementById(elem.getAttribute("insert"));
+            shiftFilesRight(x, true, parseInt(x.getAttribute("delay")));
+        }
     }
     if (elem.hasAttribute("set-attr") && elem.getAttribute("set-attr")) {
         var optsArray = elem.getAttribute("insert").split(";");

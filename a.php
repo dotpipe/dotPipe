@@ -8,12 +8,22 @@
 <p id="thatone">THIN</p>
 <script>
 var f = {
+    "button-left": {
+        "tagname": "p",
+        "id": "left",
+        "width": 100,
+        "height": 100,
+        "onclick": "pipes(this)",
+        "class": "carousel-step-left",
+        "insert": "idtag1",
+        "textContent": "HI!"
+    },
     "carousel": {
         "tagname": "card",
         "id": "idtag1",
         "type": "img",
         "sources": "headstockfront.jpg;headstockback.jpg;backheel.jpg;headstockback.jpg",
-        "auto": true,
+        "auto": false,
         "delay": 1500,
         "boxes": 4,
         "iter": 0,
@@ -22,6 +32,16 @@ var f = {
         "width": 100,
         "height": 100,
         "direction": "right"
+    },
+    "button-right": {
+        "tagname": "p",
+        "id": "left",
+        "width": 100,
+        "height": 100,
+        "onclick": "pipes(this)",
+        "class": "carousel-step-right",
+        "insert": "idtag1",
+        "textContent": "HI!"
     }
 }
 modala(f, document.body);
