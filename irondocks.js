@@ -419,11 +419,10 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
             elem.children[h].style.display = "block";
         else if (h + 1 < b)
             elem.children[h].style.display = "inline-block";
-        // el = el.nextSibling
         h++;
     }
 
-    elem.setAttribute("index", (i + 1) % elem.children.length);
+    elem.setAttribute("index", (i + iter) % elem.children.length);
     if (auto == true)
         setTimeout(() => { shiftFilesLeft(elem, auto, delay); }, (delay));
 
@@ -439,7 +438,7 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
     var h = 0;
     var g = 0;
 
-    while (j * i + 1 > h) {
+    while (b + 1 > h) {
         {
             // let n = elem.childNodes;
             var clone = elem.lastChild.cloneNode(true);
@@ -458,11 +457,14 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
             elem.children[h].style.display = "block";
         else if (h + 1 < b)
             elem.children[h].style.display = "inline-block";
-        // el = el.nextSibling
         h++;
     }
+    if (i - iter <= 0)
+        i = elem.children.length
+    else
+        i -= iter;
 
-    elem.setAttribute("index", Math.abs(i + 1) % elem.children.length);
+    elem.setAttribute("index", Math.abs(i) % elem.children.length);
     
     if (auto == true)
         setTimeout(() => { shiftFilesRight(elem, auto, delay); }, (delay));
