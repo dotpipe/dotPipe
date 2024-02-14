@@ -284,7 +284,7 @@ function modala(value, tempTag, root, id) {
                         gth.src = e;
                         gth.width = value['width'];
                         gth.height = value['height'];
-                        gth.style.display = "hidden"
+                        gth.style.display = "hidden";
                         temp.appendChild(gth);
                 }
                 else if (value['type'] == "audio") {
@@ -302,6 +302,7 @@ function modala(value, tempTag, root, id) {
                         gth.src = e;
                         gth.width = value['width'];
                         gth.height = value['height'];
+                        gth.style.display = "hidden";
                         var i = 0;
                         while (e.substr(-i,1) != '.') i++;
                         gth.type = "video/" + e.substring(-(i-1));
@@ -373,46 +374,6 @@ function setTimers(target) {
     }, delay);
 }
 
-// function fileOrder(elem) {
-//     arr = elem.getAttribute("file-order").split(";");
-//     ppfc = document.getElementById(elem.getAttribute("insert").toString());
-//     if (!ppfc.hasAttribute("file-index"))
-//         ppfc.setAttribute("file-index", "0");
-//     index = parseInt(ppfc.getAttribute("file-index").toString());
-//     var interv = elem.getAttribute("interval");
-//     if (elem.classList.contains("decrIndex"))
-//         index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) - interv;
-//     else
-//         index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) + interv;
-//     if (index < 0)
-//         index = arr.length - 1;
-//     index = index % arr.length;
-//     ppfc.setAttribute("file-index", index.toString());
-
-//     // console.log(ppfc);
-//     if (ppfc.tagName == "SOURCE" && ppfc.hasAttribute("src")) {
-//         try {
-//             // <Source> tag's parentNode will need to be paused and resumed
-//             // to switch the video
-//             ppfc.parentNode.pause();
-//             ppfc.parentNode.setAttribute("src", arr[index].toString());
-//             ppfc.parentNode.load();
-//             ppfc.parentNode.play();
-//         }
-//         catch (e) {
-//             ppfc.setAttribute("src", arr[index].toString());
-//         }
-//     }
-//     else if (ppfc && ppfc.tagName == "IMG") {
-//         ppfc.setAttribute("src", arr[index].toString());
-//     }
-//     else {
-//         var obj = document.createElement("img");
-//         obj.setAttribute("src", arr[index].toString());
-//         ppfc.appendChild(obj);
-//     }
-// }
-
 function shiftFilesLeft(elem, auto = false, delay = 1000) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
@@ -427,13 +388,15 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
         {
             // let n = elem.childNodes;
             var clone = elem.firstChild.cloneNode(true);
-            clone.style.display = "none"
+            clone.style.display = "none";
             elem.appendChild(clone);
             elem.removeChild(elem.firstChild);
         }
         h++;
     }
+
     h = 0;
+    
     while (h < b)
     {
         if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
@@ -453,7 +416,6 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
 function shiftFilesRight(elem, auto = false, delay = 1000) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
-    console.error(elem)
     var j = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
     var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
     var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
@@ -475,13 +437,13 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
         if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
             elem.children[h].style.display = "block";
         else if (h + 1 < b)
-            elem.children[h].style.display = "visible";
+            elem.children[h].style.display = "inline-block";
         h++;
     }
     elem.setAttribute("index", Math.abs(i + 1) % elem.children.length);
     
     if (auto == true)
-        setTimeout(() => { shiftFilesLeft(elem, auto, delay); }, (delay));
+        setTimeout(() => { shiftFilesRight(elem, auto, delay); }, (delay));
 
 }
 
