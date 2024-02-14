@@ -4,7 +4,7 @@
 <script src="irondocks.js"></script>
 </head>
 </html>
-<p id="thisone" class="json" onclick="pipes(this)" ajax-multi="j.json:thisone@modala;j.json:thatone@json">THICK</p>
+<p id="thisone" style="display:block" onclick="pipes(this)" ajax-multi="j.json:thisone@modala;j.json:thatone@json">THICK</p>
 <p id="thatone">THIN</p>
 <script>
 var f = {
@@ -16,8 +16,8 @@ var f = {
         "auto": true,
         "delay": 1500,
         "boxes": 4,
-        "iter": 1,
-        "vertical": false,
+        "iter": 0,
+        "vertical": true,
         "insert": "idtag1",
         "width": 100,
         "height": 100,
