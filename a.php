@@ -16,7 +16,8 @@ var f = {
         "onclick": "pipes(this)",
         "class": "carousel-step-left",
         "insert": "idtag1",
-        "textContent": "HI!"
+        "textContent": "HI!",
+        "set-attr": "idtag1.auto:true;idtag1.direction:left"
     },
     "carousel": {
         "tagname": "card",
@@ -35,13 +36,14 @@ var f = {
     },
     "button-right": {
         "tagname": "p",
-        "id": "left",
+        "id": "right",
         "width": 100,
         "height": 100,
         "onclick": "pipes(this)",
         "class": "carousel-step-right",
         "insert": "idtag1",
-        "textContent": "HI!"
+        "textContent": "HI!",
+        "set-attr": "idtag1.auto:false;idtag1.direction:right"
     }
 }
 modala(f, document.body);

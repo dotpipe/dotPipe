@@ -394,13 +394,13 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
     console.error(elem)
-    var j = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
+    var iter = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
     var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
     var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
 
     var h = 0;
 
-    while (j * i + 1 > h) {
+    while (iter * i + 1 > h) {
         {
             // let n = elem.childNodes;
             var clone = elem.firstChild.cloneNode(true);
@@ -431,7 +431,7 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
 function shiftFilesRight(elem, auto = false, delay = 1000) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
-    var j = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
+    var iter = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
     var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
     var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
 
