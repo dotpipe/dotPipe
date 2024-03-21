@@ -1,3 +1,5 @@
+Donations can be given at baboonxiv@gmail.com via PayPal.me/thexiv
+
 # Irondocks v 3.45.1
 
 Bug fixes
