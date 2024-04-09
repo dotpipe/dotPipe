@@ -1,5 +1,14 @@
 Donations can be given at baboonxiv@gmail.com via PayPal.me/thexiv
 
+# PipesJS v 3.7
+
+Bug fixes
+ - recognizes id adherence by itself
+
+added remedial get-var and set-var for query 
+ - use set-var to put query into insert Node
+ - get get-var to put them in query and send to pipes when clicked
+
 # Irondocks v 3.45.1
 
 Bug fixes
