@@ -17,12 +17,9 @@
   *  callbacks.........= calls function set as attribute value
   *  set-var...........= set window varianble as a dynamic value you setup
   *  get-var...........= get variable fmo window array in JS
-<<<<<<< HEAD
   *  clear-node........= clear nodes. delimited in insert="first;second;thirdnode" by ';'
   *  modala-multi-last.= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
   *  modala-multi-first= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
-=======
->>>>>>> eac0d6ca2a6e780254b5d52c5468dfcb9489c42b
   *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
   *  query.............= default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
   *  modal.............= Irondocks key. Inserts the Irondocks file in the value for template ease of use.
