@@ -44,6 +44,20 @@ var f = {
         "insert": "idtag1",
         "textContent": "HI!",
         "set-attr": "idtag1.auto:false;idtag1.direction:right"
+    },
+    "chexMix0": {
+        "tagname": "div",
+        "id": "get",
+        "insert": "left",
+        "textContent": "HEY!",
+        "set-var": "taking:out;messing:with;redoing:oldcode"
+    },
+    "chexMix1": {
+        "tagname": "div",
+        "id": "set",
+        "insert": "left",
+        "textContent": "HEY!",
+        "get-var": "taking;messing;redoing"
     }
 }
 modala(f, document.body);

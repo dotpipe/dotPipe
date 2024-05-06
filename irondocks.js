@@ -11,10 +11,15 @@
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
   *  insert............= return ajax call to this id
-  *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
+  *  ajax..............= calls and returns multiple files for insert in as many nodes. Also allows class-type insertion types (ex: ajax-multi="page.html:therethere@plain-html")
   *  turn..............= creates a call to each Node with an id matching the listed, delimited with a semicolon in the 'turn' attribute
   *  ajax-multi........= calls and returns multiple files for insert in as many nodes. Also allows class-type insertion types (ex: ajax-multi="page.html:therethere@plain-html")
   *  callbacks.........= calls function set as attribute value
+  *  set-var...........= set window varianble as a dynamic value you setup
+  *  get-var...........= get variable fmo window array in JS
+  *  clear-node........= clear nodes. delimited in insert="first;second;thirdnode" by ';'
+  *  modala-multi-last.= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
+  *  modala-multi-first= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
   *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
   *  query.............= default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
   *  modal.............= Irondocks key. Inserts the Irondocks file in the value for template ease of use.
@@ -81,18 +86,16 @@
 
 function last() {
 
-    // const irc = JSON.parse(document.body.innerText);
-
-    // document.body.innerText = "";
+    const irc = JSON.parse(document.body.innerText);
+    
+    document.body.innerText = "";
     // document.head.append(modalaHead(irc, ""));
-    // modala(irc, document.body);
-    all = document.querySelectorAll("*");
-    // document.body.style.display = "block";
-    for (i = 0; i < all.length; i++) {
-        all[i].addEventListener("click", function (elem) {
-            if (elem.target.id != undefined) { pipes(elem.target); }
-        });
-    }
+    modala(irc, document.body);
+    document.body.style.display = "block";
+    document.addEventListener("click", function (elem) {
+        console.log(elem.target);
+        if (elem.target.id != undefined) { pipes(elem.target); }
+    });
     return;
 }
 
@@ -227,22 +230,6 @@ function modalaHead(value) {
     return;
 }
 
-function carouselButtonSlide(elem, direction) {
-
-    if (direction.toLowerCase() == "right")
-        shiftFilesRight(elem.getAttribute("insert"), true, elem.getAttribute("delay"));
-    else
-        shiftFilesLeft(elem.getAttribute("insert"), true, elem.getAttribute("delay"));
-}
-
-function carouselButtonStep(elem, direction) {
-
-    if (direction.toLowerCase() == "right")
-        shiftFilesRight(elem.getAttribute("insert"), false, elem.getAttribute("delay"));
-    else
-        shiftFilesLeft(elem.getAttribute("insert"), false, elem.getAttribute("delay"));
-}
-
 function modala(value, tempTag, root, id) {
     if (typeof (tempTag) == "string") {
         tempTag = document.getElementById(tempTag);
@@ -275,8 +262,7 @@ function modala(value, tempTag, root, id) {
             temp.appendChild(select);
             modala(v, temp, root, id);
         }
-        else if (k.toLowerCase() == "options" && tempTag.tagName.toLowerCase() == "select") {
-            console.log(v)
+        else if (k.toLowerCase() == "options" && temp.tagName.toLowerCase() == "select") {
             var optsArray = v.split(";");
             var options = null;
             console.log(v)
@@ -285,9 +271,8 @@ function modala(value, tempTag, root, id) {
                 options = document.createElement("option");
                 options.setAttribute("value", g[1]);
                 options.textContent = (g[0]);
-                tempTag.appendChild(options);
+                temp.appendChild(options);
             });
-            // temp.appendChild(select);
             console.log("*")
         }
         else if (k.toLowerCase() == "sources" && (temp.tagName.toLowerCase() == "card" || temp.tagName.toLowerCase() == "carousel")) {
@@ -298,34 +283,34 @@ function modala(value, tempTag, root, id) {
             temp.id = value['id'];
             optsArray.forEach((e, f) => {
                 if (value['type'] == "img") {
-                    var gth = document.createElement("img");
-                    gth.src = e;
-                    gth.width = value['width'];
-                    gth.height = value['height'];
-                    gth.style.display = "hidden";
-                    temp.appendChild(gth);
+                        var gth = document.createElement("img");
+                        gth.src = e;
+                        gth.width = value['width'];
+                        gth.height = value['height'];
+                        gth.style.display = "hidden";
+                        temp.appendChild(gth);
                 }
                 else if (value['type'] == "audio") {
-                    var gth = document.createElement("source");
-                    gth.src = e;
-                    gth.width = value['width'];
-                    gth.height = value['height'];
-                    while (e.substr(-i, 1) != '.') i++;
-                    gth.type = "audio/" + e.substring(-(i - 1));
-                    gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
-                    temp.appendChild(gth);
+                        var gth = document.createElement("source");
+                        gth.src = e;
+                        gth.width = value['width'];
+                        gth.height = value['height'];
+                        while (e.substr(-i,1) != '.') i++;
+                        gth.type = "audio/" + e.substring(-(i-1));
+                        gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
+                        temp.appendChild(gth);
                 }
                 else if (value['type'] == "video") {
-                    var gth = document.createElement("source");
-                    gth.src = e;
-                    gth.width = value['width'];
-                    gth.height = value['height'];
-                    gth.style.display = "hidden";
-                    var i = 0;
-                    while (e.substr(-i, 1) != '.') i++;
-                    gth.type = "video/" + e.substring(-(i - 1));
-                    gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
-                    temp.appendChild(gth);
+                        var gth = document.createElement("source");
+                        gth.src = e;
+                        gth.width = value['width'];
+                        gth.height = value['height'];
+                        gth.style.display = "hidden";
+                        var i = 0;
+                        while (e.substr(-i,1) != '.') i++;
+                        gth.type = "video/" + e.substring(-(i-1));
+                        gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
+                        temp.appendChild(gth);
                 }
                 else if (value['type'] == "modal") {
                     fetch(e)
@@ -342,7 +327,7 @@ function modala(value, tempTag, root, id) {
                 shiftFilesRight(temp, auto, value['delay']);
             else
                 shiftFilesLeft(temp, auto, value['delay']);
-
+            
         }
         else if (k.toLowerCase() == "br") {
             var br = document.createElement("br");
@@ -379,7 +364,7 @@ function modala(value, tempTag, root, id) {
             (k.toLowerCase() == "textcontent") ? temp.textContent = v : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = v : temp.innerText = v;
         }
     });
-
+    
     tempTag.appendChild(temp);
     return tempTag;
 }
@@ -390,6 +375,22 @@ function setTimers(target) {
         pipes(target);
         setTimers(target);
     }, delay);
+}
+
+function carouselButtonSlide(elem, direction) {
+    
+    if (direction.toLowerCase() == "right")
+        shiftFilesRight(elem.getAttribute("insert"), true, elem.getAttribute("delay"));
+    else
+        shiftFilesLeft(elem.getAttribute("insert"), true, elem.getAttribute("delay"));
+}
+
+function carouselButtonStep(elem, direction) {
+    
+    if (direction.toLowerCase() == "right")
+        shiftFilesRight(elem.getAttribute("insert"), false, elem.getAttribute("delay"));
+    else
+        shiftFilesLeft(elem.getAttribute("insert"), false, elem.getAttribute("delay"));
 }
 
 function shiftFilesLeft(elem, auto = false, delay = 1000) {
@@ -414,8 +415,9 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     }
 
     h = 0;
-
-    while (h < b) {
+    
+    while (h < b)
+    {
         if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
             elem.children[h].style.display = "block";
         else if (h + 1 < b)
@@ -451,8 +453,9 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
     }
 
     h = 0;
-
-    while (h < b) {
+    
+    while (h < b)
+    {
         if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
             elem.children[h].style.display = "block";
         else if (h + 1 < b)
@@ -465,7 +468,7 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
         i -= iter;
 
     elem.setAttribute("index", Math.abs(i) % elem.children.length);
-
+    
     if (auto == true)
         setTimeout(() => { shiftFilesRight(elem, auto, delay); }, (delay));
 
@@ -512,10 +515,36 @@ function pipes(elem, stop = false) {
     var query = "";
     var headers = new Map();
     var formclass = "";
-
+    var json = new Map();
     if (elem.id === null)
         return;
     //    domContentLoad(true);
+    if (elem.classList.contains("clear-node")) {
+        var pages = elem.getAttribute("insert").split(";");
+        pages.forEach((e) => {
+            console.log(e);
+            document.getElementById(e).innerHTML = "";
+        });
+    }
+    if (elem.classList.contains("multi-part") == true) {
+        var pages = elem.getAttribute("ajax").split(";");
+        pages.forEach((e) => {
+            var g = e.split(":");
+            var stag = elem.cloneNode();
+            stag.classList.toggle("multi-part");
+            stag.setAttribute("insert", g[1]);
+            stag.setAttribute("ajax", g[0]);
+            if (g.length == 3)
+            {
+                stag.setAttribute("boxes", g[2]);
+            }
+            else {
+                stag.setAttribute("boxes", 1);
+            }
+            pipes(stag);
+        });
+        return;
+    }
     if (elem.tagName == "lnk" && elem.classList.contains("new-win")) {
         let lnk_win = (elem.hasAttribute("win-name") && elem.getAttribute("win-name")) ? elem.getAttribute("win-name") : "_blank";
         window.open(elem.getAttribute("ajax") + (elem.hasAttribute("query") ? "?" + elem.getAttribute("query") : ""), lnk_win);
@@ -537,48 +566,78 @@ function pipes(elem, stop = false) {
         var optsArray = elem.getAttribute("ajax-multi").split(";");
         optsArray.forEach((e, f) => {
             var g = e.split(":");
-            if (g.length > 1 && g[1] != '' && g[0] != '' && g[1] != undefined) {
+            if (g.length > 1 && g[1] != '' && g[0] != '' && g[1] != undefined)
+            {
                 var p = elem.cloneNode(true);
                 p.removeAttribute("ajax-multi");
                 p.setAttribute("ajax", g[0]);
-
-                if (g[1].split("@").length > 1) {
+                
+                if (g[1].split("@").length > 1)
+                {
                     p.classList.toggle(g[1].split("@")[1]);
                     p.setAttribute("insert", g[1].split("@")[0]);
                 }
-                else {
+                else
+                {
                     p.setAttribute("insert", g[1]);
                 }
                 pipes(p)
             }
         });
     }
+    if (elem.hasAttribute("get-var") && elem.getAttribute("get-var")) {
+        var jsonGet = new Map();
+        js = elem.getAttribute("query").split(";");
+        var str = "";
+        js.forEach((i, f) => {
+            var g  = i.split(":");
+            str += `${g[0]}:${window[g[0]]};`;
+        });
+        query = document.getElementById(elem.getAttribute("insert")).getAttribute("query")
+    }
+    if (elem.hasAttribute("set-var") && elem.getAttribute("set-var")) {
+        js = elem.getAttribute("set-var").split(";");
+        js.forEach((e, f) => {
+            var i = e.split(":");
+            window[i[0]] = i[1];
+            json.set(i[0], window[i[0]]);
+        });
+        let str = "";
+        json.forEach((i, f) => {
+            str += `${i}:${window[i]};`;
+        });
+        document.getElementById(elem.getAttribute("insert")).setAttribute("query", str.toString())
+    }
     if (elem.hasAttribute("turn")) {
         var optsArray = elem.getAttribute("turn").split(";");
         optsArray.forEach((e, f) => {
-            pipes(e);
+            pipes(e.target);
         });
     }
     if (elem.classList.contains("carousel-step-right")) {
-        if (elem.hasAttribute("insert")) {
+        if (elem.hasAttribute("insert"))
+        {
             var x = document.getElementById(elem.getAttribute("insert"));
             shiftFilesRight(x, false, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-step-left")) {
-        if (elem.hasAttribute("insert")) {
+        if (elem.hasAttribute("insert"))
+        {
             var x = document.getElementById(elem.getAttribute("insert"));
             shiftFilesLeft(x, false, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-left")) {
-        if (elem.hasAttribute("insert")) {
+        if (elem.hasAttribute("insert"))
+        {
             var x = document.getElementById(elem.getAttribute("insert"));
             shiftFilesLeft(x, true, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-right")) {
-        if (elem.hasAttribute("insert")) {
+        if (elem.hasAttribute("insert"))
+        {
             var x = document.getElementById(elem.getAttribute("insert"));
             shiftFilesRight(x, true, parseInt(x.getAttribute("delay")));
         }
@@ -873,3 +932,4 @@ function navigate(elem, opts = null, query = "", classname = "") {
         // console.log(e);
     }
 }
+ last();

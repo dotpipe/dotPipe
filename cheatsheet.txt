@@ -1,20 +1,11 @@
-/**
- *** Only donate through the js.fivy.org website 
- *** It's safe and secure through Paypal, no Venmo or Cashapp
- *** You can donate any amount.
-  *  ?? only usage: onclick="pipes(this)" ?? <!-- Legacy Instructions
-  *  All nodes to be active must have an ID. This injects the Automatic 'click' Listener
-  *  to begin using the PipesJS code in other ways than <dyn> <pipe> and <timed>.
-  *  Usable DOM Attributes (almost all are optional
-  *  upto x > 134,217,000 different configurations 
-  *  with unlimited inputs/outputs):
-  *  Attribute/Tag   |   Use Case
-  *  -------------------------------------------------------------
+
   *  insert............= return ajax call to this id
   *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  turn..............= creates a call to each Node with an id matching the listed, delimited with a semicolon in the 'turn' attribute
-  *  callbacks.........= calls function set as attribute value
   *  ajax-multi........= calls and returns multiple files for insert in as many nodes. Also allows class-type insertion types (ex: ajax-multi="page.html:therethere@plain-html")
+  *  callbacks.........= calls function set as attribute value
+  *  set-var...........= set window varianble as a dynamic value you setup
+  *  get-var...........= get variable fmo window array in JS
   *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
   *  query.............= default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
   *  modal.............= Irondocks key. Inserts the Irondocks file in the value for template ease of use.
@@ -30,19 +21,19 @@
   *  <pipe>............= Tag (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  <dyn>.............= Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
   *  dyn-one...........= Class to stop recurring clicking activities 
-  *  plain-text........= plain text returned to the insertion point
-  *  plain-html........= returns as true HTML
+  *  plain-text........= Class plain text returned to the insertion point
+  *  plain-html........= Class returns as true HTML
   *  <timed>...........= Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
   *  delay.............= delay between <timed> tag refreshes (required for <timed> tag) ex: see <timed>
   *  <carousel>........= Tag to create a carousel that moves every a timeOut() delay="x" occurs ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
   *  carousel-ajax.....= Class to create Modala sets for carousel use.
-  *         -images...= Class to use pure images for carousel use.
-  *         -auto-off.= Class to stop carousel from moving (better to create buttons)
-  *         -vert.....= Class to make carousel vertical, instead of horizontal (default)
-  *         -video....= Class to make video carousel
-  *         -audio....= Class to make audio carousel
-  *         -iframe...= Class to make iframe carousel
-  *         -link.....= Class to make link carousel
+  *         -images....= Class to use pure images for carousel use.
+  *         -auto-off..= Class to stop carousel from moving (better to create buttons)
+  *         -vert......= Class to make carousel vertical, instead of horizontal (default)
+  *         -video.....= Class to make video carousel
+  *         -audio.....= Class to make audio carousel
+  *         -iframe....= Class to make iframe carousel
+  *         -link......= Class to make link carousel
   *  direction.........= Right/left vs Up/down
   *  vertical..........= (boolean) turns carousel vertical
   *  auto..............= (boolean) auto scroll
@@ -55,7 +46,7 @@
   *  file-index........= counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  incrIndex.........= increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  decrIndex.........= decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  iter..........= Take this many steps when stepping through file-order default = 1
+  *  iter..............= Take this many steps when stepping through file-order default = 1
   *  set-attr..........= attribute to set in target HTML tag ex: <pipe id="thisOrSomeId" set-attr="id.attr:value" ajax="foo.bar" query="do0:reme0;" insert="thisOrSomeID">
   *  mode..............= "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
   *  pipe..............= creates a listener on the object. use listen="eventType" to relegate.
@@ -70,7 +61,3 @@
   *  mouse-insert......= class name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
   *  event.............= works with mouse/pipe class only. Creates eventListener on "insert"-d to node.
   *  options...........= works with <select> tagName only. Key:Value; pairs to setup and easily roll out multiple selects.
-  **** FILTERS aer go ahead code usually coded in other languages and just come back with a result. Not wholly different from AJAX. They are general purpose files.
-  **** ALL HEADERS FOR AJAX are available. They will use defaults to
-  **** go on if there is no input to replace them.
-  */
