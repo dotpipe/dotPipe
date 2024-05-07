@@ -11,12 +11,13 @@
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
   *  insert............= return ajax call to this id
-  *  ajax..............= calls and returns multiple files for insert in as many nodes. Also allows class-type insertion types (ex: ajax-multi="page.html:therethere@plain-html")
+  *  ajax..............= calls and returns multiple files for insert in as many nodes. Also allows class-type insertion types (ex: ajax="page.html:therethere@plain-html")
   *  turn..............= creates a call to each Node with an id matching the listed, delimited with a semicolon in the 'turn' attribute
   *  ajax-multi........= calls and returns multiple files for insert in as many nodes. Also allows class-type insertion types (ex: ajax-multi="page.html:therethere@plain-html")
   *  callbacks.........= calls function set as attribute value
   *  set-var...........= set window varianble as a dynamic value you setup
   *  get-var...........= get variable fmo window array in JS
+  *  <caller>..........= creates listeners with attribute values as event type to callback functions with parameters
   *  clear-node........= clear nodes. delimited in insert="first;second;thirdnode" by ';'
   *  modala-multi-last.= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
   *  modala-multi-first= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
@@ -144,9 +145,36 @@ let domContentLoad = (again = false) => {
         if (elem.classList.contains("pipe-active"))
             return;
         elem.classList.toggle("pipe-active")
-        // elem.addEventListener("click", function () {
-        //     pipes(elem);
-        // });
+        elem.addEventListener("click", function () {
+            pipes(elem);
+        });
+    });
+
+    let event_listen = document.getElementsByTagName("caller");
+    Array.from(event_listen).forEach(function (elem) {
+        var ev = elem.getAttribute("event");
+        var rv = ev.split(";");
+        Array.from(rv).forEach((v) => {
+            var g = v.split(":");
+            elem.addEventListener(g[0], function () {
+                if (typeof window[g[0]] === 'function') {
+                    if (elem.hasAttribute("get-var") && elem.getAttribute("get-var")) {
+                        js = elem.getAttribute("get-var").split(";");
+                        js.forEach((i) => {
+                            var h = i.split(":");
+                            variables.push(h[0]);
+                        });
+                        window[g[0]].apply(this, variables);
+                    }
+                    // Check if the function exists
+                    else {
+                        // Handle the case where the function doesn't exist
+                        console.error("Function '" + g[0] + "' not found.");
+                        return null;
+                    }
+                }
+            });
+        });
     });
 
     let elements_mouse = document.querySelectorAll(".mouse");
@@ -580,7 +608,6 @@ function pipes(elem, stop = false) {
         });
     }
     if (elem.hasAttribute("get-var") && elem.getAttribute("get-var")) {
-        var jsonGet = new Map();
         js = elem.getAttribute("query").split(";");
         var str = "";
         js.forEach((i, f) => {
