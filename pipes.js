@@ -11,7 +11,7 @@
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
   *  insert............= return ajax call to this id
-  *  ajax..............= calls and returns multiple files for insert in as many nodes. Also allows class-type insertion types (ex: ajax-multi="page.html:therethere@plain-html")
+  *  ajax..............= calls and returns multiple files for insert in as many nodes. Also allows class-type insertion types (ex: ajax="page.html:therethere@plain-html")
   *  turn..............= creates a call to each Node with an id matching the listed, delimited with a semicolon in the 'turn' attribute
   *  ajax-multi........= calls and returns multiple files for insert in as many nodes. Also allows class-type insertion types (ex: ajax-multi="page.html:therethere@plain-html")
   *  callbacks.........= calls function set as attribute value
