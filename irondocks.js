@@ -87,7 +87,7 @@
 function last() {
 
     const irc = JSON.parse(document.body.innerText);
-    
+
     document.body.innerText = "";
     // document.head.append(modalaHead(irc, ""));
     modala(irc, document.body);
@@ -283,34 +283,34 @@ function modala(value, tempTag, root, id) {
             temp.id = value['id'];
             optsArray.forEach((e, f) => {
                 if (value['type'] == "img") {
-                        var gth = document.createElement("img");
-                        gth.src = e;
-                        gth.width = value['width'];
-                        gth.height = value['height'];
-                        gth.style.display = "hidden";
-                        temp.appendChild(gth);
+                    var gth = document.createElement("img");
+                    gth.src = e;
+                    gth.width = value['width'];
+                    gth.height = value['height'];
+                    gth.style.display = "hidden";
+                    temp.appendChild(gth);
                 }
                 else if (value['type'] == "audio") {
-                        var gth = document.createElement("source");
-                        gth.src = e;
-                        gth.width = value['width'];
-                        gth.height = value['height'];
-                        while (e.substr(-i,1) != '.') i++;
-                        gth.type = "audio/" + e.substring(-(i-1));
-                        gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
-                        temp.appendChild(gth);
+                    var gth = document.createElement("source");
+                    gth.src = e;
+                    gth.width = value['width'];
+                    gth.height = value['height'];
+                    while (e.substr(-i, 1) != '.') i++;
+                    gth.type = "audio/" + e.substring(-(i - 1));
+                    gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
+                    temp.appendChild(gth);
                 }
                 else if (value['type'] == "video") {
-                        var gth = document.createElement("source");
-                        gth.src = e;
-                        gth.width = value['width'];
-                        gth.height = value['height'];
-                        gth.style.display = "hidden";
-                        var i = 0;
-                        while (e.substr(-i,1) != '.') i++;
-                        gth.type = "video/" + e.substring(-(i-1));
-                        gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
-                        temp.appendChild(gth);
+                    var gth = document.createElement("source");
+                    gth.src = e;
+                    gth.width = value['width'];
+                    gth.height = value['height'];
+                    gth.style.display = "hidden";
+                    var i = 0;
+                    while (e.substr(-i, 1) != '.') i++;
+                    gth.type = "video/" + e.substring(-(i - 1));
+                    gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
+                    temp.appendChild(gth);
                 }
                 else if (value['type'] == "modal") {
                     fetch(e)
@@ -327,7 +327,7 @@ function modala(value, tempTag, root, id) {
                 shiftFilesRight(temp, auto, value['delay']);
             else
                 shiftFilesLeft(temp, auto, value['delay']);
-            
+
         }
         else if (k.toLowerCase() == "br") {
             var br = document.createElement("br");
@@ -364,7 +364,7 @@ function modala(value, tempTag, root, id) {
             (k.toLowerCase() == "textcontent") ? temp.textContent = v : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = v : temp.innerText = v;
         }
     });
-    
+
     tempTag.appendChild(temp);
     return tempTag;
 }
@@ -378,7 +378,7 @@ function setTimers(target) {
 }
 
 function carouselButtonSlide(elem, direction) {
-    
+
     if (direction.toLowerCase() == "right")
         shiftFilesRight(elem.getAttribute("insert"), true, elem.getAttribute("delay"));
     else
@@ -386,7 +386,7 @@ function carouselButtonSlide(elem, direction) {
 }
 
 function carouselButtonStep(elem, direction) {
-    
+
     if (direction.toLowerCase() == "right")
         shiftFilesRight(elem.getAttribute("insert"), false, elem.getAttribute("delay"));
     else
@@ -415,9 +415,8 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     }
 
     h = 0;
-    
-    while (h < b)
-    {
+
+    while (h < b) {
         if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
             elem.children[h].style.display = "block";
         else if (h + 1 < b)
@@ -453,9 +452,8 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
     }
 
     h = 0;
-    
-    while (h < b)
-    {
+
+    while (h < b) {
         if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
             elem.children[h].style.display = "block";
         else if (h + 1 < b)
@@ -468,7 +466,7 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
         i -= iter;
 
     elem.setAttribute("index", Math.abs(i) % elem.children.length);
-    
+
     if (auto == true)
         setTimeout(() => { shiftFilesRight(elem, auto, delay); }, (delay));
 
@@ -534,8 +532,7 @@ function pipes(elem, stop = false) {
             stag.classList.toggle("multi-part");
             stag.setAttribute("insert", g[1]);
             stag.setAttribute("ajax", g[0]);
-            if (g.length == 3)
-            {
+            if (g.length == 3) {
                 stag.setAttribute("boxes", g[2]);
             }
             else {
@@ -566,19 +563,16 @@ function pipes(elem, stop = false) {
         var optsArray = elem.getAttribute("ajax-multi").split(";");
         optsArray.forEach((e, f) => {
             var g = e.split(":");
-            if (g.length > 1 && g[1] != '' && g[0] != '' && g[1] != undefined)
-            {
+            if (g.length > 1 && g[1] != '' && g[0] != '' && g[1] != undefined) {
                 var p = elem.cloneNode(true);
                 p.removeAttribute("ajax-multi");
                 p.setAttribute("ajax", g[0]);
-                
-                if (g[1].split("@").length > 1)
-                {
+
+                if (g[1].split("@").length > 1) {
                     p.classList.toggle(g[1].split("@")[1]);
                     p.setAttribute("insert", g[1].split("@")[0]);
                 }
-                else
-                {
+                else {
                     p.setAttribute("insert", g[1]);
                 }
                 pipes(p)
@@ -590,7 +584,7 @@ function pipes(elem, stop = false) {
         js = elem.getAttribute("query").split(";");
         var str = "";
         js.forEach((i, f) => {
-            var g  = i.split(":");
+            var g = i.split(":");
             str += `${g[0]}:${window[g[0]]};`;
         });
         query = document.getElementById(elem.getAttribute("insert")).getAttribute("query")
@@ -615,29 +609,25 @@ function pipes(elem, stop = false) {
         });
     }
     if (elem.classList.contains("carousel-step-right")) {
-        if (elem.hasAttribute("insert"))
-        {
+        if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
             shiftFilesRight(x, false, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-step-left")) {
-        if (elem.hasAttribute("insert"))
-        {
+        if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
             shiftFilesLeft(x, false, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-left")) {
-        if (elem.hasAttribute("insert"))
-        {
+        if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
             shiftFilesLeft(x, true, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-right")) {
-        if (elem.hasAttribute("insert"))
-        {
+        if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
             shiftFilesRight(x, true, parseInt(x.getAttribute("delay")));
         }
@@ -858,19 +848,40 @@ function navigate(elem, opts = null, query = "", classname = "") {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
                 var allText = ""; // JSON.parse(rawFile.responseText);
-                allText = JSON.parse(rawFile.responseText);
-                // console.log(allText);
-                document.getElementById(elem.getAttribute("insert")).innerHTML = "";
-                modala(allText, elem.getAttribute("insert"));
-                if (elem.hasAttribute("callback")) {
-                    var func = elem.getAttribute("callback");
-                    var fn = window[func];
-
-                    // check if object a function? 
-                    if (typeof fn === "function") {
-                        fn.apply(null, allText);
-                    }
+                var html = "";
+                try {
+                    allText = JSON.parse(rawFile.responseText);
+                } catch (e) {
+                    html = rawFile.responseText;
                 }
+                var boxOF = false;
+                console.log(elem.getAttribute("boxes") + " " + document.getElementById(elem.getAttribute("insert")).childElementCount);
+                if (elem.hasAttribute("boxes") && elem.getAttribute("boxes") <= document.getElementById(elem.getAttribute("insert")).childElementCount)
+                    boxOF = true;
+                if (!elem.classList.contains("modala-multi-first") && !elem.classList.contains("modala-multi-last")) {
+                    document.getElementById(elem.getAttribute("insert")).innerHTML = "";
+                }
+                if (elem.classList.contains("modala-multi-first") && boxOF) {
+                    document.getElementById(elem.getAttribute("insert")).lastChild.remove();
+                }
+                else if (elem.classList.contains("modala-multi-last") && boxOF) {
+                    document.getElementById(elem.getAttribute("insert")).firstChild.remove();
+                }
+                else {
+                    document.getElementById(elem.getAttribute("insert")).innerHTML = "";
+                    modala(allText, elem.getAttribute("insert"));
+                    if (elem.hasAttribute("callback")) {
+                        var func = elem.getAttribute("callback");
+                        var fn = window[func];
+
+                        // check if object a function? 
+                        if (typeof fn === "function") {
+                            fn.apply(null, allText);
+                        }
+                    }
+                    return;
+                }
+                modala(allText, document.getElementById(elem.getAttribute("insert")));
             }
         }
     }
@@ -932,4 +943,4 @@ function navigate(elem, opts = null, query = "", classname = "") {
         // console.log(e);
     }
 }
- last();
+last();
