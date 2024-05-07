@@ -156,7 +156,7 @@ let domContentLoad = (again = false) => {
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
             var g = v.split(":");
-            elem.addEventListener(g[0], function () {
+            elem.addEventListener(g[1], function () {
                 if (typeof window[g[0]] === 'function') {
                     if (elem.hasAttribute("get-var") && elem.getAttribute("get-var")) {
                         js = elem.getAttribute("get-var").split(";");
