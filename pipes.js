@@ -160,11 +160,27 @@ let domContentLoad = (again = false) => {
                 if (typeof window[g[0]] === 'function') {
                     if (elem.hasAttribute("get-var") && elem.getAttribute("get-var")) {
                         js = elem.getAttribute("get-var").split(";");
+                        let variables = [];
                         js.forEach((i) => {
-                            var h = i.split(":");
-                            variables.push(h[0]);
+                            variables.push(i);
                         });
                         window[g[0]].apply(this, variables);
+                    }
+                    // Check if the function exists
+                    else {
+                        // Handle the case where the function doesn't exist
+                        console.error("Function '" + g[0] + "' not found.");
+                        return null;
+                    }
+                }
+                else if (typeof g[0] === 'function') {
+                    if (elem.hasAttribute("get-var") && elem.getAttribute("get-var")) {
+                        js = elem.getAttribute("get-var").split(";");
+                        let variables = [];
+                        js.forEach((i) => {
+                            variables.push(i);
+                        });
+                        g[0](variables);
                     }
                     // Check if the function exists
                     else {
