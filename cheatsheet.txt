@@ -10,45 +10,37 @@
   *  with unlimited inputs/outputs):
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
-  *  insert............= return ajax call to this id
-  *  ajax..............= calls and returns multiple files for insert in as many nodes. Also allows class-type insertion types (ex: ajax-multi="page.html:therethere@plain-html")
-  *  turn..............= creates a call to each Node with an id matching the listed, delimited with a semicolon in the 'turn' attribute
-  *  ajax-multi........= calls and returns multiple files for insert in as many nodes. Also allows class-type insertion types (ex: ajax-multi="page.html:therethere@plain-html")
-  *  callbacks.........= calls function set as attribute value
-  *  <caller>..........= creates listeners with attribute values as event type to callback functions with parameters
-  *  set-var...........= set window varianble as a dynamic value you setup
-  *  get-var...........= get variable fmo window array in JS
+  *  insert............= 'ajax' sent here
+  *  ajax..............= call and return numerous files for insert to as many or more nodes.
+			 (ex: ajax-multi="page.html:therethere@plain-html")
+  *  turn..............= call each Node with matching id. turn='id1;id2;id3...'
+  *  <caller>..........= Listener with values such as event. Callback parameters with get-var
+  *  set-var...........= set global variable as dynamic value
+  *  get-var...........= get global from JavaScript window array
   *  clear-node........= clear nodes. delimited in insert="first;second;thirdnode" by ';'
-  *  modala-multi-last.= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
-  *  modala-multi-first= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
-  *  call-chain........= same as callbacks, but the chained set of commands doesn't use AJAX results
-  *  query.............= default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
-  *  modal.............= Irondocks key. Inserts the Irondocks file in the value for template ease of use.
-  *  br................= Irondocks key. Inserts 'x' amount of breaks successively. { "br": "x" }
-  *  download..........= class for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
+  *  modala-multi-last.= multi-child inserters ex: ajax="foo.bar:insertHere:x;.."
+			 the 'x' is the max number of insertions while removing the last
+  *  modala-multi-first= multi-child insertions ex: ajax="foo.bar:insertHere:x;.."
+			 the 'x' is the max number of insertions while removing the first
+  *  query.............= query string ex: query="key0:value0;key1:value2;"
+  *  modal.............= Class for JSON page templates
+  *  br................= Modala key inserts 'x' amount of breaks successively. { "br": "x" }
+  *  download..........= Class ex: class="download" file="foo.zip" directory="/home/bar/"
   *  file..............= filename to download
-  *  x-toggle..........= toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
-  *  directory.........= relative or full path of 'file'
-  *  redirect..........= "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
-  *  js................= [Specifically a] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest.
-  *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
-  *  <lnk>.............= tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
-  *  <pipe>............= Tag (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  <dyn>.............= Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  dyn-one...........= Class to stop recurring clicking activities 
+  *  x-toggle..........= toggle classes of id's stated in attribute id1:class1;id1:class2;id2:class2"
+  *  directory.........= relative or full path of 'file'  (needs ending with slash)
+  *  redirect..........= "follow" the ajax call in POST or GET mode ex: class="redirect" mode="POST"
+  *  js................= Modala key/value pair.
+  *  css...............= Modala key/value pair. Imports a stylesheet file to the page accessing it.
+  *  <pipe>............= Automatic tag referenced at full page load
+  *  <dyn>.............= Automatic eventListening tag for ex: query="key0:value0;"
+  *  dyn-one...........= Class to stop recurring clicking activities
   *  plain-text........= plain text returned to the insertion point
   *  plain-html........= returns as true HTML
-  *  <timed>...........= Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
-  *  delay.............= delay between <timed> tag refreshes (required for <timed> tag) ex: see <timed>
-  *  <carousel>........= Tag to create a carousel that moves every a timeOut() delay="x" occurs ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
-  *  carousel-ajax.....= Class to create Modala sets for carousel use.
-  *         -images...= Class to use pure images for carousel use.
-  *         -auto-off.= Class to stop carousel from moving (better to create buttons)
-  *         -vert.....= Class to make carousel vertical, instead of horizontal (default)
-  *         -video....= Class to make video carousel
-  *         -audio....= Class to make audio carousel
-  *         -iframe...= Class to make iframe carousel
-  *         -link.....= Class to make link carousel
+  *  <timed>...........= Timed result refreshing tags
+			 ex: <timed ajax="foo.bar" delay="500" insert="someID">
+  *  delay.............= delay between tag refreshes (required for <timed> and carousel)
+  *  carousel..........= Modala native tagname value. Use other attributes like sources and boxes
   *  direction.........= Right/left vs Up/down
   *  vertical..........= (boolean) turns carousel vertical
   *  auto..............= (boolean) auto scroll
@@ -57,26 +49,24 @@
   *  width.............= width of carousel frame
   *  height............= height of carousel frame
   *  boxes.............= <carousel> attribute to request x box cards
-  *  file-order........= ajax to these files, iterating [0,1,2,3]%array.length per call (delimited by ';') ex: <pipe query="key0:value0;" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  file-index........= counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  incrIndex.........= increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  decrIndex.........= decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  iter..........= Take this many steps when stepping through file-order default = 1
-  *  set-attr..........= attribute to set in target HTML tag ex: <pipe id="thisOrSomeId" set-attr="id.attr:value" ajax="foo.bar" query="do0:reme0;" insert="thisOrSomeID">
-  *  mode..............= "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
+  *  file-order........= ajax to these files, iterating [0,1,2,3]%array.length
+			 file-order="foo.bar;bar.foo"
+  *  set-attr..........= attribute to set in target HTML tag
+			 set-attr="id.attr:value"
+  *  mode..............= "POST" or "GET" (default: "POST") ex:
+			 mode="POST"
   *  pipe..............= creates a listener on the object. use listen="eventType" to relegate.
   *  multiple..........= states that this object has two or more key/value pairs use: states this is a multi-select form box
-  *  remove............= remove element in tag ex: <anyTag remove="someID;someOtherId;">
-  *  display...........= toggle visible and invisible of anything in the value ex: <anyTag display="someID;someOtherId;">
-  *  json..............= returns a JSON file set as value
-  *  headers...........= headers in CSS markup-style-attribute (delimited by '&') <any ajax="foo.bar" headers="foobar:boo&barfoo:barfoo;q:9&" insert="someID">
+  *  remove............= remove element in tag ex:
+			 remove="someID;someOtherId;"
+  *  display...........= toggle visibility of anything in the value ex: display="someID;someOtherId;"
+  *  json..............= Class to call ajax file a json
+  *  headers...........= headers in CSS markup-style-attribute (delimited by '&' not ';')				 headers="foobar:boo&barfoo:barfoo;q:9&" insert="someID">
   *  form-class........= class name of devoted form elements
-  *  action-class......= class name of devoted to-be-triggered tags (acts as listener to other certain tag(s))
   *  mouse.............= class name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
-  *  mouse-insert......= class name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
   *  event.............= works with mouse/pipe class only. Creates eventListener on "insert"-d to node.
-  *  options...........= works with <select> tagName only. Key:Value; pairs to setup and easily roll out multiple selects.
-  **** FILTERS aer go ahead code usually coded in other languages and just come back with a result. Not wholly different from AJAX. They are general purpose files.
+  *  options...........= Modala attribtue for <select> tagNames.
+			 Key:Value; pairs to setup and easily roll out multiple selects. **** FILTERS aer go ahead code usually coded in other languages and just come back with a result. Not wholly different from AJAX. They are general purpose files.
   **** ALL HEADERS FOR AJAX are available. They will use defaults to
   **** go on if there is no input to replace them.
   */
