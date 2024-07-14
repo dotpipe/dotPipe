@@ -932,7 +932,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
 
                         // check if object a function? 
                         if (typeof fn === "function") {
-                            fn.apply(null, allText);
+                            fn.apply(this, allText);
                         }
                     }
                     if (elem.hasAttribute("insert")) {
@@ -959,7 +959,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
 
                         // check if object a function? 
                         if (typeof fn === "function") {
-                            fn.apply(null, allText);
+                            fn.apply(this, allText);
                         }
                     }
                     if (elem.hasAttribute("insert")) {
@@ -1005,7 +1005,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
 
                         // check if object a function? 
                         if (typeof fn === "function") {
-                            fn.apply(null, allText);
+                            fn.apply(this, allText);
                         }
                     }
                     return;
@@ -1026,7 +1026,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
 
                         // check if object a function? 
                         if (typeof fn === "function") {
-                            fn.apply(null, allText);
+                            fn.apply(this, allText);
                         }
                     }
                     if (elem.hasAttribute("insert")) {
@@ -1059,7 +1059,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
 
                 // check if object a function? 
                 if (typeof fn === "function") {
-                    fn.apply(null, allText);
+                    fn.apply(this, allText);
                 }
             }
         }
