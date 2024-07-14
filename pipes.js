@@ -623,6 +623,26 @@ function pipes(elem, stop = false) {
             }
         });
     }
+    if (elem.hasAttribute("crud") && elem.getAttribute("crud")) {
+        var optsArray = elem.getAttribute("crud").split(";");
+        optsArray.forEach((e, f) => {
+            var g = e.split(":");
+            if (g.length > 1 && g[1] != '' && g[0] != '' && g[1] != undefined) {
+                var p = elem.cloneNode(true);
+                p.removeAttribute("crud");
+                p.setAttribute("crud", g[0]);
+
+                // if (g[1].split("@").length > 1) {
+                //     p.classList.toggle(g[1].split("@")[1]);
+                //     p.setAttribute("insert", g[1].split("@")[0]);
+                // }
+                // else {
+                p.setAttribute("insert", g[1]);
+                // }
+                pipes(p);
+            }
+        });
+    }
     if (elem.hasAttribute("get-var") && elem.getAttribute("get-var")) {
         js = elem.getAttribute("query").split(";");
         var str = "";
@@ -797,11 +817,71 @@ function formAJAX(elem, classname) {
     return (elem_qstring);
 }
 
+function formJSONAJAX(elem, classname) {
+    var elements = document.getElementsByClassName(classname);
+    var data = {};
+
+    for (var i = 0; i < elements.length; i++) {
+        var elem = elements[i];
+        
+        var data_nest = {};
+        var elem_count_base = elem.getAttribute("crud") + ";";
+        // getting all FORM data with "crud" as an attr
+        for (var j = 0; elem.hasAttribute("crud") && elem_count_base.length > 1; ) {
+            var el_crud_calls = elem_count_base.split(";")
+            
+            // init map for holding temp variables
+            var map = {}
+            for (var element of el_crud_calls) {
+                var all_crud = element.getAttribute('crud')
+                var el_id = (all_crud.contains("?")) ? all_crud.split('?') : ""
+                var el_crud_id = (el_id[0].length > 0) ? map.push({"id": el_id[0]}) : "NULL"
+                var el_key_value = el_id[1].split('@')
+                var insert = (el_key_value[1].contains("."))
+                for (var kv of el_key_value) {
+                    var key = kv.split(":")[0]
+                    var val = kv.split(":")[1]
+                    map.push({ key: val })
+                }
+
+                map.push({ "insert": insert })
+                data_nest[j].push(map)
+                map = {}
+                j++;
+            }
+        }
+
+        if (data_nest.length > 0)
+            data.push(data_nest);
+
+        var name = elem.name;
+        var value = elem.value;
+
+        // Handle multiple select boxes
+        if (elem.multiple) {
+            data[name] = [];
+            for (var o of elem.options) {
+                if (o.selected) {
+                    data[name].push(o.value);
+                }
+            }
+        } else {
+            data[name] = value;
+        }
+    }
+    // Convert the data object to a JSON string
+    var jsonString = JSON.stringify(data, null, 2);
+    return jsonString;
+}
 
 function navigate(elem, opts = null, query = "", classname = "") {
     //formAJAX at the end of this line
     //	console.log();
-    elem_qstring = query + ((document.getElementsByClassName(classname).length > 0) ? formAJAX(elem, classname) : "");
+    elem_qstring = "";
+    if (elem.classList.contains("db-pipe"))
+        elem_qstring = query + ((document.getElementsByClassName(classname).length > 0) ? formJSONAJAX(elem, classname) : "");
+    else
+        elem_qstring = query + ((document.getElementsByClassName(classname).length > 0) ? formAJAX(elem, classname) : "");
     //    elem_qstring = elem_qstring;
     elem_qstring = encodeURI(elem_qstring);
     console.log(elem_qstring);
@@ -826,11 +906,17 @@ function navigate(elem, opts = null, query = "", classname = "") {
                         document.getElementById(elem.getAttribute("insert")).textContent = (allText);
                     else
                         document.getElementById(elem.getAttribute("insert")).setAttribute(elem.getAttribute("set-attr"), allText);
-
                 }
                 catch (e) {
                     console.error(e);
                 }
+            }
+        }
+    }
+    else if (elem.classList.contains("db-pipe")) {
+        rawFile.onreadystatechange = function () {
+            if (rawFile.readyState === 4) {
+
             }
         }
     }
