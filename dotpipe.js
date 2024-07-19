@@ -90,19 +90,23 @@ export default dotPipe;
 class dotPipe {
 
     constructor() {
+        try {
+            const irc = JSON.parse(document.body.innerText);
+            document.body.innerText = "";
+            this.modala(irc, document.body);
+            document.body.style.display = "block";
+        } catch (e) {
+            console.error("Failed to parse JSON from document body:", e);
+        }
 
-        const irc = JSON.parse(document.body.innerText);
-
-        document.body.innerText = "";
-        // document.head.append(modalaHead(irc, ""));
-        this.modala(irc, document.body);
-        document.body.style.display = "block";
-        document.addEventListener("click", function (elem) {
+        document.addEventListener("click", (elem) => {
             console.log(elem.target);
-            if (elem.target.id != undefined) { pipes(elem.target); }
+            if (elem.target.id !== undefined) {
+                this.pipes(elem.target);
+            }
         });
-        this.run()
-        return;
+
+        this.run();
     }
 
     run() {
