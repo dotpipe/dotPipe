@@ -1,0 +1,189 @@
+{
+  "br": "2",
+  "table": {
+    "tagname": "table",
+    "id": "am-I-dumb",
+    "sales": {
+      "tagname": "tr",
+      "td2": {
+        "tagname": "td",
+        "class": "sale-label",
+        "id": "sales-tag",
+        "textContent": "On Sale!",
+        "style": "color: #666;"
+      }
+    },
+    "guitar1": {
+      "tagname": "tr",
+      "id": "guitar1",
+      "td1": {
+        "tagname": "td",
+        "id": "i-am-dum1",
+        "textContent": "Gibson \"Sunny\" Les Paul Standard",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+      },
+      "td2": {
+        "tagname": "td",
+        "textContent": "Electric",
+        "id": "i-am-dumb2",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+      },
+      "td3": {
+        "tagname": "td",
+        "textContent": "$2499.99",
+        "id": "i-am-dumb3",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+      },
+      "td11": {
+        "tagname": "td",
+        "textContent": "Gibson M2M 1959 Custom",
+        "id": "i-am-dumb4",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+      },
+      "td12": {
+        "tagname": "td",
+        "textContent": "Electric",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+      },
+      "td13": {
+        "tagname": "td",
+        "textContent": "$1499.99",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+      }
+    },
+    "guitar2": {
+      "tagname": "tr",
+      "id": "guitar2",
+      "td1": {
+        "tagname": "td",
+        "textContent": "Gibson M2M 1959 Custom",
+        "id": "i-am-dumb2",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+      },
+      "td11": {
+        "tagname": "td",
+        "textContent": "Electric",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+      },
+      "td31": {
+        "tagname": "td",
+        "textContent": "$1499.99",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+      },
+      "td12": {
+        "tagname": "td",
+        "textContent": "Gibson M2M 1959 Custom",
+        "id": "i-am-dumb7",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+      },
+      "td21": {
+        "tagname": "td",
+        "textContent": "Electric",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+      },
+      "td13": {
+        "tagname": "td",
+        "textContent": "$1499.99",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+      }
+    },
+    "guitar6": {
+      "tagname": "tr",
+      "id": "guitar3",
+      "td11": {
+        "tagname": "td",
+        "textContent": "Taylor 214ce",
+        "id": "i-am-dumb9",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+      },
+      "td21": {
+        "tagname": "td",
+        "textContent": "Acoustic-Electric",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+      },
+      "td31": {
+        "tagname": "td",
+        "textContent": "$999.99",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+      },
+      "td12": {
+        "tagname": "td",
+        "textContent": "Taylor 214ce",
+        "id": "i-am-dumb8",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+      },
+      "td22": {
+        "tagname": "td",
+        "textContent": "Acoustic-Electric",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+      },
+      "td32": {
+        "tagname": "td",
+        "textContent": "$999.99",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+      }
+    },
+    "guitar7": {
+      "tagname": "tr",
+      "id": "guitar10",
+      "td1": {
+        "tagname": "td",
+        "id": "i-am-dumb",
+        "textContent": "Gibson \"Sunny\" Les Paul Standard",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+      },
+      "td2": {
+        "tagname": "td",
+        "textContent": "Electric",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+      },
+      "td3": {
+        "tagname": "td",
+        "textContent": "$2499.99",
+        "class": "multi-part modala-multi-last sales-item modala",
+        "method": "GET",
+        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+      }
+    }
+  }
+}

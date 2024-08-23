@@ -1,0 +1,218 @@
+{
+	"header": {
+		"title": "David's Guitar Show",
+		"css": "dark-theme.css",
+		"meta": {
+			"a": {
+				"tagname": "meta",
+				"name": "viewport",
+				"content": "width='device-width, initial-scale=1.0'"
+			},
+			"b": {
+				"tagname": "meta",
+				"http-equiv": "cache-control",
+				"content": "no-cache"
+			},
+			"c": {
+				"tagname": "meta",
+				"http-equiv": "expires",
+				"content": "0"
+			},
+			"d": {
+				"tagname": "meta",
+				"http-equiv": "pragma",
+				"content": "no-cache"
+			}
+		}
+	},
+	"head": {
+		"body": {
+			"tagname": "table",
+			"id": "table1",
+			"style": "width:800px;",
+			"children00": {
+				"tagname": "tr",
+				"id": "info",
+				"children01": {
+					"tagname": "td",
+					"h11": {
+						"tagname": "table",
+						"id": "table",
+						"style": "width:400px; text-align: right;",
+						"children00": {
+							"tagname": "tr",
+							"id": "info",
+							"children01": {
+								"tagname": "td",
+								"h1": "Welcome to David's Guitar Store"
+							},
+							"children02": {
+								"tagname": "td",
+								"style": "background-color: #333333;",
+								"img": {
+									"tagname": "img",
+									"src": "dave.png",
+									"style": "align:bottom"
+								}
+							}
+						}
+					}
+				},
+				"children4": {
+					"tagname": "td",
+					"rowspan": "1",
+					"colspan": "2",
+					"style": "display:block; align:right;",
+					"img": {
+						"tagname": "img",
+						"src": "blank.png"
+					},
+					"id": "left-pic"
+				},
+				"children03": {
+					"tagname": "td",
+					"style": "width:800px",
+					"class": "description",
+					"rowspan": "1",
+					"colspan": "2",
+					"id": "guitardesc"
+				}
+			},
+			"children02": {
+				"tagname": "tr",
+				"children11": {
+					"tagname": "td",
+					"id": "dark-mode-finance",
+					"h11": {
+						"tagname": "h5",
+						"style": "float: right; font-size:8px; padding: 30px;",
+						"textContent": "Learn More About Financing Through David's",
+						"class": "modala",
+						"ajax": "reasons_to_work.json",
+						"insert": "me"
+					},
+					"colspan": "3"
+				}
+			},
+			"children11": {
+				"tagname": "td",
+				"id": "dark-mode-slogan",
+				"h": {
+					"h1": "The Guitars Are Here"
+				}
+			},
+			"children12": {
+				"tagname": "td",
+				"id": "dark-mode-invitation",
+				"style": "padding: 5px",
+				"colspan": "5",
+				"h": {
+					"h4": "Explore our wide range of instruments and other gear."
+				}
+			}
+		},
+		"table": {
+			"tagname": "table",
+			"children1": {
+				"tagname": "tr",
+				"td": {
+					"tagname": "td",
+					"style": "background-color: #222222; margin-top:5px; min-height: 500px; width: 100%; display: grid; gap: 25px; padding: 7px;",
+					"menuItem0": {
+						"tagname": "a",
+						"id": "dark-mode-button",
+						"textContent": "Deals",
+						"class": "multi-part modala-multi-last deal-button modala",
+						"ajax": "learn-more-info.json:learn-more-content:1"
+					},
+					"menuItemA": {
+						"tagname": "a",
+						"textContent": "B-Stock",
+						"class": "",
+						"style": "margin: 5px;"
+					},
+					"menuItemB": {
+						"tagname": "a",
+						"textContent": "Used",
+						"class": "",
+						"style": "margin: 5px;"
+					},
+					"menuItem1": {
+						"tagname": "a",
+						"textContent": "Home",
+						"id": "test",
+						"class": "multi-part modala-multi-first modala menu-item",
+						"ajax": "reasons_to_work.json:me:2;learn-more-info.json:learn-more-content:3",
+						"style": "margin: 5px;"
+					},
+					"menuItem2": {
+						"tagname": "a",
+						"textContent": "Products",
+						"class": "",
+						"style": "margin: 5px;"
+					},
+					"menuItem3": {
+						"tagname": "a",
+						"textContent": "About Us",
+						"class": "",
+						"style": "margin: 5px;"
+					},
+					"menuItem4": {
+						"tagname": "a",
+						"textContent": "Contact",
+						"class": "",
+						"style": "margin: 5px;"
+					},
+					"trogly": {
+						"tagname": "a",
+						"textContent": "NGD",
+						"width": "20px",
+						"height": "20px",
+						"class": "orchid ngd-button",
+						"style": "margin: 5px;"
+					},
+					"menuItem6": {
+						"tagname": "a",
+						"id": "so-dumb",
+						"textContent": "Clear",
+						"class": "clear-node menu-item",
+						"insert": "me;learn-more-content",
+						"style": "margin: 5px;"
+					},
+					"menuItem7": {
+						"tagname": "a",
+						"textContent": "Home Delivery",
+						"class": "airplane ",
+						"style": "margin: 5px;"
+					},
+					"menuItem8": {
+						"tagname": "a",
+						"textContent": "Merch",
+						"class": "green t-shirt ",
+						"style": "margin: 5px;"
+					}
+				}
+			}
+		},
+		"br": "2",
+		"children1": {
+			"tagname": "table",
+			"td0": {
+				"tagname": "tr",
+				"menuItem8": {
+					"tagname": "td",
+					"style": "margin: 5px;",
+					"id": "learn-more-content"
+				}
+			},
+			"tr1": {
+				"tagname": "tr",
+				"menuItem8": {
+					"tagname": "td",
+					"style": "margin: 5px;",
+					"id": "me"
+				}
+			}
+		}
+	}
+}
