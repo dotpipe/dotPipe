@@ -777,6 +777,8 @@ function pipes(elem, stop = false) {
     if (elem.id === null)
         return;
 
+    if (elem.classList.contains("disabled"))
+        return;
     if (elem.classList.contains("clear-node")) {
         var pages = elem.getAttribute("insert").split(";");
         pages.forEach((e) => {
