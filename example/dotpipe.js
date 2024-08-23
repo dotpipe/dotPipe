@@ -783,7 +783,7 @@ function pipes(elem, stop = false) {
         var pages = elem.getAttribute("insert").split(";");
         pages.forEach((e) => {
             console.log(e);
-            document.getElementById(e).innerHTML = "";
+            document.getElementById(e).remove();
         });
     }
     if (elem.classList.contains("multi-part") == true) {
