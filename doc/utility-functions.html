@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utility Functions - dotPipe.js Documentation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <!-- Same header as index.html -->
+    </header>
+    <main>
+        <h2>Utility Functions</h2>
+        <section>
+            <h3>setTimers(target)</h3>
+            <p>Sets up timed refreshes.</p>
+            <pre><code>
+function setTimers(target) {
+    var delay = target.getAttribute("delay");
+    setTimeout(function () {
+        pipes(target);
+        setTimers(target);
+    }, delay);
+}
+            </code></pre>
+        </section>
+        <!-- Add sections for other utility functions: carouselButtonSlide, shiftFilesLeft, fileOrder, etc. -->
+    </main>
+    <footer>
+        <p>&copy; 2023 dotPipe.js Documentation</p>
+    </footer>
+</body>
+</html>

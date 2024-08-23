@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Functions - dotPipe.js Documentation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <!-- Same header as index.html -->
+    </header>
+    <main>
+        <h2>Core Functions</h2>
+        <section>
+            <h3>domContentLoad(again = false)</h3>
+            <p>Initializes the library by processing various custom tags and setting up event listeners.</p>
+            <pre><code>
+function domContentLoad(again = false) {
+    doc_set = document.getElementsByTagName("pipe");
+    if (again == false) {
+        Array.from(doc_set).forEach(function (elem) {
+            if (elem.classList.contains("pipe-active"))
+                return;
+            elem.classList.toggle("pipe-active")
+            pipes(elem);
+        });
+    }
+    // ... (rest of the function)
+}
+            </code></pre>
+        </section>
+        <!-- Add sections for other core functions: modala, pipes, navigate, etc. -->
+    </main>
+    <footer>
+        <p>&copy; 2023 dotPipe.js Documentation</p>
+    </footer>
+</body>
+</html>
