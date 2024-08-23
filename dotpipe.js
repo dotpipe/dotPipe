@@ -19,6 +19,9 @@
   *  multi-part........= Class to create multi-ajax calls ex: <tag id="something" ajax="foo.bar:insertIn0;foo.bar:insertIn1;bar.foo:insertIn3">Click me!</tag>
   *  modala-multi-last.= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
   *  modala-multi-first= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
+  *  time-active.......= Class to activate timers for things that go on continuously
+  *  time-inactive.....= Class to deactivate timers for things that go on continuously
+  *  disabled..........= Class to disable a tag (use x-toggle to toggle state of this and time-active/-inactive)
   *  br................= [Specifically a] Modala key/value pair. "br": "x" where x is the number of breaks in succession.
   *  js................= [Specifically a] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest.
   *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
@@ -69,10 +72,11 @@
 // import { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
 //export { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
 
+
 function last() {
 
     const irc = JSON.parse(document.body.innerText);
-    
+
     document.body.innerText = "";
     // document.head.append(modalaHead(irc, ""));
     modala(irc, document.body);
@@ -98,38 +102,44 @@ let domContentLoad = (again = false) => {
 
     let elementsArray_time = document.getElementsByTagName("timed");
     Array.from(elementsArray_time).forEach(function (elem) {
-        if (elem.classList.contains("pipe-active"))
+        if (elem.classList.contains("time-inactive"))
             return;
-        elem.classList.toggle("pipe-active")
-        setTimers(elem);
+        if (elem.classList.toggle("time-active")) {
+            auto = true;
+            setTimers(elem);
+        }
+        else if (elem.classList.contains("time-inactive")) {
+            auto = false;
+        }
     });
 
     let elementsArray_dyn = document.getElementsByTagName("dyn");
     Array.from(elementsArray_dyn).forEach(function (elem) {
-        if (elem.classList.contains("pipe-active"))
+        if (elem.classList.contains("disabled"))
             return;
-        elem.classList.toggle("pipe-active");
+        elem.classList.toggle("disabled");
     });
 
     let elements_Carousel = document.getElementsByTagName("carousel");
     Array.from(elements_Carousel).forEach(function (elem) {
-        if (elem.classList.contains("pipe-active"))
+        if (elem.classList.contains("time-inactive"))
             return;
-        elem.classList.toggle("pipe-active")
-        let auto = true;
-        if (elem.classList.contains("carousel-auto-off"))
+        if (elem.classList.toggle("time-active")) {
+            auto = true;
+            setTimers(elem);
+        }
+        else if (elem.classList.contains("time-inactive")) {
             auto = false;
+        }
         setTimeout(carousel(elem, auto), elem.getAttribute("delay"));
     });
 
     let elementsArray_link = document.getElementsByTagName("lnk");
     Array.from(elementsArray_link).forEach(function (elem) {
-        if (elem.classList.contains("pipe-active"))
+        if (elem.classList.contains("disabled"))
             return;
-        elem.classList.toggle("pipe-active")
-        // elem.addEventListener("click", function () {
-        //     pipes(elem);
-        // });
+        elem.classList.toggle("disabled");
+
     });
 
     let elements_mouse = document.querySelectorAll(".mouse");
@@ -139,8 +149,15 @@ let domContentLoad = (again = false) => {
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
             var g = v.split(":");
+            if (elem.classList.toggle("time-active")) {
+                auto = true;
+                setTimers(elem);
+            }
+            else if (elem.classList.contains("time-inactive")) {
+                auto = false;
+            }
             elem.addEventListener(g[0], function () {
-                setTimeout(pipes(elem, true), g[1]);
+                setTimeout(pipes(elem, auto), g[1]);
             });
         });
     });
@@ -188,7 +205,7 @@ function modalaHead(value) {
                 cssvar.rel = "stylesheet";
                 document.head.appendChild(cssvar);
             });
-           
+
         }
         else if (k.toLowerCase() == "js") {
             var optsArray = v.split(";");
@@ -368,7 +385,7 @@ function modala(value, tempTag, root, id) {
                     const tmp = modala(data, temp, root, id);
                     tempTag.appendChild(tmp);
                 });
-        } 
+        }
         else if (k.toLowerCase() == "html") {
             fetch(v)
                 .then(response => response.text())
@@ -401,6 +418,19 @@ function modala(value, tempTag, root, id) {
 
 function setTimers(target) {
     var delay = target.getAttribute("delay");
+    if (target.classList.contains("time-inactive") && target.classList.contains("time-active")) {
+        target.classList.toggle("time-active")
+        auto = false;
+        return;
+    }
+    else if (target.classList.toggle("time-active")) {
+        auto = true;
+    }
+    else if (target.classList.contains("time-inactive")) {
+        auto = false;
+        return;
+    }
+
     setTimeout(function () {
         pipes(target);
         setTimers(target);
@@ -409,18 +439,30 @@ function setTimers(target) {
 
 function carouselButtonSlide(elem, direction) {
 
+    if (elem.classList.toggle("time-active")) {
+        auto = true;
+    }
+    else if (elem.classList.contains("time-inactive")) {
+        auto = false;
+    }
     if (direction.toLowerCase() == "right")
-        shiftFilesRight(elem.getAttribute("insert"), true, elem.getAttribute("delay"));
+        shiftFilesRight(elem.getAttribute("insert"), auto, elem.getAttribute("delay"));
     else
-        shiftFilesLeft(elem.getAttribute("insert"), true, elem.getAttribute("delay"));
+        shiftFilesLeft(elem.getAttribute("insert"), auto, elem.getAttribute("delay"));
 }
 
 function carouselButtonStep(elem, direction) {
 
+    if (elem.classList.toggle("time-active")) {
+        auto = true;
+    }
+    else if (elem.classList.contains("time-inactive")) {
+        auto = false;
+    }
     if (direction.toLowerCase() == "right")
-        shiftFilesRight(elem.getAttribute("insert"), false, elem.getAttribute("delay"));
+        shiftFilesRight(elem.getAttribute("insert"), auto, elem.getAttribute("delay"));
     else
-        shiftFilesLeft(elem.getAttribute("insert"), false, elem.getAttribute("delay"));
+        shiftFilesLeft(elem.getAttribute("insert"), auto, elem.getAttribute("delay"));
 }
 
 function shiftFilesLeft(elem, auto = false, delay = 1000) {
@@ -454,9 +496,15 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
         h++;
     }
 
+    if (elem.classList.toggle("time-active")) {
+        auto = true;
+    }
+    else if (elem.classList.contains("time-inactive")) {
+        auto = false;
+    }
     elem.setAttribute("index", (i + iter) % elem.children.length);
-    if (auto == true)
-        setTimeout(() => { shiftFilesLeft(elem, elem.getAttribute("auto"), delay); }, (delay));
+    if (auto == "on")
+        setTimeout(() => { shiftFilesLeft(elem, auto, delay); }, (delay));
 
 }
 
@@ -497,7 +545,13 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
 
     elem.setAttribute("index", Math.abs(i) % elem.children.length);
 
-    if (auto == true)
+    if (elem.classList.toggle("time-active")) {
+        auto = true;
+    }
+    else if (elem.classList.contains("time-inactive")) {
+        auto = false;
+    }
+    if (auto == "on")
         setTimeout(() => { shiftFilesRight(elem, elem.getAttribute("auto"), delay); }, (delay));
 
 }
@@ -669,8 +723,13 @@ function carousel(elem, auto = true) {
     var w = (Math.abs(i));
     x.setAttribute("file-index", w % mArray.length);
     var delay = x.getAttribute("delay");
-    if (!x.classList.contains("carousel-auto-off"))
-        setTimeout(() => { carousel(x.id, auto); }, delay);
+    if (x.classList.toggle("time-active")) {
+        auto = true;
+    }
+    else if (x.classList.contains("time-inactive")) {
+        auto = false;
+    }
+    setTimeout(() => { carousel(x.id, auto) }, delay);
 }
 
 function fileShift(elem) {
@@ -717,7 +776,7 @@ function pipes(elem, stop = false) {
 
     if (elem.id === null)
         return;
-    
+
     if (elem.classList.contains("clear-node")) {
         var pages = elem.getAttribute("insert").split(";");
         pages.forEach((e) => {
@@ -733,8 +792,7 @@ function pipes(elem, stop = false) {
             stag.classList.toggle("multi-part");
             stag.setAttribute("insert", g[1]);
             stag.setAttribute("ajax", g[0]);
-            if (g.length == 3)
-            {
+            if (g.length == 3) {
                 stag.setAttribute("boxes", g[2]);
             }
             else {
@@ -817,25 +875,53 @@ function pipes(elem, stop = false) {
     if (elem.classList.contains("carousel-step-right")) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
-            this.shiftFilesRight(x, false, parseInt(x.getAttribute("delay")));
+
+            if (elem.classList.toggle("time-active")) {
+                auto = true;
+            }
+            else if (elem.classList.contains("time-inactive")) {
+                auto = false;
+            }
+            this.shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-step-left")) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
-            this.shiftFilesLeft(x, false, parseInt(x.getAttribute("delay")));
+
+            if (elem.classList.toggle("time-active")) {
+                auto = true;
+            }
+            else if (elem.classList.contains("time-inactive")) {
+                auto = false;
+            }
+            this.shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-left")) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
-            this.shiftFilesLeft(x, true, parseInt(x.getAttribute("delay")));
+
+            if (elem.classList.toggle("time-active")) {
+                auto = true;
+            }
+            else if (elem.classList.contains("time-inactive")) {
+                auto = false;
+            }
+            this.shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-right")) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
-            this.shiftFilesRight(x, true, parseInt(x.getAttribute("delay")));
+
+            if (elem.classList.toggle("time-active")) {
+                auto = true;
+            }
+            else if (elem.classList.contains("time-inactive")) {
+                auto = false;
+            }
+            this.shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.hasAttribute("query")) {
@@ -865,9 +951,13 @@ function pipes(elem, stop = false) {
     }
     if (elem.classList.contains("carousel")) {
         var auto = true;
-        if (elem.classList.contains("carousel-auto-off"))
+        if (elem.classList.toggle("time-active")) {
+            auto = true;
+        }
+        else if (elem.classList.contains("time-inactive")) {
             auto = false;
-        carousel(elem, auto);
+        }
+        carousel(elem,  auto);
         return;
     }
     // This is a quick way to make a downloadable link in an href
@@ -1041,12 +1131,10 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 if (!elem.classList.contains("modala-multi-first") && !elem.classList.contains("modala-multi-last")) {
                     document.getElementById(elem.getAttribute("insert")).innerHTML = "";
                 }
-                if (elem.classList.contains("modala-multi-first") && boxOF)
-                {
+                if (elem.classList.contains("modala-multi-first") && boxOF) {
                     document.getElementById(elem.getAttribute("insert")).lastChild.remove();
                 }
-                else if (elem.classList.contains("modala-multi-last") && boxOF)
-                {
+                else if (elem.classList.contains("modala-multi-last") && boxOF) {
                     document.getElementById(elem.getAttribute("insert")).firstChild.remove();
                 }
                 modala(allText, document.getElementById(elem.getAttribute("insert")));
