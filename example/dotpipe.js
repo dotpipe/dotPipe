@@ -430,6 +430,10 @@ function setTimers(target) {
         auto = false;
         return;
     }
+    else {
+        target.classList.toggle("time-inactive")
+        auto = false;
+    }
 
     setTimeout(function () {
         pipes(target);
