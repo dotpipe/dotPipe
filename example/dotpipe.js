@@ -420,19 +420,16 @@ function setTimers(target) {
     var delay = target.getAttribute("delay");
     if (target.classList.contains("time-inactive") && target.classList.contains("time-active")) {
         target.classList.toggle("time-active")
-        auto = false;
         return;
     }
-    else if (target.classList.toggle("time-active")) {
-        auto = true;
+    else if (target.classList.contains("time-active")) {
     }
     else if (target.classList.contains("time-inactive")) {
-        auto = false;
         return;
     }
     else {
         target.classList.toggle("time-inactive")
-        auto = false;
+        return;
     }
 
     setTimeout(function () {
