@@ -104,7 +104,7 @@ let domContentLoad = (again = false) => {
     Array.from(elementsArray_time).forEach(function (elem) {
         if (elem.classList.contains("time-inactive"))
             return;
-        if (elem.classList.toggle("time-active")) {
+        if (elem.classList.contains("time-active")) {
             auto = true;
             setTimers(elem);
         }
@@ -124,7 +124,7 @@ let domContentLoad = (again = false) => {
     Array.from(elements_Carousel).forEach(function (elem) {
         if (elem.classList.contains("time-inactive"))
             return;
-        if (elem.classList.toggle("time-active")) {
+        if (elem.classList.contains("time-active")) {
             auto = true;
             setTimers(elem);
         }
@@ -149,7 +149,7 @@ let domContentLoad = (again = false) => {
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
             var g = v.split(":");
-            if (elem.classList.toggle("time-active")) {
+            if (elem.classList.contains("time-active")) {
                 auto = true;
                 setTimers(elem);
             }
@@ -440,7 +440,7 @@ function setTimers(target) {
 
 function carouselButtonSlide(elem, direction) {
 
-    if (elem.classList.toggle("time-active")) {
+    if (elem.classList.contains("time-active")) {
         auto = true;
     }
     else if (elem.classList.contains("time-inactive")) {
@@ -454,7 +454,7 @@ function carouselButtonSlide(elem, direction) {
 
 function carouselButtonStep(elem, direction) {
 
-    if (elem.classList.toggle("time-active")) {
+    if (elem.classList.contains("time-active")) {
         auto = true;
     }
     else if (elem.classList.contains("time-inactive")) {
@@ -477,13 +477,10 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     var h = 0;
 
     while (iter * i + 1 > h) {
-        {
-            // let n = elem.childNodes;
-            var clone = elem.firstChild.cloneNode(true);
-            clone.style.display = "none";
-            elem.appendChild(clone);
-            elem.removeChild(elem.firstChild);
-        }
+        var clone = elem.firstChild.cloneNode(true);
+        clone.style.display = "none";
+        elem.appendChild(clone);
+        elem.removeChild(elem.firstChild);
         h++;
     }
 
@@ -497,7 +494,7 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
         h++;
     }
 
-    if (elem.classList.toggle("time-active")) {
+    if (elem.classList.contains("time-active")) {
         auto = true;
     }
     else if (elem.classList.contains("time-inactive")) {
@@ -546,7 +543,7 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
 
     elem.setAttribute("index", Math.abs(i) % elem.children.length);
 
-    if (elem.classList.toggle("time-active")) {
+    if (elem.classList.contains("time-active")) {
         auto = true;
     }
     else if (elem.classList.contains("time-inactive")) {
@@ -592,11 +589,8 @@ function fileOrder(elem) {
     index = index % arr.length;
     ppfc.setAttribute("file-index", index.toString());
 
-    // console.log(ppfc);
     if (ppfc.tagName == "SOURCE" && ppfc.hasAttribute("src")) {
         try {
-            // <Source> tag's parentNode will need to be paused and resumed
-            // to switch the video
             ppfc.parentNode.pause();
             ppfc.parentNode.setAttribute("src", arr[index].toString());
             ppfc.parentNode.load();
@@ -607,10 +601,7 @@ function fileOrder(elem) {
         }
     }
     else if (ppfc && ppfc.tagName == "IMG") {
-
         ppfc.setAttribute("src", arr[index].toString());
-        // elem.setAttribute("ajax", arr[index].toString());
-        // pipes(elem);
     }
     else {
         var obj = document.createElement("img");
@@ -638,7 +629,6 @@ function carousel(elem, auto = true) {
     }
     var m = 0;
     var obj = document.createElement("card");
-    // obj.id = "insert-" + elem.getAttribute("insert");
     obj.classList.toggle("pipe-grid");
     for (n = 0; obj.children.length < (x.getAttribute("boxes") * multiVert); n++) {
         if (x.classList.contains("carousel-ajax") || elem.classList.contains("carousel-ajax")) // && x.children.length < elem.getAttribute("boxes")) {
@@ -724,7 +714,7 @@ function carousel(elem, auto = true) {
     var w = (Math.abs(i));
     x.setAttribute("file-index", w % mArray.length);
     var delay = x.getAttribute("delay");
-    if (x.classList.toggle("time-active")) {
+    if (x.classList.contains("time-active")) {
         auto = true;
     }
     else if (x.classList.contains("time-inactive")) {
@@ -879,7 +869,7 @@ function pipes(elem, stop = false) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
 
-            if (elem.classList.toggle("time-active")) {
+            if (elem.classList.contains("time-active")) {
                 auto = true;
             }
             else if (elem.classList.contains("time-inactive")) {
@@ -892,7 +882,7 @@ function pipes(elem, stop = false) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
 
-            if (elem.classList.toggle("time-active")) {
+            if (elem.classList.contains("time-active")) {
                 auto = true;
             }
             else if (elem.classList.contains("time-inactive")) {
@@ -905,7 +895,7 @@ function pipes(elem, stop = false) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
 
-            if (elem.classList.toggle("time-active")) {
+            if (elem.classList.contains("time-active")) {
                 auto = true;
             }
             else if (elem.classList.contains("time-inactive")) {
@@ -918,7 +908,7 @@ function pipes(elem, stop = false) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
 
-            if (elem.classList.toggle("time-active")) {
+            if (elem.classList.contains("time-active")) {
                 auto = true;
             }
             else if (elem.classList.contains("time-inactive")) {
@@ -954,7 +944,7 @@ function pipes(elem, stop = false) {
     }
     if (elem.classList.contains("carousel")) {
         var auto = true;
-        if (elem.classList.toggle("time-active")) {
+        if (elem.classList.contains("time-active")) {
             auto = true;
         }
         else if (elem.classList.contains("time-inactive")) {
