@@ -1,0 +1,9 @@
+{
+    "header": {
+        "title": "Newbies and Scroobies",
+        "css": "theme.css"
+    },
+    "table": {
+            "modal": "./menu_pages/collective.php"
+    }
+}
