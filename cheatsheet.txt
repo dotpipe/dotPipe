@@ -1,59 +1,251 @@
-  *  Attribute/Tag   |   Use Case
-  *  -------------------------------------------------------------
-  *  insert............= 'ajax' sent here
-  *  ajax..............= call and return numerous files for insert to as many or more nodes.
-			 (ex: ajax-multi="page.html:therethere@plain-html")
-  *  turn..............= call each Node with matching id. turn='id1;id2;id3...'
-  *  <caller>..........= Listener with values such as event. Callback parameters with get-var
-  *  set-var...........= set global variable as dynamic value
-  *  get-var...........= get global from JavaScript window array
-  *  clear-node........= clear nodes. delimited in insert="first;second;thirdnode" by ';'
-  *  modala-multi-last.= multi-child inserters ex: ajax="foo.bar:insertHere:x;.."
-			 the 'x' is the max number of insertions while removing the last
-  *  modala-multi-first= multi-child insertions ex: ajax="foo.bar:insertHere:x;.."
-			 the 'x' is the max number of insertions while removing the first
-  *  query.............= query string ex: query="key0:value0;key1:value2;"
-  *  modal.............= Class for JSON page templates
-  *  br................= Modala key inserts 'x' amount of breaks successively. { "br": "x" }
-  *  download..........= Class ex: class="download" file="foo.zip" directory="/home/bar/"
-  *  file..............= filename to download
-  *  x-toggle..........= toggle classes of id's stated in attribute id1:class1;id1:class2;id2:class2"
-  *  directory.........= relative or full path of 'file'  (needs ending with slash)
-  *  redirect..........= "follow" the ajax call in POST or GET mode ex: class="redirect" mode="POST"
-  *  js................= Modala key/value pair.
-  *  css...............= Modala key/value pair. Imports a stylesheet file to the page accessing it.
-  *  <pipe>............= Automatic tag referenced at full page load
-  *  <dyn>.............= Automatic eventListening tag for ex: query="key0:value0;"
-  *  dyn-one...........= Class to stop recurring clicking activities
-  *  plain-text........= plain text returned to the insertion point
-  *  plain-html........= returns as true HTML
-  *  <timed>...........= Timed result refreshing tags
-			 ex: <timed ajax="foo.bar" delay="500" insert="someID">
-  *  delay.............= delay between tag refreshes (required for <timed> and carousel)
-  *  carousel..........= Modala native tagname value. Use other attributes like sources and boxes
-  *  direction.........= Right/left vs Up/down
-  *  vertical..........= (boolean) turns carousel vertical
-  *  auto..............= (boolean) auto scroll
-  *  sources...........= file list delimited by ';' 
-  *  type..............= type of objects in carousel
-  *  width.............= width of carousel frame
-  *  height............= height of carousel frame
-  *  boxes.............= <carousel> attribute to request x box cards
-  *  file-order........= ajax to these files, iterating [0,1,2,3]%array.length
-			 file-order="foo.bar;bar.foo"
-  *  set-attr..........= attribute to set in target HTML tag
-			 set-attr="id.attr:value"
-  *  mode..............= "POST" or "GET" (default: "POST") ex:
-			 mode="POST"
-  *  pipe..............= creates a listener on the object. use listen="eventType" to relegate.
-  *  multiple..........= states that this object has two or more key/value pairs use: states this is a multi-select form box
-  *  remove............= remove element in tag ex:
-			 remove="someID;someOtherId;"
-  *  display...........= toggle visibility of anything in the value ex: display="someID;someOtherId;"
-  *  json..............= Class to call ajax file a json
-  *  headers...........= headers in CSS markup-style-attribute (delimited by '&' not ';')				 headers="foobar:boo&barfoo:barfoo;q:9&" insert="someID">
-  *  form-class........= class name of devoted form elements
-  *  mouse.............= class name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
-  *  event.............= works with mouse/pipe class only. Creates eventListener on "insert"-d to node.
-  *  options...........= Modala attribtue for <select> tagNames.
-			 Key:Value; pairs to setup and easily roll out multiple selects.
+PipesJS v3.7 Comprehensive Cheatsheet
+
+1. Introduction
+PipesJS is a powerful JavaScript library that enables dynamic content loading, AJAX interactions, and DOM manipulation with minimal coding. This cheatsheet covers the main features, attributes, and usage patterns of PipesJS.
+
+2. Basic Usage
+The core functionality of PipesJS is activated by adding the 'onclick' attribute to HTML elements:
+
+<element onclick="pipes(this)">
+
+However, in newer versions, simply adding an ID to an element makes it active with PipesJS.
+
+3. Core Attributes
+
+3.1. insert
+Purpose: Specifies where to insert AJAX results
+Syntax: insert="elementId"
+Example: <pipe ajax="data.php" insert="resultContainer"></pipe>
+
+3.2. ajax
+Purpose: Defines the URL for AJAX calls
+Syntax: ajax="url"
+Example: <pipe ajax="fetch_data.php" insert="dataContainer"></pipe>
+
+3.3. query
+Purpose: Sets query parameters for AJAX calls
+Syntax: query="key1:value1;key2:value2"
+Example: <pipe ajax="search.php" query="term:javascript;limit:10" insert="searchResults"></pipe>
+
+3.4. callbacks
+Purpose: Specifies JavaScript functions to call after AJAX completion
+Syntax: callbacks="function1;function2"
+Example: <pipe ajax="update.php" callbacks="refreshUI;showNotification" insert="updateStatus"></pipe>
+
+3.5. call-chain
+Purpose: Similar to callbacks, but doesn't use AJAX results
+Syntax: call-chain="function1;function2"
+Example: <button call-chain="validateForm;submitData">Submit</button>
+
+3.6. modal
+Purpose: Inserts Modala file for templating
+Syntax: modal="template.json"
+Example: <pipe modal="userProfile.json" insert="profileContainer"></pipe>
+
+3.7. download
+Purpose: Initiates file download
+Syntax: class="download" file="filename" directory="/path/to/directory/"
+Example: <a class="download" file="report.pdf" directory="/documents/">Download Report</a>
+
+3.8. x-toggle
+Purpose: Toggles classes on specified elements
+Syntax: x-toggle="id1:class1;id2:class2"
+Example: <button x-toggle="panel1:hidden;panel2:visible">Toggle Panels</button>
+
+3.9. clear-node
+Purpose: Clears content of specified nodes
+Syntax: clear-node="id1;id2;id3"
+Example: <pipe clear-node="messages;notifications" ajax="refresh.php"></pipe>
+
+3.10. redirect
+Purpose: Follows AJAX call in POST or GET mode
+Syntax: class="redirect"
+Example: <pipe ajax="process.php" class="redirect" query="action:submit"></pipe>
+
+4. Advanced Attributes
+
+4.1. multi-part
+Purpose: Creates multiple AJAX calls
+Syntax: ajax="url1:insert1;url2:insert2"
+Example: <pipe ajax="header.php:headerContainer;content.php:mainContent;footer.php:footerContainer"></pipe>
+
+4.2. modala-multi-last
+Purpose: Multi-AJAX calls, removing last insertion
+Syntax: ajax="url:insertId:maxCount"
+Example: <pipe ajax="updates.php:newsFeed:5"></pipe>
+
+4.3. modala-multi-first
+Purpose: Multi-AJAX calls, removing first insertion
+Syntax: ajax="url:insertId:maxCount"
+Example: <pipe ajax="messages.php:chatBox:10"></pipe>
+
+4.4. time-active
+Purpose: Activates continuous timers
+Syntax: class="time-active"
+Example: <div class="time-active" ajax="live_data.php" insert="liveUpdates" delay="5000"></div>
+
+4.5. set-var
+Purpose: Sets a window variable dynamically
+Syntax: set-var="variableName:value"
+Example: <pipe ajax="userInfo.php" set-var="currentUser:username" insert="welcomeMessage"></pipe>
+
+4.6. get-var
+Purpose: Retrieves a variable from the window array
+Syntax: get-var="variableName"
+Example: <pipe ajax="profile.php" get-var="currentUser" insert="userProfile"></pipe>
+
+4.7. headers
+Purpose: Sets custom headers for AJAX requests
+Syntax: headers="header1:value1&header2:value2"
+Example: <pipe ajax="api.php" headers="Authorization:Bearer token&Content-Type:application/json" insert="apiResponse"></pipe>
+
+4.8. file-order
+Purpose: Specifies order of files for AJAX calls
+Syntax: file-order="file1;file2;file3"
+Example: <pipe ajax="content/" file-order="intro.html;main.html;conclusion.html" insert="articleContent"></pipe>
+
+4.9. form-class
+Purpose: Specifies class name for form elements in AJAX submission
+Syntax: form-class="className"
+Example: <form class="ajaxForm" form-class="formField" ajax="submit.php" insert="formResponse"></form>
+
+4.10. action-class
+Purpose: Specifies class name for tags to act as listeners
+Syntax: action-class="className"
+Example: <button action-class="submitTrigger" ajax="process.php" insert="result">Submit</button>
+
+5. Special Tags
+
+5.1. <pipe>
+Purpose: Core tag for PipesJS functionality
+Example: <pipe ajax="data.php" insert="dataContainer"></pipe>
+
+5.2. <lnk>
+Purpose: Creates a clickable link with AJAX functionality
+Example: <lnk ajax="page.html" query="section:about">About Us</lnk>
+
+5.3. <timed>
+Purpose: Periodically refreshes content
+Example: <timed ajax="updates.php" delay="10000" insert="liveUpdates"></timed>
+
+5.4. <carousel>
+Purpose: Creates a dynamic content carousel
+Example: <carousel ajax="slides.php" file-order="slide1.jpg;slide2.jpg;slide3.jpg" delay="5000" insert="slideshow"></carousel>
+
+5.5. <caller>
+Purpose: Creates event listeners for callback functions
+Example: <caller event="click" callback="handleClick" params="param1,param2"></caller>
+
+6. Data Handling
+
+6.1. json
+Purpose: Retrieves and processes JSON data
+Syntax: json="path/to/data.json"
+Example: <pipe json="userdata.json" insert="userInfo"></pipe>
+
+6.2. plain-text
+Purpose: Handles plain text responses
+Syntax: plain-text
+Example: <pipe ajax="message.txt" plain-text insert="textContainer"></pipe>
+
+6.3. plain-html
+Purpose: Processes HTML responses
+Syntax: plain-html
+Example: <pipe ajax="content.html" plain-html insert="htmlContainer"></pipe>
+
+7. Event Handling
+
+7.1. onclick
+Legacy method to activate PipesJS
+Example: <button onclick="pipes(this)" ajax="action.php">Click Me</button>
+
+7.2. Automatic Listeners
+In newer versions, elements with IDs are automatically active
+
+7.3. Custom Events
+Use <caller> tag or JavaScript to create custom event listeners
+
+8. Form Handling
+
+8.1. AJAX Form Submission
+Use class="ajax" on form elements for AJAX submission
+Example: <anyTag form-class="ajax" ajax="submit.php" class="ajax" method="POST" name="var" value="val" insert="formResponse"></form>
+
+8.2. File Uploads
+Handle file uploads with appropriate enctype
+Example: <form class="ajax" action="upload.php" method="POST" enctype="multipart/form-data" insert="uploadStatus"></form>
+
+9. Error Handling
+PipesJS provides basic error handling. Implement custom error handling in callbacks for more control.
+
+10. Performance Optimization
+
+10.1. Caching
+Implement caching strategies for frequently accessed data
+
+10.2. Lazy Loading
+Use PipesJS to implement lazy loading of content
+
+10.3. Batch Requests
+Combine multiple AJAX calls into a single request where possible
+
+11. Security Considerations
+
+11.1. XSS Prevention
+Sanitize user inputs and validate data on both client and server sides
+
+11.2. CSRF Protection
+Implement CSRF tokens in your forms and AJAX requests
+
+12. Integration with Other Libraries
+PipesJS can be used alongside other JavaScript libraries. Ensure proper initialization and avoid conflicts.
+
+13. Browser Compatibility
+PipesJS is compatible with modern browsers. Test thoroughly across different browsers and versions.
+
+14. Debugging Tips
+
+14.1. Console Logging
+Use console.log() for debugging AJAX responses and callback functions
+
+14.2. Network Monitoring
+Use browser developer tools to monitor AJAX requests and responses
+
+14.3. Error Tracking
+Implement error tracking and logging for production environments
+
+15. Best Practices
+
+15.1. Modular Design
+Organize your PipesJS code into modular, reusable components
+
+15.2. Progressive Enhancement
+Use PipesJS to enhance functionality while ensuring basic functionality without JavaScript
+
+15.3. Performance Monitoring
+Regularly monitor and optimize the performance of your PipesJS implementations
+
+16. Advanced Techniques
+
+16.1. Dynamic Template Loading
+Use PipesJS to dynamically load and render templates
+
+16.2. Real-time Updates
+Implement real-time features using PipesJS's timed functionality
+
+16.3. Infinite Scrolling
+Create infinite scrolling lists or galleries using PipesJS
+
+17. Customization and Extension
+Extend PipesJS functionality by creating custom attributes or integrating with your own JavaScript functions
+
+18. Version Compatibility
+Be aware of changes between PipesJS versions and update your code accordingly
+
+19. Community and Support
+Engage with the PipesJS community for support, share best practices, and contribute to its development
+
+20. Conclusion
+PipesJS offers a powerful, flexible approach to creating dynamic web applications with minimal JavaScript coding. By mastering its attributes and techniques, developers can create rich, interactive experiences efficiently.
+
+Remember to always refer to the latest documentation for the most up-to-date information on PipesJS features and best practices.
