@@ -28,7 +28,6 @@
   *  <lnk>.............= tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
   *  <pipe>............= Tag (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  <dyn>.............= Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  dyn-one...........= Class to stop recurring clicking activities 
   *  \n................= RegEx emplacement to insert <br /> in Modala contents for innerHTML
   *  plain-text........= plain text returned to the insertion point
   *  plain-html........= returns as true HTML
@@ -68,19 +67,17 @@
   **** go on if there is no input to replace them.
   */
 
-// Just incase you get the hang of this file.
-// import { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
-//export { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
-
-
 function last() {
+    try {
+        const irc = JSON.parse(document.body.innerText);
 
-    const irc = JSON.parse(document.body.innerText);
-
-    document.body.innerText = "";
-    // document.head.append(modalaHead(irc, ""));
-    modala(irc, document.body);
-    document.body.style.display = "block";
+        document.body.innerText = "";
+        modala(irc, document.body);
+        document.body.style.display = "block";
+    }
+    catch (e) {
+        console.log(e);
+    }
     document.addEventListener("click", function (elem) {
         console.log(elem.target);
         if (elem.target.id != undefined) { pipes(elem.target); }
@@ -148,16 +145,8 @@ let domContentLoad = (again = false) => {
         var ev = elem.getAttribute("event");
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
-            var g = v.split(":");
-            if (elem.classList.contains("time-active")) {
-                auto = true;
-                setTimers(elem);
-            }
-            else if (elem.classList.contains("time-inactive")) {
-                auto = false;
-            }
-            elem.addEventListener(g[0], function () {
-                setTimeout(pipes(elem, auto), g[1]);
+            elem.addEventListener(v, function () {
+                (pipes(elem, auto));
             });
         });
     });
@@ -183,6 +172,10 @@ function modalaHead(value) {
     if (value == undefined) {
         console.error("value of reference incorrect");
         return;
+    }
+    if (value["tagname"] == undefined) {
+        console.error("tagname of reference incorrect");
+        value["tagname"] = "div";
     }
     var temp = document.createElement(value["tagname"]);
 
@@ -235,6 +228,47 @@ function modalaHead(value) {
     return;
 }
 
+function modal(filename, tagId) {
+    if (typeof (tagId) == "string") {
+        tagId = document.getElementById(tagId);
+    }
+    const draft = getJSONFile(filename)
+    draft.then(function (res) {
+        modala(res, tagId);
+    });
+}
+
+function modalList(filenames) {
+    const files = filename.split(";");
+    files.forEach(file => {
+        file.split(":").forEach(tagId => {
+            modal(file, tagId);
+        });
+    });
+}
+
+function getJSONFile(filename) {
+    const resp = fetch(filename)
+        .then(response => response.json())
+        .then(data => {
+            return data;
+        });
+    return resp.then(function (res) {
+        return res;
+    });
+}
+
+function getTextFile(filename) {
+    const resp = fetch(filename)
+        .then(response => response.text())
+        .then(data => {
+            return data;
+        });
+    return resp.then(function (res) {
+        return res;
+    });
+}
+
 function modala(value, tempTag, root, id) {
     if (typeof (tempTag) == "string") {
         tempTag = document.getElementById(tempTag);
@@ -245,10 +279,17 @@ function modala(value, tempTag, root, id) {
         return;
     }
     if (value == undefined) {
+        console.log(tempTag + "******");
         console.error("value of reference incorrect");
         return;
     }
+
     var temp = document.createElement(value["tagname"]);
+    if (temp.tagName.toLowerCase() == "undefined") {
+        temp.tagName = "div";
+        temp.id = "undefined";
+    }
+
     if (value["header"] !== undefined && value["header"] instanceof Object) {
 
         modalaHead(value["header"], "head", root, null);
@@ -408,8 +449,11 @@ function modala(value, tempTag, root, id) {
             temp.setAttribute(k, v);
         }
         else if (!Number(k) && k.toLowerCase() != "tagname" && (k.toLowerCase() == "textcontent" || k.toLowerCase() == "innerhtml" || k.toLowerCase() == "innertext")) {
-            const val = v.replace(/\r?\n/g, "<br />");
+            const val = v.replace(/\r?\n/g, "<br>");
             (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
+        }
+        else if (k.toLowerCase() == "style") {
+            temp.style.cssText = v;
         }
     });
     tempTag.appendChild(temp);
@@ -919,6 +963,7 @@ function pipes(elem, stop = false) {
     }
     if (elem.hasAttribute("query")) {
         var optsArray = elem.getAttribute("query").split(";");
+        var query = "";
         optsArray.forEach((e, f) => {
             var g = e.split(":");
             query = query + g[0] + "=" + g[1] + "&";
@@ -950,7 +995,7 @@ function pipes(elem, stop = false) {
         else if (elem.classList.contains("time-inactive")) {
             auto = false;
         }
-        carousel(elem,  auto);
+        carousel(elem, auto);
         return;
     }
     // This is a quick way to make a downloadable link in an href
@@ -1002,12 +1047,12 @@ function formAJAX(elem, classname) {
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
-        elem_qstring = elem_qstring + elem_value.name + "=" + elem_value.value + "&";
+        elem_qstring = elem_qstring + elem_value.getAttribute('name') + "=" + elem_value.getAttribute('value') + "&";
         // Multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {
                 if (o.selected) {
-                    elem_qstring = elem_qstring + "&" + elem_value.name + "=" + o.value;
+                    elem_qstring = elem_qstring + "&" + elem_value.getAttribute('name') + "=" + o.getAttribute('name');
                 }
             }
         }
@@ -1110,7 +1155,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
     else if (elem.classList.contains("modala")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
-                var allText = ""; // JSON.parse(rawFile.responseText);
+                var allText = "" //JSON.parse(rawFile.responseText);
                 var html = "";
                 try {
                     allText = JSON.parse(rawFile.responseText);

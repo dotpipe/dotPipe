@@ -28,7 +28,6 @@
   *  <lnk>.............= tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
   *  <pipe>............= Tag (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  <dyn>.............= Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  dyn-one...........= Class to stop recurring clicking activities 
   *  \n................= RegEx emplacement to insert <br /> in Modala contents for innerHTML
   *  plain-text........= plain text returned to the insertion point
   *  plain-html........= returns as true HTML
@@ -68,18 +67,11 @@
   **** go on if there is no input to replace them.
   */
 
-// Just incase you get the hang of this file.
-// import { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
-//export { navigate, formAJAX, domContentLoad, setAJAXOpts, carousel, classOrder, fileOrder, fileShift, modala, pipes, setTimers };
-
-
-function last() {
-
+  function last() {
     try {
         const irc = JSON.parse(document.body.innerText);
 
         document.body.innerText = "";
-        // document.head.append(modalaHead(irc, ""));
         modala(irc, document.body);
         document.body.style.display = "block";
     }
@@ -181,6 +173,10 @@ function modalaHead(value) {
         console.error("value of reference incorrect");
         return;
     }
+    if (value["tagname"] == undefined) {
+        console.error("tagname of reference incorrect");
+        value["tagname"] = "div";
+    }
     var temp = document.createElement(value["tagname"]);
 
     Object.entries(value).forEach((nest) => {
@@ -233,13 +229,25 @@ function modalaHead(value) {
 }
 
 function modal(filename, tagId) {
+    if (typeof (tagId) == "string") {
+        tagId = document.getElementById(tagId);
+    }
     const draft = getJSONFile(filename)
     draft.then(function (res) {
         modala(res, tagId);
     });
 }
-function getJSONFile(filename) {
 
+function modalList(filenames) {
+    const files = filename.split(";");
+    files.forEach(file => {
+        file.split(":").forEach(tagId => {
+            modal(file, tagId);
+        });
+    });
+}
+
+function getJSONFile(filename) {
     const resp = fetch(filename)
         .then(response => response.json())
         .then(data => {
@@ -275,7 +283,13 @@ function modala(value, tempTag, root, id) {
         console.error("value of reference incorrect");
         return;
     }
+
     var temp = document.createElement(value["tagname"]);
+    if (temp.tagName.toLowerCase() == "undefined") {
+        temp.tagName = "div";
+        temp.id = "undefined";
+    }
+
     if (value["header"] !== undefined && value["header"] instanceof Object) {
 
         modalaHead(value["header"], "head", root, null);
