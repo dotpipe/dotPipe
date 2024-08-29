@@ -367,24 +367,7 @@ function modala(value, tempTag, root, id) {
                     temp.appendChild(gth);
                 }
                 else if (value['type'] == "modal") {
-
-                    if (e.split(";") > 1) {
-                        var calls = e.split(";");
-                        for (var i = 0; i < calls.length; i++) {
-                            var page = calls[i].split(":");
-                            if (page[1].split(".").length > 1) {
-                                var ins = page[1].split(".");
-                                for (var j = 0; j < ins.length; j++) {
-                                    modal(page[0], ins[j]);
-                                }
-                            }
-                            else {
-                                modal(page[0], page[1]);
-                            }
-                        }
-                    }
-                    else
-                        modal(e.split(":")[0], v.split(":")[1]);
+                    modalList(v)
                 }
                 else if (value['type'] == "html") {
                     console.log(e);
@@ -432,29 +415,7 @@ function modala(value, tempTag, root, id) {
             tempTag.appendChild(h);
         }
         else if (k.toLowerCase() == "modal") {
-            if (v.split(";") > 1) {
-                var calls = v.split(";");
-                for (var i = 0; i < calls.length; i++) {
-                    var page = calls[i].split(":");
-                    if (page[1].split(".").length > 1) {
-                        var ins = page[1].split(".");
-                        for (var j = 0; j < ins.length; j++) {
-                            modal(page[0], ins[j]);
-                        }
-                    }
-                    else {
-                        modal(page[0], page[1]);
-                    }
-                }
-            }
-            else if (v.split(":")[1].split(".").length > 1) {
-                var ins = v.split(":")[1].split(".");
-                for (var j = 0; j < ins.length; j++) {
-                    modal(v.split(":")[0], ins[j]);
-                }
-            }
-            else
-                modal(v.split(":")[0], v.split(":")[1]);
+            modalList(v)
         }
         else if (k.toLowerCase() == "html") {
             fetch(v)
