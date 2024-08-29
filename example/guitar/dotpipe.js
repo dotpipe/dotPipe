@@ -239,7 +239,7 @@ function modal(filename, tagId) {
 }
 
 function modalList(filenames) {
-    const files = filename.split(";");
+    const files = filenames.split(";");
     files.forEach(file => {
         file.split(":").forEach(tagId => {
             modal(file, tagId);
