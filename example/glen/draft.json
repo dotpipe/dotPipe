@@ -4,6 +4,7 @@
         "css": "theme.css"
     },
     "table": {
-            "modal": "./menu_pages/collective.php"
+
+            "modal": "./menu_pages/collective.php:collective-container"
     }
 }
