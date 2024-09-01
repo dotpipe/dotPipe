@@ -289,7 +289,6 @@ function modala(value, tempTag, root, id) {
         temp.tagName = "div";
         temp.id = "undefined";
     }
-
     if (value["header"] !== undefined && value["header"] instanceof Object) {
 
         modalaHead(value["header"], "head", root, null);
@@ -302,7 +301,7 @@ function modala(value, tempTag, root, id) {
         const [k, v] = nest;
         if (k.toLowerCase() == "header");
         else if (v instanceof Object)
-            modala(v, temp, root, id);
+            modala(v, tempTag, root, id);
         else if (k.toLowerCase() == "br") {
             let brs = v;
             while (brs) {

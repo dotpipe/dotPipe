@@ -67,7 +67,7 @@
   **** go on if there is no input to replace them.
   */
 
-function last() {
+  function last() {
     try {
         const irc = JSON.parse(document.body.innerText);
 
@@ -169,16 +169,16 @@ let domContentLoad = (again = false) => {
 
 function modalaHead(value) {
 
-    if (value == undefined) {
-        console.error("value of reference incorrect");
-        return;
+    try {
+        if (value == undefined) {
+            console.error("value of reference incorrect");
+            return;
+        }
     }
-    if (value["tagname"] == undefined) {
-        console.error("tagname of reference incorrect");
-        value["tagname"] = "div";
+    catch (e) {
+        console.log(e)
     }
     var temp = document.createElement(value["tagname"]);
-
     Object.entries(value).forEach((nest) => {
         const [k, v] = nest;
         if (v instanceof Object) {
@@ -238,30 +238,24 @@ function modal(filename, tagId) {
     });
 }
 
-function modalList(files) {
-        if (files.split(";") > 1) {
-            var calls = files.split(";");
-            for (var i = 0; i < calls.length; i++) {
-                var page = calls[i].split(":");
-                if (page[1].split(".").length > 1) {
-                    var ins = page[1].split(".");
-                    for (var j = 0; j < ins.length; j++) {
-                        modal(page[0], ins[j]);
-                    }
-                }
-                else {
-                    modal(page[0], page[1]);
-                }
+function modalList(filenames) {
+    const files = filenames.split(";");
+    if (files.length >= 1) {
+        files.forEach(file => {
+            const f = file.split(":");
+            if (f[1].split(".").length > 1) {
+                f[1].split(".").forEach(insert => {
+                        modal(f[0], insert);
+                });
             }
-        }
-        else if (files.split(":")[1].split(".").length > 1) {
-            var ins = files.split(":")[1].split(".");
-            for (var j = 0; j < ins.length; j++) {
-                modal(files.split(":")[0], ins[j]);
-            }
-        }
-        else
-            modal(files.split(":")[0], files.split(":")[1]);
+            else 
+                modal(f[0], f[1]);
+        });
+    }
+    else if (filenames.length == 1){
+        console.log(files)
+        modal(filenames[0].split(":")[0], filenames[0].split(":")[1]);
+    }
 }
 
 function getJSONFile(filename) {
@@ -306,7 +300,6 @@ function modala(value, tempTag, root, id) {
         temp.tagName = "div";
         temp.id = "undefined";
     }
-
     if (value["header"] !== undefined && value["header"] instanceof Object) {
 
         modalaHead(value["header"], "head", root, null);
@@ -319,7 +312,7 @@ function modala(value, tempTag, root, id) {
         const [k, v] = nest;
         if (k.toLowerCase() == "header");
         else if (v instanceof Object)
-            modala(v, temp, root, id);
+            modala(v, tempTag, root, id);
         else if (k.toLowerCase() == "br") {
             let brs = v;
             while (brs) {
@@ -432,7 +425,7 @@ function modala(value, tempTag, root, id) {
             tempTag.appendChild(h);
         }
         else if (k.toLowerCase() == "modal") {
-            modalList(v);
+            modalList(v)
         }
         else if (k.toLowerCase() == "html") {
             fetch(v)

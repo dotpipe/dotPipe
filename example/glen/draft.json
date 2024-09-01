@@ -5,6 +5,6 @@
     },
     "table": {
 
-            "modal": "./menu_pages/collective.php:collective-container"
+            "modal": "./menu_pages/collective.php:collective-container.arrow-area;getarrow.php:arrow-area"
     }
 }
