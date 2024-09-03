@@ -239,23 +239,29 @@ function modal(filename, tagId) {
 }
 
 function modalList(filenames) {
-    const files = filenames.split(";");
-    if (files.length >= 1) {
-        files.forEach(file => {
-            const f = file.split(":");
-            if (f[1] != undefined && f[1].split(".").length > 1) {
-                f[1].split(".").forEach(insert => {
-                        modal(f[0], insert);
-                });
-            }
-            else 
-                modal(f[0], f[1]);
-        });
-    }
-    else if (files.length == 1){
-        console.log(files)
-        modal(filenames[0].split(":")[0], filenames[0].split(":")[1]);
-    }
+    const fileList = getJSONFile(filenames);
+    fileList.then(function (res) {
+        console.log(res);
+        const files = res['modal'].split(";");
+        if (files.length >= 1) {
+            files.forEach(file => {
+                const f = file.split(":");
+                if (f[1] != undefined && f[1].split(".").length > 1) {
+                    f[1].split(".").forEach(insert => {
+                            modal(f[0], insert);
+                    });
+                }
+                else {
+                    console.log(f);
+                    modal(f[0], f[1]);
+                }
+            });
+        }
+        else {
+            console.log(files)
+            modal(filenames[0].split(":")[0], filenames[0].split(":")[1]);
+        }
+    });
 }
 
 function getJSONFile(filename) {
@@ -264,9 +270,10 @@ function getJSONFile(filename) {
         .then(data => {
             return data;
         });
-    return resp.then(function (res) {
+    const f = resp.then(function (res) {
         return res;
     });
+    return f;
 }
 
 function getTextFile(filename) {
@@ -523,7 +530,7 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
 
     var h = 0;
 
-    while (iter * i + 1 > h) {
+    while (iter * i > h) {
         var clone = null
         try {
             elem.firstChild.cloneNode(true);
