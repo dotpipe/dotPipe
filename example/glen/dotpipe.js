@@ -243,7 +243,7 @@ function modalList(filenames) {
     if (files.length >= 1) {
         files.forEach(file => {
             const f = file.split(":");
-            if (f[1].split(".").length > 1) {
+            if (f[1] != undefined && f[1].split(".").length > 1) {
                 f[1].split(".").forEach(insert => {
                         modal(f[0], insert);
                 });
@@ -252,7 +252,7 @@ function modalList(filenames) {
                 modal(f[0], f[1]);
         });
     }
-    else if (filenames.length == 1){
+    else if (files.length == 1){
         console.log(files)
         modal(filenames[0].split(":")[0], filenames[0].split(":")[1]);
     }
@@ -446,7 +446,10 @@ function modala(value, tempTag, root, id) {
                 });
         }
         else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
-            temp.setAttribute(k, v);
+            try {
+                temp.setAttribute(k, v);
+            }
+            catch(e) {}
         }
         else if (!Number(k) && k.toLowerCase() != "tagname" && (k.toLowerCase() == "textcontent" || k.toLowerCase() == "innerhtml" || k.toLowerCase() == "innertext")) {
             const val = v.replace(/\r?\n/g, "<br>");
@@ -521,10 +524,15 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     var h = 0;
 
     while (iter * i + 1 > h) {
-        var clone = elem.firstChild.cloneNode(true);
-        clone.style.display = "none";
-        elem.appendChild(clone);
-        elem.removeChild(elem.firstChild);
+        var clone = null
+        try {
+            elem.firstChild.cloneNode(true);
+            clone.style.display = "none";
+            elem.appendChild(clone);
+            elem.removeChild(elem.firstChild);
+        }
+        catch (e) { console.log(e) }
+       
         h++;
     }
 
@@ -786,6 +794,40 @@ function fileShift(elem) {
     ppfc.setAttribute("file-index", index.toString());
 }
 
+function htmlToJson(htmlString) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, 'text/html');
+  
+    function elementToJson(element) {
+      const result = {
+        tagName: element.tagName.toLowerCase(),
+        attributes: {},
+        children: []
+      };
+  
+      // Process attributes
+      for (const attr of element.attributes) {
+        result.attributes[attr.name] = attr.value;
+      }
+  
+      // Process child nodes
+      for (const child of element.childNodes) {
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          result.children.push(elementToJson(child));
+        } else if (child.nodeType === Node.TEXT_NODE && child.textContent.trim() !== '') {
+          result.children.push({
+            type: 'text',
+            content: child.textContent.trim()
+          });
+        }
+      }
+  
+      return result;
+    }
+  
+    return elementToJson(doc.body.firstChild);
+}
+
 function classOrder(elem) {
     arr = elem.getAttribute("class-switch").split(";");
     if (!elem.hasAttribute("class-index"))
@@ -1016,6 +1058,9 @@ function pipes(elem, stop = false) {
         return;
     if (elem.hasAttribute("ajax"))
         navigate(elem, headers, query, formclass);
+    else if (elem.hasAttribute("modal")) {
+        modalList(elem.getAttribute("modal"));
+    }
 }
 
 function setAJAXOpts(elem, opts) {
@@ -1044,10 +1089,11 @@ function setAJAXOpts(elem, opts) {
 function formAJAX(elem, classname) {
     var elem_qstring = "";
 
+    console.log(document.getElementsByClassName(classname));
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
-        elem_qstring = elem_qstring + elem_value.getAttribute('name') + "=" + elem_value.getAttribute('value') + "&";
+        elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.value + "&";
         // Multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {

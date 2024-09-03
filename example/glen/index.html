@@ -46,20 +46,12 @@
     </div>
 
     <script>
-        // Load collective.php content
-        // var draft = getJSONFile("./draft.json");
-        // draft.then(function(res) {
-        //     modala(res, "collective-content");
-        // });
-        // var draft = getJSONFile("./draft.json");
-        // draft.then(function(res) {
         try {
             modal("./draft.json", "collective-content");
         }
         catch(e) {
             console.log(e);
         }
-        // });
     </script>
 </body>
 </html>
