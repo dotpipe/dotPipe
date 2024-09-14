@@ -6,68 +6,69 @@
   *  with unlimited inputs/outputs):
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
-  *  insert............= return ajax call to this id
-  *  ajax..............= calls and returns the value file's output ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  query.............= default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
-  *  modal.............= Irondocks key. Inserts the Irondocks file in the value for template ease of use.
-  *  download..........= class for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
-  *  file..............= filename to download
-  *  x-toggle..........= toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
-  *  directory.........= relative or full path of 'file'
-  *  clear-node........= clear nodes. delimited in insert="first;second;thirdnode" by ';'
-  *  redirect..........= "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
-  *  multi-part........= Class to create multi-ajax calls ex: <tag id="something" ajax="foo.bar:insertIn0;foo.bar:insertIn1;bar.foo:insertIn3">Click me!</tag>
-  *  modala-multi-last.= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
-  *  modala-multi-first= Class to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
-  *  time-active.......= Class to activate timers for things that go on continuously
-  *  time-inactive.....= Class to deactivate timers for things that go on continuously
-  *  disabled..........= Class to disable a tag (use x-toggle to toggle state of this and time-active/-inactive)
+  *  insert............= [Attr] return ajax call to this id
+  *  ajax..............= [Attr] * calls and returns the value file's output ex: <pipe id="id1" ajax="foo.bar:insert1:countByEvent" query="key0:value0;" insert="someID">
+  *  query.............= [Attr] default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
+  *  modal.............= [Modala Key] * Inserts JSON files in the insert targets for template ease of use. "modal": "json1.json:insert1.insert2.insert3;continued"
+  *  download..........= [Class] for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
+  *  file..............= [Attr] filename to download
+  *  x-toggle..........= [Attr] toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
+  *  directory.........= [Attr] relative or full path of 'file'
+  *  clear-node........= [Class] clear nodes. delimited in insert="first;second;thirdnode" by ';'
+  *  redirect..........= [Class] "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
+  *  modala-multi-last.= [Class] to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
+  *  modala-multi-first= [Class] to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
+  *  time-active.......= [Class] to activate timers for things that go on continuously
+  *  time-inactive.....= [Class] to deactivate timers for things that go on continuously
+  *  disabled..........= [Class] to disable a tag (use x-toggle to toggle state of this and time-active/-inactive)
   *  br................= [Specifically a] Modala key/value pair. "br": "x" where x is the number of breaks in succession.
   *  js................= [Specifically a] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest.
   *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
-  *  <lnk>.............= tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
-  *  <pipe>............= Tag (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  <dyn>.............= Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  \n................= RegEx emplacement to insert <br /> in Modala contents for innerHTML
-  *  plain-text........= plain text returned to the insertion point
-  *  plain-html........= returns as true HTML
-  *  <timed>...........= Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
-  *  delay.............= delay between <timed> tag refreshes (required for <timed> tag) ex: see <timed>
-  *  <carousel>........= Tag to create a carousel that moves every a timeOut() delay="x" occurs ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
-  *  carousel-ajax.....= Class to create Modala sets for carousel use.
-  *         -images...= Class to use pure images for carousel use.
-  *         -auto-off.= Class to stop carousel from moving (better to create buttons)
-  *         -vert.....= Class to make carousel vertical, instead of horizontal (default)
-  *         -video....= Class to make video carousel
-  *         -audio....= Class to make audio carousel
-  *         -iframe...= Class to make iframe carousel
-  *         -link.....= Class to make link carousel
-  *  boxes.............= <carousel> attribute to request for x boxes for pictures
-  *  file-order........= ajax to these files, iterating [0,1,2,3]%array.length per call (delimited by ';') ex: <pipe query="key0:value0;" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  file-index........= counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  incrIndex.........= increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  decrIndex.........= decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  interval..........= Take this many steps when stepping through file-order default = 1
-  *  set-attr..........= attribute to set in target HTML tag ex: <pipe id="thisOrSomeId" class="set-attr" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
-  *  mode..............= "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
-  *  pipe..............= creates a listener on the object. use listen="eventType" to relegate.
-  *  multiple..........= states that this object has two or more key/value pairs use: states this is a multi-select form box
-  *  remove............= remove element in tag ex: <anyTag remove="someID;someOtherId;">
-  *  display...........= toggle visible and invisible of anything in the value ex: <anyTag display="someID;someOtherId;">
-  *  json..............= returns a JSON file set as value
-  *  headers...........= headers in CSS markup-style-attribute (delimited by '&') <any ajax="foo.bar" headers="foobar:boo&barfoo:barfoo;q:9&" insert="someID">
-  *  form-class........= class name of devoted form elements
-  *  action-class......= class name of devoted to-be-triggered tags (acts as listener to other certain tag(s))
-  *  mouse.............= class name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
-  *  mouse-insert......= class name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
-  *  event.............= works with mouse/pipe class only.event="click;dblclick;etc" activates according to the event, like a normal click would
-  *  options...........= works with <select> tagName only. Key:Value; pairs to setup and easily roll out multiple selects.
+  *  <lnk>.............= [Tag] tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
+  *  <pipe>............= [Tag] (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
+  *  <dyn>.............= [Tag] Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
+  *  \n................= [-] RegEx emplacement to insert <br /> in Modala contents for innerHTML
+  *  plain-text........= [Class] plain text returned to the insertion point
+  *  plain-html........= [Class] returns as true HTML
+  *  <timed>...........= [Tag] Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
+  *  delay.............= [Attr] delay between <timed> tag refreshes (required for <timed> tag) ex: see <timed>
+  *  <carousel>........= [Tag] to create a carousel that moves every a timeOut() delay="x" occurs ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
+  *  carousel-ajax.....= [Class] to create Modala sets for carousel use.
+  *         -images....= [Class] to use pure images for carousel use.
+  *         -auto-off..= [Class] to stop carousel from moving (better to create buttons)
+  *         -vert......= [Class] to make carousel vertical, instead of horizontal (default)
+  *         -video.....= [Class] to make video carousel
+  *         -audio.....= [Class] to make audio carousel
+  *         -iframe....= [Class] to make iframe carousel
+  *         -link......= [Class] to make link carousel
+  *  boxes.............= [Attr] attribute to request for x boxes for carousel elementss ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
+  *  file-order........= [Attr] ajax to these files, iterating [0,1,2,3]%array.length per call (delimited by ';') ex: <pipe query="key0:value0;" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
+  *  file-index........= [Attr] counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
+  *  incrIndex.........= [Class] increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
+  *  decrIndex.........= [Class] decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
+  *  interval..........= [Attr] Take this many steps when stepping through file-order default = 1
+  *  x-value...........= [Attr] set/get target HTML "value" ex: <pipe id="thisOrSomeId" class="x-value" insert="id2:id1-Value=id5-Value&id3=id4-Value;" ajax="foo.bar">
+  *  rem-value.........= [Attr] remove target HTML intrinsic "values" ex: <pipe id="thisOrSomeId" class="rem-value" insert="id2:gonekey&gonekey2;id1;id3" ajax="foo.bar">
+  *  rem-value-all.....= [Attr] remove all target HTML "value" ex: <pipe id="thisOrSomeId" class="rem-value-all" insert="id2;" ajax="foo.bar">
+  *  mode..............= [Attr] "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
+  *  pipe..............= [Class] creates a listener on the object. use listen="eventType" to relegate.
+  *  multiple..........= [Class] states that this object has two or more key/value pairs use: states this is a multi-select form box
+  *  remove............= [Attr] * remove element in tag ex: <anyTag remove="someID;someOtherId;">
+  *  display...........= [Attr] toggle visible and invisible of anything in the value ex: <anyTag display="someID;someOtherId;">
+  *  json..............= [Class] returns a JSON file set as value
+  *  headers...........= [Attr] headers in CSS markup-style (delimited by '&') <any ajax="foo.bar" headers="foobar:boo&barfoo:barfoo;q:9&" insert="someID">
+  *  form-class........= [Class] name of devoted form elements
+  *  action-class......= [Class] name of devoted to-be-triggered tags (acts as listener to other certain tag(s))
+  *  mouse.............= [Class] name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
+  *  mouse-insert......= [Class] name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
+  *  event.............= [Attr] works with mouse/pipe class only.event="click;dblclick;etc" activates according to the event, like a normal click would
+  *  options...........= [Attr] works with <select> tagName only. Key:Value; pairs to setup and easily roll out multiple selects.
   **** FILTERS aer go ahead code usually coded in other languages and just come back with a result. Not wholly different from AJAX. They are general purpose files.
   **** ALL HEADERS FOR AJAX are available. They will use defaults to
   **** go on if there is no input to replace them.
   */
 
-  function last() {
+function last() {
     try {
         const irc = JSON.parse(document.body.innerText);
 
@@ -248,7 +249,7 @@ function modalList(filenames) {
                 const f = file.split(":");
                 if (f[1] != undefined && f[1].split(".").length > 1) {
                     f[1].split(".").forEach(insert => {
-                            modal(f[0], insert);
+                        modal(f[0], insert);
                     });
                 }
                 else {
@@ -456,7 +457,7 @@ function modala(value, tempTag, root, id) {
             try {
                 temp.setAttribute(k, v);
             }
-            catch(e) {}
+            catch (e) { }
         }
         else if (!Number(k) && k.toLowerCase() != "tagname" && (k.toLowerCase() == "textcontent" || k.toLowerCase() == "innerhtml" || k.toLowerCase() == "innertext")) {
             const val = v.replace(/\r?\n/g, "<br>");
@@ -539,7 +540,7 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
             elem.removeChild(elem.firstChild);
         }
         catch (e) { console.log(e) }
-       
+
         h++;
     }
 
@@ -804,34 +805,34 @@ function fileShift(elem) {
 function htmlToJson(htmlString) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlString, 'text/html');
-  
+
     function elementToJson(element) {
-      const result = {
-        tagName: element.tagName.toLowerCase(),
-        attributes: {},
-        children: []
-      };
-  
-      // Process attributes
-      for (const attr of element.attributes) {
-        result.attributes[attr.name] = attr.value;
-      }
-  
-      // Process child nodes
-      for (const child of element.childNodes) {
-        if (child.nodeType === Node.ELEMENT_NODE) {
-          result.children.push(elementToJson(child));
-        } else if (child.nodeType === Node.TEXT_NODE && child.textContent.trim() !== '') {
-          result.children.push({
-            type: 'text',
-            content: child.textContent.trim()
-          });
+        const result = {
+            tagName: element.tagName.toLowerCase(),
+            attributes: {},
+            children: []
+        };
+
+        // Process attributes
+        for (const attr of element.attributes) {
+            result.attributes[attr.name] = attr.value;
         }
-      }
-  
-      return result;
+
+        // Process child nodes
+        for (const child of element.childNodes) {
+            if (child.nodeType === Node.ELEMENT_NODE) {
+                result.children.push(elementToJson(child));
+            } else if (child.nodeType === Node.TEXT_NODE && child.textContent.trim() !== '') {
+                result.children.push({
+                    type: 'text',
+                    content: child.textContent.trim()
+                });
+            }
+        }
+
+        return result;
     }
-  
+
     return elementToJson(doc.body.firstChild);
 }
 
@@ -1131,25 +1132,68 @@ function navigate(elem, opts = null, query = "", classname = "") {
     rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + elem_qstring, true);
     console.log(elem);
 
-    if (elem.classList.contains("set-attr")) {
-        rawFile.onreadystatechange = function () {
-            if (rawFile.readyState === 4) {
-                var allText = (rawFile.responseText);
-                try {
-                    if (elem.classList.contains("plain-html"))
-                        document.getElementById(elem.getAttribute("insert")).innerHTML = (allText);
-                    else if (elem.classList.contains("plain-text"))
-                        document.getElementById(elem.getAttribute("insert")).textContent = (allText);
-                    else if (elem.classList.contains("json"))
-                        document.getElementById(elem.getAttribute("insert")).textContent = (allText);
-                    else
-                        document.getElementById(elem.getAttribute("insert")).setAttribute(elem.getAttribute("set-attr"), allText);
-
-                }
-                catch (e) {
-                    console.error(e);
-                }
+    if (elem.classList.contains("x-value")) {
+        try {
+            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
+            if (rems.length > 1) {
+                Array.from(rems).forEach(function (e) {
+                    if (e.split(":") == 1) {
+                        document.getElementById(e.split(":")[0]).value = document.getElementById(e.split(":")[1]).value;
+                    }
+                    else {
+                        Array.from(e.split(":")).forEach(function (f) {
+                            if (f.split("&").length > 1) {
+                                Array.from(f.split("&")).forEach(function (g) {
+                                    document.getElementById(g.split("=")[0]).value = document.getElementById(g.split("=")[1].value);
+                                });
+                            }
+                            else {
+                                document.getElementById(f.split("=")[0]).value = document.getElementById(f.split("=")[1].value);
+                            }
+                        });
+                    }
+                });
             }
+            else {
+                document.getElementById(rems).value = elem.value;
+            }
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+    if (elem.classList.contains("rem-value")) {
+        try {
+            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
+            if (rems.length > 1) {
+                Array.from(rems).forEach(function (e) {
+                    Array.from(e).forEach(function (f) {
+                        if (f.split(":").length == 2) {
+                            document.getElementById(f.split(":")[0]).value = "";
+                        }
+                    });
+                });
+            }
+            else
+                document.getElementById(rems).value = elem.value;
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+    if (elem.classList.contains("rem-value-all")) {
+        try {
+            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
+            if (rems.length > 1) {
+                Array.from(rems).forEach(function (f) {
+                    document.getElementById(f.split(":")[0]).value = "";
+                });
+            }
+            else
+                document.getElementById(rems.split(":")[0]).value = "";
+        }
+        catch (e) {
+            console.error(e);
         }
     }
     else if (elem.classList.contains("text-html")) {
