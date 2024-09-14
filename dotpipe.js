@@ -34,13 +34,13 @@
   *  delay.............= [Attr] delay between <timed> tag refreshes (required for <timed> tag) ex: see <timed>
   *  <carousel>........= [Tag] to create a carousel that moves every a timeOut() delay="x" occurs ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
   *  carousel-ajax.....= [Class] to create Modala sets for carousel use.
-  *         -images....= [Class] to use pure images for carousel use.
-  *         -auto-off..= [Class] to stop carousel from moving (better to create buttons)
-  *         -vert......= [Class] to make carousel vertical, instead of horizontal (default)
-  *         -video.....= [Class] to make video carousel
-  *         -audio.....= [Class] to make audio carousel
-  *         -iframe....= [Class] to make iframe carousel
-  *         -link......= [Class] to make link carousel
+  *         -images...= [Class] to use pure images for carousel use.
+  *         -auto-off.= [Class] to stop carousel from moving (better to create buttons)
+  *         -vert.....= [Class] to make carousel vertical, instead of horizontal (default)
+  *         -video....= [Class] to make video carousel
+  *         -audio....= [Class] to make audio carousel
+  *         -iframe...= [Class] to make iframe carousel
+  *         -link.....= [Class] to make link carousel
   *  boxes.............= [Attr] attribute to request for x boxes for carousel elementss ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
   *  file-order........= [Attr] ajax to these files, iterating [0,1,2,3]%array.length per call (delimited by ';') ex: <pipe query="key0:value0;" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  file-index........= [Attr] counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
@@ -1134,24 +1134,27 @@ function navigate(elem, opts = null, query = "", classname = "") {
 
     if (elem.classList.contains("x-value")) {
         try {
+            var str = "";
             var rems = document.getElementById(elem.getAttribute("insert")).split(";");
             if (rems.length > 1) {
                 Array.from(rems).forEach(function (e) {
-                    if (e.split(":") == 1) {
-                        document.getElementById(e.split(":")[0]).value = document.getElementById(e.split(":")[1]).value;
-                    }
-                    else {
-                        Array.from(e.split(":")).forEach(function (f) {
-                            if (f.split("&").length > 1) {
-                                Array.from(f.split("&")).forEach(function (g) {
-                                    document.getElementById(g.split("=")[0]).value = document.getElementById(g.split("=")[1].value);
-                                });
-                            }
-                            else {
-                                document.getElementById(f.split("=")[0]).value = document.getElementById(f.split("=")[1].value);
-                            }
-                        });
-                    }
+                    try {
+                    var v = e.split(":")[1].split("&");
+                    var s = elem.getAttribute("insert");
+                    v.forEach(function (f) {
+                        if (s.indexOf(f) == -1) {
+                            str += f + "&";
+                        }
+                        else {
+                            var emplace = s.indexOf(f.split("=")[1]);
+                            str += f.split("=")[0] + "=" + emplace + "&";
+                        }
+                    });
+                    document.getElementById(e.split(":")[0]).value = str;
+                }
+                catch (e) {
+                    console.error(e);
+                }
                 });
             }
             else {
@@ -1164,18 +1167,23 @@ function navigate(elem, opts = null, query = "", classname = "") {
     }
     if (elem.classList.contains("rem-value")) {
         try {
+            var str = "";
             var rems = document.getElementById(elem.getAttribute("insert")).split(";");
             if (rems.length > 1) {
                 Array.from(rems).forEach(function (e) {
-                    Array.from(e).forEach(function (f) {
-                        if (f.split(":").length == 2) {
-                            document.getElementById(f.split(":")[0]).value = "";
-                        }
+                    var v = e.split(":")[1].split(".");
+                    var s = elem.getAttribute("insert");
+                    v.forEach(function (f) {
+                        if (s.indexOf(f) > -1) { }
+                        else
+                            str += f.split("=")[0] + "=" + f.split("=")[1] + "&";
                     });
+                    document.getElementById(e.split(":")[0]).value = str;
                 });
             }
-            else
-                document.getElementById(rems).value = elem.value;
+            else if (document.getElementById(rems.split()).value != "") {
+                document.getElementById(rems).value = "";
+            }
         }
         catch (e) {
             console.error(e);
@@ -1186,11 +1194,11 @@ function navigate(elem, opts = null, query = "", classname = "") {
             var rems = document.getElementById(elem.getAttribute("insert")).split(";");
             if (rems.length > 1) {
                 Array.from(rems).forEach(function (f) {
-                    document.getElementById(f.split(":")[0]).value = "";
+                    document.getElementById(f).value = "";
                 });
             }
             else
-                document.getElementById(rems.split(":")[0]).value = "";
+                document.getElementById(rems).value = "";
         }
         catch (e) {
             console.error(e);

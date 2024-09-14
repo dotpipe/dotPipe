@@ -47,10 +47,9 @@
   *  incrIndex.........= [Class] increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  decrIndex.........= [Class] decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  interval..........= [Attr] Take this many steps when stepping through file-order default = 1
-  *  set-value..........= [Attr] set in target HTML tag ex: <pipe id="thisOrSomeId" class="set-attr" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
-  *  get-value..........= [Attr] get in target HTML tag ex: <pipe id="thisOrSomeId" class="get-attr" get-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
-  *  rem-value..........= [Attr] remove in target HTML tag ex: <pipe id="thisOrSomeId" class="rem-attr" rem-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
-  *  rem-value-all.....= [Attr] remove in target HTML tag ex: <pipe id="thisOrSomeId" class="rem-attr" rem-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
+  *  x-value...........= [Attr] set/get target HTML "value" ex: <pipe id="thisOrSomeId" class="x-value" insert="id2:id1-Value=id5-Value&id3=id4-Value;" ajax="foo.bar">
+  *  rem-value.........= [Attr] remove target HTML intrinsic "values" ex: <pipe id="thisOrSomeId" class="rem-value" insert="id2:gonekey&gonekey2;id1;id3" ajax="foo.bar">
+  *  rem-value-all.....= [Attr] remove all target HTML "value" ex: <pipe id="thisOrSomeId" class="rem-value-all" insert="id2;" ajax="foo.bar">
   *  mode..............= [Attr] "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
   *  pipe..............= [Class] creates a listener on the object. use listen="eventType" to relegate.
   *  multiple..........= [Class] states that this object has two or more key/value pairs use: states this is a multi-select form box
@@ -1135,24 +1134,27 @@ function navigate(elem, opts = null, query = "", classname = "") {
 
     if (elem.classList.contains("x-value")) {
         try {
+            var str = "";
             var rems = document.getElementById(elem.getAttribute("insert")).split(";");
             if (rems.length > 1) {
                 Array.from(rems).forEach(function (e) {
-                    if (e.split(":") == 1) {
-                        document.getElementById(e.split(":")[0]).value = document.getElementById(e.split(":")[1]).value;
-                    }
-                    else {
-                        Array.from(e.split(":")).forEach(function (f) {
-                            if (f.split("&").length > 1) {
-                                Array.from(f.split("&")).forEach(function (g) {
-                                    document.getElementById(g.split("=")[0]).value = document.getElementById(g.split("=")[1].value);
-                                });
-                            }
-                            else {
-                                document.getElementById(f.split("=")[0]).value = document.getElementById(f.split("=")[1].value);
-                            }
-                        });
-                    }
+                    try {
+                    var v = e.split(":")[1].split("&");
+                    var s = elem.getAttribute("insert");
+                    v.forEach(function (f) {
+                        if (s.indexOf(f) == -1) {
+                            str += f + "&";
+                        }
+                        else {
+                            var emplace = s.indexOf(f.split("=")[1]);
+                            str += f.split("=")[0] + "=" + emplace + "&";
+                        }
+                    });
+                    document.getElementById(e.split(":")[0]).value = str;
+                }
+                catch (e) {
+                    console.error(e);
+                }
                 });
             }
             else {
@@ -1165,18 +1167,23 @@ function navigate(elem, opts = null, query = "", classname = "") {
     }
     if (elem.classList.contains("rem-value")) {
         try {
+            var str = "";
             var rems = document.getElementById(elem.getAttribute("insert")).split(";");
             if (rems.length > 1) {
                 Array.from(rems).forEach(function (e) {
-                    Array.from(e).forEach(function (f) {
-                        if (f.split(":").length == 2) {
-                            document.getElementById(f.split(":")[0]).value = "";
-                        }
+                    var v = e.split(":")[1].split(".");
+                    var s = elem.getAttribute("insert");
+                    v.forEach(function (f) {
+                        if (s.indexOf(f) > -1) { }
+                        else
+                            str += f.split("=")[0] + "=" + f.split("=")[1] + "&";
                     });
+                    document.getElementById(e.split(":")[0]).value = str;
                 });
             }
-            else
-                document.getElementById(rems).value = elem.value;
+            else if (document.getElementById(rems.split()).value != "") {
+                document.getElementById(rems).value = "";
+            }
         }
         catch (e) {
             console.error(e);
@@ -1187,11 +1194,11 @@ function navigate(elem, opts = null, query = "", classname = "") {
             var rems = document.getElementById(elem.getAttribute("insert")).split(";");
             if (rems.length > 1) {
                 Array.from(rems).forEach(function (f) {
-                    document.getElementById(f.split(":")[0]).value = "";
+                    document.getElementById(f).value = "";
                 });
             }
             else
-                document.getElementById(rems.split(":")[0]).value = "";
+                document.getElementById(rems).value = "";
         }
         catch (e) {
             console.error(e);
