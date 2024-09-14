@@ -60,7 +60,7 @@
   *  action-class......= class name of devoted to-be-triggered tags (acts as listener to other certain tag(s))
   *  mouse.............= class name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
   *  mouse-insert......= class name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
-  *  event.............= works with mouse/pipe class only. Creates eventListener on "insert"-d to node.
+  *  event.............= works with mouse/pipe class only. activates according to the event, like a normal click would
   *  options...........= works with <select> tagName only. Key:Value; pairs to setup and easily roll out multiple selects.
   **** FILTERS aer go ahead code usually coded in other languages and just come back with a result. Not wholly different from AJAX. They are general purpose files.
   **** ALL HEADERS FOR AJAX are available. They will use defaults to
