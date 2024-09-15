@@ -1132,7 +1132,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
     rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + elem_qstring, true);
     console.log(elem);
 
-    if (elem.classList.contains("x-value")) {
+    if (elem.classList.contains("x-value-set")) {
         try {
             var str = "";
             var rems = document.getElementById(elem.getAttribute("insert")).split(";");
@@ -1165,14 +1165,44 @@ function navigate(elem, opts = null, query = "", classname = "") {
             console.error(e);
         }
     }
-    if (elem.classList.contains("rem-value")) {
+    if (elem.classList.contains("x-value-get")) {
+        try {
+            var str = "";
+            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
+            if (rems.length > 1) {
+                Array.from(rems).forEach(function (e) {
+                    try {
+                        var v = e.split(":")[1].split("&");
+                        var s = elem.getAttribute("insert");
+                        v.forEach(function (f) {
+                            if (s.indexOf(f) == 0) {
+                                var emplace = f.split("=")[1];
+                                str += f.split("=")[0] + "=" + emplace + "&";
+                            }
+                        });
+                        document.getElementById(e.split(":")[0]).value = str;
+                    }
+                    catch (e) {
+                        console.error(e);
+                    }
+                });
+            }
+            else {
+                document.getElementById(rems).value = elem.value;
+            }
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+    if (elem.classList.contains("x-value-rem")) {
         try {
             var str = "";
             var rems = document.getElementById(elem.getAttribute("insert")).split(";");
             if (rems.length > 1) {
                 Array.from(rems).forEach(function (e) {
                     var v = e.split(":")[1].split(".");
-                    var s = elem.getAttribute("insert");
+                    var s = elem.value;
                     v.forEach(function (f) {
                         if (s.indexOf(f) > -1) { }
                         else
@@ -1189,7 +1219,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
             console.error(e);
         }
     }
-    if (elem.classList.contains("rem-value-all")) {
+    if (elem.classList.contains("x-value-clear")) {
         try {
             var rems = document.getElementById(elem.getAttribute("insert")).split(";");
             if (rems.length > 1) {
