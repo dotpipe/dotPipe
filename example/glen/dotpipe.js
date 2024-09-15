@@ -68,7 +68,7 @@
   **** go on if there is no input to replace them.
   */
 
-function last() {
+  function last() {
     try {
         const irc = JSON.parse(document.body.innerText);
 
@@ -1101,7 +1101,7 @@ function formAJAX(elem, classname) {
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
-        elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.value + "&";
+        elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.value + (elem_value.substr(-1) == "&" ? "" : "&");
         // Multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {
