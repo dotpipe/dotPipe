@@ -1139,22 +1139,22 @@ function navigate(elem, opts = null, query = "", classname = "") {
             if (rems.length > 1) {
                 Array.from(rems).forEach(function (e) {
                     try {
-                    var v = e.split(":")[1].split("&");
-                    var s = elem.getAttribute("insert");
-                    v.forEach(function (f) {
-                        if (s.indexOf(f) == -1) {
-                            str += f + "&";
-                        }
-                        else {
-                            var emplace = s.indexOf(f.split("=")[1]);
-                            str += f.split("=")[0] + "=" + emplace + "&";
-                        }
-                    });
-                    document.getElementById(e.split(":")[0]).value = str;
-                }
-                catch (e) {
-                    console.error(e);
-                }
+                        var v = e.split(":")[1].split("&");
+                        var s = elem.getAttribute("insert");
+                        v.forEach(function (f) {
+                            if (s.indexOf(f) == -1) {
+                                str += f + "&";
+                            }
+                            else {
+                                var emplace = f.split("=")[1];
+                                str += f.split("=")[0] + "=" + emplace + "&";
+                            }
+                        });
+                        document.getElementById(e.split(":")[0]).value = str;
+                    }
+                    catch (e) {
+                        console.error(e);
+                    }
                 });
             }
             else {
