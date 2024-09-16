@@ -47,9 +47,10 @@
   *  incrIndex.........= [Class] increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  decrIndex.........= [Class] decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  interval..........= [Attr] Take this many steps when stepping through file-order default = 1
-  *  x-value...........= [Attr] set/get target HTML "value" ex: <pipe id="thisOrSomeId" class="x-value" insert="id2:id1-Value=id5-Value&id3=id4-Value;" ajax="foo.bar">
-  *  rem-value.........= [Attr] remove target HTML intrinsic "values" ex: <pipe id="thisOrSomeId" class="rem-value" insert="id2:gonekey&gonekey2;id1;id3" ajax="foo.bar">
-  *  rem-value-all.....= [Attr] remove all target HTML "value" ex: <pipe id="thisOrSomeId" class="rem-value-all" insert="id2;" ajax="foo.bar">
+  *  x-value-set.......= [Attr] set target HTML "value" ex: <pipe id="thisOrSomeId" class="x-value-set" insert="id2:id1-Value&id3=id4-Value;" ajax="foo.bar">
+  *  x-value-get.......= [Attr] get target HTML "value" ex: <pipe id="thisOrSomeId" class="x-value-get" insert="id2:id1-Value=id5-Value&id3=id4-Value;" ajax="foo.bar">
+  *  x-value-rem.......= [Attr] remove target HTML intrinsic "values" ex: <pipe id="thisOrSomeId" class="rem-value" insert="id2:gonekey&gonekey2;id1;id3" ajax="foo.bar">
+  *  x-value-clear.....= [Attr] remove all target HTML "value" ex: <pipe id="thisOrSomeId" class="rem-value-all" insert="id2;" ajax="foo.bar">
   *  mode..............= [Attr] "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
   *  pipe..............= [Class] creates a listener on the object. use listen="eventType" to relegate.
   *  multiple..........= [Class] states that this object has two or more key/value pairs use: states this is a multi-select form box
@@ -168,6 +169,14 @@ let domContentLoad = (again = false) => {
     });
 }
 
+/**
+ * Recursively creates HTML elements based on a JSON object and appends them to the document head.
+ *
+ * @param {Object} value - A JSON object containing information about the HTML elements to create.
+ * @param {string} value.tagname - The tag name of the HTML element to create.
+ * @param {Object} [value[key]] - Additional properties of the HTML element, such as attributes, text content, or nested elements.
+ * @returns {HTMLElement} The created HTML element.
+ */
 function modalaHead(value) {
 
     try {
@@ -229,6 +238,12 @@ function modalaHead(value) {
     return;
 }
 
+/**
+ * Displays a modal dialog with content from a JSON file.
+ *
+ * @param {string} filename - The URL or path to the JSON file containing the modal content.
+ * @param {string|HTMLElement} tagId - The ID of the HTML element to insert the modal into, or the element itself.
+ */
 function modal(filename, tagId) {
     if (typeof (tagId) == "string") {
         tagId = document.getElementById(tagId);
@@ -239,6 +254,13 @@ function modal(filename, tagId) {
     });
 }
 
+/**
+ * Displays a list of modals from a JSON file.
+ *
+ * @param {string} filenames - A string containing one or more filenames separated by semicolons. Each filename can optionally have a colon-separated target element ID.
+ * @example
+ * modalList('modal.json:modal-container.another-container;another-modal.json:another-target');
+ */
 function modalList(filenames) {
     const fileList = getJSONFile(filenames);
     fileList.then(function (res) {
@@ -265,6 +287,13 @@ function modalList(filenames) {
     });
 }
 
+
+/**
+ * Fetches a JSON file from the specified URL or path and returns the parsed JSON data.
+ *
+ * @param {string} filename - The URL or path to the JSON file to fetch.
+ * @returns {Promise<any>} - A Promise that resolves to the parsed JSON data.
+ */
 function getJSONFile(filename) {
     const resp = fetch(filename)
         .then(response => response.json())
@@ -277,6 +306,12 @@ function getJSONFile(filename) {
     return f;
 }
 
+/**
+ * Fetches a text file from the specified URL or path and returns the text content.
+ *
+ * @param {string} filename - The URL or path to the text file to fetch.
+ * @returns {Promise<string>} - A Promise that resolves to the text content of the file.
+ */
 function getTextFile(filename) {
     const resp = fetch(filename)
         .then(response => response.text())
@@ -288,6 +323,14 @@ function getTextFile(filename) {
     });
 }
 
+/**
+ * 
+ * @param {JSON Object} value 
+ * @param {string} tempTag 
+ * @param {} root 
+ * @param {*} id 
+ * @returns HTML Object
+ */
 function modala(value, tempTag, root, id) {
     if (typeof (tempTag) == "string") {
         tempTag = document.getElementById(tempTag);
@@ -471,6 +514,11 @@ function modala(value, tempTag, root, id) {
     return tempTag;
 }
 
+/**
+ * @param {string} target
+ * @example
+ * 
+ */
 function setTimers(target) {
     var delay = target.getAttribute("delay");
     if (target.classList.contains("time-inactive") && target.classList.contains("time-active")) {
@@ -478,17 +526,15 @@ function setTimers(target) {
         return;
     }
     else if (target.classList.contains("time-active")) {
+        pipes(target);
     }
     else if (target.classList.contains("time-inactive")) {
-        return;
     }
     else {
         target.classList.toggle("time-inactive")
-        return;
     }
 
     setTimeout(function () {
-        pipes(target);
         setTimers(target);
     }, delay);
 }
