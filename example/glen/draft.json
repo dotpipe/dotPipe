@@ -1,10 +1,9 @@
 {
     "header": {
-        "title": "Newbies and Scroobies",
-        "css": "theme.css"
+        "title": "Newbies and Scroobies"
     },
-    "table": {
-
-            "modal": "./menu_pages/collective.php:collective-container.arrow-area;getarrow.php:arrow-area"
+    "modals": {
+            "modal": "./menu_pages/collective.php:collective-container;./getarrow.php:arrow-area"
     }
+    
 }

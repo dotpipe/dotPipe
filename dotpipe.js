@@ -69,13 +69,16 @@
   **** go on if there is no input to replace them.
   */
 
-  function last() {
-    try {
-        const irc = JSON.parse(document.body.innerText);
+function last() {
 
-        document.body.innerText = "";
-        modala(irc, document.body);
-        document.body.style.display = "block";
+    try {
+        if (document.body.textContent != undefined) {
+            const irc = JSON.parse(document.body.textContent);
+
+            document.body.innerText = "";
+            modala(irc, document.body);
+            document.body.style.display = "block";
+        }
     }
     catch (e) {
         console.log(e);
@@ -107,9 +110,6 @@ let domContentLoad = (again = false) => {
             auto = true;
             setTimers(elem);
         }
-        else if (elem.classList.contains("time-inactive")) {
-            auto = false;
-        }
     });
 
     let elementsArray_dyn = document.getElementsByTagName("dyn");
@@ -126,9 +126,7 @@ let domContentLoad = (again = false) => {
         if (elem.classList.contains("time-active")) {
             auto = true;
             setTimers(elem);
-        }
-        else if (elem.classList.contains("time-inactive")) {
-            auto = false;
+            return;
         }
         setTimeout(carousel(elem, auto), elem.getAttribute("delay"));
     });
@@ -157,12 +155,12 @@ let domContentLoad = (again = false) => {
     Array.from(elements_pipe).forEach(function (elem) {
         var ev = elem.getAttribute("event");
         elem.addEventListener(ev, function () {
-            if (elem.classList.contains("dyn-one") && !elem.classList.contains("dyn-done")) {
-                elem.classList.toggle("dyn-done");
+            if (!elem.classList.contains("disabled")) {
+                elem.classList.toggle("disabled");
                 pipes(elem);
                 return;
             }
-            else if (elem.classList.contains("dyn-one") && elem.classList.contains("dyn-done")) { }
+            else if (elem.classList.contains("disabled")) { }
             else
                 pipes(elem);
         });
@@ -265,11 +263,11 @@ function modalList(filenames) {
     const fileList = getJSONFile(filenames);
     fileList.then(function (res) {
         console.log(res);
-        const files = res['modal'].split(";");
+        const files = filenames.split(";");
         if (files.length >= 1) {
             files.forEach(file => {
                 const f = file.split(":");
-                if (f[1] != undefined && f[1].split(".").length > 1) {
+                if (f[1] != undefined && f[1].split(".").length >= 1) {
                     f[1].split(".").forEach(insert => {
                         modal(f[0], insert);
                     });
@@ -295,7 +293,7 @@ function modalList(filenames) {
  * @returns {Promise<any>} - A Promise that resolves to the parsed JSON data.
  */
 function getJSONFile(filename) {
-    const resp = fetch(filename)
+    return fetch(filename)
         .then(response => response.json())
         .then(data => {
             return data;
@@ -592,13 +590,11 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
 
     h = 0;
 
-    while (h < b) {
-        if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
-            elem.children[h].style.display = "block";
-        else if (h + 1 < b)
-            elem.children[h].style.display = "inline-block";
-        h++;
-    }
+
+    if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
+        elem.style.display = "block";
+    else
+        elem.style.display = "inline-block";
 
     if (elem.classList.contains("time-active")) {
         auto = true;
@@ -635,13 +631,11 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
 
     h = 0;
 
-    while (h < b) {
-        if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
-            elem.children[h].style.display = "block";
-        else if (h + 1 < b)
-            elem.children[h].style.display = "inline-block";
-        h++;
-    }
+
+    if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
+        elem.style.display = "block";
+    else
+        elem.style.display = "inline-block";
     if (i - iter <= 0)
         i = elem.children.length
     else
