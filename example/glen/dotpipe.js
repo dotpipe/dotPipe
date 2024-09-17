@@ -265,15 +265,11 @@ function modal(filename, tagId) {
  * modalList('modal.json:modal-container.another-container;another-modal.json:another-target');
  */
 function modalList(filenames) {
-    const fileList = filenames.split(";");
-    fileList.forEach(function (res) {
-        console.log(res);
         const files = filenames.split(";");
         if (files.length >= 1) {
             files.forEach(file => {
                 const f = file.split(":");
-                const f0 = getJSONFile(f[0]);
-                if (f[1] != undefined && f[1].split(".").length >= 1) {
+                if (f[1] != undefined && f[1].split(".").length > 1) {
                     f[1].split(".").forEach(insert => {
                         modal(f[0], insert);
                     });
@@ -286,9 +282,8 @@ function modalList(filenames) {
         }
         else {
             console.log(files)
-            modal(filenames[0].split(":")[0], filenames[0].split(":")[1]);
+            modal(files[0].split(":")[0], files[0].split(":")[1]);
         }
-    });
 }
 
 
@@ -1143,7 +1138,7 @@ function formAJAX(elem, classname) {
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
-        elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.value + "&";
+        elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.getAttribute('value') + "&";
         // Multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {

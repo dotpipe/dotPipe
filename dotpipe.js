@@ -69,13 +69,13 @@
   **** go on if there is no input to replace them.
   */
 
-function last() {
+  function last() {
 
     try {
-        if (document.body.textContent != undefined) {
+        if (document.body != null && !JSON.parse(document.body)) {
             const irc = JSON.parse(document.body.textContent);
 
-            document.body.innerText = "";
+            document.body.textContent = "";
             modala(irc, document.body);
             document.body.style.display = "block";
         }
@@ -110,6 +110,9 @@ let domContentLoad = (again = false) => {
             auto = true;
             setTimers(elem);
         }
+        else if (elem.classList.contains("time-inactive")) {
+            auto = false;
+        }
     });
 
     let elementsArray_dyn = document.getElementsByTagName("dyn");
@@ -126,7 +129,9 @@ let domContentLoad = (again = false) => {
         if (elem.classList.contains("time-active")) {
             auto = true;
             setTimers(elem);
-            return;
+        }
+        else if (elem.classList.contains("time-inactive")) {
+            auto = false;
         }
         setTimeout(carousel(elem, auto), elem.getAttribute("delay"));
     });
@@ -155,12 +160,12 @@ let domContentLoad = (again = false) => {
     Array.from(elements_pipe).forEach(function (elem) {
         var ev = elem.getAttribute("event");
         elem.addEventListener(ev, function () {
-            if (!elem.classList.contains("disabled")) {
-                elem.classList.toggle("disabled");
+            if (elem.classList.contains("dyn-one") && !elem.classList.contains("dyn-done")) {
+                elem.classList.toggle("dyn-done");
                 pipes(elem);
                 return;
             }
-            else if (elem.classList.contains("disabled")) { }
+            else if (elem.classList.contains("dyn-one") && elem.classList.contains("dyn-done")) { }
             else
                 pipes(elem);
         });
@@ -260,14 +265,11 @@ function modal(filename, tagId) {
  * modalList('modal.json:modal-container.another-container;another-modal.json:another-target');
  */
 function modalList(filenames) {
-    const fileList = getJSONFile(filenames);
-    fileList.then(function (res) {
-        console.log(res);
         const files = filenames.split(";");
         if (files.length >= 1) {
             files.forEach(file => {
                 const f = file.split(":");
-                if (f[1] != undefined && f[1].split(".").length >= 1) {
+                if (f[1] != undefined && f[1].split(".").length > 1) {
                     f[1].split(".").forEach(insert => {
                         modal(f[0], insert);
                     });
@@ -280,9 +282,8 @@ function modalList(filenames) {
         }
         else {
             console.log(files)
-            modal(filenames[0].split(":")[0], filenames[0].split(":")[1]);
+            modal(files[0].split(":")[0], files[0].split(":")[1]);
         }
-    });
 }
 
 
@@ -293,12 +294,12 @@ function modalList(filenames) {
  * @returns {Promise<any>} - A Promise that resolves to the parsed JSON data.
  */
 function getJSONFile(filename) {
-    return fetch(filename)
+    const resp = fetch(filename)
         .then(response => response.json())
         .then(data => {
             return data;
         });
-    const f = resp.then(function (res) {
+    return resp.then(function (res) {
         return res;
     });
     return f;
@@ -590,7 +591,6 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
 
     h = 0;
 
-
     if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
         elem.style.display = "block";
     else
@@ -628,9 +628,6 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
         }
         h++;
     }
-
-    h = 0;
-
 
     if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
         elem.style.display = "block";
@@ -1141,7 +1138,7 @@ function formAJAX(elem, classname) {
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
-        elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.value + (elem_value.substr(-1) == "&" ? "" : "&");
+        elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.getAttribute('value') + "&";
         // Multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {
