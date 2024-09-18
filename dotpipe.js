@@ -574,11 +574,15 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
 
     var h = i;
-
-    while (elem.childElementCount > 0) {
-        elem.removeChild(elem.firstChild);
-    }
-    h = i;
+    var g = iter;
+    // while (elem.childElementCount >= b) {
+        while (g > 0) {
+            elem.removeChild(elem.firstChild);
+            g--;
+        }
+        // elem.removeChild(elem.firstChild);
+    // }
+    
     while (elem.childElementCount < b) {
         var cloneSrcs = elem.getAttribute("sources").split(";");
         var clones = cloneSrcs[h % cloneSrcs.length];
@@ -627,33 +631,25 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
 
     var h = i;
 
-    while (elem.childElementCount > 0) {
-        elem.removeChild(elem.firstChild);
+    var g = iter;
+    var cloneSrcs = elem.getAttribute("sources").split(";");
+    var clones = cloneSrcs[h % cloneSrcs.length];
+    while (typeof (elem.lastChild) && elem.childElementCount > b - i) {
+        try {
+            elem.removeChild(elem.lastChild);
+        } catch (e) { console.log(e); break; }
+        g--;
     }
-    h = elem.getAttribute("sources").split(";").length - 1;
+    h = iter;
     while (elem.childElementCount < b) {
         var cloneSrcs = elem.getAttribute("sources").split(";");
-        var clones = cloneSrcs[h % cloneSrcs.length];
-        var newClone = null;
-        if (elem.getAttribute("type").toLowerCase() == ('audio' | 'video'))
-            newClone = document.createElement(elem.getAttribute("source"));
-        else if (elem.getAttribute("type").toLowerCase() == ('modal')) {
-            modalList(clones);
-            return;
-        }
-        else if (elem.getAttribute("type").toLowerCase() == ('php' | 'html')) {
-            var f = htmlToJson(getTextFile(clones));
-            modalList(f);
-            return;
-        }
-        else if (elem.getAttribute("type").toLowerCase() == ('img')) {
-            newClone = document.createElement(elem.getAttribute("type"));
-        }
+        var clones = cloneSrcs[Math.abs(h) % cloneSrcs.length];
+        var newClone = document.createElement(elem.getAttribute("type"));
         newClone.src = clones;
         newClone.height = elem.getAttribute("height");
         newClone.width = elem.getAttribute("width");
-        elem.appendChild(newClone);
-        h = (0 >= h) ? cloneSrcs.length - 1 : h - 1;
+        elem.prepend(newClone);
+        h = (Math.abs(h) % cloneSrcs.length + 1);
     }
 
     if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
@@ -661,7 +657,7 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
     else
         elem.style.display = "inline-block";
 
-    elem.setAttribute("index", Math.abs(h) % elem.children.length);
+    elem.setAttribute("index", Math.abs(h));
 
     if (elem.classList.contains("time-active")) {
         auto = true;

@@ -15,8 +15,7 @@ var f = {
         "height": 100,
         "class": "carousel-slide-left",
         "insert": "idtag1",
-        "textContent": "HI!",
-        "set-attr": "idtag1.auto:true;idtag1.direction:left"
+        "textContent": "HI!"
     },
     "carousel": {
         "tagname": "card",
@@ -25,13 +24,12 @@ var f = {
         "sources": "headstockfront.jpg;headstockback.jpg;backheel.jpg;headstockback.jpg",
         "auto": false,
         "delay": 1500,
-        "boxes": 3,
-        "iter": 2,
+        "boxes": 4,
+        "iter": 1,
         "vertical": true,
         "insert": "idtag1",
         "width": 100,
-        "height": 100,
-        "direction": "right"
+        "height": 100
     },
     "button-right": {
         "tagname": "p",
@@ -40,8 +38,7 @@ var f = {
         "height": 100,
         "class": "carousel-slide-right",
         "insert": "idtag1",
-        "textContent": "HI!",
-        "set-attr": "idtag1.auto:false;idtag1.direction:right"
+        "textContent": "HI!"
     }
 }
 modala(f, document.body);
