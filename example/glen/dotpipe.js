@@ -396,6 +396,8 @@ function modala(value, tempTag, root, id) {
             var i = (value['index'] == undefined) ? 0 : value['index'];
             temp.id = value['id'];
             optsArray.forEach((e, f) => {
+                if (value['boxes'] == temp.childElementCount)
+                    return;
                 if (value['type'] == "img") {
                     var gth = document.createElement("img");
                     gth.src = e;

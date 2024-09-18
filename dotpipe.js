@@ -396,6 +396,8 @@ function modala(value, tempTag, root, id) {
             var i = (value['index'] == undefined) ? 0 : value['index'];
             temp.id = value['id'];
             optsArray.forEach((e, f) => {
+                if (value['boxes'] == temp.childElementCount)
+                    return;
                 if (value['type'] == "img") {
                     var gth = document.createElement("img");
                     gth.src = e;
@@ -580,7 +582,17 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     while (elem.childElementCount < b) {
         var cloneSrcs = elem.getAttribute("sources").split(";");
         var clones = cloneSrcs[h % cloneSrcs.length];
-        var newClone = document.createElement(elem.getAttribute("type"));
+        var newClone = null;
+        if (elem.getAttribute("type").toLowerCase() == ('audio' | 'video'))
+            newClone = document.createElement(elem.getAttribute("source"));
+        else if (elem.getAttribute("type").toLowerCase() == ('modal'))
+            modalList(clones);
+        else if (elem.getAttribute("type").toLowerCase() == ('php' | 'html')) {
+            var f = htmlToJson(getTextFile(clones));
+            modalList(f);
+        }
+        else
+            newClone = document.createElement(elem.getAttribute("type"));
         newClone.src = clones;
         newClone.height = elem.getAttribute("height");
         newClone.width = elem.getAttribute("width");
@@ -615,20 +627,33 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
 
     var h = i;
 
-
     while (elem.childElementCount > 0) {
         elem.removeChild(elem.firstChild);
     }
-    h = elem.getAttribute("sources").split(";").length - 1 - i;
+    h = elem.getAttribute("sources").split(";").length - 1;
     while (elem.childElementCount < b) {
         var cloneSrcs = elem.getAttribute("sources").split(";");
         var clones = cloneSrcs[h % cloneSrcs.length];
-        var newClone = document.createElement(elem.getAttribute("type"));
+        var newClone = null;
+        if (elem.getAttribute("type").toLowerCase() == ('audio' | 'video'))
+            newClone = document.createElement(elem.getAttribute("source"));
+        else if (elem.getAttribute("type").toLowerCase() == ('modal')) {
+            modalList(clones);
+            return;
+        }
+        else if (elem.getAttribute("type").toLowerCase() == ('php' | 'html')) {
+            var f = htmlToJson(getTextFile(clones));
+            modalList(f);
+            return;
+        }
+        else if (elem.getAttribute("type").toLowerCase() == ('img')) {
+            newClone = document.createElement(elem.getAttribute("type"));
+        }
         newClone.src = clones;
         newClone.height = elem.getAttribute("height");
         newClone.width = elem.getAttribute("width");
         elem.appendChild(newClone);
-        h = (h % cloneSrcs.length - i) ? 0 : h - 1;
+        h = (0 >= h) ? cloneSrcs.length - 1 : h - 1;
     }
 
     if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
