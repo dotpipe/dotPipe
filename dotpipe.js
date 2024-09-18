@@ -573,19 +573,12 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
     var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
 
-    var h = i;
-    var g = iter;
-    // while (elem.childElementCount >= b) {
-        while (g > 0) {
-            elem.removeChild(elem.firstChild);
-            g--;
-        }
-        // elem.removeChild(elem.firstChild);
-    // }
-    
-    while (elem.childElementCount < b) {
+    var h = 0;
+
+    while (h < b) {
+        elem.removeChild(elem.firstChild);
         var cloneSrcs = elem.getAttribute("sources").split(";");
-        var clones = cloneSrcs[h % cloneSrcs.length];
+        var clones = cloneSrcs[(h + i) % cloneSrcs.length];
         var newClone = null;
         if (elem.getAttribute("type").toLowerCase() == ('audio' | 'video'))
             newClone = document.createElement(elem.getAttribute("source"));
@@ -593,7 +586,7 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
             modalList(clones);
         else if (elem.getAttribute("type").toLowerCase() == ('php' | 'html')) {
             var f = htmlToJson(getTextFile(clones));
-            modalList(f);
+            modalList(f)
         }
         else
             newClone = document.createElement(elem.getAttribute("type"));
@@ -620,36 +613,37 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
         setTimeout(() => { shiftFilesLeft(elem, auto, delay); }, (delay));
 
 }
-
 function shiftFilesRight(elem, auto = false, delay = 1000) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
 
+    console.error(elem)
     var iter = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
     var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
     var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
 
-    var h = i;
+    var h = 0;
 
-    var g = iter;
-    var cloneSrcs = elem.getAttribute("sources").split(";");
-    var clones = cloneSrcs[h % cloneSrcs.length];
-    while (typeof (elem.lastChild) && elem.childElementCount > b - i) {
-        try {
-            elem.removeChild(elem.lastChild);
-        } catch (e) { console.log(e); break; }
-        g--;
-    }
-    h = iter;
-    while (elem.childElementCount < b) {
+    while (h < b) {
+        elem.removeChild(elem.lastChild);
         var cloneSrcs = elem.getAttribute("sources").split(";");
-        var clones = cloneSrcs[Math.abs(h) % cloneSrcs.length];
-        var newClone = document.createElement(elem.getAttribute("type"));
+        var clones = cloneSrcs[(h + i) % cloneSrcs.length];
+        var newClone = null;
+        if (elem.getAttribute("type").toLowerCase() == ('audio' | 'video'))
+            newClone = document.createElement(elem.getAttribute("source"));
+        else if (elem.getAttribute("type").toLowerCase() == ('modal'))
+            modalList(clones);
+        else if (elem.getAttribute("type").toLowerCase() == ('php' | 'html')) {
+            var f = htmlToJson(getTextFile(clones));
+            modalList(f)
+        }
+        else
+            newClone = document.createElement(elem.getAttribute("type"));
         newClone.src = clones;
         newClone.height = elem.getAttribute("height");
         newClone.width = elem.getAttribute("width");
         elem.prepend(newClone);
-        h = (Math.abs(h) % cloneSrcs.length + 1);
+        h++;
     }
 
     if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
@@ -657,18 +651,18 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
     else
         elem.style.display = "inline-block";
 
-    elem.setAttribute("index", Math.abs(h));
-
     if (elem.classList.contains("time-active")) {
         auto = true;
     }
     else if (elem.classList.contains("time-inactive")) {
         auto = false;
     }
+    elem.setAttribute("index", (i + iter) % elem.children.length);
     if (auto == "on")
-        setTimeout(() => { shiftFilesRight(elem, elem.getAttribute("auto"), delay); }, (delay));
+        setTimeout(() => { shiftFilesLeft(elem, auto, delay); }, (delay));
 
 }
+
 function fileShift(elem) {
     var i = elem.getAttribute("index");
     var iter = elem.getAttribute("iter");

@@ -13,7 +13,7 @@ var f = {
         "id": "left",
         "width": 100,
         "height": 100,
-        "class": "carousel-slide-left",
+        "class": "carousel-step-left",
         "insert": "idtag1",
         "textContent": "HI!"
     },
@@ -36,7 +36,7 @@ var f = {
         "id": "right",
         "width": 100,
         "height": 100,
-        "class": "carousel-slide-right",
+        "class": "carousel-step-right",
         "insert": "idtag1",
         "textContent": "HI!"
     }
