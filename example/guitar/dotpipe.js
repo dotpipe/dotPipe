@@ -69,7 +69,7 @@
   **** go on if there is no input to replace them.
   */
 
-  function last() {
+function last() {
 
     try {
         if (document.body != null && !JSON.parse(document.body)) {
@@ -265,25 +265,25 @@ function modal(filename, tagId) {
  * modalList('modal.json:modal-container.another-container;another-modal.json:another-target');
  */
 function modalList(filenames) {
-        const files = filenames.split(";");
-        if (files.length >= 1) {
-            files.forEach(file => {
-                const f = file.split(":");
-                if (f[1] != undefined && f[1].split(".").length > 1) {
-                    f[1].split(".").forEach(insert => {
-                        modal(f[0], insert);
-                    });
-                }
-                else {
-                    console.log(f);
-                    modal(f[0], f[1]);
-                }
-            });
-        }
-        else {
-            console.log(files)
-            modal(files[0].split(":")[0], files[0].split(":")[1]);
-        }
+    const files = filenames.split(";");
+    if (files.length >= 1) {
+        files.forEach(file => {
+            const f = file.split(":");
+            if (f[1] != undefined && f[1].split(".").length > 1) {
+                f[1].split(".").forEach(insert => {
+                    modal(f[0], insert);
+                });
+            }
+            else {
+                console.log(f);
+                modal(f[0], f[1]);
+            }
+        });
+    }
+    else {
+        console.log(files)
+        modal(files[0].split(":")[0], files[0].split(":")[1]);
+    }
 }
 
 
@@ -566,22 +566,25 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
 
-
-    if (typeof (elem) == "string")
-        elem = document.getElementById(elem);
     console.error(elem)
     var iter = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
     var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
     var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
 
-    var h = 0;
+    var h = i;
 
-    while (b + 1> h) {
-        {
-            var clone = elem.firstChild.cloneNode(true);
-            elem.appendChild(clone);
-            elem.removeChild(elem.firstChild);
-        }
+    while (elem.childElementCount > 0) {
+        elem.removeChild(elem.firstChild);
+    }
+    h = i;
+    while (elem.childElementCount < b) {
+        var cloneSrcs = elem.getAttribute("sources").split(";");
+        var clones = cloneSrcs[h % cloneSrcs.length];
+        var newClone = document.createElement(elem.getAttribute("type"));
+        newClone.src = clones;
+        newClone.height = elem.getAttribute("height");
+        newClone.width = elem.getAttribute("width");
+        elem.appendChild(newClone);
         h++;
     }
 
@@ -605,33 +608,35 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
 function shiftFilesRight(elem, auto = false, delay = 1000) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
+
     var iter = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
     var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
     var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
 
-    var h = 0;
-    var g = 0;
+    var h = i;
 
-    while (b + 1 > h) {
-        {
-            let n = elem.childNodes;
-            var clone = elem.lastChild.cloneNode(true);
-            elem.insertBefore(clone, elem.firstChild);
-            elem.removeChild(elem.lastChild);
-        }
-        h++;
+
+    while (elem.childElementCount > 0) {
+        elem.removeChild(elem.firstChild);
+    }
+    h = elem.getAttribute("sources").split(";").length - 1 - i;
+    while (elem.childElementCount < b) {
+        var cloneSrcs = elem.getAttribute("sources").split(";");
+        var clones = cloneSrcs[h % cloneSrcs.length];
+        var newClone = document.createElement(elem.getAttribute("type"));
+        newClone.src = clones;
+        newClone.height = elem.getAttribute("height");
+        newClone.width = elem.getAttribute("width");
+        elem.appendChild(newClone);
+        h = (h % cloneSrcs.length - i) ? 0 : h - 1;
     }
 
     if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
         elem.style.display = "block";
     else
         elem.style.display = "inline-block";
-    if (i - iter <= 0)
-        i = elem.children.length
-    else
-        i -= iter;
 
-    elem.setAttribute("index", Math.abs(i) % elem.children.length);
+    elem.setAttribute("index", Math.abs(h) % elem.children.length);
 
     if (elem.classList.contains("time-active")) {
         auto = true;
@@ -706,7 +711,7 @@ function fileOrder(elem) {
                 ppfc.removeChild(ppfc.firstChild);
             var obj = document.createElement("img");
             obj.setAttribute("src", arr[loop % arr.length].toString());
-            
+
             if (elem.getAttribute("direction").toLowerCase() !== "left")
                 ppfc.insertBefore(obj, ppfc.firstChild);
             else
