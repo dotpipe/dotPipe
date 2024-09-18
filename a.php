@@ -14,7 +14,7 @@ var f = {
         "width": 100,
         "height": 100,
         "onclick": "pipes(this)",
-        "class": "carousel-step-left",
+        "class": "carousel-slide-left",
         "insert": "idtag1",
         "textContent": "HI!",
         "set-attr": "idtag1.auto:true;idtag1.direction:left"
@@ -27,7 +27,7 @@ var f = {
         "auto": false,
         "delay": 1500,
         "boxes": 4,
-        "iter": 0,
+        "iter": 1,
         "vertical": true,
         "insert": "idtag1",
         "width": 100,
@@ -39,25 +39,11 @@ var f = {
         "id": "right",
         "width": 100,
         "height": 100,
-        "onclick": "pipes(this)",
-        "class": "carousel-step-right",
+        "onclick": "shiftFilesRight(this)",
+        "class": "carousel-slide-right",
         "insert": "idtag1",
         "textContent": "HI!",
         "set-attr": "idtag1.auto:false;idtag1.direction:right"
-    },
-    "chexMix0": {
-        "tagname": "div",
-        "id": "get",
-        "insert": "left",
-        "textContent": "HEY!",
-        "set-var": "taking:out;messing:with;redoing:oldcode"
-    },
-    "chexMix1": {
-        "tagname": "div",
-        "id": "set",
-        "insert": "left",
-        "textContent": "HEY!",
-        "get-var": "taking;messing;redoing"
     }
 }
 modala(f, document.body);

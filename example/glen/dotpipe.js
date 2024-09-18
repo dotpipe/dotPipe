@@ -69,7 +69,7 @@
   **** go on if there is no input to replace them.
   */
 
-function last() {
+  function last() {
 
     try {
         if (document.body != null && !JSON.parse(document.body)) {
@@ -402,6 +402,7 @@ function modala(value, tempTag, root, id) {
                     gth.width = value['width'];
                     gth.height = value['height'];
                     gth.style.display = "hidden";
+                    temp.setAttribute("sources", value['sources'])
                     temp.appendChild(gth);
                 }
                 else if (value['type'] == "audio") {
@@ -450,11 +451,6 @@ function modala(value, tempTag, root, id) {
                         });
                 }
             });
-            var auto = (value['auto'] != undefined && value['auto'] != false) ? true : false;
-            if (value['direction'] != undefined && value['direction'].toLowerCase() == "right")
-                shiftFilesRight(temp, auto, value['delay']);
-            else
-                shiftFilesLeft(temp, auto, value['delay']);
 
         }
         else if (k.toLowerCase() == "css") {
@@ -525,7 +521,6 @@ function setTimers(target) {
         return;
     }
     else if (target.classList.contains("time-active")) {
-        pipes(target);
     }
     else if (target.classList.contains("time-inactive")) {
     }
@@ -534,6 +529,7 @@ function setTimers(target) {
     }
 
     setTimeout(function () {
+        pipes(target);
         setTimers(target);
     }, delay);
 }
@@ -569,6 +565,10 @@ function carouselButtonStep(elem, direction) {
 function shiftFilesLeft(elem, auto = false, delay = 1000) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
+
+
+    if (typeof (elem) == "string")
+        elem = document.getElementById(elem);
     console.error(elem)
     var iter = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
     var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
@@ -576,20 +576,14 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
 
     var h = 0;
 
-    while (iter * i > h) {
-        var clone = null
-        try {
-            elem.firstChild.cloneNode(true);
-            clone.style.display = "none";
+    while (b + 1> h) {
+        {
+            var clone = elem.firstChild.cloneNode(true);
             elem.appendChild(clone);
             elem.removeChild(elem.firstChild);
         }
-        catch (e) { console.log(e) }
-
         h++;
     }
-
-    h = 0;
 
     if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
         elem.style.display = "block";
@@ -620,9 +614,8 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
 
     while (b + 1 > h) {
         {
-            // let n = elem.childNodes;
+            let n = elem.childNodes;
             var clone = elem.lastChild.cloneNode(true);
-            clone.style.display = "none";
             elem.insertBefore(clone, elem.firstChild);
             elem.removeChild(elem.lastChild);
         }
@@ -650,15 +643,17 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
         setTimeout(() => { shiftFilesRight(elem, elem.getAttribute("auto"), delay); }, (delay));
 
 }
-
 function fileShift(elem) {
-    if (elem == null || elem == undefined)
-        return;
-    var arr = elem.getAttribute("file-order").split(";");
+    var i = elem.getAttribute("index");
+    var iter = elem.getAttribute("iter");
+    var b = elem.getAttribute("boxes");
+    var h = 0;
+    var g = 0;
+    var arr = elem.getAttribute("sources").split(";");
     var ppfc = document.getElementById(elem.getAttribute("insert").toString());
     if (!ppfc.hasAttribute("file-index"))
         ppfc.setAttribute("file-index", "0");
-    var index = parseInt(ppfc.getAttribute("file-index").toString());
+    index = parseInt(ppfc.getAttribute("file-index").toString());
     var interv = elem.getAttribute("interval");
     if (elem.classList.contains("decrIndex"))
         index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) - interv;
@@ -668,10 +663,14 @@ function fileShift(elem) {
         index = arr.length - 1;
     index = index % arr.length;
     ppfc.setAttribute("file-index", index.toString());
+
 }
 
 function fileOrder(elem) {
-    arr = elem.getAttribute("file-order").split(";");
+    if (typeof (elem) == "string")
+        elem = document.getElementById(elem);
+
+    arr = elem.getAttribute("sources").split(";");
     ppfc = document.getElementById(elem.getAttribute("insert").toString());
     if (!ppfc.hasAttribute("file-index"))
         ppfc.setAttribute("file-index", "0");
@@ -699,13 +698,24 @@ function fileOrder(elem) {
     }
     else if (ppfc && ppfc.tagName == "IMG") {
         ppfc.setAttribute("src", arr[index].toString());
-    }
-    else {
-        var obj = document.createElement("img");
-        obj.setAttribute("src", arr[index].toString());
-        ppfc.appendChild(obj);
+        var loop = index;
+        while (loop % arr.length != (index + iter) % arr.length) {
+            if (elem.getAttribute("direction").toLowerCase() !== "left")
+                ppfc.removeChild(ppfc.lastChild);
+            else
+                ppfc.removeChild(ppfc.firstChild);
+            var obj = document.createElement("img");
+            obj.setAttribute("src", arr[loop % arr.length].toString());
+            
+            if (elem.getAttribute("direction").toLowerCase() !== "left")
+                ppfc.insertBefore(obj, ppfc.firstChild);
+            else
+                ppfc.appendChild(obj);
+            loop++;
+        }
     }
 }
+
 function carousel(elem, auto = true) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
@@ -823,7 +833,7 @@ function carousel(elem, auto = true) {
 function fileShift(elem) {
     if (elem == null || elem == undefined)
         return;
-    var arr = elem.getAttribute("file-order").split(";");
+    var arr = elem.getAttribute("sources").split(";");
     var ppfc = document.getElementById(elem.getAttribute("insert").toString());
     if (!ppfc.hasAttribute("file-index"))
         ppfc.setAttribute("file-index", "0");
@@ -1006,7 +1016,7 @@ function pipes(elem, stop = false) {
             else if (elem.classList.contains("time-inactive")) {
                 auto = false;
             }
-            this.shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
+            shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-step-left")) {
@@ -1019,7 +1029,7 @@ function pipes(elem, stop = false) {
             else if (elem.classList.contains("time-inactive")) {
                 auto = false;
             }
-            this.shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
+            shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-left")) {
@@ -1032,7 +1042,7 @@ function pipes(elem, stop = false) {
             else if (elem.classList.contains("time-inactive")) {
                 auto = false;
             }
-            this.shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
+            shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-right")) {
@@ -1045,7 +1055,7 @@ function pipes(elem, stop = false) {
             else if (elem.classList.contains("time-inactive")) {
                 auto = false;
             }
-            this.shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
+            shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.hasAttribute("query")) {
