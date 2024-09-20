@@ -252,7 +252,7 @@ function modal(filename, tagId) {
         tagId = document.getElementById(tagId);
     }
     const draft = getJSONFile(filename)
-    draft.then(function (res) {
+    return draft.then(function (res) {
         modala(res, tagId);
     });
 }
@@ -346,9 +346,9 @@ function modala(value, tempTag, root, id) {
     }
 
     var temp = document.createElement(value["tagname"]);
-    if (temp.tagName.toLowerCase() == "undefined") {
+    if (value["tagname"] == "undefined") {
         temp.tagName = "div";
-        temp.id = "undefined";
+        temp = document.createElement("div");
     }
     if (value["header"] !== undefined && value["header"] instanceof Object) {
 
@@ -361,6 +361,20 @@ function modala(value, tempTag, root, id) {
     Object.entries(value).forEach((nest) => {
         const [k, v] = nest;
         if (k.toLowerCase() == "header");
+        else if (k.toLocaleLowerCase() == "buttons" && v instanceof Object) {
+            var buttons = document.createElement("div");
+            v.forEach(z => {
+                var button = document.createElement("button");
+                button.innerHTML = z["innerText"];
+                button.id = z["id"];
+                button.setAttribute("insert", z["insert"]);
+                button.className = z["class"];
+                temp.appendChild(button);
+            });
+            // modala(v, tempTag, root, id);
+        }
+        else if (v instanceof Object)
+            modala(v, tempTag, root, id);
         else if (v instanceof Object)
             modala(v, tempTag, root, id);
         else if (k.toLowerCase() == "br") {

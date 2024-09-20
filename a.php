@@ -4,19 +4,26 @@
     <script src="dotpipe.js"></script>
 </head>
 </html>
-<p id="thisone" style="display:block" onclick="pipes(this)" ajax-multi="j.json:thisone@modala;j.json:thatone@json">THICK</p>
-<p id="thatone">THIN</p>
 <script>
 var f = {
-    "button-left": {
-        "tagname": "p",
+    "buttons": [
+        {
         "id": "left",
         "width": 100,
         "height": 100,
         "class": "carousel-step-left",
         "insert": "idtag1",
-        "textContent": "HI!"
-    },
+        "innerText": "HI!"
+        },
+        {
+            "id": "right",
+            "width": 100,
+            "height": 100,
+            "class": "carousel-step-right",
+            "insert": "idtag1",
+            "innerText": "HI!"
+        }
+    ],
     "carousel": {
         "tagname": "card",
         "id": "idtag1",
@@ -30,15 +37,6 @@ var f = {
         "insert": "idtag1",
         "width": 100,
         "height": 100
-    },
-    "button-right": {
-        "tagname": "p",
-        "id": "right",
-        "width": 100,
-        "height": 100,
-        "class": "carousel-step-right",
-        "insert": "idtag1",
-        "textContent": "HI!"
     }
 }
 modala(f, document.body);
