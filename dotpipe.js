@@ -322,6 +322,14 @@ function getTextFile(filename) {
     });
 }
 
+function escapeHtml(html) {
+    var text = document.createTextNode(html);
+    var p = document.createElement('p');
+    p.innerHTML = (text.innerHTML);
+    console.log(p);
+    return p.innerHTML;
+}
+
 /**
  * 
  * @param {JSON Object} value 
@@ -367,14 +375,15 @@ function modala(value, tempTag, root, id) {
                 var button = document.createElement("input");
                 console.log(z);
                 button.type = "button";
-                var keys = [ "text", "value", "textcontent", "innerhtml", "innerText" ];
+                var keys = ["text", "value", "textcontent", "innerhtml", "innerText"];
                 Object.entries(z).forEach(x => {
-                    const [k, val] = x;
-                    console.log(k, val);
-                    if (keys.includes(k.toLocaleLowerCase())) 
+                    const [key, val] = x;
+                    console.log(["text", "value", "textcontent", "innerhtml", "innertext"].includes(key.toLowerCase()));
+                    vals = escapeHtml(val);
+                    if (["text", "value", "textcontent", "innerhtml", "innertext"].includes(key.toLowerCase()))
                         button.value = val;
                     else
-                        button.setAttribute(k, val);
+                        button.setAttribute(key, val);
                 });
                 temp.appendChild(button);
             });
