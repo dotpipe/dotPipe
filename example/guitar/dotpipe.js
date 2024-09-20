@@ -364,11 +364,18 @@ function modala(value, tempTag, root, id) {
         else if (k.toLocaleLowerCase() == "buttons" && v instanceof Object) {
             var buttons = document.createElement("div");
             v.forEach(z => {
-                var button = document.createElement("button");
-                button.innerHTML = z["innerText"];
-                button.id = z["id"];
-                button.setAttribute("insert", z["insert"]);
-                button.className = z["class"];
+                var button = document.createElement("input");
+                console.log(z);
+                button.type = "button";
+                var keys = [ "text", "value", "textcontent", "innerhtml", "innerText" ];
+                Object.entries(z).forEach(x => {
+                    const [k, val] = x;
+                    console.log(k, val);
+                    if (keys.includes(k.toLocaleLowerCase())) 
+                        button.value = val;
+                    else
+                        button.setAttribute(k, val);
+                });
                 temp.appendChild(button);
             });
             // modala(v, tempTag, root, id);
