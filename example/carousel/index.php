@@ -13,7 +13,7 @@ var f = {
         "height": 100,
         "class": "carousel-step-left",
         "insert": "idtag1",
-        "innerHTML": "&lt;"
+        "innerHTML": "↶."
         },
         {
             "id": "right",
@@ -21,7 +21,7 @@ var f = {
             "height": 100,
             "class": "carousel-step-right",
             "insert": "idtag1",
-            "value": ">"
+            "value": ".↷"
         }
     ],
     "carousel": {

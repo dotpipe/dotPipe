@@ -9,7 +9,7 @@ for($i = 1 ; $i <= 11 ; $i++) {
             "id": "main",
             "style": "position:fixed;color:blue;height:25;width:10",
             "class": "arrow'.$i.' modala clear-node",
-            "innerHTML": "►",
+            "innerHTML": "➤",
             "method": "get",
             "ajax": "getarrow.php",
             "name": "arrow",

@@ -330,6 +330,178 @@ function escapeHtml(html) {
     return p.innerHTML;
 }
 
+function mapTagToAndroidComponent(tag) {
+    const componentMap = {
+        'div': 'LinearLayout',
+        'span': 'TextView',
+        'p': 'TextView',
+        'h1': 'TextView',
+        'h2': 'TextView',
+        'h3': 'TextView',
+        'h4': 'TextView',
+        'h5': 'TextView',
+        'h6': 'TextView',
+        'img': 'ImageView',
+        'a': 'Button',
+        'button': 'Button',
+        'input': 'EditText',
+        'textarea': 'EditText',
+        'select': 'Spinner',
+        'option': 'TextView',
+        'ul': 'ListView',
+        'ol': 'ListView',
+        'li': 'TextView',
+        'table': 'TableLayout',
+        'tr': 'TableRow',
+        'td': 'TextView',
+        'th': 'TextView',
+        'form': 'ScrollView',
+        'nav': 'LinearLayout',
+        'header': 'LinearLayout',
+        'footer': 'LinearLayout',
+        'main': 'LinearLayout',
+        'section': 'LinearLayout',
+        'article': 'LinearLayout',
+        'aside': 'LinearLayout',
+        'video': 'VideoView',
+        'audio': 'MediaController',
+        'canvas': 'SurfaceView',
+        'iframe': 'WebView',
+        'hr': 'View',
+        'br': 'View',
+        'label': 'TextView',
+        'fieldset': 'LinearLayout',
+        'legend': 'TextView',
+        'datalist': 'AutoCompleteTextView',
+        'details': 'ExpandableListView',
+        'summary': 'TextView',
+        'progress': 'ProgressBar',
+        'meter': 'ProgressBar',
+        'time': 'TextView',
+        'mark': 'TextView',
+        'code': 'TextView',
+        'pre': 'TextView',
+        'blockquote': 'TextView',
+        'q': 'TextView',
+        'cite': 'TextView',
+        'abbr': 'TextView',
+        'address': 'TextView',
+        'map': 'MapView',
+        'area': 'ImageButton'
+    };
+
+    return componentMap[tag.toLowerCase()] || 'View';
+}
+
+function createAndroidHierarchy(modalaJSON) {
+    function convertToAndroidFormat(element, parentKey = '') {
+        let androidElement = {};
+
+        if (element.tagname) {
+            let componentType = mapTagToAndroidComponent(element.tagname);
+            androidElement['@android:id'] = `@+id/${parentKey}_${componentType.toLowerCase()}`;
+            androidElement['@android:layout_width'] = element.width || 'wrap_content';
+            androidElement['@android:layout_height'] = element.height || 'wrap_content';
+
+            for (let attr in element) {
+                if (attr !== 'tagname' && attr !== 'children') {
+                    let androidAttr = mapCheatSheetToAndroidAttributes(attr, element[attr]);
+                    if (attr === 'ajax' || attr === 'insert') {
+                        androidElement[androidAttr] = handleMultipleValues(element[attr]);
+                    } else {
+                        androidElement[androidAttr] = element[attr];
+                    }
+                }
+            }
+
+            if (element.children) {
+                for (let childKey in element.children) {
+                    androidElement[mapTagToAndroidComponent(element.children[childKey].tagname)] =
+                        convertToAndroidFormat(element.children[childKey], childKey);
+                }
+            }
+        }
+        return androidElement;
+    }
+
+    function handleMultipleValues(value) {
+        if (value.includes(';')) {
+            return value.split(';').map(item => {
+                let [filename, insertId] = item.split(':');
+                return `${filename},${insertId}`;
+            }).join('|');
+        }
+        return value;
+    }
+
+    let androidLayout = {
+        'LinearLayout': {
+            '@xmlns:android': 'http://schemas.android.com/apk/res/android',
+            '@android:layout_width': 'match_parent',
+            '@android:layout_height': 'match_parent',
+            '@android:orientation': 'vertical'
+        }
+    };
+
+    androidLayout.LinearLayout = { ...androidLayout.LinearLayout, ...convertToAndroidFormat(modalaJSON) };
+
+    return { '<?xml version="1.0" encoding="utf-8"?>': androidLayout };
+}
+
+/**
+ *
+ * @param {string} attribute
+ * @param {string} value
+ * @returns
+ */
+function mapToAndroidAttributes(attribute, value) {
+    const attributeMap = {
+        'insert': '@android:id',
+        'ajax': '@android:tag',
+        'query': '@android:tag',
+        'modal': '@android:onClick',
+        'download': '@android:onClick',
+        'file': '@android:tag',
+        'x-toggle': '@android:onClick',
+        'directory': '@android:tag',
+        'clear-node': '@android:onClick',
+        'redirect': '@android:onClick',
+        'modala-multi-last': '@android:tag',
+        'modala-multi-first': '@android:tag',
+        'time-active': '@android:tag',
+        'time-inactive': '@android:tag',
+        'disabled': '@android:enabled',
+        'br': '@android:layout_marginBottom',
+        'js': '@android:tag',
+        'css': '@android:tag',
+        'event': '@android:onClick',
+        'options': '@android:entries',
+        'delay': '@android:tag',
+        'boxes': '@android:tag',
+        'file-order': '@android:tag',
+        'file-index': '@android:tag',
+        'incrIndex': '@android:tag',
+        'decrIndex': '@android:tag',
+        'interval': '@android:tag',
+        'x-value-set': '@android:onClick',
+        'x-value-get': '@android:onClick',
+        'x-value-rem': '@android:onClick',
+        'x-value-clear': '@android:onClick',
+        'mode': '@android:tag',
+        'pipe': '@android:tag',
+        'multiple': '@android:tag',
+        'remove': '@android:onClick',
+        'display': '@android:visibility',
+        'json': '@android:tag',
+        'headers': '@android:tag',
+        'form-class': '@android:tag',
+        'action-class': '@android:tag',
+        'mouse': '@android:clickable',
+        'mouse-insert': '@android:onClick'
+    };
+
+    return attributeMap[attribute] || `@android:${attribute}`;
+}
 /**
  * 
  * @param {JSON Object} value 
