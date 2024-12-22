@@ -1131,6 +1131,10 @@ function pipes(elem, stop = false) {
     if (elem.id === null)
         return;
 
+    if (elem.classList.contains("redirect")) {
+        window.location.href = elem.getAttribute("ajax");
+        return;
+    }
     if (elem.classList.contains("disabled"))
         return;
     if (elem.classList.contains("clear-node")) {
