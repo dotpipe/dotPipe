@@ -1,5 +1,3 @@
-Certainly! Let's expand further into more detailed sections, including advanced configurations, error handling, and integrating PipesJS with other libraries.
-
 ## Advanced Configurations
 
 ### Customizing AJAX Requests
