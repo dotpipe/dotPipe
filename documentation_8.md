@@ -1,5 +1,3 @@
-Certainly! Here are more examples of commands and functionalities for your web application:
-
 #### Command: `callbacks`
 
 **Description**: Calls a function set as the attribute value.
