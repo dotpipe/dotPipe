@@ -25,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/irondocks/irondock/issues"
   },
-  "homepage": "https://github.com/irondocks/irondock#readme"
+  "homepage": "https://github.com/irondocks/irondock#readme",
+  "devDependencies": {
+    "electron": "^32.1.2"
+  }
 }

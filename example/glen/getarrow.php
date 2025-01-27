@@ -1,5 +1,5 @@
 <?php
-$arrow = $_GET['arrow'];
+$arrow = $_GET['main'];
 
 $arrow_menu = array(
     "Main" => "1",

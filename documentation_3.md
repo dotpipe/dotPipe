@@ -1,5 +1,3 @@
-Certainly! Let's delve further into specific use cases, additional examples, and detailed descriptions of more advanced features and capabilities of PipesJS.
-
 ## Advanced Usage
 
 ### Handling User Interactions
