@@ -1,0 +1,26 @@
+{
+    "label": "Root",
+    "table": {
+        "label": "Table",
+        "sales": {
+            "textContent": "Sales",
+            "td2": {
+                "ajax": "tree.json",
+                "class": "sale-label tree-view",
+                "id": "sales-tag",
+                "insert": "sales-tag",
+                "textContent": "On Sale!",
+                "style": "color: #666;"
+            },
+            "sale1": {
+                "textContent": "Sale 1",
+                "ajax": "index2.html",
+                "tagname": "td",
+                "class": "sale-label redirect",
+                "id": "sales-tag1",
+                "textContent": "On Sale!!!",
+                "style": "color: #666;"
+            }
+        }
+    }
+}

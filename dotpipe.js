@@ -71,7 +71,7 @@
   **** go on if there is no input to replace them.
   */
 
-  function last() {
+function last() {
     try {
         const irc = JSON.parse(document.body.innerText);
 
@@ -353,6 +353,7 @@ function modala(value, tempTag, root, id) {
         temp.tagName = "div";
         temp.id = "undefined";
     }
+
     if (value["header"] !== undefined && value["header"] instanceof Object) {
 
         modalaHead(value["header"], "head", root, null);
@@ -515,6 +516,8 @@ function modala(value, tempTag, root, id) {
     tempTag.appendChild(temp);
     return tempTag;
 }
+
+
 
 /**
  * @param {string} target
@@ -910,6 +913,9 @@ function pipes(elem, stop = false) {
     if (elem.id === null)
         return;
 
+    if (elem.classList.contains("redirect")) {
+        window.location.href = elem.getAttribute("ajax");
+    }
     if (elem.classList.contains("disabled"))
         return;
     if (elem.classList.contains("clear-node")) {
@@ -1121,55 +1127,68 @@ function pipes(elem, stop = false) {
 
 let highlightedItem = null;
 
-function renderTree(obj, parentElement) {
-    let item = document.createElement('div');
-    item.classList.add('tree-item');
-    
-    if (obj.icon || obj.label) {
-        if (obj.icon) {
-            let img = document.createElement('img');
-            img.src = obj.icon;
-            // img.alt = obj.label || '';
-            img.style.marginRight = '10px';
-            item.appendChild(img);
-        }
-        let label = document.createElement('span');
-        label.textContent = obj.label || '';
-        item.appendChild(label);
+function renderTree(value, tempTag) {
+    if (typeof tempTag == "string") {
+        tempTag = document.getElementById(tempTag);
     }
-    
-    parentElement.appendChild(item);
+    if (value == undefined) {
+        console.log(tempTag + "******");
+        console.error("value of reference incorrect");
+        return;
+    }
 
-    Object.entries(obj).forEach(([key, value]) => {
-        if (key === 'icon' || key === 'label') return;
-        
-        let subItem = document.createElement('div');
-        subItem.classList.add('tree-item');
-        subItem.setAttribute('id', key);
-        subItem.textContent = key;
+    var temp = document.createElement(value["tagname"] || 'span');
+    temp.id = value["textContent"] || value["label"] || value.keyName;
+    temp.classList.add('tree-item');
 
-        let subContainer;
-        if (typeof value === 'object') {
-            subContainer = document.createElement('div');
+    if (value.icon) {
+        let img = document.createElement('img');
+        img.src = value.icon;
+        img.style.marginRight = '5px';
+        temp.appendChild(img);
+    }
+
+    temp.id = value.id;
+    temp.textContent = value.textContent || value.label;
+    if (temp.textContent.length == 0) {
+        console.error("No text content for tree item. Use \"label\" or \"textContent\"");
+        exit();
+    }
+
+    Object.entries(value).forEach(([k, v]) => {
+        let keyName = (!isNaN(k.toString()) ? "data-" + k.toString() : k);
+        if (v instanceof Object) {
+            let subContainer = document.createElement('span');
             subContainer.classList.add('sub-tree');
-            renderTree(value, subContainer);
-            subItem.appendChild(subContainer);
-            subItem.addEventListener('click', () => {
+            temp.appendChild(subContainer);
+            renderTree(v, subContainer);
+            temp.addEventListener('click', (e) => {
+                e.stopPropagation();
                 subContainer.style.display = subContainer.style.display === 'none' ? 'block' : 'none';
             });
+        } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
+            temp.setAttribute(k, v);
         }
-        parentElement.appendChild(subItem);
-
-        subItem.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (highlightedItem) {
-                highlightedItem.classList.remove('highlight');
-            }
-            subItem.classList.add('highlight');
-            highlightedItem = subItem;
-        });
     });
+
+    temp.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+        temp.classList.add('highlight');
+        pipes(temp);
+    });
+
+    // temp = htmlDecode(temp);
+
+    tempTag.appendChild(temp);
+
+    return tempTag;
 }
+// function htmlDecode(input){
+//     var e = document.createElement('div');
+//     e.innerHTML = input;
+//     return e.childNodes[0].nodeValue;
+// }
 
 function setAJAXOpts(elem, opts) {
 
@@ -1216,6 +1235,25 @@ function formAJAX(elem, classname) {
     return (elem_qstring);
 }
 
+function addPipe(elem) {
+    if (typeof elem === "Object" || typeof elem === "Array") {
+        elem.forEach(function (y) {
+            y.addEventListener('click', (x) => {
+                if (typeof x === "Object" || typeof x === "Array") {
+                    x.forEach((w) => {
+                        addPipe(w);
+                    });
+                }
+            });
+        });
+        if (!hasPipeListener(x))
+            pipes(x);
+    }
+}
+
+function hasPipeListener(elem) {
+    return elem.click;
+}
 
 function navigate(elem, opts = null, query = "", classname = "") {
     //formAJAX at the end of this line
@@ -1390,17 +1428,32 @@ function navigate(elem, opts = null, query = "", classname = "") {
     else if (elem.classList.contains("tree-view")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
-                var allText = "";// JSON.parse(rawFile.responseText);
+                var allText = "";
                 try {
                     console.log(rawFile.responseText);
                     allText = JSON.parse(rawFile.responseText);
-                    if (elem.hasAttribute("insert")) {
-                        document.getElementById(elem.getAttribute("insert")).textContent = document.getElementById(elem.getAttribute("insert")).innerHTML = treeList(rawFile.responseText, document.getElementById(elem.getAttribute("insert")));
+                    console.log(allText);
+                    var editNode = document.getElementById(elem.id);
+                    editNode.innerHTML = "";
+                    // editNode.innerHTML = allText;
+                    renderTree(allText, editNode);
+                    addPipe(editNode);
+                    return ;
+                    if (elem.hasAttribute("insert") && elem.getAttribute("insert") == elem.id && !document.getElementById(elem.id).hasChildNodes) {
+                        document.getElementById(elem.id).innerHTML = "<br>";
+                        var editNode = document.getElementById(elem.id).parentNode;
+                        var x = renderTree(allText, editNode);
+                        editNode.parentNode.insertBefore(x);
+                        console.log(document.getElementById(editNode));
+                    }
+                    else if (elem.hasAttribute("insert")) {
+                        var x = renderTree(allText, elem.getAttribute("insert"));
+                        // document.getElementById(elem.getAttribute("insert")).textContent = x.textContent;
                     }
                     return allText;
                 }
                 catch (e) {
-                    console.log("Response not a JSON");
+                    console.log("Response: " + e);
                 }
             }
         }
