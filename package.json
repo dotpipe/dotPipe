@@ -1,31 +1,30 @@
 {
-  "name": "irondocks",
+  "name": "dotpipe",
   "version": "2.8.3",
-  "description": "JSON Template HTML Extension Library Framework",
-  "main": "irondocks.js",
+  "description": "HTML Extension Library Framework",
+  "main": "dotpipe.js",
   "scripts": {
-    "test": "new irondocks(j.json,document.body);"
+    "test": "modala(j.json, 'id-of-element');"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/irondocks/irondock.git"
+    "url": "git+https://github.com/dotpipe/dotpipe.git"
   },
   "keywords": [
-    "JSON",
-    "Template",
     "HTML",
     "Extension",
     "Library",
     "Framework",
     "ajax",
-    "DOM"
+    "DOM",
+    "manipulataion"
   ],
   "author": "Anthony David Pulse, Jr.",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/irondocks/irondock/issues"
+    "url": "https://github.com/dotpipe/dotpipe/issues"
   },
-  "homepage": "https://github.com/irondocks/irondock#readme",
+  "homepage": "https://github.com/dotpipe/dotpipe#readme",
   "devDependencies": {
     "electron": "^32.1.2"
   }
