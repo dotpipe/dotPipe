@@ -71,13 +71,7 @@
   **** go on if there is no input to replace them.
   */
 
-<<<<<<< HEAD
 function last() {
-    try {
-        const irc = JSON.parse(document.body.innerText);
-=======
-  function last() {
->>>>>>> 127d4f08cec7b29e9a38f5a18a971dd13fab1efa
 
     try {
         if (document.body != null && !JSON.parse(document.body)) {

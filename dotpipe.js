@@ -731,12 +731,11 @@ function processElementsWithId() {
                     handleClick(ev);
                 pipes(element);
             });
+            if (element.classList.contains("pipe"))
+                pipes(element);
         }
     });
 }
-
-// Call the function
-processElementsWithId();
 
 // Function to get the values of elements by their IDs
 function getElementValueById(id) {
