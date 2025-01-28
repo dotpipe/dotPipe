@@ -73,9 +73,6 @@
 
 function last() {
     try {
-        const irc = JSON.parse(document.body.innerText);
-
-    try {
         if (document.body != null && !JSON.parse(document.body)) {
             const irc = JSON.parse(document.body.textContent);
 
