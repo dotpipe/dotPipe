@@ -1,3 +1,9 @@
+Please drop me a donation at baboonxiv@gmail.com on Paypal.com.
+I take Bitcoin as well!
+**bc1qjt8je65vc245y2xq0cx8lfdq0cpvxt957ns2ac**
+Or ETH **0x12c35f0d64cBbf3Ea250daD1C82E93902Be5198e**
+Or BTC Cash: **bitcoincash:qq6qugkmnl42sm3lgymrnsdrkpgt3a24pqllt4mlsg**
+
 # DotPipe.js Function Compendium
 
 This document details the functions within `dotpipe.js`, outlining their purpose, parameters, attributes, and how they interconnect. It serves as a guide for beginners, amateurs, and professionals to understand and utilize DotPipe.js effectively.
