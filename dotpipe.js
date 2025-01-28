@@ -1,11 +1,17 @@
 /**
-  *  only usage: onclick="pipes(this)"
-  *  to begin using the PipesJS code in other ways than <dyn> <pipe> and <timed>.
-  *  Usable DOM Attributes (almost all are optional
-  *  upto x > 134,217,000 different configurations 
-  *  with unlimited inputs/outputs):
-  *  Attribute/Tag   |   Use Case
-  *  -------------------------------------------------------------
+  *  dotPipe
+  *  -----------------------------------------------------------
+  *  dotPipe is a javascript library that allows you to create
+  *  a pipeline of events that can be triggered by clicking on
+  *  a button or any other event.
+  *  -----------------------------------------------------------
+  *  @author: Anthony D. Pulse, Jr.
+  *  -----------------------------------------------------------
+  *  @version: 1.0.0
+  *  -----------------------------------------------------------
+  *  one requirement: all nodes in use are with id tags
+  *  -----------------------------------------------------------
+  *  
   *  insert............= [Attr] return ajax call to this id
   *  ajax..............= [Attr] * calls and returns the value file's output ex: <pipe id="id1" ajax="foo.bar:insert1:countByEvent" query="key0:value0;" insert="someID">
   *  query.............= [Attr] default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
@@ -18,9 +24,9 @@
   *  redirect..........= [Class] "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
   *  modala-multi-last.= [Class] to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
   *  modala-multi-first= [Class] to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
-  *  time-active.......= [Class] to activate timers for things that go on continuously
-  *  time-inactive.....= [Class] to deactivate timers for things that go on continuously
-  *  disabled..........= [Class] to disable a tag (use x-toggle to toggle state of this and time-active/-inactive)
+  *  thread-active.....= [Class] to activate threads for things that go on continuously
+  *  thread-inactive...= [Class] to deactivate threads for things that go on continuously
+  *  disabled..........= [Class] to disable a tag (use x-toggle to toggle state of this and thread-active/-inactive)
   *  br................= [Specifically a] Modala key/value pair. "br": "x" where x is the number of breaks in succession.
   *  js................= [Specifically a] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest.
   *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
@@ -28,21 +34,13 @@
   *  tree-view.........= [Specifically a] Modala key/value pair or class. Allows access to Tree files in scope of top nest.
   *  <lnk>.............= [Tag] tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
   *  <pipe>............= [Tag] (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  <dyn>.............= [Tag] Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
   *  \n................= [-] RegEx emplacement to insert <br /> in Modala contents for innerHTML
   *  plain-text........= [Class] plain text returned to the insertion point
   *  plain-html........= [Class] returns as true HTML
-  *  <timed>...........= [Tag] Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
-  *  delay.............= [Attr] delay between <timed> tag refreshes (required for <timed> tag) ex: see <timed>
+  *  <thread>..........= [Tag] Thread and refreshing tags (Keep up-to-date handling on page) ex: <thread ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
+  *  delay.............= [Attr] delay between <thread> tag refreshes (required for <thread> tag) ex: see <thread> tag
   *  <carousel>........= [Tag] to create a carousel that moves every a timeOut() delay="x" occurs ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
-  *  carousel-ajax.....= [Class] to create Modala sets for carousel use.
-  *         -images...= [Class] to use pure images for carousel use.
-  *         -auto-off.= [Class] to stop carousel from moving (better to create buttons)
-  *         -vert.....= [Class] to make carousel vertical, instead of horizontal (default)
-  *         -video....= [Class] to make video carousel
-  *         -audio....= [Class] to make audio carousel
-  *         -iframe...= [Class] to make iframe carousel
-  *         -link.....= [Class] to make link carousel
+  *  carousel-ajax.....= [Class] to create Modala sets for carousel use. ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
   *  boxes.............= [Attr] attribute to request for x boxes for carousel elementss ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
   *  file-order........= [Attr] ajax to these files, iterating [0,1,2,3]%array.length per call (delimited by ';') ex: <pipe query="key0:value0;" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  file-index........= [Attr] counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
@@ -60,7 +58,7 @@
   *  display...........= [Attr] toggle visible and invisible of anything in the value ex: <anyTag display="someID;someOtherId;">
   *  json..............= [Class] returns a JSON file set as value
   *  headers...........= [Attr] headers in CSS markup-style (delimited by '&') <any ajax="foo.bar" headers="foobar:boo&barfoo:barfoo;q:9&" insert="someID">
-  *  form-class........= [Class] name of devoted form elements
+  *  form-class........= [Attr] class of devoted form elements
   *  action-class......= [Class] name of devoted to-be-triggered tags (acts as listener to other certain tag(s))
   *  mouse.............= [Class] name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
   *  mouse-insert......= [Class] name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
@@ -84,10 +82,7 @@ function last() {
     catch (e) {
         console.log(e);
     }
-    document.addEventListener("click", function (elem) {
-        console.log(elem.target);
-        if (elem.target.id != undefined) { pipes(elem.target); }
-    });
+    processElementsWithId();
     return;
 }
 
@@ -105,13 +100,13 @@ let domContentLoad = (again = false) => {
 
     let elementsArray_time = document.getElementsByTagName("timed");
     Array.from(elementsArray_time).forEach(function (elem) {
-        if (elem.classList.contains("time-inactive"))
+        if (elem.classList.contains("thread-inactive"))
             return;
-        if (elem.classList.contains("time-active")) {
+        if (elem.classList.contains("thread-active")) {
             auto = true;
             setTimers(elem);
         }
-        else if (elem.classList.contains("time-inactive")) {
+        else if (elem.classList.contains("thread-inactive")) {
             auto = false;
         }
     });
@@ -125,13 +120,13 @@ let domContentLoad = (again = false) => {
 
     let elements_Carousel = document.getElementsByTagName("carousel");
     Array.from(elements_Carousel).forEach(function (elem) {
-        if (elem.classList.contains("time-inactive"))
+        if (elem.classList.contains("thread-inactive"))
             return;
-        if (elem.classList.contains("time-active")) {
+        if (elem.classList.contains("thread-active")) {
             auto = true;
             setTimers(elem);
         }
-        else if (elem.classList.contains("time-inactive")) {
+        else if (elem.classList.contains("thread-inactive")) {
             auto = false;
         }
         setTimeout(carousel(elem, auto), elem.getAttribute("delay"));
@@ -152,7 +147,7 @@ let domContentLoad = (again = false) => {
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
             elem.addEventListener(v, function () {
-                (pipes(elem, auto));
+                pipes(elem, auto);
             });
         });
     });
@@ -469,8 +464,8 @@ function mapToAndroidAttributes(attribute, value) {
         'redirect': '@android:onClick',
         'modala-multi-last': '@android:tag',
         'modala-multi-first': '@android:tag',
-        'time-active': '@android:tag',
-        'time-inactive': '@android:tag',
+        'thread-active': '@android:tag',
+        'thread-inactive': '@android:tag',
         'disabled': '@android:enabled',
         'br': '@android:layout_marginBottom',
         'js': '@android:tag',
@@ -697,6 +692,15 @@ function modala(value, tempTag, root, id) {
                     tempTag.appendChild(div);
                 });
         }
+        else if (k.toLowerCase() == "callback") {
+            fetch(v)
+                .then(response => response.text())
+                .then(data => {
+                    var div = document.createElement("div");
+                    div.innerHTML = data;
+                    tempTag.appendChild(div);
+                });
+        }
         else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
             try {
                 temp.setAttribute(k, v);
@@ -715,7 +719,55 @@ function modala(value, tempTag, root, id) {
     return tempTag;
 }
 
+function processElementsWithId() {
+    // Select all elements with an `id` attribute
+    const elementsWithId = document.querySelectorAll('[id]');
 
+    // Loop through each element
+    elementsWithId.forEach((element) => {
+        if (!hasPipeListener(element)) {
+            element.addEventListener('click', (ev) => {
+                if (element.hasAttribute("callback"))
+                    handleClick(ev);
+                pipes(element);
+            });
+        }
+    });
+}
+
+// Call the function
+processElementsWithId();
+
+// Function to get the values of elements by their IDs
+function getElementValueById(id) {
+    const element = document.getElementById(id);
+    return element ? element.value : null;  // Return the value or null if element doesn't exist
+}
+
+// Function to handle the click event
+function handleClick(event) {
+    // Get the div that was clicked
+    const clickedElement = event.currentTarget;
+
+    if (hasPipeListener(clickedElement)) {
+        // Call the callback function with the retrieved values
+        document.getElementById(clickedElement.getAttribute('id')).addEventListener('click', handleClick);
+    }
+
+    // Get the callback function name from the 'callback' attribute
+    const callbackName = clickedElement.getAttribute('callback');
+
+    // Get the 'params' attribute, which is a semicolon-separated list of element IDs
+    const params = clickedElement.getAttribute('params').split(';');
+
+    // Retrieve the values of the elements specified in the 'params' attribute
+    const values = params.map(paramId => getElementValueById(paramId));
+
+    // Call the callback function and pass the retrieved values as arguments
+    if (window[callbackName]) {
+        window[callbackName](...values);  // Use spread syntax to pass the values as parameters
+    }
+}
 
 /**
  * @param {string} target
@@ -724,16 +776,17 @@ function modala(value, tempTag, root, id) {
  */
 function setTimers(target) {
     var delay = target.getAttribute("delay");
-    if (target.classList.contains("time-inactive") && target.classList.contains("time-active")) {
-        target.classList.toggle("time-active")
+    if (target.classList.contains("thread-inactive") && target.classList.contains("thread-active")) {
+        target.classList.toggle("thread-active")
         return;
     }
-    else if (target.classList.contains("time-active")) {
+    else if (target.classList.contains("thread-active")) {
     }
-    else if (target.classList.contains("time-inactive")) {
+    else if (target.classList.contains("thread-inactive")) {
+        return;
     }
     else {
-        target.classList.toggle("time-inactive")
+        target.classList.toggle("thread-inactive")
     }
 
     setTimeout(function () {
@@ -744,10 +797,10 @@ function setTimers(target) {
 
 function carouselButtonSlide(elem, direction) {
 
-    if (elem.classList.contains("time-active")) {
+    if (elem.classList.contains("thread-active")) {
         auto = true;
     }
-    else if (elem.classList.contains("time-inactive")) {
+    else if (elem.classList.contains("thread-inactive")) {
         auto = false;
     }
     if (direction.toLowerCase() == "right")
@@ -758,10 +811,10 @@ function carouselButtonSlide(elem, direction) {
 
 function carouselButtonStep(elem, direction) {
 
-    if (elem.classList.contains("time-active")) {
+    if (elem.classList.contains("thread-active")) {
         auto = true;
     }
-    else if (elem.classList.contains("time-inactive")) {
+    else if (elem.classList.contains("thread-inactive")) {
         auto = false;
     }
     if (direction.toLowerCase() == "right")
@@ -808,10 +861,10 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     else
         elem.style.display = "inline-block";
 
-    if (elem.classList.contains("time-active")) {
+    if (elem.classList.contains("thread-active")) {
         auto = true;
     }
-    else if (elem.classList.contains("time-inactive")) {
+    else if (elem.classList.contains("thread-inactive")) {
         auto = false;
     }
     elem.setAttribute("index", (i + iter) % elem.children.length);
@@ -857,10 +910,10 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
     else
         elem.style.display = "inline-block";
 
-    if (elem.classList.contains("time-active")) {
+    if (elem.classList.contains("thread-active")) {
         auto = true;
     }
-    else if (elem.classList.contains("time-inactive")) {
+    else if (elem.classList.contains("thread-inactive")) {
         auto = false;
     }
     elem.setAttribute("index", (i + iter) % elem.children.length);
@@ -1047,10 +1100,10 @@ function carousel(elem, auto = true) {
     var w = (Math.abs(i));
     x.setAttribute("file-index", w % mArray.length);
     var delay = x.getAttribute("delay");
-    if (x.classList.contains("time-active")) {
+    if (x.classList.contains("thread-active")) {
         auto = true;
     }
-    else if (x.classList.contains("time-inactive")) {
+    else if (x.classList.contains("thread-inactive")) {
         auto = false;
     }
     setTimeout(() => { carousel(x.id, auto) }, delay);
@@ -1239,10 +1292,10 @@ function pipes(elem, stop = false) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
 
-            if (elem.classList.contains("time-active")) {
+            if (elem.classList.contains("thread-active")) {
                 auto = true;
             }
-            else if (elem.classList.contains("time-inactive")) {
+            else if (elem.classList.contains("thread-inactive")) {
                 auto = false;
             }
             shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
@@ -1252,10 +1305,10 @@ function pipes(elem, stop = false) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
 
-            if (elem.classList.contains("time-active")) {
+            if (elem.classList.contains("thread-active")) {
                 auto = true;
             }
-            else if (elem.classList.contains("time-inactive")) {
+            else if (elem.classList.contains("thread-inactive")) {
                 auto = false;
             }
             shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
@@ -1265,10 +1318,10 @@ function pipes(elem, stop = false) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
 
-            if (elem.classList.contains("time-active")) {
+            if (elem.classList.contains("thread-active")) {
                 auto = true;
             }
-            else if (elem.classList.contains("time-inactive")) {
+            else if (elem.classList.contains("thread-inactive")) {
                 auto = false;
             }
             shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
@@ -1278,10 +1331,10 @@ function pipes(elem, stop = false) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
 
-            if (elem.classList.contains("time-active")) {
+            if (elem.classList.contains("thread-active")) {
                 auto = true;
             }
-            else if (elem.classList.contains("time-inactive")) {
+            else if (elem.classList.contains("thread-inactive")) {
                 auto = false;
             }
             shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
@@ -1315,10 +1368,10 @@ function pipes(elem, stop = false) {
     }
     if (elem.classList.contains("carousel")) {
         var auto = true;
-        if (elem.classList.contains("time-active")) {
+        if (elem.classList.contains("thread-active")) {
             auto = true;
         }
-        else if (elem.classList.contains("time-inactive")) {
+        else if (elem.classList.contains("thread-inactive")) {
             auto = false;
         }
         carousel(elem, auto);
@@ -1660,7 +1713,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     // editNode.innerHTML = allText;
                     renderTree(allText, editNode);
                     addPipe(editNode);
-                    return ;
+                    return;
                     if (elem.hasAttribute("insert") && elem.getAttribute("insert") == elem.id && !document.getElementById(elem.id).hasChildNodes) {
                         document.getElementById(elem.id).innerHTML = "<br>";
                         var editNode = document.getElementById(elem.id).parentNode;

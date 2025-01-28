@@ -61,7 +61,7 @@
   *  display...........= [Attr] toggle visible and invisible of anything in the value ex: <anyTag display="someID;someOtherId;">
   *  json..............= [Class] returns a JSON file set as value
   *  headers...........= [Attr] headers in CSS markup-style (delimited by '&') <any ajax="foo.bar" headers="foobar:boo&barfoo:barfoo;q:9&" insert="someID">
-  *  form-class........= [Class] name of devoted form elements
+  *  form-class........= [Attr] class of devoted form elements
   *  action-class......= [Class] name of devoted to-be-triggered tags (acts as listener to other certain tag(s))
   *  mouse.............= [Class] name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
   *  mouse-insert......= [Class] name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
