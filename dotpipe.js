@@ -72,11 +72,8 @@
   */
 
 function last() {
-<<<<<<< HEAD
     try {
         const irc = JSON.parse(document.body.innerText);
-=======
->>>>>>> 127d4f08cec7b29e9a38f5a18a971dd13fab1efa
 
     try {
         if (document.body != null && !JSON.parse(document.body)) {
@@ -1143,10 +1140,6 @@ function pipes(elem, stop = false) {
 
     if (elem.classList.contains("redirect")) {
         window.location.href = elem.getAttribute("ajax");
-<<<<<<< HEAD
-=======
-        return;
->>>>>>> 127d4f08cec7b29e9a38f5a18a971dd13fab1efa
     }
     if (elem.classList.contains("disabled"))
         return;
