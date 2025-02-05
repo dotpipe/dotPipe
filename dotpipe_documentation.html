@@ -258,19 +258,20 @@
     <div class="json-structure">
         <h3>Modala JSON Format</h3>
         <p>Example structure for Modala JSON files:</p>
+        <p>All key names must be in lowercase:</p>
         <pre><code>
 {
     "label": "Root",
     "table": {
         "label": "Table",
         "sales": {
-            "textContent": "Sales",
+            "textcontent": "Sales",
             "td2": {
                 "ajax": "./tree.json",
                 "class": "sale-label tree-view",
                 "id": "sales-tag",
                 "insert": "sales-tag",
-                "textContent": "On Sale!",
+                "textcontent": "On Sale!",
                 "style": "color: #666;"
             }
         }
