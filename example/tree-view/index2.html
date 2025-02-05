@@ -1,0 +1,147 @@
+<style>
+    /* chocolate-styles.css */
+    body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        background-color: #f5e6d3;
+        color: #4a3728;
+        line-height: 1.6;
+    }
+
+    #chocolate-delight {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .title {
+        color: #8b4513;
+        text-align: center;
+        font-size: 2.5em;
+    }
+
+    .section-title {
+        color: #6b3e26;
+        border-bottom: 2px solid #8b4513;
+        padding-bottom: 10px;
+    }
+
+    .ingredient-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .ingredient-list li {
+        background-color: #e6ccb2;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .description {
+        background-color: #f0d9b5;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+    }
+
+    .image-gallery {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0;
+    }
+
+    .gallery-image {
+        width: 48%;
+        border-radius: 10px;
+    }
+
+    .cta-button {
+        background-color: #8b4513;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1.2em;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .cta-button:hover {
+        background-color: #6b3e26;
+    }
+</style>
+
+<body></body>
+
+<script src="dotpipe.js"></script>
+<script>
+
+    var chocolate = {
+        "form": {
+            "tagname": "form",
+            "id": "order-form",
+            "class": "order-form",
+            "children": {
+                "nest0": {
+                    "tagname": "h3",
+                    "textContent": "Place Your Order"
+                },
+                "nest1": {
+                    "tagname": "label",
+                    "for": "quantity",
+                    "textContent": "Quantity:"
+                },
+                "nest2": {
+                    "tagname": "input",
+                    "type": "number",
+                    "id": "quantity",
+                    "name": "quantity",
+                    "min": "1",
+                    "value": "1",
+                    "class": "order-form"
+                },
+                "nest3": {
+                    "tagname": "label",
+                    "for": "name",
+                    "textContent": "Your Name:"
+                },
+                "nest4": {
+                    "tagname": "input",
+                    "type": "text",
+                    "id": "name",
+                    "name": "name",
+                    "required": true,
+                    "class": "order-form"
+                },
+                "nest5": {
+                    "tagname": "label",
+                    "for": "email",
+                    "textContent": "Email:"
+                },
+                "nest6": {
+                    "tagname": "input",
+                    "type": "email",
+                    "id": "email",
+                    "name": "email",
+                    "required": true,
+                    "class": "order-form"
+                },
+                "nest7": {
+                    "tagname": "button",
+                    "type": "submit",
+                    "textContent": "Submit Order",
+                    "class": "submit-button json",
+                    "ajax": "process-order.php",
+                    "insert": "order-confirmation",
+                    "method": "POST",
+                    "form-class": "order-form"
+                },
+                "nest8": {
+                    "tagname": "div",
+                    "id": "order-confirmation"
+                }
+            }
+        }
+
+    }
+    modala(chocolate, document.body);
+</script>

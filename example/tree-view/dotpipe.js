@@ -72,16 +72,6 @@
   */
 
 function last() {
-    try {
-        const irc = JSON.parse(document.body.innerText);
-
-        document.body.innerText = "";
-        modala(irc, document.body);
-        document.body.style.display = "block";
-    }
-    catch (e) {
-        console.log(e);
-    }
     document.addEventListener("click", function (elem) {
         console.log(elem.target);
         if (elem.target.id != undefined) { pipes(elem.target); }
@@ -1220,7 +1210,8 @@ function formAJAX(elem, classname) {
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
-        elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.value + (elem_value.substr(-1) == "&" ? "" : "&");
+        if (elem_value.value)
+            elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.value + (elem_value.value[-1] == "&" ? "" : "&");
         // Multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {
@@ -1410,12 +1401,16 @@ function navigate(elem, opts = null, query = "", classname = "") {
     else if (elem.classList.contains("json")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
-                var allText = "";// JSON.parse(rawFile.responseText);
+                var allText = JSON.parse(rawFile.responseText);
                 try {
                     console.log(rawFile.responseText);
                     allText = JSON.parse(rawFile.responseText);
+                    if (allText['status']) {
+                        if (allText['status'] != "success")
+                            return allText;
+                    }
                     if (elem.hasAttribute("insert")) {
-                        document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
+                        document.getElementById(elem.getAttribute("insert")).textContent = (allText['message']);
                     }
                     return allText;
                 }
@@ -1432,6 +1427,10 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 try {
                     console.log(rawFile.responseText);
                     allText = JSON.parse(rawFile.responseText);
+                    if (allText['status']) {
+                        if (allText['status'] != "success")
+                            return allText;
+                    }
                     console.log(allText);
                     var editNode = document.getElementById(elem.id);
                     editNode.innerHTML = "";
@@ -1439,18 +1438,6 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     renderTree(allText, editNode);
                     addPipe(editNode);
                     return ;
-                    if (elem.hasAttribute("insert") && elem.getAttribute("insert") == elem.id && !document.getElementById(elem.id).hasChildNodes) {
-                        document.getElementById(elem.id).innerHTML = "<br>";
-                        var editNode = document.getElementById(elem.id).parentNode;
-                        var x = renderTree(allText, editNode);
-                        editNode.parentNode.insertBefore(x);
-                        console.log(document.getElementById(editNode));
-                    }
-                    else if (elem.hasAttribute("insert")) {
-                        var x = renderTree(allText, elem.getAttribute("insert"));
-                        // document.getElementById(elem.getAttribute("insert")).textContent = x.textContent;
-                    }
-                    return allText;
                 }
                 catch (e) {
                     console.log("Response: " + e);

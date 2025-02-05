@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dotPipe Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1,
+        h2 {
+            color: #0066cc;
+        }
+
+        .attribute,
+        .class {
+            background-color: #f4f4f4;
+            border-left: 3px solid #0066cc;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        code {
+            background-color: #e6e6e6;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>dotPipe Documentation</h1>
+
+    <h2>Attributes</h2>
+
+    <div class="attribute">
+        <h3>id</h3>
+        <p>Unique identifier for the pipe element.</p>
+        <p>Example: <code><pipe id="uniquePipeId"></code></p>
+    </div>
+    <div class="attribute">
+        <h3>form-class</h3>
+        <p>Used for form handling. Selects elements to include in a form by their name and value.</p>
+        <p>Example: <code>&lt;form form-class="myFormClass"&gt;</code></p>
+    </div>
+    <div class="attribute">
+        <h3>ajax</h3>
+        <p>Specifies the AJAX call to be made.</p>
+        <p>Format: <code>file.extension:insertTarget:countByEvent</code></p>
+        <p>Example: <code><element ajax="data.php:resultDiv:3"></code></p>
+    </div>
+    <div class="attribute">
+        <h3>file</h3>
+        <p>Specifies the filename to download when used with the download class.</p>
+        <p>Example: <code>&lt;a class="download" file="document.pdf"&gt;Download&lt;/a&gt;</code></p>
+    </div>
+    <div class="attribute">
+        <h3>query</h3>
+        <p>Defines the default query string for the AJAX call.</p>
+        <p>Format: <code>key0:value0;key1:value1;</code></p>
+        <p>Example: <code><element query="userId:123;action:update;"></code></p>
+    </div>
+
+    <div class="attribute">
+        <h3>insert</h3>
+        <p>Specifies the target ID where the AJAX response should be inserted.</p>
+        <p>Example: <code><element insert="targetDivId"></code></p>
+    </div>
+
+    <div class="attribute">
+        <h3>modal</h3>
+        <p>Used for JSON file insertion.</p>
+        <p>Format: <code>json1.json:insert1.insert2.insert3;continued</code></p>
+        <p>Example: <code><element modal="template.json:header.main.footer;"></code></p>
+    </div>
+
+    <div class="attribute">
+        <h3>x-toggle</h3>
+        <p>Used for toggling class values.</p>
+        <p>Format: <code>id1:class1;id1:class2;id2:class2</code></p>
+        <p>Example: <code><element x-toggle="btn1:active;btn2:hidden;"></code></p>
+    </div>
+
+    <h2>Classes</h2>
+
+    <div class="class">
+        <h3>download</h3>
+        <p>Used for file downloads.</p>
+        <p>Related attributes: file, directory</p>
+        <p>Example: <code><a class="download" file="document.pdf" directory="/files/">Download</a></code></p>
+    </div>
+    <div class="class">
+        <h3>tree-view</h3>
+        <p>Used to return the tree-view modala to its resting place in the DOMNode selected through insert="".</p>
+        <p>Example: <code>&lt;div class="tree-view" insert="treeContainer"&gt;</code></p>
+    </div>
+    <div class="class">
+        <h3>clear-node</h3>
+        <p>Used to clear specified nodes.</p>
+        <p>Related attribute: insert (specifies nodes to clear)</p>
+        <p>Example: <code><button class="clear-node" insert="div1;div2;">Clear</button></code></p>
+    </div>
+
+    <div class="class">
+        <h3>redirect</h3>
+        <p>Used to follow AJAX calls in POST or GET mode.</p>
+        <p>Example: <code><a class="redirect" ajax="process.php">Submit</a></code></p>
+    </div>
+
+    <div class="class">
+        <h3>modala-multi-last</h3>
+        <p>Used for creating multi-ajax calls.</p>
+        <p>Format in ajax attribute: <code>foo.bar:insertHere:x</code> (x is max number of insertions)</p>
+        <p>Example: <code><div class="modala-multi-last" ajax="data.php:resultDiv:3">Load More</div></code></p>
+    </div>
+
+    <h2>Special Functions</h2>
+
+    <div class="function">
+        <h3>pipes()</h3>
+        <p>Initializes the dotPipe functionality on the page.</p>
+        <p>Usage: Call this function after the DOM is loaded to activate dotPipe features.</p>
+    </div>
+
+    <div class="function">
+        <h3>domcontentload()</h3>
+        <p>Ensures that dotPipe functionality is initialized when the DOM content is fully loaded.</p>
+        <p>Usage: This function is typically called automatically, but can be manually invoked if needed.</p>
+    </div>
+
+    <div class="feature">
+        <h3>Threading Control with x-toggle</h3>
+        <p>The x-toggle attribute can be used to control threading functionality in dotPipe. It leverages setTimeout for efficient execution of multiple tasks.</p>
+        <p>Example usage:</p>
+        <pre><code>&lt;button x-toggle="threadControl:active"&gt;Toggle Thread&lt;/button&gt;</code></pre>
+        <p>In the dotPipe codebase, setTimeout is used instead of setInterval. This allows for:</p>
+        <ul>
+            <li>More flexible execution of multiple tasks</li>
+            <li>Better control over timing and frequency of operations</li>
+            <li>Improved performance when dealing with multiple threads or asynchronous processes</li>
+        </ul>
+        <p>The setTimeout approach enables developers to fine-tune the behavior of threaded operations, ensuring optimal performance and responsiveness in dotPipe applications.</p>
+    </div>
+
+    <div class="feature">
+        <h3>AJAX Response Processing</h3>
+        <p>dotPipe efficiently handles AJAX responses through a custom processing mechanism.</p>
+        <p>Key aspects of AJAX response handling:</p>
+        <ul>
+            <li>Automatic parsing of JSON responses</li>
+            <li>Dynamic content insertion into specified DOM elements</li>
+            <li>Support for chained AJAX calls</li>
+            <li>Error handling and logging</li>
+        </ul>
+        <p>Example usage:</p>
+        <pre><code>&lt;div id="resultContainer" ajax="data.php:resultContainer"&gt;&lt;/div&gt;</code></pre>
+        <p>The AJAX response from data.php will be automatically processed and inserted into the element with id "resultContainer".</p>
+    </div>
+
+    <div class="feature">
+        <h3>Form Handling with form-class</h3>
+        <p>dotPipe provides robust form handling capabilities through the 'form-class' attribute.</p>
+        <p>Key features of form handling:</p>
+        <ul>
+            <li>Automatic collection of form data based on class selectors</li>
+            <li>Seamless integration with AJAX submissions</li>
+            <li>Support for custom validation before submission</li>
+            <li>Dynamic updating of form elements based on server responses</li>
+        </ul>
+        <p>Example usage:</p>
+        <pre><code>&lt;form form-class="myForm" ajax="process.php:resultDiv"&gt;
+        &lt;input type="text" name="username" class="myForm"&gt;
+        &lt;input type="submit" value="Submit"&gt;
+    &lt;/form&gt;</code></pre>
+        <p>This form will automatically collect data from inputs with class "myForm" and submit it to process.php, updating the element with id "resultDiv" with the response.</p>
+    </div>
+
+    <div class="feature">
+        <h3>Multi-AJAX Calls</h3>
+        <p>The 'modala-multi-last' class enables multiple AJAX calls with a limit on insertions.</p>
+        <p>Example:</p>
+        <pre><code>&lt;div class="modala-multi-last" ajax="data.php:resultDiv:3"&gt;Load More&lt;/div&gt;</code></pre>
+    </div>
+    <div class="feature">
+        <h3>Query String Handling</h3>
+        <p>The 'query' attribute allows for easy specification of query parameters for AJAX calls.</p>
+        <p>Example:</p>
+        <pre><code>&lt;div ajax="data.php" query="id=123&amp;type=user"&gt;Load User Data&lt;/div&gt;</code></pre>
+    </div>
+    <div class="feature">
+        <h3>Dynamic Class Toggling</h3>
+        <p>The 'x-toggle' attribute provides a way to dynamically toggle classes on elements.</p>
+        <p>Example:</p>
+        <pre><code>&lt;button x-toggle="btn1:active;btn2:hidden"&gt;Toggle Classes&lt;/button&gt;</code></pre>
+    </div>
+    
+    <div class="feature">
+        <h3>File Download</h3>
+        <p>dotPipe simplifies file downloads with the 'download' class and associated attributes.</p>
+        <p>Example:</p>
+        <pre><code>&lt;a class="download" file="report.pdf" directory="/files/"&gt;Download Report&lt;/a&gt;</code></pre>
+    </div>
+    <div class="feature">
+        <h3>Clear Node</h3>
+        <p>The 'clear-node' class allows for easy clearing of specified DOM elements.</p>
+        <p>Example:</p>
+        <pre><code>&lt;button class="clear-node" insert="div1;div2"&gt;Clear Content&lt;/button&gt;</code></pre>
+    </div>
+    <div class="feature">
+        <h3>AJAX Redirect</h3>
+        <p>The 'redirect' class enables following AJAX calls in POST or GET mode.</p>
+        <p>Example:</p>
+        <pre><code>&lt;a class="redirect" ajax="process.php"&gt;Process and Redirect&lt;/a&gt;</code></pre>
+    </div>
+    
+    
+    <div class="feature">
+        <h3>Modala Functionality</h3>
+        <p>Modala is a powerful feature in dotPipe for creating and managing modal dialogs with dynamic content.</p>
+        <p>Key features of Modala:</p>
+        <ul>
+            <li>Dynamic loading of JSON-based templates</li>
+            <li>Automatic positioning and styling of modal windows</li>
+            <li>Support for nested modals</li>
+            <li>Integration with AJAX for real-time content updates</li>
+        </ul>
+        <p>Example usage:</p>
+        <pre><code>&lt;button modal="template.json:modalContent"&gt;Open Modal&lt;/button&gt;</code></pre>
+        <p>This will open a modal dialog with content defined in template.json, inserted into an element with id "modalContent".</p>
+    </div>
+  
+    <div class="feature">
+        <h3>Tree-View Functionality</h3>
+        <p>The tree-view feature in dotPipe enables the creation of expandable, hierarchical structures for data representation and navigation.</p>
+        <p>Key aspects of tree-view:</p>
+        <ul>
+            <li>Dynamic generation of tree structures from JSON data</li>
+            <li>Collapsible and expandable nodes</li>
+            <li>Integration with AJAX for on-demand loading of sub-trees</li>
+            <li>Customizable styling and behavior</li>
+        </ul>
+        <p>Example usage:</p>
+        <pre><code>&lt;div class="tree-view" ajax="tree-data.json:treeContainer"&gt;&lt;/div&gt;</code></pre>
+        <p>This will create a tree-view structure based on the data in tree-data.json, rendered within the element with id "treeContainer".</p>
+    </div>
+
+    
+    <h2>JSON Structure</h2>
+
+    <div class="json-structure">
+        <h3>Modala JSON Format</h3>
+        <p>Example structure for Modala JSON files:</p>
+        <pre><code>
+{
+    "label": "Root",
+    "table": {
+        "label": "Table",
+        "sales": {
+            "textContent": "Sales",
+            "td2": {
+                "ajax": "./tree.json",
+                "class": "sale-label tree-view",
+                "id": "sales-tag",
+                "insert": "sales-tag",
+                "textContent": "On Sale!",
+                "style": "color: #666;"
+            }
+        }
+    }
+}
+    </code></pre>
+    </div>
+</body>
+
+</html>

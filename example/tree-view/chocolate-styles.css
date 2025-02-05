@@ -1,0 +1,69 @@
+/* chocolate-styles.css */
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f5e6d3;
+    color: #4a3728;
+    line-height: 1.6;
+}
+
+#chocolate-delight {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.title {
+    color: #8b4513;
+    text-align: center;
+    font-size: 2.5em;
+}
+
+.section-title {
+    color: #6b3e26;
+    border-bottom: 2px solid #8b4513;
+    padding-bottom: 10px;
+}
+
+.ingredient-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.ingredient-list li {
+    background-color: #e6ccb2;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.description {
+    background-color: #f0d9b5;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.image-gallery {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.gallery-image {
+    width: 48%;
+    border-radius: 10px;
+}
+
+.cta-button {
+    background-color: #8b4513;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.cta-button:hover {
+    background-color: #6b3e26;
+}

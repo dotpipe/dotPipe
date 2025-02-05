@@ -44,12 +44,12 @@
                 "sales": {
                     "textContent": "Sales",
                     "td2": {
-                        "ajax": "tree.json",
+                        "ajax": "./tree.json",
                         "class": "sale-label tree-view",
                         "id": "sales-tag",
                         "insert": "sales-tag",
                         "textContent": "On Sale!",
-                        "style": "color: #666;"
+                        "style": "color: #406;"
                     },
                     "sale1": {
                         "textContent": "Sale 1",
@@ -58,93 +58,14 @@
                         "class": "sale-label redirect",
                         "id": "sales-tag1",
                         "textContent": "On Sale!!!",
-                        "style": "color: #666;"
+                        "style": "color: #406;"
                     }
                 }
             }
         };
         renderTree(jsonData, "jsonTree");
     </script>
-    <!-- <script>
-        function renderTree(value, tempTag) {
-            if (typeof tempTag == "string") {
-                tempTag = document.getElementById(tempTag);
-            }
-            if (!value) {
-                console.error("Value of reference incorrect");
-                return;
-            }
 
-            var temp = document.createElement(value["tagname"] || 'span');
-
-            // Set ID if present in the JSON, but never as a label
-            if (value.id) {
-                temp.id = value.id;
-            }
-
-            // Handle icons and text content separately
-            if (value.icon) {
-                let img = document.createElement('img');
-                img.src = value.icon;
-                img.style.marginRight = '5px';
-                temp.appendChild(img);
-            }
-
-            // Set the text content (label, textContent) with fallback to key value
-            temp.textContent = value.textContent || value.label || '';
-
-            if (!temp.textContent) {
-                temp.textContent = "undefined";
-            }
-
-            // Process attributes for the element (excluding reserved keys)
-            Object.entries(value).forEach(([k, v]) => {
-                if (v instanceof Object) {
-                    let subContainer = document.createElement('span');
-                    subContainer.classList.add('sub-tree');
-                    temp.appendChild(subContainer);
-
-                    renderTree(v, subContainer);
-                    temp.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        subContainer.style.display = subContainer.style.display === 'none' ? 'block' : 'none';
-                    });
-                } else if (k.toLowerCase() !== "tagname" && k.toLowerCase() !== "textcontent" && k.toLowerCase() !== "label" && k.toLowerCase() !== "icon" && k.toLowerCase() !== "insert") {
-                    temp.setAttribute(k, v);
-                }
-            });
-
-            // Handle dynamic JSON loading for tree-view elements
-            if (temp.classList.contains("tree-view")) {
-                temp.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    fetch(temp.getAttribute("ajax"))
-                        .then(response => response.json())
-                        .then(data => {
-                            if (temp.hasAttribute("insert")) {
-                                let target = document.getElementById(temp.getAttribute("insert"));
-                                target.innerHTML = ''; // Clear target first
-                                renderTree(data, target);
-                            }
-                        })
-                        .catch(err => console.error("Failed to load JSON:", err));
-                });
-            }
-
-            tempTag.appendChild(temp);
-            return tempTag;
-        }
-
-        function htmlDecode(input) {
-            var e = document.createElement('div');
-            e.innerHTML = input;
-            return e.childNodes[0].nodeValue;
-        }
-
-    
-        renderTree(jsonData, "jsonTree");
-
-    </script> -->
 </body>
 
 </html>
