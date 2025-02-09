@@ -185,28 +185,39 @@ function copyContentById(id) {
 
         // Remove the textarea from the body
         document.body.removeChild(textarea);
+        return true;
         // Alert the user that the content has been copied
-        var copied = document.createElement('p');
-        copied.style.width = "100px";
-        copied.style.height = "20px";
-        var topY = window.scrollY || document.documentElement.scrollTop;
-        copied.style.top = topY + "px";
-        copied.style.padding = "10px";
-        copied.style.textAlign = "center";
-        copied.style.backgroundColor = "lightgreen";
-        copied.style.position = "absolute";
-        var pos = (document.body.offsetWidth / 2) - (copied.offsetWidth / 2);
-        copied.style.left = pos + "px";
-        copied.style.zIndex = "100";
-        copied.textContent = "Copied!";
-        document.body.appendChild(copied);
-
-        setTimeout(() => {
-            document.body.removeChild(copied);
-        }, 3000);
     } else {
         // Alert the user that the element does not exist
         alert('Element with ID ' + id + ' not found.');
+        return false;
+    };
+}
+
+function card(tagname, insert_id, classList, x_center = false, y_center = false, duration = -1, zindex = 100) {
+    var copied = document.createElement(tagname);
+    copied.classList.add(classList);
+    copied.id = insert_id;
+    copied.style.width = "100px";
+    copied.style.height = "20px";
+    var topY = window.scrollY || document.documentElement.scrollTop;
+    copied.style.top = topY + "px";
+    copied.style.padding = "10px";
+    copied.style.textAlign = "center";
+    copied.style.backgroundColor = "lightgreen";
+    copied.style.position = "absolute";
+    var x_pos = (x_center) ? (document.body.offsetWidth / 2) - (copied.offsetWidth / 2) : 0;
+    copied.style.left = x_pos + "px";
+    var y_pos = (y_center) ? (document.body.offsetHeight / 2) - (copied.offsetHeight / 2) : 0;
+    copied.style.left = y_pos + "px";
+    copied.style.zIndex = zindex;
+    copied.textContent = "Copied!";
+    document.body.appendChild(copied);
+
+    if (duration > -1) {
+        setTimeout(() => {
+            document.body.removeChild(copied);
+        }, 3000);
     }
 }
 
