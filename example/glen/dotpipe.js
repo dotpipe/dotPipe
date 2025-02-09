@@ -186,7 +186,24 @@ function copyContentById(id) {
         // Remove the textarea from the body
         document.body.removeChild(textarea);
         // Alert the user that the content has been copied
-        alert('Content copied!');
+        var copied = document.createElement('p');
+        copied.style.width = "100px";
+        copied.style.height = "20px";
+        var topY = window.scrollY || document.documentElement.scrollTop;
+        copied.style.top = topY + "px";
+        copied.style.padding = "10px";
+        copied.style.textAlign = "center";
+        copied.style.backgroundColor = "lightgreen";
+        copied.style.position = "absolute";
+        var pos = (document.body.offsetWidth / 2) - (copied.offsetWidth / 2);
+        copied.style.left = pos + "px";
+        copied.style.zIndex = "100";
+        copied.textContent = "Copied!";
+        document.body.appendChild(copied);
+
+        setTimeout(() => {
+            document.body.removeChild(copied);
+        }, 3000);
     } else {
         // Alert the user that the element does not exist
         alert('Element with ID ' + id + ' not found.');
