@@ -185,7 +185,7 @@ function copyContentById(id) {
 
         // Remove the textarea from the body
         document.body.removeChild(textarea);
-        textCard("Copied to the clipboard!", true, 25, 3000, 100);
+        textCard("Copied to the clipboard!", "", "", true, 25, 3000, 100);
         return true;
         // Alert the user that the content has been copied
     } else {
@@ -223,8 +223,11 @@ function modalCard(filename, insert_id, x_center = false, y_center = false, dura
     }
 }
 
-function textCard(text, x_center = false, y_center = false, duration = -1, zindex = 100) {
+function textCard(text, id, classes, x_center = false, y_center = false, duration = -1, zindex = 100) {
     var copied = document.createElement("div");
+    copied.id = id;
+    if (classes != undefined && classes != "")
+        copied.classList.add(classes);
     copied.style.padding = "10px";
     copied.style.textAlign = "center";
     copied.style.backgroundColor = "lightgreen";
@@ -1335,7 +1338,8 @@ function addPipe(elem) {
 }
 
 function hasPipeListener(elem) {
-    return elem.click;
+    if (elem.id != undefined)
+        return elem.click;
 }
 
 function navigate(elem, opts = null, query = "", classname = "") {
