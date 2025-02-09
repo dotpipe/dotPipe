@@ -72,7 +72,7 @@
   **** go on if there is no input to replace them.
   */
 
-function last() {
+  function last() {
     document.addEventListener("click", function (elem) {
         console.log(elem.target);
         if (elem.target.id != undefined) { pipes(elem.target); }
@@ -185,7 +185,7 @@ function copyContentById(id) {
 
         // Remove the textarea from the body
         document.body.removeChild(textarea);
-        textCard("Copied!", insert_id, x_center, y_center, duration, zindex);
+        textCard("Copied to the clipboard!", true, 25, 3000, 100);
         return true;
         // Alert the user that the content has been copied
     } else {
@@ -202,9 +202,15 @@ function modalCard(filename, insert_id, x_center = false, y_center = false, dura
     copied.style.textAlign = "center";
     copied.style.backgroundColor = "lightgreen";
     copied.style.position = "absolute";
-    var x_pos = (x_center) ? (document.body.offsetWidth - copied.offsetWidth) / 2 : 0;
+    var x_pos = 0;
+    if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
+    else if (typeof x_center === 'boolean' && !x_centerS) x_pos = 0;
+    else x_pos = x_center;
     copied.style.left = x_pos + "px";
-    var y_pos = (y_center) ? (document.innerHeight - copied.offsetHeight) / 2 : 0;
+    var y_pos = 0;
+    if (typeof y_center === 'boolean' && y_center) y_pos = window.scrollY + Math.abs((window.innerHeight / 2) - copied.style.height / 2);
+    else if (typeof y_center === 'boolean' && !y_center) y_pos = 0;
+    else y_pos = y_center;
     copied.style.top = y_pos + "px";
     copied.style.zIndex = zindex;
     copied.innerHTML = modal(filename, insert_id);
@@ -217,19 +223,24 @@ function modalCard(filename, insert_id, x_center = false, y_center = false, dura
     }
 }
 
-
 function textCard(text, x_center = false, y_center = false, duration = -1, zindex = 100) {
     var copied = document.createElement("div");
     copied.style.padding = "10px";
     copied.style.textAlign = "center";
     copied.style.backgroundColor = "lightgreen";
     copied.style.position = "absolute";
-    var x_pos = (x_center) ? (document.body.offsetWidth - copied.offsetWidth) / 2 : 0;
+    var x_pos = 0;
+    if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
+    else if (typeof x_center === 'boolean' && !x_center) x_pos = 0;
+    else x_pos = x_center;
     copied.style.left = x_pos + "px";
-    var y_pos = (y_center) ? (document.innerHeight - copied.offsetHeight) / 2 : 0;
-    copied.style.top = y_pos + "px";
     copied.style.zIndex = zindex;
     copied.textContent = text;
+    var y_pos = 0;
+    if (typeof y_center  === 'boolean' && y_center) y_pos = window.scrollY + Math.abs((window.innerHeight / 2) - copied.style.height / 2);
+    else if (typeof y_center === 'boolean' && !y_center) y_pos = 0;
+    else y_pos = y_center;
+    copied.style.top = y_pos + "px";
     document.body.appendChild(copied);
 
     if (duration > -1) {
@@ -983,7 +994,6 @@ function pipes(elem, stop = false) {
 
     if (elem.hasAttribute("copy")) {
         copyContentById(elem.getAttribute("copy"));
-        textCard("Copied to clipboard!", true, false, 3000, 100);
     }
     if (elem.classList.contains("redirect")) {
         window.location.href = elem.getAttribute("ajax");
