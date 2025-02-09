@@ -22,11 +22,11 @@
   *  time-active.......= [Class] to activate timers for things that go on continuously
   *  time-inactive.....= [Class] to deactivate timers for things that go on continuously
   *  disabled..........= [Class] to disable a tag (use x-toggle to toggle state of this and time-active/-inactive)
-  *  br................= [Specifically a] Modala key/value pair. "br": "x" where x is the number of breaks in succession.
-  *  js................= [Specifically a] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest.
-  *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
-  *  modala............= [Specifically a] Modala key/value pair. Allows access to Modala files in scope of top nest.
-  *  tree-view.........= [Specifically a] Modala key/value pair or class. Allows access to Tree files in scope of top nest.
+  *  br................= [Key] Modala key/value pair. "br": "x" where x is the number of breaks in succession.
+  *  js................= [Key] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest. ex: "js": "foo.js;foobar.js"
+  *  css...............= [Key] Modala key/value pair. Imports a stylesheet file to the page accessing it. ex: "css": "foo.css;foobar.css"
+  *  modala............= [Class] Modala key/value pair. Allows access to Modala files in scope of top nest. 
+  *  tree-view.........= [Class] Modala key/value pair or class. Allows access to Tree files in scope of top nest.
   *  <lnk>.............= [Tag] tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
   *  <pipe>............= [Tag] (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  <dyn>.............= [Tag] Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
@@ -185,6 +185,7 @@ function copyContentById(id) {
 
         // Remove the textarea from the body
         document.body.removeChild(textarea);
+        textCard("Copied!", insert_id, x_center, y_center, duration, zindex);
         return true;
         // Alert the user that the content has been copied
     } else {
@@ -194,30 +195,47 @@ function copyContentById(id) {
     };
 }
 
-function card(tagname, insert_id, classList, x_center = false, y_center = false, duration = -1, zindex = 100) {
-    var copied = document.createElement(tagname);
-    copied.classList.add(classList);
+function modalCard(filename, insert_id, x_center = false, y_center = false, duration = -1, zindex = 100) {
+    var copied = document.createElement("div");
     copied.id = insert_id;
-    copied.style.width = "100px";
-    copied.style.height = "20px";
-    var topY = window.scrollY || document.documentElement.scrollTop;
-    copied.style.top = topY + "px";
     copied.style.padding = "10px";
     copied.style.textAlign = "center";
     copied.style.backgroundColor = "lightgreen";
     copied.style.position = "absolute";
-    var x_pos = (x_center) ? (document.body.offsetWidth / 2) - (copied.offsetWidth / 2) : 0;
+    var x_pos = (x_center) ? (document.body.offsetWidth - copied.offsetWidth) / 2 : 0;
     copied.style.left = x_pos + "px";
-    var y_pos = (y_center) ? (document.body.offsetHeight / 2) - (copied.offsetHeight / 2) : 0;
-    copied.style.left = y_pos + "px";
+    var y_pos = (y_center) ? (document.innerHeight - copied.offsetHeight) / 2 : 0;
+    copied.style.top = y_pos + "px";
     copied.style.zIndex = zindex;
-    copied.textContent = "Copied!";
+    copied.innerHTML = modal(filename, insert_id);
     document.body.appendChild(copied);
 
     if (duration > -1) {
         setTimeout(() => {
             document.body.removeChild(copied);
-        }, 3000);
+        }, duration);
+    }
+}
+
+
+function textCard(text, x_center = false, y_center = false, duration = -1, zindex = 100) {
+    var copied = document.createElement("div");
+    copied.style.padding = "10px";
+    copied.style.textAlign = "center";
+    copied.style.backgroundColor = "lightgreen";
+    copied.style.position = "absolute";
+    var x_pos = (x_center) ? (document.body.offsetWidth - copied.offsetWidth) / 2 : 0;
+    copied.style.left = x_pos + "px";
+    var y_pos = (y_center) ? (document.innerHeight - copied.offsetHeight) / 2 : 0;
+    copied.style.top = y_pos + "px";
+    copied.style.zIndex = zindex;
+    copied.textContent = text;
+    document.body.appendChild(copied);
+
+    if (duration > -1) {
+        setTimeout(() => {
+            document.body.removeChild(copied);
+        }, duration);
     }
 }
 
@@ -965,6 +983,7 @@ function pipes(elem, stop = false) {
 
     if (elem.hasAttribute("copy")) {
         copyContentById(elem.getAttribute("copy"));
+        textCard("Copied to clipboard!", true, false, 3000, 100);
     }
     if (elem.classList.contains("redirect")) {
         window.location.href = elem.getAttribute("ajax");
