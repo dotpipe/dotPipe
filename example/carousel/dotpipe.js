@@ -14,6 +14,7 @@
   *  file..............= [Attr] filename to download
   *  x-toggle..........= [Attr] toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
   *  directory.........= [Attr] relative or full path of 'file'
+  *  copy..............= [Bool] copy the text in teh container. If there is a insert attribute, it will copy the text in the insert attribute with that id.
   *  clear-node........= [Class] clear nodes. delimited in insert="first;second;thirdnode" by ';'
   *  redirect..........= [Class] "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
   *  modala-multi-last.= [Class] to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
@@ -159,6 +160,37 @@ let domContentLoad = (again = false) => {
                 pipes(elem);
         });
     });
+}
+
+function copyContentById(id) {
+    // Get the element with the specified ID
+    var element = document.getElementById(id);
+
+    // Check if element exists
+    if (element) {
+        // Create a new textarea element to copy the content
+        var textarea = document.createElement('textarea');
+
+        // Set the value of the textarea to the content of the element
+        textarea.value = element.innerText;
+
+        // Append the textarea to the body
+        document.body.appendChild(textarea);
+
+        // Select the text in the textarea
+        textarea.select();
+
+        // Copy the selected text to the clipboard
+        document.execCommand('copy');
+
+        // Remove the textarea from the body
+        document.body.removeChild(textarea);
+        // Alert the user that the content has been copied
+        alert('Content copied!');
+    } else {
+        // Alert the user that the element does not exist
+        alert('Element with ID ' + id + ' not found.');
+    }
 }
 
 /**
@@ -903,6 +935,9 @@ function pipes(elem, stop = false) {
     if (elem.id === null)
         return;
 
+    if (elem.hasAttribute("copy")) {
+        copyContentById(elem.getAttribute("copy"));
+    }
     if (elem.classList.contains("redirect")) {
         window.location.href = elem.getAttribute("ajax");
     }
@@ -1437,7 +1472,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     // editNode.innerHTML = allText;
                     renderTree(allText, editNode);
                     addPipe(editNode);
-                    return ;
+                    return;
                 }
                 catch (e) {
                     console.log("Response: " + e);
