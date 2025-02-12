@@ -73,7 +73,7 @@
   **** go on if there is no input to replace them.
   */
 
-function last(again = false) {
+document.addEventListener("DOMContentLoaded", function () {
     try {
         if (document.body != null && JSON.parse(document.body.textContent)) {
             const irc = JSON.parse(document.body.textContent);
@@ -82,17 +82,15 @@ function last(again = false) {
             modala(irc, document.body);
             document.body.style.display = "block";
         }
-        addPipe();
-        if (again == false)
-            last(true);
+        domContentLoad();
+        addPipe(document.body);
         return;
     }
     catch (e) {
-        console.log(e);
     }
-}
+    });
 
-window.onload = (again = false) => {
+let domContentLoad = (again = false) => {
 
 
     doc_set = document.getElementsByTagName("pipe");
@@ -145,11 +143,11 @@ window.onload = (again = false) => {
     Array.from(elements_mouse).forEach(function (elem) {
         console.log(elem);
         if (elem.hasAttribute("tool-tip")) {
-            console.log(elem.getAttribute("tool-tip")+ "...");
+            console.log(elem.getAttribute("tool-tip") + "...");
             elem.addEventListener('mouseenter', function () {
                 const x = elem.offsetLeft + window.scrollX;
                 const y = elem.offsetTop + window.scrollY;
-                textCard(elem.getAttribute("tool-tip"), '', '', x+15, y+25, 1500, 100);
+                textCard(elem.getAttribute("tool-tip"), '', '', x + 15, y + 25, 1500, 100);
             });
         }
         var ev = elem.getAttribute("event");
@@ -255,7 +253,7 @@ function textCard(text, id = "", classes = "", x_center = false, y_center = fals
     copied.style.zIndex = zindex;
     copied.textContent = text;
     var y_pos = 0;
-    if (typeof y_center  === 'boolean' && y_center) y_pos = window.scrollY + Math.abs((window.innerHeight / 2) - copied.style.height / 2);
+    if (typeof y_center === 'boolean' && y_center) y_pos = window.scrollY + Math.abs((window.innerHeight / 2) - copied.style.height / 2);
     else if (typeof y_center === 'boolean' && !y_center) y_pos = 0;
     else y_pos = y_center;
     copied.style.top = y_pos + "px";
@@ -267,6 +265,26 @@ function textCard(text, id = "", classes = "", x_center = false, y_center = fals
         }, duration);
     }
 }
+
+function sha256(message) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    return crypto.subtle.digest('SHA-256', data).then(hash => {
+        return Array.from(new Uint8Array(hash))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
+    });
+}
+
+// Usage example to generate a nonce
+function generateNonce() {
+    const randomBytes = new Uint8Array(16);
+    crypto.getRandomValues(randomBytes);
+    return sha256(randomBytes.join('')).then(hash => hash.slice(0, 16));
+}
+
+// Example of how to use it
+
 
 /**
  * Recursively creates HTML elements based on a JSON object and appends them to the document head.
@@ -287,6 +305,7 @@ function modalaHead(value) {
     catch (e) {
         console.log(e)
     }
+
     var temp = document.createElement(value["tagname"]);
     Object.entries(value).forEach((nest) => {
         const [k, v] = nest;
@@ -302,10 +321,15 @@ function modalaHead(value) {
             var optsArray = v.split(";");
             console.log(v)
             optsArray.forEach((e, f) => {
-                var cssvar = document.createElement("link");
-                cssvar.href = v;
-                cssvar.rel = "stylesheet";
-                document.head.appendChild(cssvar);
+
+                generateNonce().then(nonce => {
+                    var cssvar = document.createElement("link");
+                    cssvar.href = v;
+                    cssvar.rel = "stylesheet";
+                    cssvar.nonce = nonce;
+                    document.head.appendChild(cssvar);
+                });
+
             });
 
         }
@@ -313,9 +337,13 @@ function modalaHead(value) {
             var optsArray = v.split(";");
             console.log(v)
             optsArray.forEach((e, f) => {
-                const js = document.createElement("script");
-                js.src = e;
-                document.head.appendChild(js);
+                generateNonce().then(nonce => {
+                    const js = document.createElement("script");
+                    js.src = e;
+                    js.type = "text/javascript";
+                    js.nonce = nonce;
+                    document.head.appendChild(js);
+                });
             });
         }
         else if (k.toLowerCase() == "modal") {
@@ -582,18 +610,6 @@ function modala(value, tempTag, root, id) {
             });
 
         }
-        else if (k.toLowerCase() == "css") {
-            var cssvar = document.createElement("link");
-            cssvar.href = v;
-            cssvar.rel = "stylesheet";
-            tempTag.appendChild(cssvar);
-        }
-        else if (k.toLowerCase() == "js") {
-            var js = document.createElement("script");
-            js.src = v;
-            js.setAttribute("defer", "true");
-            tempTag.appendChild(js);
-        }
         else if (k.toLowerCase()[0] == "h" && k.length == 2) {
             var h = document.createElement(k);
             h.innerText = v;
@@ -631,7 +647,11 @@ function modala(value, tempTag, root, id) {
             (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
         }
         else if (k.toLowerCase() == "style") {
-            temp.style.cssText = v;
+            var styleArray = v.split(";");
+            styleArray.forEach((e, f) => {
+                var styleArray2 = e.split(":");
+                temp.style[styleArray2[0]] = styleArray2[1];
+            });
         }
     });
     tempTag.appendChild(temp);
@@ -1065,7 +1085,7 @@ function pipes(elem, stop = false) {
         console.log(elem.getAttribute("tool-tip"));
         const x = rect.left + window.scrollX;
         const y = rect.top + window.scrollY;
-        textCard(elem.getAttribute("tool-tip"), '', '', x+5, y+elem.style.height, 2000, 100);
+        textCard(elem.getAttribute("tool-tip"), '', '', x + 5, y + elem.style.height, 2000, 100);
     }
     if (elem.hasAttribute("copy")) {
         copyContentById(elem.getAttribute("copy"));
@@ -1393,25 +1413,28 @@ function formAJAX(elem, classname) {
 }
 
 function addPipe(elem) {
-    if (typeof elem === "Object" || typeof elem === "Array") {
-        elem.forEach(function (y) {
-            y.addEventListener('click', (x) => {
-                if (typeof x === "Object" || typeof x === "Array") {
-                    x.forEach((w) => {
-                        addPipe(w);
-                    });
-                }
-            });
+    if (Array.isArray(elem) || elem instanceof NodeList) {
+        elem.forEach(y => addPipe(y));
+        return;
+    }
+    
+    if (elem instanceof Element) {
+        elem.addEventListener('click', () => {
+            if (elem.children.length > 0) {
+                Array.from(elem.children).forEach(child => addPipe(child));
+            }
         });
-        if (!hasPipeListener(x))
-            pipes(x);
+        
+        if (!hasPipeListener(elem)) {
+            pipes(elem);
+        }
     }
 }
 
 function hasPipeListener(elem) {
-    if (elem.id != undefined)
-    return elem.click;
+    return elem && typeof elem.onclick === 'function';
 }
+
 
 function navigate(elem, opts = null, query = "", classname = "") {
     //formAJAX at the end of this line
@@ -1596,7 +1619,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     // editNode.innerHTML = allText;
                     renderTree(allText, editNode);
                     addPipe(editNode);
-                    return ;
+                    return;
                     if (elem.hasAttribute("insert") && elem.getAttribute("insert") == elem.id && !document.getElementById(elem.id).hasChildNodes) {
                         document.getElementById(elem.id).innerHTML = "<br>";
                         var editNode = document.getElementById(elem.id).parentNode;

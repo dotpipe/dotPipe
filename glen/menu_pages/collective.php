@@ -1,5 +1,6 @@
 
 <?php
+session_start();
 $file = '{';
 
 for($i = 1 ; $i <= 11 ; $i++) {
@@ -10,9 +11,9 @@ for($i = 1 ; $i <= 11 ; $i++) {
             "style": "position:fixed;color:blue;height:25;width:10",
             "class": "arrow'.$i.' modala clear-node",
             "innerHTML": "➤",
-            "method": "get",
-            "ajax": "getarrow.php",
-            "name": "arrow",
+            "method": "GET",
+            "ajax": "getarrow.php?main='.$i.'",
+            "name": "main",
             "value": "'.$i.'",
             "form-class": "arrow'.$i.'",
             "insert": "arrow-area"

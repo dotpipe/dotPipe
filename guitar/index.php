@@ -8,9 +8,5 @@ $modala = file_get_contents("index.json");
 echo ($modala);
 
 ?>
-    <script src="./dotpipe.js"></script>
-    <script>
-        console.log(document.body.textContent);
-        // modala(<?= $modala ?>,document.body)
 
-    </script>
+    <script src="dotpipe.js"></script>
