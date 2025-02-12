@@ -14,6 +14,8 @@
   *  file..............= [Attr] filename to download
   *  x-toggle..........= [Attr] toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
   *  directory.........= [Attr] relative or full path of 'file'
+  *  tool-tip..........= [Attr] tooltip for the element ex: <tagName tool-tip="this is a tooltip">
+  *  copy..............= [Attr] copy the value of the element to the clipboard ex: <tagName copy="copy-this-id">
   *  clear-node........= [Class] clear nodes. delimited in insert="first;second;thirdnode" by ';'
   *  redirect..........= [Class] "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
   *  modala-multi-last.= [Class] to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
@@ -32,7 +34,6 @@
   *  \n................= [-] RegEx emplacement to insert <br /> in Modala contents for innerHTML
   *  plain-text........= [Class] plain text returned to the insertion point
   *  plain-html........= [Class] returns as true HTML
-  *  tree-view.........= [Class] to create a tree view of files in a directory ex: <tagname id="required" class="tree-view" ajax="foobar.json" query="key0:value0;" insert="someID">
   *  <timed>...........= [Tag] Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
   *  delay.............= [Attr] delay between <timed> tag refreshes (required for <timed> tag) ex: see <timed>
   *  <carousel>........= [Tag] to create a carousel that moves every a timeOut() delay="x" occurs ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
@@ -72,9 +73,8 @@
   **** go on if there is no input to replace them.
   */
 
-function last() {
+function last(again = false) {
     try {
-        domContentLoad(true);
         if (document.body != null && JSON.parse(document.body.textContent)) {
             const irc = JSON.parse(document.body.textContent);
 
@@ -82,18 +82,18 @@ function last() {
             modala(irc, document.body);
             document.body.style.display = "block";
         }
+        addPipe();
+        if (again == false)
+            last(true);
+        return;
     }
     catch (e) {
         console.log(e);
     }
-    document.addEventListener("click", function (elem) {
-        console.log(elem.target);
-        if (elem.target.id != undefined) { pipes(elem.target); }
-    });
-    return;
 }
 
-let domContentLoad = (again = false) => {
+window.onload = (again = false) => {
+
 
     doc_set = document.getElementsByTagName("pipe");
     if (again == false) {
@@ -141,14 +141,16 @@ let domContentLoad = (again = false) => {
 
     let elements_mouse = document.querySelectorAll(".mouse");
 
+    console.log(elements_mouse.length);
     Array.from(elements_mouse).forEach(function (elem) {
         console.log(elem);
         if (elem.hasAttribute("tool-tip")) {
             console.log(elem.getAttribute("tool-tip")+ "...");
-            elem.addEventListener('mouseover', function () {
-                textCard(elem.getAttribute("tool-tip"), '', '', elem.offsetLeft, elem.offsetTop, 2000, 100);
+            elem.addEventListener('mouseenter', function () {
+                const x = elem.offsetLeft + window.scrollX;
+                const y = elem.offsetTop + window.scrollY;
+                textCard(elem.getAttribute("tool-tip"), '', '', x+5, y+elem.style.height, 2000, 100);
             });
-            return;
         }
         var ev = elem.getAttribute("event");
         var rv = ev.split(";");
@@ -424,178 +426,6 @@ function escapeHtml(html) {
     return p.innerHTML;
 }
 
-function mapTagToAndroidComponent(tag) {
-    const componentMap = {
-        'div': 'LinearLayout',
-        'span': 'TextView',
-        'p': 'TextView',
-        'h1': 'TextView',
-        'h2': 'TextView',
-        'h3': 'TextView',
-        'h4': 'TextView',
-        'h5': 'TextView',
-        'h6': 'TextView',
-        'img': 'ImageView',
-        'a': 'Button',
-        'button': 'Button',
-        'input': 'EditText',
-        'textarea': 'EditText',
-        'select': 'Spinner',
-        'option': 'TextView',
-        'ul': 'ListView',
-        'ol': 'ListView',
-        'li': 'TextView',
-        'table': 'TableLayout',
-        'tr': 'TableRow',
-        'td': 'TextView',
-        'th': 'TextView',
-        'form': 'ScrollView',
-        'nav': 'LinearLayout',
-        'header': 'LinearLayout',
-        'footer': 'LinearLayout',
-        'main': 'LinearLayout',
-        'section': 'LinearLayout',
-        'article': 'LinearLayout',
-        'aside': 'LinearLayout',
-        'video': 'VideoView',
-        'audio': 'MediaController',
-        'canvas': 'SurfaceView',
-        'iframe': 'WebView',
-        'hr': 'View',
-        'br': 'View',
-        'label': 'TextView',
-        'fieldset': 'LinearLayout',
-        'legend': 'TextView',
-        'datalist': 'AutoCompleteTextView',
-        'details': 'ExpandableListView',
-        'summary': 'TextView',
-        'progress': 'ProgressBar',
-        'meter': 'ProgressBar',
-        'time': 'TextView',
-        'mark': 'TextView',
-        'code': 'TextView',
-        'pre': 'TextView',
-        'blockquote': 'TextView',
-        'q': 'TextView',
-        'cite': 'TextView',
-        'abbr': 'TextView',
-        'address': 'TextView',
-        'map': 'MapView',
-        'area': 'ImageButton'
-    };
-
-    return componentMap[tag.toLowerCase()] || 'View';
-}
-
-function createAndroidHierarchy(modalaJSON) {
-    function convertToAndroidFormat(element, parentKey = '') {
-        let androidElement = {};
-
-        if (element.tagname) {
-            let componentType = mapTagToAndroidComponent(element.tagname);
-            androidElement['@android:id'] = `@+id/${parentKey}_${componentType.toLowerCase()}`;
-            androidElement['@android:layout_width'] = element.width || 'wrap_content';
-            androidElement['@android:layout_height'] = element.height || 'wrap_content';
-
-            for (let attr in element) {
-                if (attr !== 'tagname' && attr !== 'children') {
-                    let androidAttr = mapCheatSheetToAndroidAttributes(attr, element[attr]);
-                    if (attr === 'ajax' || attr === 'insert') {
-                        androidElement[androidAttr] = handleMultipleValues(element[attr]);
-                    } else {
-                        androidElement[androidAttr] = element[attr];
-                    }
-                }
-            }
-
-            if (element.children) {
-                for (let childKey in element.children) {
-                    androidElement[mapTagToAndroidComponent(element.children[childKey].tagname)] =
-                        convertToAndroidFormat(element.children[childKey], childKey);
-                }
-            }
-        }
-        return androidElement;
-    }
-
-    function handleMultipleValues(value) {
-        if (value.includes(';')) {
-            return value.split(';').map(item => {
-                let [filename, insertId] = item.split(':');
-                return `${filename},${insertId}`;
-            }).join('|');
-        }
-        return value;
-    }
-
-    let androidLayout = {
-        'LinearLayout': {
-            '@xmlns:android': 'http://schemas.android.com/apk/res/android',
-            '@android:layout_width': 'match_parent',
-            '@android:layout_height': 'match_parent',
-            '@android:orientation': 'vertical'
-        }
-    };
-
-    androidLayout.LinearLayout = { ...androidLayout.LinearLayout, ...convertToAndroidFormat(modalaJSON) };
-
-    return { '<?xml version="1.0" encoding="utf-8"?>': androidLayout };
-}
-
-/**
- *
- * @param {string} attribute
- * @param {string} value
- * @returns
- */
-function mapToAndroidAttributes(attribute, value) {
-    const attributeMap = {
-        'insert': '@android:id',
-        'ajax': '@android:tag',
-        'query': '@android:tag',
-        'modal': '@android:onClick',
-        'download': '@android:onClick',
-        'file': '@android:tag',
-        'x-toggle': '@android:onClick',
-        'directory': '@android:tag',
-        'clear-node': '@android:onClick',
-        'redirect': '@android:onClick',
-        'modala-multi-last': '@android:tag',
-        'modala-multi-first': '@android:tag',
-        'time-active': '@android:tag',
-        'time-inactive': '@android:tag',
-        'disabled': '@android:enabled',
-        'br': '@android:layout_marginBottom',
-        'js': '@android:tag',
-        'css': '@android:tag',
-        'event': '@android:onClick',
-        'options': '@android:entries',
-        'delay': '@android:tag',
-        'boxes': '@android:tag',
-        'file-order': '@android:tag',
-        'file-index': '@android:tag',
-        'incrIndex': '@android:tag',
-        'decrIndex': '@android:tag',
-        'interval': '@android:tag',
-        'x-value-set': '@android:onClick',
-        'x-value-get': '@android:onClick',
-        'x-value-rem': '@android:onClick',
-        'x-value-clear': '@android:onClick',
-        'mode': '@android:tag',
-        'pipe': '@android:tag',
-        'multiple': '@android:tag',
-        'remove': '@android:onClick',
-        'display': '@android:visibility',
-        'json': '@android:tag',
-        'headers': '@android:tag',
-        'form-class': '@android:tag',
-        'action-class': '@android:tag',
-        'mouse': '@android:clickable',
-        'mouse-insert': '@android:onClick'
-    };
-
-    return attributeMap[attribute] || `@android:${attribute}`;
-}
 /**
  * 
  * @param {JSON Object} value 
@@ -1229,6 +1059,17 @@ function pipes(elem, stop = false) {
     if (elem.id === null)
         return;
 
+    if (elem.hasAttribute("tool-tip") && elem.getAttribute("tool-tip") != '') {
+        const element = document.getElementById(elem.id);
+        const rect = element.getBoundingClientRect();
+        console.log(elem.getAttribute("tool-tip"));
+        const x = rect.left + window.scrollX;
+        const y = rect.top + window.scrollY;
+        textCard(elem.getAttribute("tool-tip"), '', '', x+5, y+elem.style.height, 2000, 100);
+    }
+    if (elem.hasAttribute("copy")) {
+        copyContentById(elem.getAttribute("copy"));
+    }
     if (elem.classList.contains("redirect")) {
         window.location.href = elem.getAttribute("ajax");
     }
@@ -1817,5 +1658,4 @@ function navigate(elem, opts = null, query = "", classname = "") {
         // console.log(e);
     }
 }
-
 last();
