@@ -149,7 +149,7 @@ window.onload = (again = false) => {
             elem.addEventListener('mouseenter', function () {
                 const x = elem.offsetLeft + window.scrollX;
                 const y = elem.offsetTop + window.scrollY;
-                textCard(elem.getAttribute("tool-tip"), '', '', x+5, y+elem.style.height, 2000, 100);
+                textCard(elem.getAttribute("tool-tip"), '', '', x+15, y+25, 1500, 100);
             });
         }
         var ev = elem.getAttribute("event");
