@@ -5,10 +5,12 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
 $modala = file_get_contents("index.json");
-echo $modala;
+echo ($modala);
 
 ?>
     <script src="./dotpipe.js"></script>
     <script>
-    last();
+        console.log(document.body.textContent);
+        // modala(<?= $modala ?>,document.body)
+
     </script>

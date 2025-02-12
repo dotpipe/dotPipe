@@ -10,16 +10,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **1. `last()`**
-**Purpose:** Initializes the DOM, attaches click events, and ensures that `modala()` renders JSON content if the body contains such data.
-
-**Attributes:** None
-
-**Parameters:** None
-
----
-
-## **2. `domContentLoad(again = false)`**
+## **1. `domContentLoad(again = false)`**
 **Purpose:** Attaches event listeners and initializes tags such as `<pipe>`, `<timed>`, `<dyn>`, and `<carousel>` when the DOM content loads.
 
 **Attributes:**
@@ -32,7 +23,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **3. `modala(value, tempTag, root, id)`**
+## **2. `modala(value, tempTag, root, id)`**
 **Purpose:** Dynamically generates HTML elements based on a JSON structure and appends them to the DOM.
 
 **Attributes:**
@@ -52,7 +43,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **4. `renderTree(value, tempTag)`**
+## **3. `renderTree(value, tempTag)`**
 **Purpose:** Similar to `modala()`, but focuses on rendering hierarchical tree-like structures with collapsible behavior.
 
 **Attributes:**
@@ -67,7 +58,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **5. `modalaHead(value)`**
+## **4. `modalaHead(value)`**
 **Purpose:** Creates `<title>`, `<link>` (CSS), and `<script>` tags based on a JSON structure and appends them to the `<head>` of the document.
 
 **Attributes:**
@@ -80,7 +71,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **6. `modal(filename, tagId)`**
+## **5. `modal(filename, tagId)`**
 **Purpose:** Fetches a JSON file and renders it into a specified element using `modala()`.
 
 **Attributes:** None
@@ -91,7 +82,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **7. `modalList(filenames)`**
+## **6. `modalList(filenames)`**
 **Purpose:** Processes multiple JSON files (separated by semicolons) and renders them using `modala()`.
 
 **Attributes:** None
@@ -101,7 +92,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **8. `getJSONFile(filename)`**
+## **7. `getJSONFile(filename)`**
 **Purpose:** Fetches a JSON file from a specified URL and parses it.
 
 **Attributes:** None
@@ -111,7 +102,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **9. `getTextFile(filename)`**
+## **8. `getTextFile(filename)`**
 **Purpose:** Fetches a text file and returns its content as plain text.
 
 **Attributes:** None
@@ -121,7 +112,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **10. `escapeHtml(html)`**
+## **9. `escapeHtml(html)`**
 **Purpose:** Escapes special HTML characters in a string for safe rendering.
 
 **Attributes:** None
@@ -131,7 +122,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **11. `pipes(elem, stop = false)`**
+## **10. `pipes(elem, stop = false)`**
 **Purpose:** Core function handling events, dynamic AJAX calls, and DOM updates based on the attributes of the triggered element.
 
 **Attributes:**
@@ -150,7 +141,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **12. `navigate(elem, opts = null, query = '', classname = '')`**
+## **11. `navigate(elem, opts = null, query = '', classname = '')`**
 **Purpose:** Sends AJAX requests with optional headers and query parameters.
 
 **Attributes:**
@@ -167,7 +158,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **13. `setTimers(target)`**
+## **12. `setTimers(target)`**
 **Purpose:** Manages timed events for tags like `<timed>` and `<carousel>`.
 
 **Attributes:**
@@ -180,7 +171,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **14. `carousel(elem, auto = true)`**
+## **13. `carousel(elem, auto = true)`**
 **Purpose:** Creates and updates carousels dynamically, supporting various media types.
 
 **Attributes:**
@@ -195,7 +186,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **15. `htmlToJson(htmlString)`**
+## **14. `htmlToJson(htmlString)`**
 **Purpose:** Converts an HTML string into a JSON representation.
 
 **Attributes:** None
@@ -205,7 +196,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **16. `classOrder(elem)`**
+## **15. `classOrder(elem)`**
 **Purpose:** Toggles through predefined class names on an element.
 
 **Attributes:**
@@ -217,7 +208,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **17. `addPipe(elem)`**
+## **16. `addPipe(elem)`**
 **Purpose:** Adds event listeners for "pipe" behavior on an element or array of elements.
 
 **Attributes:**
@@ -228,7 +219,7 @@ This document details the functions within `dotpipe.js`, outlining their purpose
 
 ---
 
-## **18. `carouselButtonSlide(elem, direction)`**
+## **17. `carouselButtonSlide(elem, direction)`**
 **Purpose:** Slides the carousel left or right when triggered.
 
 **Attributes:** None

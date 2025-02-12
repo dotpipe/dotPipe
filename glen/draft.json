@@ -1,0 +1,6 @@
+{
+    "header": {
+        "title": "Newbies and Scroobies"
+    },
+    "modal": "menu_pages/collective.php:collective-container;./getarrow.php:arrow-area"    
+}

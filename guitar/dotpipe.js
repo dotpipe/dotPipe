@@ -14,7 +14,6 @@
   *  file..............= [Attr] filename to download
   *  x-toggle..........= [Attr] toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
   *  directory.........= [Attr] relative or full path of 'file'
-  *  copy..............= [Bool] copy the text in teh container. If there is a insert attribute, it will copy the text in the insert attribute with that id.
   *  clear-node........= [Class] clear nodes. delimited in insert="first;second;thirdnode" by ';'
   *  redirect..........= [Class] "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
   *  modala-multi-last.= [Class] to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
@@ -22,17 +21,18 @@
   *  time-active.......= [Class] to activate timers for things that go on continuously
   *  time-inactive.....= [Class] to deactivate timers for things that go on continuously
   *  disabled..........= [Class] to disable a tag (use x-toggle to toggle state of this and time-active/-inactive)
-  *  br................= [Key] Modala key/value pair. "br": "x" where x is the number of breaks in succession.
-  *  js................= [Key] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest. ex: "js": "foo.js;foobar.js"
-  *  css...............= [Key] Modala key/value pair. Imports a stylesheet file to the page accessing it. ex: "css": "foo.css;foobar.css"
-  *  modala............= [Class] Modala key/value pair. Allows access to Modala files in scope of top nest. 
-  *  tree-view.........= [Class] Modala key/value pair or class. Allows access to Tree files in scope of top nest.
+  *  br................= [Specifically a] Modala key/value pair. "br": "x" where x is the number of breaks in succession.
+  *  js................= [Specifically a] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest.
+  *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
+  *  modala............= [Specifically a] Modala key/value pair. Allows access to Modala files in scope of top nest.
+  *  tree-view.........= [Specifically a] Modala key/value pair or class. Allows access to Tree files in scope of top nest.
   *  <lnk>.............= [Tag] tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
   *  <pipe>............= [Tag] (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  <dyn>.............= [Tag] Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
   *  \n................= [-] RegEx emplacement to insert <br /> in Modala contents for innerHTML
   *  plain-text........= [Class] plain text returned to the insertion point
   *  plain-html........= [Class] returns as true HTML
+  *  tree-view.........= [Class] to create a tree view of files in a directory ex: <tagname id="required" class="tree-view" ajax="foobar.json" query="key0:value0;" insert="someID">
   *  <timed>...........= [Tag] Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
   *  delay.............= [Attr] delay between <timed> tag refreshes (required for <timed> tag) ex: see <timed>
   *  <carousel>........= [Tag] to create a carousel that moves every a timeOut() delay="x" occurs ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
@@ -72,7 +72,20 @@
   **** go on if there is no input to replace them.
   */
 
-  function last() {
+function last() {
+    try {
+        domContentLoad(true);
+        if (document.body != null && JSON.parse(document.body.textContent)) {
+            const irc = JSON.parse(document.body.textContent);
+
+            document.body.textContent = "";
+            modala(irc, document.body);
+            document.body.style.display = "block";
+        }
+    }
+    catch (e) {
+        console.log(e);
+    }
     document.addEventListener("click", function (elem) {
         console.log(elem.target);
         if (elem.target.id != undefined) { pipes(elem.target); }
@@ -126,17 +139,17 @@ let domContentLoad = (again = false) => {
         setTimeout(carousel(elem, auto), elem.getAttribute("delay"));
     });
 
-    let elementsArray_link = document.getElementsByTagName("lnk");
-    Array.from(elementsArray_link).forEach(function (elem) {
-        if (elem.classList.contains("disabled"))
-            return;
-        elem.classList.toggle("disabled");
-
-    });
-
     let elements_mouse = document.querySelectorAll(".mouse");
-    Array.from(elements_mouse).forEach(function (elem) {
 
+    Array.from(elements_mouse).forEach(function (elem) {
+        console.log(elem);
+        if (elem.hasAttribute("tool-tip")) {
+            console.log(elem.getAttribute("tool-tip")+ "...");
+            elem.addEventListener('mouseover', function () {
+                textCard(elem.getAttribute("tool-tip"), '', '', elem.offsetLeft, elem.offsetTop, 2000, 100);
+            });
+            return;
+        }
         var ev = elem.getAttribute("event");
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
@@ -223,7 +236,7 @@ function modalCard(filename, insert_id, x_center = false, y_center = false, dura
     }
 }
 
-function textCard(text, id, classes, x_center = false, y_center = false, duration = -1, zindex = 100) {
+function textCard(text, id = "", classes = "", x_center = false, y_center = false, duration = -1, zindex = 100) {
     var copied = document.createElement("div");
     copied.id = id;
     if (classes != undefined && classes != "")
@@ -333,7 +346,7 @@ function modal(filename, tagId) {
         tagId = document.getElementById(tagId);
     }
     const draft = getJSONFile(filename)
-    draft.then(function (res) {
+    return draft.then(function (res) {
         modala(res, tagId);
     });
 }
@@ -346,29 +359,25 @@ function modal(filename, tagId) {
  * modalList('modal.json:modal-container.another-container;another-modal.json:another-target');
  */
 function modalList(filenames) {
-    const fileList = getJSONFile(filenames);
-    fileList.then(function (res) {
-        console.log(res);
-        const files = res['modal'].split(";");
-        if (files.length >= 1) {
-            files.forEach(file => {
-                const f = file.split(":");
-                if (f[1] != undefined && f[1].split(".").length > 1) {
-                    f[1].split(".").forEach(insert => {
-                        modal(f[0], insert);
-                    });
-                }
-                else {
-                    console.log(f);
-                    modal(f[0], f[1]);
-                }
-            });
-        }
-        else {
-            console.log(files)
-            modal(filenames[0].split(":")[0], filenames[0].split(":")[1]);
-        }
-    });
+    const files = filenames.split(";");
+    if (files.length >= 1) {
+        files.forEach(file => {
+            const f = file.split(":");
+            if (f[1] != undefined && f[1].split(".").length > 1) {
+                f[1].split(".").forEach(insert => {
+                    modal(f[0], insert);
+                });
+            }
+            else {
+                console.log(f);
+                modal(f[0], f[1]);
+            }
+        });
+    }
+    else {
+        console.log(files)
+        modal(files[0].split(":")[0], files[0].split(":")[1]);
+    }
 }
 
 
@@ -384,7 +393,7 @@ function getJSONFile(filename) {
         .then(data => {
             return data;
         });
-    const f = resp.then(function (res) {
+    return resp.then(function (res) {
         return res;
     });
     return f;
@@ -407,6 +416,186 @@ function getTextFile(filename) {
     });
 }
 
+function escapeHtml(html) {
+    var text = document.createTextNode(html);
+    var p = document.createElement('p');
+    p.innerHTML = (text.innerHTML);
+    console.log(p);
+    return p.innerHTML;
+}
+
+function mapTagToAndroidComponent(tag) {
+    const componentMap = {
+        'div': 'LinearLayout',
+        'span': 'TextView',
+        'p': 'TextView',
+        'h1': 'TextView',
+        'h2': 'TextView',
+        'h3': 'TextView',
+        'h4': 'TextView',
+        'h5': 'TextView',
+        'h6': 'TextView',
+        'img': 'ImageView',
+        'a': 'Button',
+        'button': 'Button',
+        'input': 'EditText',
+        'textarea': 'EditText',
+        'select': 'Spinner',
+        'option': 'TextView',
+        'ul': 'ListView',
+        'ol': 'ListView',
+        'li': 'TextView',
+        'table': 'TableLayout',
+        'tr': 'TableRow',
+        'td': 'TextView',
+        'th': 'TextView',
+        'form': 'ScrollView',
+        'nav': 'LinearLayout',
+        'header': 'LinearLayout',
+        'footer': 'LinearLayout',
+        'main': 'LinearLayout',
+        'section': 'LinearLayout',
+        'article': 'LinearLayout',
+        'aside': 'LinearLayout',
+        'video': 'VideoView',
+        'audio': 'MediaController',
+        'canvas': 'SurfaceView',
+        'iframe': 'WebView',
+        'hr': 'View',
+        'br': 'View',
+        'label': 'TextView',
+        'fieldset': 'LinearLayout',
+        'legend': 'TextView',
+        'datalist': 'AutoCompleteTextView',
+        'details': 'ExpandableListView',
+        'summary': 'TextView',
+        'progress': 'ProgressBar',
+        'meter': 'ProgressBar',
+        'time': 'TextView',
+        'mark': 'TextView',
+        'code': 'TextView',
+        'pre': 'TextView',
+        'blockquote': 'TextView',
+        'q': 'TextView',
+        'cite': 'TextView',
+        'abbr': 'TextView',
+        'address': 'TextView',
+        'map': 'MapView',
+        'area': 'ImageButton'
+    };
+
+    return componentMap[tag.toLowerCase()] || 'View';
+}
+
+function createAndroidHierarchy(modalaJSON) {
+    function convertToAndroidFormat(element, parentKey = '') {
+        let androidElement = {};
+
+        if (element.tagname) {
+            let componentType = mapTagToAndroidComponent(element.tagname);
+            androidElement['@android:id'] = `@+id/${parentKey}_${componentType.toLowerCase()}`;
+            androidElement['@android:layout_width'] = element.width || 'wrap_content';
+            androidElement['@android:layout_height'] = element.height || 'wrap_content';
+
+            for (let attr in element) {
+                if (attr !== 'tagname' && attr !== 'children') {
+                    let androidAttr = mapCheatSheetToAndroidAttributes(attr, element[attr]);
+                    if (attr === 'ajax' || attr === 'insert') {
+                        androidElement[androidAttr] = handleMultipleValues(element[attr]);
+                    } else {
+                        androidElement[androidAttr] = element[attr];
+                    }
+                }
+            }
+
+            if (element.children) {
+                for (let childKey in element.children) {
+                    androidElement[mapTagToAndroidComponent(element.children[childKey].tagname)] =
+                        convertToAndroidFormat(element.children[childKey], childKey);
+                }
+            }
+        }
+        return androidElement;
+    }
+
+    function handleMultipleValues(value) {
+        if (value.includes(';')) {
+            return value.split(';').map(item => {
+                let [filename, insertId] = item.split(':');
+                return `${filename},${insertId}`;
+            }).join('|');
+        }
+        return value;
+    }
+
+    let androidLayout = {
+        'LinearLayout': {
+            '@xmlns:android': 'http://schemas.android.com/apk/res/android',
+            '@android:layout_width': 'match_parent',
+            '@android:layout_height': 'match_parent',
+            '@android:orientation': 'vertical'
+        }
+    };
+
+    androidLayout.LinearLayout = { ...androidLayout.LinearLayout, ...convertToAndroidFormat(modalaJSON) };
+
+    return { '<?xml version="1.0" encoding="utf-8"?>': androidLayout };
+}
+
+/**
+ *
+ * @param {string} attribute
+ * @param {string} value
+ * @returns
+ */
+function mapToAndroidAttributes(attribute, value) {
+    const attributeMap = {
+        'insert': '@android:id',
+        'ajax': '@android:tag',
+        'query': '@android:tag',
+        'modal': '@android:onClick',
+        'download': '@android:onClick',
+        'file': '@android:tag',
+        'x-toggle': '@android:onClick',
+        'directory': '@android:tag',
+        'clear-node': '@android:onClick',
+        'redirect': '@android:onClick',
+        'modala-multi-last': '@android:tag',
+        'modala-multi-first': '@android:tag',
+        'time-active': '@android:tag',
+        'time-inactive': '@android:tag',
+        'disabled': '@android:enabled',
+        'br': '@android:layout_marginBottom',
+        'js': '@android:tag',
+        'css': '@android:tag',
+        'event': '@android:onClick',
+        'options': '@android:entries',
+        'delay': '@android:tag',
+        'boxes': '@android:tag',
+        'file-order': '@android:tag',
+        'file-index': '@android:tag',
+        'incrIndex': '@android:tag',
+        'decrIndex': '@android:tag',
+        'interval': '@android:tag',
+        'x-value-set': '@android:onClick',
+        'x-value-get': '@android:onClick',
+        'x-value-rem': '@android:onClick',
+        'x-value-clear': '@android:onClick',
+        'mode': '@android:tag',
+        'pipe': '@android:tag',
+        'multiple': '@android:tag',
+        'remove': '@android:onClick',
+        'display': '@android:visibility',
+        'json': '@android:tag',
+        'headers': '@android:tag',
+        'form-class': '@android:tag',
+        'action-class': '@android:tag',
+        'mouse': '@android:clickable',
+        'mouse-insert': '@android:onClick'
+    };
+
+    return attributeMap[attribute] || `@android:${attribute}`;
+}
 /**
  * 
  * @param {JSON Object} value 
@@ -431,9 +620,9 @@ function modala(value, tempTag, root, id) {
     }
 
     var temp = document.createElement(value["tagname"]);
-    if (temp.tagName.toLowerCase() == "undefined") {
+    if (value["tagname"] == "undefined") {
         temp.tagName = "div";
-        temp.id = "undefined";
+        temp = document.createElement("div");
     }
 
     if (value["header"] !== undefined && value["header"] instanceof Object) {
@@ -447,6 +636,28 @@ function modala(value, tempTag, root, id) {
     Object.entries(value).forEach((nest) => {
         const [k, v] = nest;
         if (k.toLowerCase() == "header");
+        else if (k.toLocaleLowerCase() == "buttons" && v instanceof Object) {
+            var buttons = document.createElement("div");
+            v.forEach(z => {
+                var button = document.createElement("input");
+                console.log(z);
+                button.type = "button";
+                var keys = ["text", "value", "textcontent", "innerhtml", "innerText"];
+                Object.entries(z).forEach(x => {
+                    const [key, val] = x;
+                    console.log(["text", "value", "textcontent", "innerhtml", "innertext"].includes(key.toLowerCase()));
+                    vals = escapeHtml(val);
+                    if (["text", "value", "textcontent", "innerhtml", "innertext"].includes(key.toLowerCase()))
+                        button.value = val;
+                    else
+                        button.setAttribute(key, val);
+                });
+                temp.appendChild(button);
+            });
+            // modala(v, tempTag, root, id);
+        }
+        else if (v instanceof Object)
+            modala(v, tempTag, root, id);
         else if (v instanceof Object)
             modala(v, tempTag, root, id);
         else if (k.toLowerCase() == "br") {
@@ -482,12 +693,15 @@ function modala(value, tempTag, root, id) {
             var i = (value['index'] == undefined) ? 0 : value['index'];
             temp.id = value['id'];
             optsArray.forEach((e, f) => {
+                if (value['boxes'] == temp.childElementCount)
+                    return;
                 if (value['type'] == "img") {
                     var gth = document.createElement("img");
                     gth.src = e;
                     gth.width = value['width'];
                     gth.height = value['height'];
                     gth.style.display = "hidden";
+                    temp.setAttribute("sources", value['sources'])
                     temp.appendChild(gth);
                 }
                 else if (value['type'] == "audio") {
@@ -536,11 +750,6 @@ function modala(value, tempTag, root, id) {
                         });
                 }
             });
-            var auto = (value['auto'] != undefined && value['auto'] != false) ? true : false;
-            if (value['direction'] != undefined && value['direction'].toLowerCase() == "right")
-                shiftFilesRight(temp, auto, value['delay']);
-            else
-                shiftFilesLeft(temp, auto, value['delay']);
 
         }
         else if (k.toLowerCase() == "css") {
@@ -622,6 +831,7 @@ function setTimers(target) {
     }
 
     setTimeout(function () {
+        pipes(target);
         setTimers(target);
     }, delay);
 }
@@ -657,6 +867,7 @@ function carouselButtonStep(elem, direction) {
 function shiftFilesLeft(elem, auto = false, delay = 1000) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
+
     console.error(elem)
     var iter = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
     var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
@@ -664,28 +875,81 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
 
     var h = 0;
 
-    while (iter * i > h) {
-        var clone = null
-        try {
-            elem.firstChild.cloneNode(true);
-            clone.style.display = "none";
-            elem.appendChild(clone);
-            elem.removeChild(elem.firstChild);
+    while (h < b) {
+        elem.removeChild(elem.firstChild);
+        var cloneSrcs = elem.getAttribute("sources").split(";");
+        var clones = cloneSrcs[(h + i) % cloneSrcs.length];
+        var newClone = null;
+        if (elem.getAttribute("type").toLowerCase() == ('audio' | 'video'))
+            newClone = document.createElement(elem.getAttribute("source"));
+        else if (elem.getAttribute("type").toLowerCase() == ('modal'))
+            modalList(clones);
+        else if (elem.getAttribute("type").toLowerCase() == ('php' | 'html')) {
+            var f = htmlToJson(getTextFile(clones));
+            modalList(f)
         }
-        catch (e) { console.log(e) }
-
+        else
+            newClone = document.createElement(elem.getAttribute("type"));
+        newClone.src = clones;
+        newClone.height = elem.getAttribute("height");
+        newClone.width = elem.getAttribute("width");
+        elem.appendChild(newClone);
         h++;
     }
 
-    h = 0;
+    if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
+        elem.style.display = "block";
+    else
+        elem.style.display = "inline-block";
+
+    if (elem.classList.contains("time-active")) {
+        auto = true;
+    }
+    else if (elem.classList.contains("time-inactive")) {
+        auto = false;
+    }
+    elem.setAttribute("index", (i + iter) % elem.children.length);
+    if (auto == "on")
+        setTimeout(() => { shiftFilesLeft(elem, auto, delay); }, (delay));
+
+}
+function shiftFilesRight(elem, auto = false, delay = 1000) {
+    if (typeof (elem) == "string")
+        elem = document.getElementById(elem);
+
+    console.error(elem)
+    var iter = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
+    var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
+    var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
+
+    var h = 0;
 
     while (h < b) {
-        if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
-            elem.children[h].style.display = "block";
-        else if (h + 1 < b)
-            elem.children[h].style.display = "inline-block";
+        elem.removeChild(elem.lastChild);
+        var cloneSrcs = elem.getAttribute("sources").split(";");
+        var clones = cloneSrcs[(h + i) % cloneSrcs.length];
+        var newClone = null;
+        if (elem.getAttribute("type").toLowerCase() == ('audio' | 'video'))
+            newClone = document.createElement(elem.getAttribute("source"));
+        else if (elem.getAttribute("type").toLowerCase() == ('modal'))
+            modalList(clones);
+        else if (elem.getAttribute("type").toLowerCase() == ('php' | 'html')) {
+            var f = htmlToJson(getTextFile(clones));
+            modalList(f)
+        }
+        else
+            newClone = document.createElement(elem.getAttribute("type"));
+        newClone.src = clones;
+        newClone.height = elem.getAttribute("height");
+        newClone.width = elem.getAttribute("width");
+        elem.prepend(newClone);
         h++;
     }
+
+    if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
+        elem.style.display = "block";
+    else
+        elem.style.display = "inline-block";
 
     if (elem.classList.contains("time-active")) {
         auto = true;
@@ -699,62 +963,17 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
 
 }
 
-function shiftFilesRight(elem, auto = false, delay = 1000) {
-    if (typeof (elem) == "string")
-        elem = document.getElementById(elem);
-    var iter = elem.hasAttribute("iter") ? parseInt(elem.getAttribute("iter")) : 1;
-    var i = elem.hasAttribute("index") ? parseInt(elem.getAttribute("index")) : 0;
-    var b = elem.hasAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : 1;
-
+function fileShift(elem) {
+    var i = elem.getAttribute("index");
+    var iter = elem.getAttribute("iter");
+    var b = elem.getAttribute("boxes");
     var h = 0;
     var g = 0;
-
-    while (b + 1 > h) {
-        {
-            // let n = elem.childNodes;
-            var clone = elem.lastChild.cloneNode(true);
-            clone.style.display = "none";
-            elem.insertBefore(clone, elem.firstChild);
-            elem.removeChild(elem.lastChild);
-        }
-        h++;
-    }
-
-    h = 0;
-
-    while (h < b) {
-        if (h + 1 < b && elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
-            elem.children[h].style.display = "block";
-        else if (h + 1 < b)
-            elem.children[h].style.display = "inline-block";
-        h++;
-    }
-    if (i - iter <= 0)
-        i = elem.children.length
-    else
-        i -= iter;
-
-    elem.setAttribute("index", Math.abs(i) % elem.children.length);
-
-    if (elem.classList.contains("time-active")) {
-        auto = true;
-    }
-    else if (elem.classList.contains("time-inactive")) {
-        auto = false;
-    }
-    if (auto == "on")
-        setTimeout(() => { shiftFilesRight(elem, elem.getAttribute("auto"), delay); }, (delay));
-
-}
-
-function fileShift(elem) {
-    if (elem == null || elem == undefined)
-        return;
-    var arr = elem.getAttribute("file-order").split(";");
+    var arr = elem.getAttribute("sources").split(";");
     var ppfc = document.getElementById(elem.getAttribute("insert").toString());
     if (!ppfc.hasAttribute("file-index"))
         ppfc.setAttribute("file-index", "0");
-    var index = parseInt(ppfc.getAttribute("file-index").toString());
+    index = parseInt(ppfc.getAttribute("file-index").toString());
     var interv = elem.getAttribute("interval");
     if (elem.classList.contains("decrIndex"))
         index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) - interv;
@@ -764,10 +983,14 @@ function fileShift(elem) {
         index = arr.length - 1;
     index = index % arr.length;
     ppfc.setAttribute("file-index", index.toString());
+
 }
 
 function fileOrder(elem) {
-    arr = elem.getAttribute("file-order").split(";");
+    if (typeof (elem) == "string")
+        elem = document.getElementById(elem);
+
+    arr = elem.getAttribute("sources").split(";");
     ppfc = document.getElementById(elem.getAttribute("insert").toString());
     if (!ppfc.hasAttribute("file-index"))
         ppfc.setAttribute("file-index", "0");
@@ -795,13 +1018,24 @@ function fileOrder(elem) {
     }
     else if (ppfc && ppfc.tagName == "IMG") {
         ppfc.setAttribute("src", arr[index].toString());
-    }
-    else {
-        var obj = document.createElement("img");
-        obj.setAttribute("src", arr[index].toString());
-        ppfc.appendChild(obj);
+        var loop = index;
+        while (loop % arr.length != (index + iter) % arr.length) {
+            if (elem.getAttribute("direction").toLowerCase() !== "left")
+                ppfc.removeChild(ppfc.lastChild);
+            else
+                ppfc.removeChild(ppfc.firstChild);
+            var obj = document.createElement("img");
+            obj.setAttribute("src", arr[loop % arr.length].toString());
+
+            if (elem.getAttribute("direction").toLowerCase() !== "left")
+                ppfc.insertBefore(obj, ppfc.firstChild);
+            else
+                ppfc.appendChild(obj);
+            loop++;
+        }
     }
 }
+
 function carousel(elem, auto = true) {
     if (typeof (elem) == "string")
         elem = document.getElementById(elem);
@@ -919,7 +1153,7 @@ function carousel(elem, auto = true) {
 function fileShift(elem) {
     if (elem == null || elem == undefined)
         return;
-    var arr = elem.getAttribute("file-order").split(";");
+    var arr = elem.getAttribute("sources").split(";");
     var ppfc = document.getElementById(elem.getAttribute("insert").toString());
     if (!ppfc.hasAttribute("file-index"))
         ppfc.setAttribute("file-index", "0");
@@ -995,9 +1229,6 @@ function pipes(elem, stop = false) {
     if (elem.id === null)
         return;
 
-    if (elem.hasAttribute("copy")) {
-        copyContentById(elem.getAttribute("copy"));
-    }
     if (elem.classList.contains("redirect")) {
         window.location.href = elem.getAttribute("ajax");
     }
@@ -1058,7 +1289,7 @@ function pipes(elem, stop = false) {
         else
             elem.setAttribute("turn-index", "0");
         optsArray.forEach((e, f) => {
-            this.pipes(e.target);
+            pipes(e.target);
         });
     }
     if (elem.hasAttribute("x-toggle")) {
@@ -1108,7 +1339,7 @@ function pipes(elem, stop = false) {
             else if (elem.classList.contains("time-inactive")) {
                 auto = false;
             }
-            this.shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
+            shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-step-left")) {
@@ -1121,7 +1352,7 @@ function pipes(elem, stop = false) {
             else if (elem.classList.contains("time-inactive")) {
                 auto = false;
             }
-            this.shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
+            shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-left")) {
@@ -1134,7 +1365,7 @@ function pipes(elem, stop = false) {
             else if (elem.classList.contains("time-inactive")) {
                 auto = false;
             }
-            this.shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
+            shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-right")) {
@@ -1147,7 +1378,7 @@ function pipes(elem, stop = false) {
             else if (elem.classList.contains("time-inactive")) {
                 auto = false;
             }
-            this.shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
+            shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.hasAttribute("query")) {
@@ -1305,8 +1536,7 @@ function formAJAX(elem, classname) {
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
-        if (elem_value.value)
-            elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.value + (elem_value.value[-1] == "&" ? "" : "&");
+        elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.getAttribute('value') + "&";
         // Multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {
@@ -1339,7 +1569,7 @@ function addPipe(elem) {
 
 function hasPipeListener(elem) {
     if (elem.id != undefined)
-        return elem.click;
+    return elem.click;
 }
 
 function navigate(elem, opts = null, query = "", classname = "") {
@@ -1497,16 +1727,12 @@ function navigate(elem, opts = null, query = "", classname = "") {
     else if (elem.classList.contains("json")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
-                var allText = JSON.parse(rawFile.responseText);
+                var allText = "";// JSON.parse(rawFile.responseText);
                 try {
                     console.log(rawFile.responseText);
                     allText = JSON.parse(rawFile.responseText);
-                    if (allText['status']) {
-                        if (allText['status'] != "success")
-                            return allText;
-                    }
                     if (elem.hasAttribute("insert")) {
-                        document.getElementById(elem.getAttribute("insert")).textContent = (allText['message']);
+                        document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
                     }
                     return allText;
                 }
@@ -1523,17 +1749,25 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 try {
                     console.log(rawFile.responseText);
                     allText = JSON.parse(rawFile.responseText);
-                    if (allText['status']) {
-                        if (allText['status'] != "success")
-                            return allText;
-                    }
                     console.log(allText);
                     var editNode = document.getElementById(elem.id);
                     editNode.innerHTML = "";
                     // editNode.innerHTML = allText;
                     renderTree(allText, editNode);
                     addPipe(editNode);
-                    return;
+                    return ;
+                    if (elem.hasAttribute("insert") && elem.getAttribute("insert") == elem.id && !document.getElementById(elem.id).hasChildNodes) {
+                        document.getElementById(elem.id).innerHTML = "<br>";
+                        var editNode = document.getElementById(elem.id).parentNode;
+                        var x = renderTree(allText, editNode);
+                        editNode.parentNode.insertBefore(x);
+                        console.log(document.getElementById(editNode));
+                    }
+                    else if (elem.hasAttribute("insert")) {
+                        var x = renderTree(allText, elem.getAttribute("insert"));
+                        // document.getElementById(elem.getAttribute("insert")).textContent = x.textContent;
+                    }
+                    return allText;
                 }
                 catch (e) {
                     console.log("Response: " + e);

@@ -16,6 +16,7 @@
   *  directory.........= [Attr] relative or full path of 'file'
   *  copy..............= [Bool] copy the text in teh container. If there is a insert attribute, it will copy the text in the insert attribute with that id.
   *  clear-node........= [Class] clear nodes. delimited in insert="first;second;thirdnode" by ';'
+  *  tool-tip..........= [Attr] tool tip for the element
   *  redirect..........= [Class] "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
   *  modala-multi-last.= [Class] to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
   *  modala-multi-first= [Class] to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
@@ -72,13 +73,11 @@
   **** go on if there is no input to replace them.
   */
 
-  function last() {
-    document.addEventListener("click", function (elem) {
-        console.log(elem.target);
-        if (elem.target.id != undefined) { pipes(elem.target); }
-    });
+document.addEventListener("DOMContentLoaded", function () {
+    addPipe(document.body);
+    domContentLoad();
     return;
-}
+});
 
 let domContentLoad = (again = false) => {
 
@@ -105,13 +104,6 @@ let domContentLoad = (again = false) => {
         }
     });
 
-    let elementsArray_dyn = document.getElementsByTagName("dyn");
-    Array.from(elementsArray_dyn).forEach(function (elem) {
-        if (elem.classList.contains("disabled"))
-            return;
-        elem.classList.toggle("disabled");
-    });
-
     let elements_Carousel = document.getElementsByTagName("carousel");
     Array.from(elements_Carousel).forEach(function (elem) {
         if (elem.classList.contains("time-inactive"))
@@ -126,17 +118,17 @@ let domContentLoad = (again = false) => {
         setTimeout(carousel(elem, auto), elem.getAttribute("delay"));
     });
 
-    let elementsArray_link = document.getElementsByTagName("lnk");
-    Array.from(elementsArray_link).forEach(function (elem) {
-        if (elem.classList.contains("disabled"))
-            return;
-        elem.classList.toggle("disabled");
-
-    });
-
     let elements_mouse = document.querySelectorAll(".mouse");
-    Array.from(elements_mouse).forEach(function (elem) {
 
+    Array.from(elements_mouse).forEach(function (elem) {
+        console.log(elem);
+        if (elem.hasAttribute("tool-tip")) {
+            console.log(elem.getAttribute("tool-tip")+ "...");
+            elem.addEventListener('mouseover', function () {
+                textCard(elem.getAttribute("tool-tip"), '', '', elem.offsetLeft, elem.offsetTop, 2000, 100);
+            });
+            return;
+        }
         var ev = elem.getAttribute("event");
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
@@ -223,7 +215,7 @@ function modalCard(filename, insert_id, x_center = false, y_center = false, dura
     }
 }
 
-function textCard(text, id, classes, x_center = false, y_center = false, duration = -1, zindex = 100) {
+function textCard(text, id = "", classes = "", x_center = false, y_center = false, duration = -1, zindex = 100) {
     var copied = document.createElement("div");
     copied.id = id;
     if (classes != undefined && classes != "")
@@ -995,6 +987,14 @@ function pipes(elem, stop = false) {
     if (elem.id === null)
         return;
 
+    if (elem.hasAttribute("tool-tip") && elem.getAttribute("tool-tip") != '') {
+        const element = document.getElementById(elem.id);
+        const rect = element.getBoundingClientRect();
+        console.log(elem.getAttribute("tool-tip"));
+        const x = rect.left + window.scrollX;
+        const y = rect.top + window.scrollY;
+        textCard(elem.getAttribute("tool-tip"), '', '', x+5, y+elem.style.height, 2000, 100);
+    }
     if (elem.hasAttribute("copy")) {
         copyContentById(elem.getAttribute("copy"));
     }
@@ -1331,6 +1331,13 @@ function addPipe(elem) {
                     });
                 }
             });
+            y.addEventListener('mouseover', (x) => {
+                if (typeof x === "Object" && x.hasAttribute("tool-tip")) {
+                    x.forEach((w) => {
+                        addPipe(w);
+                    });
+                }
+            });
         });
         if (!hasPipeListener(x))
             pipes(x);
@@ -1584,4 +1591,4 @@ function navigate(elem, opts = null, query = "", classname = "") {
     }
 }
 
-last();
+;

@@ -16,8 +16,9 @@
                 "textContent": "Sale 1",
                 "ajax": "index2.html",
                 "tagname": "td",
-                "class": "sale-label redirect",
+                "class": "sale-label redirect mouse",
                 "id": "sales-tag1",
+                "tool-tip": "Tool-tips!",
                 "textContent": "On Sale!!!",
                 "style": "color: #666;"
             }
