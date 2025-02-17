@@ -73,7 +73,7 @@
   **** go on if there is no input to replace them.
   */
 
-document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", function () {
     try {
         if (document.body != null && JSON.parse(document.body.textContent)) {
             const irc = JSON.parse(document.body.textContent);
@@ -91,8 +91,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 let domContentLoad = (again = false) => {
-
-
     doc_set = document.getElementsByTagName("pipe");
     if (again == false) {
         Array.from(doc_set).forEach(function (elem) {
@@ -137,19 +135,17 @@ let domContentLoad = (again = false) => {
         setTimeout(carousel(elem, auto), elem.getAttribute("delay"));
     });
 
-    let elements_mouse = document.querySelectorAll(".mouse");
+    let elementsArray_link = document.getElementsByTagName("lnk");
+    Array.from(elementsArray_link).forEach(function (elem) {
+        if (elem.classList.contains("disabled"))
+            return;
+        elem.classList.toggle("disabled");
 
-    console.log(elements_mouse.length);
+    });
+
+    let elements_mouse = document.querySelectorAll(".mouse");
     Array.from(elements_mouse).forEach(function (elem) {
-        console.log(elem);
-        if (elem.hasAttribute("tool-tip")) {
-            console.log(elem.getAttribute("tool-tip") + "...");
-            elem.addEventListener('mouseenter', function () {
-                const x = elem.offsetLeft + window.scrollX;
-                const y = elem.offsetTop + window.scrollY;
-                textCard(elem.getAttribute("tool-tip"), '', '', x + 15, y + 25, 1500, 100);
-            });
-        }
+
         var ev = elem.getAttribute("event");
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
@@ -174,6 +170,7 @@ let domContentLoad = (again = false) => {
         });
     });
 }
+
 
 function copyContentById(id) {
     // Get the element with the specified ID
@@ -266,25 +263,65 @@ function textCard(text, id = "", classes = "", x_center = false, y_center = fals
     }
 }
 
-function sha256(message) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(message);
-    return crypto.subtle.digest('SHA-256', data).then(hash => {
-        return Array.from(new Uint8Array(hash))
-            .map(b => b.toString(16).padStart(2, '0'))
-            .join('');
+let highlightedItem = null;
+
+function renderTree(value, tempTag) {
+    if (typeof tempTag == "string") {
+        tempTag = document.getElementById(tempTag);
+    }
+    if (value == undefined) {
+        console.log(tempTag + "******");
+        console.error("value of reference incorrect");
+        return;
+    }
+
+    var temp = document.createElement(value["tagname"] || 'span');
+    temp.id = value["textContent"] || value["label"] || value.keyName;
+    temp.classList.add('tree-item');
+
+    if (value.icon) {
+        let img = document.createElement('img');
+        img.src = value.icon;
+        img.style.marginRight = '5px';
+        temp.appendChild(img);
+    }
+
+    temp.id = value.id;
+    temp.textContent = value.textContent || value.label;
+    if (temp.textContent.length == 0) {
+        console.error("No text content for tree item. Use \"label\" or \"textContent\"");
+        exit();
+    }
+
+    Object.entries(value).forEach(([k, v]) => {
+        let keyName = (!isNaN(k.toString()) ? "data-" + k.toString() : k);
+        if (v instanceof Object) {
+            let subContainer = document.createElement('span');
+            subContainer.classList.add('sub-tree');
+            temp.appendChild(subContainer);
+            renderTree(v, subContainer);
+            temp.addEventListener('click', (e) => {
+                e.stopPropagation();
+                subContainer.style.display = subContainer.style.display === 'none' ? 'block' : 'none';
+            });
+        } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
+            temp.setAttribute(k, v);
+        }
     });
+
+    temp.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+        temp.classList.add('highlight');
+        pipes(temp);
+    });
+
+    // temp = htmlDecode(temp);
+
+    tempTag.appendChild(temp);
+
+    return tempTag;
 }
-
-// Usage example to generate a nonce
-function generateNonce() {
-    const randomBytes = new Uint8Array(16);
-    crypto.getRandomValues(randomBytes);
-    return sha256(randomBytes.join('')).then(hash => hash.slice(0, 16));
-}
-
-// Example of how to use it
-
 
 /**
  * Recursively creates HTML elements based on a JSON object and appends them to the document head.
@@ -305,7 +342,6 @@ function modalaHead(value) {
     catch (e) {
         console.log(e)
     }
-
     var temp = document.createElement(value["tagname"]);
     Object.entries(value).forEach((nest) => {
         const [k, v] = nest;
@@ -321,15 +357,10 @@ function modalaHead(value) {
             var optsArray = v.split(";");
             console.log(v)
             optsArray.forEach((e, f) => {
-
-                generateNonce().then(nonce => {
-                    var cssvar = document.createElement("link");
-                    cssvar.href = v;
-                    cssvar.rel = "stylesheet";
-                    cssvar.nonce = nonce;
-                    document.head.appendChild(cssvar);
-                });
-
+                var cssvar = document.createElement("link");
+                cssvar.href = v;
+                cssvar.rel = "stylesheet";
+                document.head.appendChild(cssvar);
             });
 
         }
@@ -337,13 +368,9 @@ function modalaHead(value) {
             var optsArray = v.split(";");
             console.log(v)
             optsArray.forEach((e, f) => {
-                generateNonce().then(nonce => {
-                    const js = document.createElement("script");
-                    js.src = e;
-                    js.type = "text/javascript";
-                    js.nonce = nonce;
-                    document.head.appendChild(js);
-                });
+                const js = document.createElement("script");
+                js.src = e;
+                document.head.appendChild(js);
             });
         }
         else if (k.toLowerCase() == "modal") {
@@ -482,7 +509,6 @@ function modala(value, tempTag, root, id) {
         temp.tagName = "div";
         temp = document.createElement("div");
     }
-
     if (value["header"] !== undefined && value["header"] instanceof Object) {
 
         modalaHead(value["header"], "head", root, null);
@@ -610,6 +636,18 @@ function modala(value, tempTag, root, id) {
             });
 
         }
+        else if (k.toLowerCase() == "css") {
+            var cssvar = document.createElement("link");
+            cssvar.href = v;
+            cssvar.rel = "stylesheet";
+            tempTag.appendChild(cssvar);
+        }
+        else if (k.toLowerCase() == "js") {
+            var js = document.createElement("script");
+            js.src = v;
+            js.setAttribute("defer", "true");
+            tempTag.appendChild(js);
+        }
         else if (k.toLowerCase()[0] == "h" && k.length == 2) {
             var h = document.createElement(k);
             h.innerText = v;
@@ -647,18 +685,12 @@ function modala(value, tempTag, root, id) {
             (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
         }
         else if (k.toLowerCase() == "style") {
-            var styleArray = v.split(";");
-            styleArray.forEach((e, f) => {
-                var styleArray2 = e.split(":");
-                temp.style[styleArray2[0]] = styleArray2[1];
-            });
+            temp.style.cssText = v;
         }
     });
     tempTag.appendChild(temp);
     return tempTag;
 }
-
-
 
 /**
  * @param {string} target
@@ -672,7 +704,6 @@ function setTimers(target) {
         return;
     }
     else if (target.classList.contains("time-active")) {
-        pipes(target);
     }
     else if (target.classList.contains("time-inactive")) {
     }
@@ -1070,33 +1101,44 @@ function classOrder(elem) {
     elem.classList = arr[index];
 }
 
+function addPipe(elem) {
+    if (Array.isArray(elem) || elem instanceof NodeList) {
+        elem.forEach(y => addPipe(y));
+        return;
+    }
+    
+    if (elem instanceof Element) {
+        elem.addEventListener('click', () => {
+            if (elem.children.length > 0) {
+                Array.from(elem.children).forEach(child => addPipe(child));
+            }
+        });
+        
+        if (!hasPipeListener(elem)) {
+            pipes(elem);
+        }
+    }
+}
+
+function hasPipeListener(elem) {
+    return elem && typeof elem.onclick === 'function';
+}
+
 function pipes(elem, stop = false) {
 
     var query = "";
     var headers = new Map();
     var formclass = "";
+//
+//    if (elem.id === null)
+//        return;
 
-    if (elem.id === null)
-        return;
-
-    if (elem.hasAttribute("tool-tip") && elem.getAttribute("tool-tip") != '') {
-        const element = document.getElementById(elem.id);
-        const rect = element.getBoundingClientRect();
-        console.log(elem.getAttribute("tool-tip"));
-        const x = rect.left + window.scrollX;
-        const y = rect.top + window.scrollY;
-        textCard(elem.getAttribute("tool-tip"), '', '', x + 5, y + elem.style.height, 2000, 100);
-    }
-    if (elem.hasAttribute("copy")) {
-        copyContentById(elem.getAttribute("copy"));
-    }
-    if (elem.classList.contains("redirect")) {
-        window.location.href = elem.getAttribute("ajax");
-    }
+    if (elem.classList.contains("redirect"))
+	window.location.href = elem.getAttribute("ajax");
     if (elem.classList.contains("disabled"))
         return;
     if (elem.classList.contains("clear-node")) {
-        var pages = elem.getAttribute("insert").split(";");
+        var pages = elem.getAttribute("node").split(";");
         pages.forEach((e) => {
             console.log(e);
             document.getElementById(e).innerHTML = "";
@@ -1150,7 +1192,7 @@ function pipes(elem, stop = false) {
         else
             elem.setAttribute("turn-index", "0");
         optsArray.forEach((e, f) => {
-            pipes(e.target);
+            this.pipes(e.target);
         });
     }
     if (elem.hasAttribute("x-toggle")) {
@@ -1302,71 +1344,6 @@ function pipes(elem, stop = false) {
     }
 }
 
-let highlightedItem = null;
-
-function renderTree(value, tempTag) {
-    if (typeof tempTag == "string") {
-        tempTag = document.getElementById(tempTag);
-    }
-    if (value == undefined) {
-        console.log(tempTag + "******");
-        console.error("value of reference incorrect");
-        return;
-    }
-
-    var temp = document.createElement(value["tagname"] || 'span');
-    temp.id = value["textContent"] || value["label"] || value.keyName;
-    temp.classList.add('tree-item');
-
-    if (value.icon) {
-        let img = document.createElement('img');
-        img.src = value.icon;
-        img.style.marginRight = '5px';
-        temp.appendChild(img);
-    }
-
-    temp.id = value.id;
-    temp.textContent = value.textContent || value.label;
-    if (temp.textContent.length == 0) {
-        console.error("No text content for tree item. Use \"label\" or \"textContent\"");
-        exit();
-    }
-
-    Object.entries(value).forEach(([k, v]) => {
-        let keyName = (!isNaN(k.toString()) ? "data-" + k.toString() : k);
-        if (v instanceof Object) {
-            let subContainer = document.createElement('span');
-            subContainer.classList.add('sub-tree');
-            temp.appendChild(subContainer);
-            renderTree(v, subContainer);
-            temp.addEventListener('click', (e) => {
-                e.stopPropagation();
-                subContainer.style.display = subContainer.style.display === 'none' ? 'block' : 'none';
-            });
-        } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
-            temp.setAttribute(k, v);
-        }
-    });
-
-    temp.addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
-        temp.classList.add('highlight');
-        pipes(temp);
-    });
-
-    // temp = htmlDecode(temp);
-
-    tempTag.appendChild(temp);
-
-    return tempTag;
-}
-// function htmlDecode(input){
-//     var e = document.createElement('div');
-//     e.innerHTML = input;
-//     return e.childNodes[0].nodeValue;
-// }
-
 function setAJAXOpts(elem, opts) {
 
     // communicate properties of Fetch Request
@@ -1410,29 +1387,6 @@ function formAJAX(elem, classname) {
     if (elem.classList.contains("redirect"))
         window.location.href = elem.getAttribute("ajax") + "?" + ((elem_qstring.length > 0) ? elem_qstring : "");
     return (elem_qstring);
-}
-
-function addPipe(elem) {
-    if (Array.isArray(elem) || elem instanceof NodeList) {
-        elem.forEach(y => addPipe(y));
-        return;
-    }
-    
-    if (elem instanceof Element) {
-        elem.addEventListener('click', () => {
-            if (elem.children.length > 0) {
-                Array.from(elem.children).forEach(child => addPipe(child));
-            }
-        });
-        
-        if (!hasPipeListener(elem)) {
-            pipes(elem);
-        }
-    }
-}
-
-function hasPipeListener(elem) {
-    return elem && typeof elem.onclick === 'function';
 }
 
 
@@ -1588,24 +1542,6 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
         }
     }
-    else if (elem.classList.contains("json")) {
-        rawFile.onreadystatechange = function () {
-            if (rawFile.readyState === 4) {
-                var allText = "";// JSON.parse(rawFile.responseText);
-                try {
-                    console.log(rawFile.responseText);
-                    allText = JSON.parse(rawFile.responseText);
-                    if (elem.hasAttribute("insert")) {
-                        document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
-                    }
-                    return allText;
-                }
-                catch (e) {
-                    console.log("Response not a JSON");
-                }
-            }
-        }
-    }
     else if (elem.classList.contains("tree-view")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
@@ -1620,21 +1556,27 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     renderTree(allText, editNode);
                     addPipe(editNode);
                     return;
-                    if (elem.hasAttribute("insert") && elem.getAttribute("insert") == elem.id && !document.getElementById(elem.id).hasChildNodes) {
-                        document.getElementById(elem.id).innerHTML = "<br>";
-                        var editNode = document.getElementById(elem.id).parentNode;
-                        var x = renderTree(allText, editNode);
-                        editNode.parentNode.insertBefore(x);
-                        console.log(document.getElementById(editNode));
-                    }
-                    else if (elem.hasAttribute("insert")) {
-                        var x = renderTree(allText, elem.getAttribute("insert"));
-                        // document.getElementById(elem.getAttribute("insert")).textContent = x.textContent;
+                }
+                catch (e) {
+                    console.log("Response: " + e);
+                }
+            }
+        }
+    }
+    else if (elem.classList.contains("json")) {
+        rawFile.onreadystatechange = function () {
+            if (rawFile.readyState === 4) {
+                var allText = "";// JSON.parse(rawFile.responseText);
+                try {
+                    console.log(rawFile.responseText);
+                    allText = JSON.parse(rawFile.responseText);
+                    if (elem.hasAttribute("insert")) {
+                        document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
                     }
                     return allText;
                 }
                 catch (e) {
-                    console.log("Response: " + e);
+                    console.log("Response not a JSON");
                 }
             }
         }
@@ -1681,4 +1623,3 @@ function navigate(elem, opts = null, query = "", classname = "") {
         // console.log(e);
     }
 }
-last();

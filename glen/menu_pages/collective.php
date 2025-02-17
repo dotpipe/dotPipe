@@ -12,7 +12,7 @@ for($i = 1 ; $i <= 11 ; $i++) {
             "class": "arrow'.$i.' modala clear-node",
             "innerHTML": "➤",
             "method": "GET",
-            "ajax": "getarrow.php?main='.$i.'",
+            "ajax": "getarrow.php",
             "name": "main",
             "value": "'.$i.'",
             "form-class": "arrow'.$i.'",
