@@ -1,5 +1,5 @@
 <?php
-$arrow = $_GET['main'];
+$arrow = ($_GET['main']);
 
 $arrow_menu = array(
     "Main" => "1",
@@ -37,7 +37,7 @@ $file = '{
         "footer": {
             "tagname": "div",
             "id": "footer",
-            "class": "modala clear-node",
+            "class": "modala modala-multi-first",
             "display": "footer;main",
             "textContent": "Today is '.$date.'",
             "ajax": "'.$lc.'.php",

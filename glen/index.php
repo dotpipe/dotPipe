@@ -35,6 +35,12 @@
             padding: 10px;
             text-align: left;
         }
+        .arrow {
+            position:absolute;
+            color:blue;
+            height:25;
+            width:10;
+        }
     </style>
 </head>
 <body>

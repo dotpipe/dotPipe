@@ -73,6 +73,8 @@
   **** go on if there is no input to replace them.
   */
 
+  const PAGE_NONCE = await generateSHA256Nonce();
+
   document.addEventListener("DOMContentLoaded", function () {
     try {
         if (document.body != null && JSON.parse(document.body.textContent)) {
@@ -409,6 +411,7 @@ function modalaHead(value) {
             optsArray.forEach((e, f) => {
                 var cssvar = document.createElement("link");
                 cssvar.href = v;
+                cssvar.nonce = PAGE_NONCE;
                 cssvar.rel = "stylesheet";
                 document.head.appendChild(cssvar);
             });
@@ -420,6 +423,7 @@ function modalaHead(value) {
             optsArray.forEach((e, f) => {
                 const js = document.createElement("script");
                 js.src = e;
+                js.nonce = PAGE_NONCE;
                 document.head.appendChild(js);
             });
         }
@@ -563,7 +567,7 @@ function modala(value, tempTag, root, id) {
 
         modalaHead(value["header"], "head", root, null);
         var meta = document.createElement("meta");
-        meta.content = "script-src-elem 'self'; img-src 'self'; style-src 'self'; child-src 'none'; object-src 'none'";
+        meta.content = "script-src 'self' 'nonce-PAGE_NONCE'; img-src 'self'; style-src 'self' 'nonce-PAGE_NONCE'; child-src 'none'; object-src 'none'";
         meta.httpEquiv = "Content-Security-Policy";
         document.head.appendChild(meta);
     }

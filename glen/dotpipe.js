@@ -73,14 +73,16 @@
   **** go on if there is no input to replace them.
   */
 
-  document.addEventListener("DOMContentLoaded", function () {
-    try {
-        if (document.body != null && JSON.parse(document.body.textContent)) {
-            const irc = JSON.parse(document.body.textContent);
+let PAGE_NONCE;
 
+document.addEventListener("DOMContentLoaded", function () {
+    try {
+        if (JSON.parse(document.body.textContent)) {
+            const irc = JSON.parse(document.body.textContent);
             document.body.textContent = "";
             modala(irc, document.body);
             document.body.style.display = "block";
+            
         }
     } catch (e) {
         console.error("Error parsing or modifying body content", e);
@@ -89,10 +91,27 @@
     // Ensure domContentLoad is always called
     domContentLoad();
     addPipe(document.body);
+
+    generateNonce().then(nonce => {
+        const script_tags = document.getElementsByTagName("script");
+        const style_tags = document.getElementsByTagName("style");
+
+        Array.from(script_tags).forEach(function (elem) {
+            elem.nonce = nonce;
+        });
+        Array.from(style_tags).forEach(function (elem) {
+            elem.nonce = nonce;
+        });
+        PAGE_NONCE = nonce
+        var meta = document.createElement("meta");
+        meta.content = `script-src 'self' nonce-${PAGE_NONCE}; img-src 'self'; style-src 'self' nonce-${PAGE_NONCE}; child-src 'none'; object-src 'none'`;
+        meta.httpEquiv = "Content-Security-Policy";
+        document.head.appendChild(meta);
+    });
 });
 
 
-let domContentLoad = (again = false) => {
+function domContentLoad(again = false) {
     doc_set = document.getElementsByTagName("pipe");
     if (again == false) {
         Array.from(doc_set).forEach(function (elem) {
@@ -183,43 +202,44 @@ let domContentLoad = (again = false) => {
                 pipes(elem);
         });
     });
+
 }
 
-/**
- * Generates a SHA-256 nonce and appends it to headers and query strings.
- *
- * @param {Object} headers - A Map object containing the headers.
- * @param {string} query - The existing query string (optional).
- * @returns {Promise<{headers: Map, query: string}>} - Updated headers and query with nonce.
- */
-async function addNonce(headers, query = "") {
-    // Generate a random nonce
-    const nonce = await generateSHA256Nonce();
+// /**
+//  * Generates a SHA-256 nonce and appends it to headers and query strings.
+//  *
+//  * @param {Object} headers - A Map object containing the headers.
+//  * @param {string} query - The existing query string (optional).
+//  * @returns {Promise<{headers: Map, query: string}>} - Updated headers and query with nonce.
+//  */
+// async function addNonce(headers, query = "") {
+//     // Generate a random nonce
+//     const nonce = await generateSHA256Nonce();
 
-    // Append nonce to headers
-    if (!headers) headers = new Map();
-    headers.set("X-Nonce", nonce);
+//     // Append nonce to headers
+//     if (!headers) headers = new Map();
+//     headers.set("X-Nonce", nonce);
 
-    // Append nonce to query string
-    query += (query.length > 0 ? "&" : "") + "nonce=" + encodeURIComponent(nonce);
+//     // Append nonce to query string
+//     query += (query.length > 0 ? "&" : "") + "nonce=" + encodeURIComponent(nonce);
 
-    return { headers, query };
-}
+//     return { headers, query };
+// }
 
-/**
- * Generates a secure SHA-256 nonce from a random string.
- *
- * @returns {Promise<string>} - The SHA-256 hashed nonce.
- */
-async function generateSHA256Nonce() {
-    const randomString = crypto.getRandomValues(new Uint8Array(16)).join('');
-    const encoder = new TextEncoder();
-    const data = encoder.encode(randomString);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    return Array.from(new Uint8Array(hashBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-}
+// /**
+//  * Generates a secure SHA-256 nonce from a random string.
+//  *
+//  * @returns {Promise<string>} - The SHA-256 hashed nonce.
+//  */
+// async function generateSHA256Nonce() {
+//     const randomString = crypto.getRandomValues(new Uint8Array(16)).join('');
+//     const encoder = new TextEncoder();
+//     const data = encoder.encode(randomString);
+//     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+//     return Array.from(new Uint8Array(hashBuffer))
+//         .map(b => b.toString(16).padStart(2, '0'))
+//         .join('');
+// }
 
 
 function copyContentById(id) {
@@ -381,8 +401,7 @@ function renderTree(value, tempTag) {
  * @param {Object} [value[key]] - Additional properties of the HTML element, such as attributes, text content, or nested elements.
  * @returns {HTMLElement} The created HTML element.
  */
-function modalaHead(value) {
-
+async function modalaHead(value) {
     try {
         if (value == undefined) {
             console.error("value of reference incorrect");
@@ -409,6 +428,7 @@ function modalaHead(value) {
             optsArray.forEach((e, f) => {
                 var cssvar = document.createElement("link");
                 cssvar.href = v;
+                cssvar.nonce = PAGE_NONCE;
                 cssvar.rel = "stylesheet";
                 document.head.appendChild(cssvar);
             });
@@ -420,6 +440,7 @@ function modalaHead(value) {
             optsArray.forEach((e, f) => {
                 const js = document.createElement("script");
                 js.src = e;
+                js.nonce = PAGE_NONCE;
                 document.head.appendChild(js);
             });
         }
@@ -439,7 +460,7 @@ function modalaHead(value) {
         }
     });
 
-    return;
+    return PAGE_NONCE;
 }
 
 /**
@@ -531,6 +552,24 @@ function escapeHtml(html) {
     return p.innerHTML;
 }
 
+
+function sha256(message) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    return crypto.subtle.digest('SHA-256', data).then(hash => {
+        return Array.from(new Uint8Array(hash))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
+    });
+}
+
+// Usage example to generate a nonce
+function generateNonce() {
+    const randomBytes = new Uint8Array(16);
+    crypto.getRandomValues(randomBytes);
+    return sha256(randomBytes.join('')).then(hash => hash.slice(0, 16));
+}
+
 /**
  * 
  * @param {JSON Object} value 
@@ -562,11 +601,9 @@ function modala(value, tempTag, root, id) {
     if (value["header"] !== undefined && value["header"] instanceof Object) {
 
         modalaHead(value["header"], "head", root, null);
-        var meta = document.createElement("meta");
-        meta.content = "script-src-elem 'self'; img-src 'self'; style-src 'self'; child-src 'none'; object-src 'none'";
-        meta.httpEquiv = "Content-Security-Policy";
-        document.head.appendChild(meta);
     }
+
+
     Object.entries(value).forEach((nest) => {
         const [k, v] = nest;
         if (k.toLowerCase() == "header");
@@ -738,6 +775,7 @@ function modala(value, tempTag, root, id) {
             temp.style.cssText = v;
         }
     });
+
     tempTag.appendChild(temp);
     return tempTag;
 }
@@ -1196,7 +1234,7 @@ async function pipes(elem, stop = false) {
     if (elem.classList.contains("disabled"))
         return;
     if (elem.classList.contains("clear-node")) {
-        var pages = elem.getAttribute("node").split(";");
+        var pages = elem.getAttribute("insert").split(";");
         pages.forEach((e) => {
             console.log(e);
             document.getElementById(e).innerHTML = "";
@@ -1393,9 +1431,15 @@ async function pipes(elem, stop = false) {
     }
     // Make sure we have headers before proceeding
     // Use a guard flag on the element to prevent re-entry
-    if (elem.__processing) return;
-        elem.__processing = true;
+    // if (elem.__processing) return;
+    // elem.__processing = true;
 
+    if (elem.hasAttribute("ajax")) {
+        navigate(elem, headers, query, formclass);
+    } else if (elem.hasAttribute("modal")) {
+        navigate(elem, headers, query, classname); //.getAttribute("modal"));
+    }
+    return;
     try {
         let query = elem.getAttribute("query") || "";
         let headers = new Map();
@@ -1411,10 +1455,11 @@ async function pipes(elem, stop = false) {
                 });
             }
             console.log("Passing headers to navigate:", headers);
-            await navigate(elem, headers, query);
+            navigate(elem, headers, query, formclass);
+            
         } else {
             console.log("No headers found, passing empty Map.");
-            await navigate(elem, new Map(), query);
+            navigate(elem, new Map(), query, formclass);
         }
     } catch (e) {
         console.error(e);
@@ -1462,26 +1507,20 @@ function setAJAXOpts(elem, opts = null) {
 function formAJAX(elem, classname) {
     var elem_qstring = "";
 
-    console.log(document.getElementsByClassName(classname));
+    var elements = document.querySelectorAll('.' + classname);
+    console.log(elements.length); // This should now output the correct count
 
-    for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
-        var elem_value = document.getElementsByClassName(classname)[i];
-        var elem_name = elem_value.getAttribute('name'); // Get the name attribute
-        var elem_val = elem_value.getAttribute('value'); // Get the value attribute
-
-        if (elem_name) {
-            elem_qstring += elem_name + "=" + elem_val + "&";
-        }
-
-        // Handle multi-select box
-        if (elem_value.hasOwnProperty("multiple")) {
-            for (var o of elem_value.options) {
+    elements.forEach(function(elem_value) {
+        elem_qstring += elem_value.id + "=" + elem_value.getAttribute('value') + "&";
+        // Handle multi-select boxes
+        if (elem_value.multiple) {
+            Array.from(elem_value.options).forEach(function(o) {
                 if (o.selected) {
-                    elem_qstring += "&" + elem_name + "=" + o.getAttribute('name');
+                    elem_qstring += elem_value.getAttribute('name') + "=" + o.getAttribute('name') + "&";
                 }
-            }
+            });
         }
-    }
+    });
 
     if (elem.classList.contains("redirect")) {
         window.location.href = elem.getAttribute("ajax") + "?" + (elem_qstring.length > 0 ? elem_qstring : "");
@@ -1490,9 +1529,8 @@ function formAJAX(elem, classname) {
     return elem_qstring;
 }
 
-async function navigate(elem, opts = null, query = "", classname = "") {
+function navigate(elem, opts = null, query = "", classname = "") {
     query = encodeURI(query);
-
     // Ensure opts is a Map
     if (!opts || !(opts instanceof Map)) {
         console.warn("navigate() received an invalid opts. Initializing a new Map.");
@@ -1500,12 +1538,10 @@ async function navigate(elem, opts = null, query = "", classname = "") {
     }
 
     opts = setAJAXOpts(elem, opts);
-
-    // Append nonce
-    ({ headers: opts, query } = await addNonce(opts, query));
+    var getFormQuery = formAJAX(elem,classname);
 
     var rawFile = new XMLHttpRequest();
-    rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + query, true);
+    rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + getFormQuery, true);
 
     if (opts instanceof Map) {
         opts.forEach((value, key) => {
@@ -1702,7 +1738,7 @@ async function navigate(elem, opts = null, query = "", classname = "") {
                     html = rawFile.responseText;
                 }
                 var boxOF = false;
-                console.log(elem.getAttribute("boxes") + " " + document.getElementById(elem.getAttribute("insert")).childElementCount);
+                // console.log(elem.getAttribute("boxes") + " " + document.getElementById(elem.getAttribute("insert")).childElementCount);
                 if (elem.hasAttribute("boxes") && elem.getAttribute("boxes") <= document.getElementById(elem.getAttribute("insert")).childElementCount)
                     boxOF = true;
                 if (!elem.classList.contains("modala-multi-first") && !elem.classList.contains("modala-multi-last")) {
@@ -1714,6 +1750,7 @@ async function navigate(elem, opts = null, query = "", classname = "") {
                 else if (elem.classList.contains("modala-multi-last") && boxOF) {
                     document.getElementById(elem.getAttribute("insert")).firstChild.remove();
                 }
+                console.log(allText);
                 modala(allText, document.getElementById(elem.getAttribute("insert")));
             }
         }
