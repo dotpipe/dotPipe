@@ -13,7 +13,7 @@ for($i = 1 ; $i <= 11 ; $i++) {
             "method": "GET",
             "ajax": "getarrow.php",
             "name": "main",
-            "value": '.$i.',
+            "value": "'.$i.'",
             "form-class": "arrow'.$i.'",
             "insert": "arrow-area"
         },';

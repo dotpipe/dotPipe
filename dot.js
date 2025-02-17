@@ -1109,14 +1109,11 @@ function addPipe(elem) {
     
     if (elem instanceof Element) {
         elem.addEventListener('click', () => {
-            if (elem.children.length > 0) {
-                Array.from(elem.children).forEach(child => addPipe(child));
-            }
+            if (!hasPipeListener(elem)) {
+                pipes(elem);
+            }    
         });
         
-        if (!hasPipeListener(elem)) {
-            pipes(elem);
-        }
     }
 }
 

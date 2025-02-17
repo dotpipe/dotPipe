@@ -73,25 +73,22 @@
   **** go on if there is no input to replace them.
   */
 
-let PAGE_NONCE;
-
-document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", function () {
     try {
-        if (JSON.parse(document.body.textContent)) {
+        if (document.body != null && JSON.parse(document.body.textContent)) {
             const irc = JSON.parse(document.body.textContent);
+
             document.body.textContent = "";
             modala(irc, document.body);
             document.body.style.display = "block";
-            
         }
-    } catch (e) {
-        console.error("Error parsing or modifying body content", e);
+    }
+    catch (e) {
     }
 
-    // Ensure domContentLoad is always called
     domContentLoad();
     addPipe(document.body);
-
+    
     generateNonce().then(nonce => {
         const script_tags = document.getElementsByTagName("script");
         const style_tags = document.getElementsByTagName("style");
@@ -110,8 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-
-function domContentLoad(again = false) {
+let domContentLoad = (again = false) => {
     doc_set = document.getElementsByTagName("pipe");
     if (again == false) {
         Array.from(doc_set).forEach(function (elem) {
@@ -165,8 +161,6 @@ function domContentLoad(again = false) {
     });
 
     let elements_mouse = document.querySelectorAll(".mouse");
-
-    console.log(elements_mouse.length);
     Array.from(elements_mouse).forEach(function (elem) {
         console.log(elem);
         if (elem.hasAttribute("tool-tip")) {
@@ -179,13 +173,11 @@ function domContentLoad(again = false) {
         }
         var ev = elem.getAttribute("event");
         var rv = ev.split(";");
-        if (rv.length > 0) {
-            Array.from(rv).forEach((v) => {
-                elem.addEventListener(v, function () {
-                    (pipes(elem, auto));
-                });
+        Array.from(rv).forEach((v) => {
+            elem.addEventListener(v, function () {
+                (pipes(elem, auto));
             });
-        }
+        });
     });
 
     let elements_pipe = document.querySelectorAll(".pipe");
@@ -202,45 +194,24 @@ function domContentLoad(again = false) {
                 pipes(elem);
         });
     });
-
 }
 
-// /**
-//  * Generates a SHA-256 nonce and appends it to headers and query strings.
-//  *
-//  * @param {Object} headers - A Map object containing the headers.
-//  * @param {string} query - The existing query string (optional).
-//  * @returns {Promise<{headers: Map, query: string}>} - Updated headers and query with nonce.
-//  */
-// async function addNonce(headers, query = "") {
-//     // Generate a random nonce
-//     const nonce = await generateSHA256Nonce();
+function sha256(message) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    return crypto.subtle.digest('SHA-256', data).then(hash => {
+        return Array.from(new Uint8Array(hash))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
+    });
+}
 
-//     // Append nonce to headers
-//     if (!headers) headers = new Map();
-//     headers.set("X-Nonce", nonce);
-
-//     // Append nonce to query string
-//     query += (query.length > 0 ? "&" : "") + "nonce=" + encodeURIComponent(nonce);
-
-//     return { headers, query };
-// }
-
-// /**
-//  * Generates a secure SHA-256 nonce from a random string.
-//  *
-//  * @returns {Promise<string>} - The SHA-256 hashed nonce.
-//  */
-// async function generateSHA256Nonce() {
-//     const randomString = crypto.getRandomValues(new Uint8Array(16)).join('');
-//     const encoder = new TextEncoder();
-//     const data = encoder.encode(randomString);
-//     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-//     return Array.from(new Uint8Array(hashBuffer))
-//         .map(b => b.toString(16).padStart(2, '0'))
-//         .join('');
-// }
-
+// Usage example to generate a nonce
+function generateNonce() {
+    const randomBytes = new Uint8Array(16);
+    crypto.getRandomValues(randomBytes);
+    return sha256(randomBytes.join('')).then(hash => hash.slice(0, 16));
+}
 
 function copyContentById(id) {
     // Get the element with the specified ID
@@ -401,7 +372,8 @@ function renderTree(value, tempTag) {
  * @param {Object} [value[key]] - Additional properties of the HTML element, such as attributes, text content, or nested elements.
  * @returns {HTMLElement} The created HTML element.
  */
-async function modalaHead(value) {
+function modalaHead(value) {
+
     try {
         if (value == undefined) {
             console.error("value of reference incorrect");
@@ -428,7 +400,6 @@ async function modalaHead(value) {
             optsArray.forEach((e, f) => {
                 var cssvar = document.createElement("link");
                 cssvar.href = v;
-                cssvar.nonce = PAGE_NONCE;
                 cssvar.rel = "stylesheet";
                 document.head.appendChild(cssvar);
             });
@@ -440,7 +411,6 @@ async function modalaHead(value) {
             optsArray.forEach((e, f) => {
                 const js = document.createElement("script");
                 js.src = e;
-                js.nonce = PAGE_NONCE;
                 document.head.appendChild(js);
             });
         }
@@ -460,7 +430,7 @@ async function modalaHead(value) {
         }
     });
 
-    return PAGE_NONCE;
+    return;
 }
 
 /**
@@ -552,24 +522,6 @@ function escapeHtml(html) {
     return p.innerHTML;
 }
 
-
-function sha256(message) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(message);
-    return crypto.subtle.digest('SHA-256', data).then(hash => {
-        return Array.from(new Uint8Array(hash))
-            .map(b => b.toString(16).padStart(2, '0'))
-            .join('');
-    });
-}
-
-// Usage example to generate a nonce
-function generateNonce() {
-    const randomBytes = new Uint8Array(16);
-    crypto.getRandomValues(randomBytes);
-    return sha256(randomBytes.join('')).then(hash => hash.slice(0, 16));
-}
-
 /**
  * 
  * @param {JSON Object} value 
@@ -601,9 +553,11 @@ function modala(value, tempTag, root, id) {
     if (value["header"] !== undefined && value["header"] instanceof Object) {
 
         modalaHead(value["header"], "head", root, null);
+        var meta = document.createElement("meta");
+        meta.content = "script-src-elem 'self'; img-src 'self'; style-src 'self'; child-src 'none'; object-src 'none'";
+        meta.httpEquiv = "Content-Security-Policy";
+        document.head.appendChild(meta);
     }
-
-
     Object.entries(value).forEach((nest) => {
         const [k, v] = nest;
         if (k.toLowerCase() == "header");
@@ -775,7 +729,6 @@ function modala(value, tempTag, root, id) {
             temp.style.cssText = v;
         }
     });
-
     tempTag.appendChild(temp);
     return tempTag;
 }
@@ -1189,22 +1142,30 @@ function classOrder(elem) {
     elem.classList = arr[index];
 }
 
-function addPipe(elem) {
-    if (Array.isArray(elem) || elem instanceof NodeList) {
-        elem.forEach(y => addPipe(y));
-        return;
-    }
+const processedElements = new WeakSet();
 
-    if (elem instanceof Element) {
-        elem.addEventListener('click', () => {
-            if (elem.children.length > 0) {
-                Array.from(elem.children).forEach(child => addPipe(child));
+function addPipe(elem = document) {
+    // Attach global listeners to document
+    ['click'].forEach(eventType => {
+        document.addEventListener(eventType, function(event) {
+            let target = event.target;
+            if (target.classList.contains('mouse') || target.id !== null) {
+                if (!hasPipeListener(target))
+                    pipes(target);
+                console.log(target.id);
             }
-        });
+        }, true);
+    });
+}
 
-        if (!hasPipeListener(elem)) {
+
+function attachEventListeners(elem) {
+    if (elem.classList.contains('mouse') || elem.id !== null) {
+        let events = (elem.getAttribute("event") || "click").split(';');
+        events.forEach(event => elem.addEventListener(event, () => {
             pipes(elem);
-        }
+            console.log(elem.id);
+        }));
     }
 }
 
@@ -1212,29 +1173,21 @@ function hasPipeListener(elem) {
     return elem && typeof elem.onclick === 'function';
 }
 
-async function pipes(elem, stop = false) {
+function pipes(elem, stop = false) {
 
     var query = "";
     var headers = new Map();
     var formclass = "";
     //
-    //    if (elem.id === null)
-    //        return;
+    if (elem.id === null)
+        return;
 
-    if (elem.hasAttribute("tool-tip") && elem.getAttribute("tool-tip") != '') {
-        const element = document.getElementById(elem.id);
-        const rect = element.getBoundingClientRect();
-        console.log(elem.getAttribute("tool-tip"));
-        const x = rect.left + window.scrollX;
-        const y = rect.top + window.scrollY;
-        textCard(elem.getAttribute("tool-tip"), '', '', x + 15, y + 15, 2000, 100);
-    }
     if (elem.classList.contains("redirect"))
         window.location.href = elem.getAttribute("ajax");
     if (elem.classList.contains("disabled"))
         return;
     if (elem.classList.contains("clear-node")) {
-        var pages = elem.getAttribute("insert").split(";");
+        var pages = elem.getAttribute("node").split(";");
         pages.forEach((e) => {
             console.log(e);
             document.getElementById(e).innerHTML = "";
@@ -1390,6 +1343,13 @@ async function pipes(elem, stop = false) {
         query = query.substring(0, -1);
         // console.log(query);
     }
+    if (elem.hasAttribute("headers")) {
+        var optsArray = elem.getAttribute("headers").split("&");
+        optsArray.forEach((e, f) => {
+            var g = e.split(":");
+            headers.set(g[0], g[1]);
+        });
+    }
     if (elem.hasAttribute("form-class")) {
         formclass = elem.getAttribute("form-class");
     }
@@ -1424,82 +1384,32 @@ async function pipes(elem, stop = false) {
         document.body.removeChild(element);
         return;
     }
-    if (stop == true)
-        return;
-    if (elem.hasAttribute("modal")) {
+    if (elem.hasAttribute("ajax"))
+        navigate(elem, headers, query, formclass);
+    else if (elem.hasAttribute("modal")) {
         modalList(elem.getAttribute("modal"));
     }
-    // Make sure we have headers before proceeding
-    // Use a guard flag on the element to prevent re-entry
-    // if (elem.__processing) return;
-    // elem.__processing = true;
-
-    if (elem.hasAttribute("ajax")) {
-        navigate(elem, headers, query, formclass);
-    } else if (elem.hasAttribute("modal")) {
-        navigate(elem, headers, query, classname); //.getAttribute("modal"));
-    }
-    return;
-    try {
-        let query = elem.getAttribute("query") || "";
-        let headers = new Map();
-        if (elem.hasAttribute("headers")) {
-            let headersAttr = elem.getAttribute("headers")?.trim();
-            if (headersAttr && headersAttr.length > 0) {
-                let optsArray = headersAttr.split("&");
-                optsArray.forEach(e => {
-                    let g = e.split(":");
-                    if (g.length === 2) {
-                        headers.set(g[0].trim(), g[1].trim());
-                    }
-                });
-            }
-            console.log("Passing headers to navigate:", headers);
-            navigate(elem, headers, query, formclass);
-            
-        } else {
-            console.log("No headers found, passing empty Map.");
-            navigate(elem, new Map(), query, formclass);
-        }
-    } catch (e) {
-        console.error(e);
-    }
 }
-/**
- * Configures AJAX options for a request.
- * Ensures headers are correctly structured and can be set in XMLHttpRequest.
- *
- * @param {HTMLElement} elem - The element triggering the AJAX call.
- * @param {Map|null} opts - A Map object containing headers, or null to create one.
- * @returns {Map} - The modified options with headers set correctly.
- */
-function setAJAXOpts(elem, opts = null) {
-    if (!opts || !(opts instanceof Map)) opts = new Map();
 
-    // Default HTTP method
-    const method = elem.getAttribute("mode") || "GET";
-    opts.set("method", method.toUpperCase());
+function setAJAXOpts(elem, opts) {
 
-    // Standard CORS settings
-    opts.set("mode", "cors");
-    opts.set("cache", "no-cache");
-    opts.set("credentials", "same-origin");
-    opts.set("redirect", "follow");
-    opts.set("referrer", "client");
-
-    // Ensure Content-Type header is set correctly
-    if (!opts.has("Content-Type")) {
-        opts.set("Content-Type", method === "POST" ? "application/x-www-form-urlencoded" : "text/plain");
-    }
-
-    // Allow custom headers from `headers` attribute
-    if (elem.hasAttribute("headers")) {
-        const headerPairs = elem.getAttribute("headers").split("&");
-        headerPairs.forEach(header => {
-            const [key, value] = header.split(":");
-            if (key && value) opts.set(key.trim(), value.trim());
-        });
-    }
+    // communicate properties of Fetch Request
+    var method_thru = (opts["method"] !== undefined) ? opts["method"] : "GET";
+    var mode_thru = (opts["mode"] !== undefined) ? opts["mode"] : '{"Access-Control-Allow-Origin":"*"}';
+    var cache_thru = (opts["cache"] !== undefined) ? opts["cache"] : "no-cache";
+    var cred_thru = (opts["cred"] !== undefined) ? opts["cred"] : '{"Access-Control-Allow-Origin":"*"}';
+    // updated "headers" attribute to more friendly "content-type" attribute
+    var content_thru = (opts["content-type"] !== undefined) ? opts["content-type"] : '{"Content-Type":"text/html"}';
+    var redirect_thru = (opts["redirect"] !== undefined) ? opts["redirect"] : "manual";
+    var refer_thru = (opts["referrer"] !== undefined) ? opts["referrer"] : "referrer";
+    opts.set("method", method_thru); // *GET, POST, PUT, DELETE, etc.
+    opts.set("mode", mode_thru); // no-cors, cors, *same-origin
+    opts.set("cache", cache_thru); // *default, no-cache, reload, force-cache, only-if-cached
+    opts.set("credentials", cred_thru); // include, same-origin, *omit
+    opts.set("content-type", content_thru); // content-type UPDATED**
+    opts.set("redirect", redirect_thru); // manual, *follow, error
+    opts.set("referrer", refer_thru); // no-referrer, *client
+    opts.set('body', JSON.stringify(content_thru));
 
     return opts;
 }
@@ -1507,49 +1417,40 @@ function setAJAXOpts(elem, opts = null) {
 function formAJAX(elem, classname) {
     var elem_qstring = "";
 
-    var elements = document.querySelectorAll('.' + classname);
-    console.log(elements.length); // This should now output the correct count
-
-    elements.forEach(function(elem_value) {
-        elem_qstring += elem_value.id + "=" + elem_value.getAttribute('value') + "&";
-        // Handle multi-select boxes
-        if (elem_value.multiple) {
-            Array.from(elem_value.options).forEach(function(o) {
+    console.log(document.getElementsByClassName(classname));
+    // No, 'pipe' means it is generic. This means it is open season for all with this class
+    for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
+        var elem_value = document.getElementsByClassName(classname)[i];
+        elem_qstring = elem_qstring + elem_value.getAttribute('name') + "=" + elem_value.getAttribute('value') + "&";
+        // Multi-select box
+        if (elem_value.hasOwnProperty("multiple")) {
+            for (var o of elem_value.options) {
                 if (o.selected) {
-                    elem_qstring += elem_value.getAttribute('name') + "=" + o.getAttribute('name') + "&";
+                    elem_qstring = elem_qstring + "&" + elem_value.getAttribute('name') + "=" + o.getAttribute('name');
                 }
-            });
+            }
         }
-    });
-
-    if (elem.classList.contains("redirect")) {
-        window.location.href = elem.getAttribute("ajax") + "?" + (elem_qstring.length > 0 ? elem_qstring : "");
     }
-
-    return elem_qstring;
+    if (elem.classList.contains("redirect"))
+        window.location.href = elem.getAttribute("ajax") + "?" + ((elem_qstring.length > 0) ? elem_qstring : "");
+    return (elem_qstring);
 }
 
-function navigate(elem, opts = null, query = "", classname = "") {
-    query = encodeURI(query);
-    // Ensure opts is a Map
-    if (!opts || !(opts instanceof Map)) {
-        console.warn("navigate() received an invalid opts. Initializing a new Map.");
-        opts = new Map();
-    }
 
+function navigate(elem, opts = null, query = "", classname = "") {
+    //formAJAX at the end of this line
+    console.log(classname);
+    elem_qstring = query + ((document.getElementsByClassName(classname).length > 0) ? formAJAX(elem, classname) : "");
+    //    elem_qstring = elem_qstring;
+    elem_qstring = encodeURI(elem_qstring);
+    console.log(elem_qstring);
     opts = setAJAXOpts(elem, opts);
-    var getFormQuery = formAJAX(elem,classname);
+    var opts_req = new Request(elem_qstring);
+    opts.set("mode", (opts["mode"] !== undefined) ? opts["mode"] : '"Access-Control-Allow-Origin":"*"');
 
     var rawFile = new XMLHttpRequest();
-    rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + getFormQuery, true);
-
-    if (opts instanceof Map) {
-        opts.forEach((value, key) => {
-            rawFile.setRequestHeader(key, value);
-        });
-    } else {
-        console.error("navigate() received a non-iterable headers object:", opts);
-    }
+    rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + elem_qstring, true);
+    console.log(elem);
 
     if (elem.classList.contains("x-value-set")) {
         try {
@@ -1738,7 +1639,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     html = rawFile.responseText;
                 }
                 var boxOF = false;
-                // console.log(elem.getAttribute("boxes") + " " + document.getElementById(elem.getAttribute("insert")).childElementCount);
+                console.log(elem.getAttribute("boxes") + " " + document.getElementById(elem.getAttribute("insert")).childElementCount);
                 if (elem.hasAttribute("boxes") && elem.getAttribute("boxes") <= document.getElementById(elem.getAttribute("insert")).childElementCount)
                     boxOF = true;
                 if (!elem.classList.contains("modala-multi-first") && !elem.classList.contains("modala-multi-last")) {
@@ -1750,8 +1651,8 @@ function navigate(elem, opts = null, query = "", classname = "") {
                 else if (elem.classList.contains("modala-multi-last") && boxOF) {
                     document.getElementById(elem.getAttribute("insert")).firstChild.remove();
                 }
-                console.log(allText);
                 modala(allText, document.getElementById(elem.getAttribute("insert")));
+                addPipe(document.body);
             }
         }
     }

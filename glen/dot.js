@@ -73,7 +73,7 @@
   **** go on if there is no input to replace them.
   */
 
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     try {
         if (document.body != null && JSON.parse(document.body.textContent)) {
             const irc = JSON.parse(document.body.textContent);
