@@ -82,13 +82,15 @@
             modala(irc, document.body);
             document.body.style.display = "block";
         }
-        domContentLoad();
-        addPipe(document.body);
-        return;
+    } catch (e) {
+        console.error("Error parsing or modifying body content", e);
     }
-    catch (e) {
-    }
-    });
+
+    // Ensure domContentLoad is always called
+    domContentLoad();
+    addPipe(document.body);
+});
+
 
 let domContentLoad = (again = false) => {
     doc_set = document.getElementsByTagName("pipe");
@@ -144,15 +146,27 @@ let domContentLoad = (again = false) => {
     });
 
     let elements_mouse = document.querySelectorAll(".mouse");
-    Array.from(elements_mouse).forEach(function (elem) {
 
+    console.log(elements_mouse.length);
+    Array.from(elements_mouse).forEach(function (elem) {
+        console.log(elem);
+        if (elem.hasAttribute("tool-tip")) {
+            console.log(elem.getAttribute("tool-tip") + "...");
+            elem.addEventListener('mouseover', function () {
+                const x = elem.offsetLeft + window.scrollX;
+                const y = elem.offsetTop + window.scrollY;
+                textCard(elem.getAttribute("tool-tip"), '', '', x + 15, y + 15, 1500, 100);
+            });
+        }
         var ev = elem.getAttribute("event");
         var rv = ev.split(";");
-        Array.from(rv).forEach((v) => {
-            elem.addEventListener(v, function () {
-                (pipes(elem, auto));
+        if (rv.length > 0) {
+            Array.from(rv).forEach((v) => {
+                elem.addEventListener(v, function () {
+                    (pipes(elem, auto));
+                });
             });
-        });
+        }
     });
 
     let elements_pipe = document.querySelectorAll(".pipe");
@@ -169,6 +183,42 @@ let domContentLoad = (again = false) => {
                 pipes(elem);
         });
     });
+}
+
+/**
+ * Generates a SHA-256 nonce and appends it to headers and query strings.
+ *
+ * @param {Object} headers - A Map object containing the headers.
+ * @param {string} query - The existing query string (optional).
+ * @returns {Promise<{headers: Map, query: string}>} - Updated headers and query with nonce.
+ */
+async function addNonce(headers, query = "") {
+    // Generate a random nonce
+    const nonce = await generateSHA256Nonce();
+
+    // Append nonce to headers
+    if (!headers) headers = new Map();
+    headers.set("X-Nonce", nonce);
+
+    // Append nonce to query string
+    query += (query.length > 0 ? "&" : "") + "nonce=" + encodeURIComponent(nonce);
+
+    return { headers, query };
+}
+
+/**
+ * Generates a secure SHA-256 nonce from a random string.
+ *
+ * @returns {Promise<string>} - The SHA-256 hashed nonce.
+ */
+async function generateSHA256Nonce() {
+    const randomString = crypto.getRandomValues(new Uint8Array(16)).join('');
+    const encoder = new TextEncoder();
+    const data = encoder.encode(randomString);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
 }
 
 
@@ -1106,14 +1156,14 @@ function addPipe(elem) {
         elem.forEach(y => addPipe(y));
         return;
     }
-    
+
     if (elem instanceof Element) {
         elem.addEventListener('click', () => {
             if (elem.children.length > 0) {
                 Array.from(elem.children).forEach(child => addPipe(child));
             }
         });
-        
+
         if (!hasPipeListener(elem)) {
             pipes(elem);
         }
@@ -1124,17 +1174,25 @@ function hasPipeListener(elem) {
     return elem && typeof elem.onclick === 'function';
 }
 
-function pipes(elem, stop = false) {
+async function pipes(elem, stop = false) {
 
     var query = "";
     var headers = new Map();
     var formclass = "";
-//
-//    if (elem.id === null)
-//        return;
+    //
+    //    if (elem.id === null)
+    //        return;
 
+    if (elem.hasAttribute("tool-tip") && elem.getAttribute("tool-tip") != '') {
+        const element = document.getElementById(elem.id);
+        const rect = element.getBoundingClientRect();
+        console.log(elem.getAttribute("tool-tip"));
+        const x = rect.left + window.scrollX;
+        const y = rect.top + window.scrollY;
+        textCard(elem.getAttribute("tool-tip"), '', '', x + 15, y + 15, 2000, 100);
+    }
     if (elem.classList.contains("redirect"))
-	window.location.href = elem.getAttribute("ajax");
+        window.location.href = elem.getAttribute("ajax");
     if (elem.classList.contains("disabled"))
         return;
     if (elem.classList.contains("clear-node")) {
@@ -1294,13 +1352,6 @@ function pipes(elem, stop = false) {
         query = query.substring(0, -1);
         // console.log(query);
     }
-    if (elem.hasAttribute("headers")) {
-        var optsArray = elem.getAttribute("headers").split("&");
-        optsArray.forEach((e, f) => {
-            var g = e.split(":");
-            headers.set(g[0], g[1]);
-        });
-    }
     if (elem.hasAttribute("form-class")) {
         formclass = elem.getAttribute("form-class");
     }
@@ -1337,32 +1388,73 @@ function pipes(elem, stop = false) {
     }
     if (stop == true)
         return;
-    if (elem.hasAttribute("ajax"))
-        navigate(elem, headers, query, formclass);
-    else if (elem.hasAttribute("modal")) {
+    if (elem.hasAttribute("modal")) {
         modalList(elem.getAttribute("modal"));
     }
+    // Make sure we have headers before proceeding
+    // Use a guard flag on the element to prevent re-entry
+    if (elem.__processing) return;
+        elem.__processing = true;
+
+    try {
+        let query = elem.getAttribute("query") || "";
+        let headers = new Map();
+        if (elem.hasAttribute("headers")) {
+            let headersAttr = elem.getAttribute("headers")?.trim();
+            if (headersAttr && headersAttr.length > 0) {
+                let optsArray = headersAttr.split("&");
+                optsArray.forEach(e => {
+                    let g = e.split(":");
+                    if (g.length === 2) {
+                        headers.set(g[0].trim(), g[1].trim());
+                    }
+                });
+            }
+            console.log("Passing headers to navigate:", headers);
+            await navigate(elem, headers, query);
+        } else {
+            console.log("No headers found, passing empty Map.");
+            await navigate(elem, new Map(), query);
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
+/**
+ * Configures AJAX options for a request.
+ * Ensures headers are correctly structured and can be set in XMLHttpRequest.
+ *
+ * @param {HTMLElement} elem - The element triggering the AJAX call.
+ * @param {Map|null} opts - A Map object containing headers, or null to create one.
+ * @returns {Map} - The modified options with headers set correctly.
+ */
+function setAJAXOpts(elem, opts = null) {
+    if (!opts || !(opts instanceof Map)) opts = new Map();
 
-function setAJAXOpts(elem, opts) {
+    // Default HTTP method
+    const method = elem.getAttribute("mode") || "GET";
+    opts.set("method", method.toUpperCase());
 
-    // communicate properties of Fetch Request
-    var method_thru = (opts["method"] !== undefined) ? opts["method"] : "GET";
-    var mode_thru = (opts["mode"] !== undefined) ? opts["mode"] : '{"Access-Control-Allow-Origin":"*"}';
-    var cache_thru = (opts["cache"] !== undefined) ? opts["cache"] : "no-cache";
-    var cred_thru = (opts["cred"] !== undefined) ? opts["cred"] : '{"Access-Control-Allow-Origin":"*"}';
-    // updated "headers" attribute to more friendly "content-type" attribute
-    var content_thru = (opts["content-type"] !== undefined) ? opts["content-type"] : '{"Content-Type":"text/html"}';
-    var redirect_thru = (opts["redirect"] !== undefined) ? opts["redirect"] : "manual";
-    var refer_thru = (opts["referrer"] !== undefined) ? opts["referrer"] : "referrer";
-    opts.set("method", method_thru); // *GET, POST, PUT, DELETE, etc.
-    opts.set("mode", mode_thru); // no-cors, cors, *same-origin
-    opts.set("cache", cache_thru); // *default, no-cache, reload, force-cache, only-if-cached
-    opts.set("credentials", cred_thru); // include, same-origin, *omit
-    opts.set("content-type", content_thru); // content-type UPDATED**
-    opts.set("redirect", redirect_thru); // manual, *follow, error
-    opts.set("referrer", refer_thru); // no-referrer, *client
-    opts.set('body', JSON.stringify(content_thru));
+    // Standard CORS settings
+    opts.set("mode", "cors");
+    opts.set("cache", "no-cache");
+    opts.set("credentials", "same-origin");
+    opts.set("redirect", "follow");
+    opts.set("referrer", "client");
+
+    // Ensure Content-Type header is set correctly
+    if (!opts.has("Content-Type")) {
+        opts.set("Content-Type", method === "POST" ? "application/x-www-form-urlencoded" : "text/plain");
+    }
+
+    // Allow custom headers from `headers` attribute
+    if (elem.hasAttribute("headers")) {
+        const headerPairs = elem.getAttribute("headers").split("&");
+        headerPairs.forEach(header => {
+            const [key, value] = header.split(":");
+            if (key && value) opts.set(key.trim(), value.trim());
+        });
+    }
 
     return opts;
 }
@@ -1371,39 +1463,57 @@ function formAJAX(elem, classname) {
     var elem_qstring = "";
 
     console.log(document.getElementsByClassName(classname));
-    // No, 'pipe' means it is generic. This means it is open season for all with this class
+
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
-        elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.getAttribute('value') + "&";
-        // Multi-select box
+        var elem_name = elem_value.getAttribute('name'); // Get the name attribute
+        var elem_val = elem_value.getAttribute('value'); // Get the value attribute
+
+        if (elem_name) {
+            elem_qstring += elem_name + "=" + elem_val + "&";
+        }
+
+        // Handle multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {
                 if (o.selected) {
-                    elem_qstring = elem_qstring + "&" + elem_value.getAttribute('name') + "=" + o.getAttribute('name');
+                    elem_qstring += "&" + elem_name + "=" + o.getAttribute('name');
                 }
             }
         }
     }
-    if (elem.classList.contains("redirect"))
-        window.location.href = elem.getAttribute("ajax") + "?" + ((elem_qstring.length > 0) ? elem_qstring : "");
-    return (elem_qstring);
+
+    if (elem.classList.contains("redirect")) {
+        window.location.href = elem.getAttribute("ajax") + "?" + (elem_qstring.length > 0 ? elem_qstring : "");
+    }
+
+    return elem_qstring;
 }
 
+async function navigate(elem, opts = null, query = "", classname = "") {
+    query = encodeURI(query);
 
-function navigate(elem, opts = null, query = "", classname = "") {
-    //formAJAX at the end of this line
-    //	console.log();
-    elem_qstring = query + ((document.getElementsByClassName(classname).length > 0) ? formAJAX(elem, classname) : "");
-    //    elem_qstring = elem_qstring;
-    elem_qstring = encodeURI(elem_qstring);
-    console.log(elem_qstring);
+    // Ensure opts is a Map
+    if (!opts || !(opts instanceof Map)) {
+        console.warn("navigate() received an invalid opts. Initializing a new Map.");
+        opts = new Map();
+    }
+
     opts = setAJAXOpts(elem, opts);
-    var opts_req = new Request(elem_qstring);
-    opts.set("mode", (opts["mode"] !== undefined) ? opts["mode"] : '"Access-Control-Allow-Origin":"*"');
+
+    // Append nonce
+    ({ headers: opts, query } = await addNonce(opts, query));
 
     var rawFile = new XMLHttpRequest();
-    rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + elem_qstring, true);
-    console.log(elem);
+    rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + query, true);
+
+    if (opts instanceof Map) {
+        opts.forEach((value, key) => {
+            rawFile.setRequestHeader(key, value);
+        });
+    } else {
+        console.error("navigate() received a non-iterable headers object:", opts);
+    }
 
     if (elem.classList.contains("x-value-set")) {
         try {

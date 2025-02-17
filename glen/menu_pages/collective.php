@@ -9,7 +9,7 @@ for($i = 1 ; $i <= 11 ; $i++) {
             "tagname": "p",
             "id": "main",
             "style": "position:fixed;color:blue;height:25;width:10",
-            "class": "arrow'.$i.' modala clear-node",
+            "class": "arrow'.$i.' clear-node",
             "innerHTML": "➤",
             "method": "GET",
             "ajax": "getarrow.php",
