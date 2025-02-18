@@ -1130,14 +1130,16 @@ function pipes(elem, stop = false) {
         query = document.getElementById(elem.getAttribute("insert")).getAttribute("query");
         js = query.split(";");
         var str = "";
+        var vars = elem.getAttribute("get-var").split('&')
         js.forEach((i, f) => {
             var g = i.split(":");
-            str += `${g[0]}:${window[g[0]]};`;
+            if (vars.contains(g[0]))
+                str += `${g[0]}:${window[g[0]]}&`;
         });
         document.getElementById(elem.id).setAttribute("query", str.toString())
     }
     if (elem.hasAttribute("set-var") && elem.getAttribute("set-var")) {
-        js = elem.getAttribute("set-var").split(";");
+        js = elem.getAttribute("set-var").split("&");
         js.forEach((e, f) => {
             var i = e.split(":");
             window[i[0]] = i[1];
@@ -1145,7 +1147,7 @@ function pipes(elem, stop = false) {
         });
         let str = "";
         json.forEach((i, f) => {
-            str += `${i}:${window[i]};`;
+            str += `${i}:${window[i]}&`;
         });
         document.getElementById(elem.getAttribute("insert")).setAttribute("query", str.toString())
     }
