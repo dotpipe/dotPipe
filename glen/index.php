@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="dot.js"></script>
+    <script src="dotpipe.js"></script>
     <style>
         body {
             margin: 0;
