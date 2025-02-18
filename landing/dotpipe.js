@@ -958,24 +958,6 @@ function fileOrder(elem) {
     }
 }
 
-function fileShift(elem) {
-    if (elem == null || elem == undefined)
-        return;
-    var arr = elem.getAttribute("sources").split(";");
-    var ppfc = document.getElementById(elem.getAttribute("insert").toString());
-    if (!ppfc.hasAttribute("file-index"))
-        ppfc.setAttribute("file-index", "0");
-    var index = parseInt(ppfc.getAttribute("file-index").toString());
-    var interv = elem.getAttribute("interval");
-    if (elem.classList.contains("decrIndex"))
-        index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) - interv;
-    else
-        index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) + interv;
-    if (index < 0)
-        index = arr.length - 1;
-    index = index % arr.length;
-    ppfc.setAttribute("file-index", index.toString());
-}
 
 function htmlToJson(htmlString) {
     const parser = new DOMParser();
