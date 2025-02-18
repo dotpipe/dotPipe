@@ -73,7 +73,7 @@
   **** go on if there is no input to replace them.
   */
 
-document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", function () {
     try {
         if (document.body != null && JSON.parse(document.body.textContent)) {
             const irc = JSON.parse(document.body.textContent);
@@ -1127,13 +1127,14 @@ function pipes(elem, stop = false) {
         });
     }
     if (elem.hasAttribute("get-var") && elem.getAttribute("get-var")) {
-        js = elem.getAttribute("query").split(";");
+        query = document.getElementById(elem.getAttribute("insert")).getAttribute("query");
+        js = query.split(";");
         var str = "";
         js.forEach((i, f) => {
             var g = i.split(":");
             str += `${g[0]}:${window[g[0]]};`;
         });
-        query = document.getElementById(elem.getAttribute("insert")).getAttribute("query")
+        document.getElementById(elem.id).setAttribute("query", str.toString())
     }
     if (elem.hasAttribute("set-var") && elem.getAttribute("set-var")) {
         js = elem.getAttribute("set-var").split(";");

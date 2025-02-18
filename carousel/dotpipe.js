@@ -958,6 +958,7 @@ function fileOrder(elem) {
     }
 }
 
+
 function htmlToJson(htmlString) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlString, 'text/html');
@@ -1126,13 +1127,14 @@ function pipes(elem, stop = false) {
         });
     }
     if (elem.hasAttribute("get-var") && elem.getAttribute("get-var")) {
-        js = elem.getAttribute("query").split(";");
+        query = document.getElementById(elem.getAttribute("insert")).getAttribute("query");
+        js = query.split(";");
         var str = "";
         js.forEach((i, f) => {
             var g = i.split(":");
             str += `${g[0]}:${window[g[0]]};`;
         });
-        query = document.getElementById(elem.getAttribute("insert")).getAttribute("query")
+        document.getElementById(elem.id).setAttribute("query", str.toString())
     }
     if (elem.hasAttribute("set-var") && elem.getAttribute("set-var")) {
         js = elem.getAttribute("set-var").split(";");
@@ -1548,4 +1550,4 @@ function navigate(elem, opts = null, query = "", classname = "") {
         // console.log(e);
     }
     domContentLoad();
-}
+}  
