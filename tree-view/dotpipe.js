@@ -73,7 +73,7 @@
   **** go on if there is no input to replace them.
   */
 
-document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", function () {
     try {
         if (document.body != null && JSON.parse(document.body.textContent)) {
             const irc = JSON.parse(document.body.textContent);
@@ -956,120 +956,6 @@ function fileOrder(elem) {
             loop++;
         }
     }
-}
-
-function carousel(elem, auto = true) {
-    if (typeof (elem) == "string")
-        elem = document.getElementById(elem);
-    var x = document.getElementById(elem.getAttribute("insert"));
-    var mArray = x.getAttribute("file-order").split(";");
-    var y = 1;
-    var crement = 1;
-    if (x.classList.contains("decrIndex"))
-        crement = (-1);
-    var i = (parseInt(x.getAttribute("file-index"))) ?? 0;
-    var j = parseInt(x.getAttribute("interval")) ?? 1;
-    var multiVert = 1;
-    if (x.classList.contains("carousel-vert")) {
-        multiVert = 2;
-    }
-    while (x.children.length) {
-        x.removeChild(x.children[0]);
-    }
-    var m = 0;
-    var obj = document.createElement("card");
-    obj.classList.toggle("pipe-grid");
-    for (n = 0; obj.children.length < (x.getAttribute("boxes") * multiVert); n++) {
-        if (x.classList.contains("carousel-ajax") || elem.classList.contains("carousel-ajax")) // && x.children.length < elem.getAttribute("boxes")) {
-        {
-            p = document.createElement("p");
-            p.setAttribute("ajax", mArray[(i + j) % mArray.length]);
-            p.setAttribute("insert", "self_" + obj.children.length + 1);
-            p.classList.add("modala");
-            p.id = "self_" + obj.children.length + 1;
-            p.setAttribute("onclick", "pipes(this)");
-            p.click();
-            p.removeAttribute("onclick");
-            p.classList.add("pipe-grid-child");
-            p.classList.add("pipe");
-            obj.appendChild(p);
-            i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
-            if (multiVert == 2) {
-                n++;
-                obj.appendChild(br);
-            }
-        }
-        else if (x.classList.contains("carousel-images") || elem.classList.contains("carousel-images")) {
-            img = document.createElement("img");
-            img.src = mArray[(i + j) % mArray.length];
-            img.style = x.style;
-            img.classList.add("pipe-grid-child");
-            if (x.classList.contains("carousel-images")) {
-                img.height = x.getAttribute("height");
-                img.width = x.getAttribute("width");
-            }
-            obj.appendChild(img);
-        }
-        else if (x.classList.contains("carousel-video") || elem.classList.contains("carousel-video")) {
-            var video = document.createElement("video");
-            video.src = mArray[(i + j) % mArray.length];
-            video.style = x.style;
-            video.classList.add("pipe-grid-child");
-            video.autoplay = true;
-            video.loop = false;
-            video.muted = true;
-            video.id = "self_" + obj.children.length + 1;
-            obj.appendChild(video);
-        }
-        else if (x.classList.contains("carousel-audio") || elem.classList.contains("carousel-audio")) {
-            var audio = document.createElement("audio");
-            audio.src = mArray[(i + j) % mArray.length];
-            audio.style = x.style;
-            audio.classList.add("pipe-grid-child");
-            audio.autoplay = true;
-            audio.loop = false;
-            audio.muted = true;
-            audio.id = "self_" + obj.children.length + 1;
-            obj.appendChild(audio);
-        }
-        else if (x.classList.contains("carousel-iframe") || elem.classList.contains("carousel-iframe")) {
-            var iframe = document.createElement("iframe");
-            iframe.src = mArray[(i + j) % mArray.length];
-            iframe.style = x.style;
-            iframe.classList.add("pipe-grid-child");
-            iframe.id = "self_" + obj.children.length + 1;
-            obj.appendChild(iframe);
-        }
-        else if (x.classList.contains("carousel-link") || elem.classList.contains("carousel-link")) {
-            var link = document.createElement("a");
-            link.href = mArray[(i + j) % mArray.length];
-            link.textContent = mArray[(i + j) % mArray.length];
-            link.style = x.style;
-            link.classList.add("pipe-grid-child");
-            link.id = "self_" + obj.children.length + 1;
-            obj.appendChild(link);
-        }
-        i = (crement > 0) ? i + 1 : (i < 0) ? (mArray.length - 1) : i - 1;
-        br = document.createElement("br");
-        if (multiVert == 2) {
-            n++;
-            obj.appendChild(br);
-        }
-        // console.log("OIWEWI");
-    }
-    // while (x.children.length || (x.classList.contains("carousel-ajax") || elem.classList.contains("carousel-ajax")) && x.children.length > x.getAttribute("boxes") * multiVert)
-    //     x.removeChild(x.children[x.children.length - 1]);
-    x.append(obj);
-    var w = (Math.abs(i));
-    x.setAttribute("file-index", w % mArray.length);
-    var delay = x.getAttribute("delay");
-    if (x.classList.contains("time-active")) {
-        auto = true;
-    }
-    else if (x.classList.contains("time-inactive")) {
-        auto = false;
-    }
-    setTimeout(() => { carousel(x.id, auto) }, delay);
 }
 
 function fileShift(elem) {
