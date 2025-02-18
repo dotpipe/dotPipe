@@ -88,7 +88,7 @@
 
     domContentLoad();
     addPipe(document.body);
-    
+
     generateNonce().then(nonce => {
         const script_tags = document.getElementsByTagName("script");
         const style_tags = document.getElementsByTagName("style");
@@ -1147,7 +1147,7 @@ const processedElements = new WeakSet();
 function addPipe(elem = document) {
     // Attach global listeners to document
     ['click'].forEach(eventType => {
-        document.addEventListener(eventType, function(event) {
+        document.addEventListener(eventType, function (event) {
             let target = event.target;
             if (target.classList.contains('mouse') || target.id !== null) {
                 if (!hasPipeListener(target))
@@ -1166,6 +1166,12 @@ function attachEventListeners(elem) {
             pipes(elem);
             console.log(elem.id);
         }));
+        if (!hasPipeListener(elem)) {
+            elem.addEventListener('click', () => {
+                pipes(elem);
+                console.log(elem.id);
+            });
+        }
     }
 }
 
@@ -1549,6 +1555,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
             else
                 document.getElementById(rems).value = "";
+            domContentLoad();
         }
         catch (e) {
             console.error(e);
@@ -1563,6 +1570,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).innerHTML = (rawFile.responseText);
                     }
+                    domContentLoad();
                     return allText;
                 }
                 catch (e) {
@@ -1581,6 +1589,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
                     }
+                    domContentLoad();
                     return allText;
                 }
                 catch (e) {
@@ -1601,7 +1610,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     editNode.innerHTML = "";
                     // editNode.innerHTML = allText;
                     renderTree(allText, editNode);
-                    addPipe(editNode);
+                    domContentLoad();
                     return;
                 }
                 catch (e) {
@@ -1620,6 +1629,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
                     }
+                    domContentLoad();
                     return allText;
                 }
                 catch (e) {
@@ -1652,7 +1662,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     document.getElementById(elem.getAttribute("insert")).firstChild.remove();
                 }
                 modala(allText, document.getElementById(elem.getAttribute("insert")));
-                addPipe(document.body);
+                domContentLoad();
             }
         }
     }
@@ -1670,4 +1680,5 @@ function navigate(elem, opts = null, query = "", classname = "") {
     } catch (e) {
         // console.log(e);
     }
+    domContentLoad();
 }

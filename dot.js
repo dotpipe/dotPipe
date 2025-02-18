@@ -82,13 +82,30 @@
             modala(irc, document.body);
             document.body.style.display = "block";
         }
-        domContentLoad();
-        addPipe(document.body);
-        return;
     }
     catch (e) {
     }
+
+    domContentLoad();
+    addPipe(document.body);
+
+    generateNonce().then(nonce => {
+        const script_tags = document.getElementsByTagName("script");
+        const style_tags = document.getElementsByTagName("style");
+
+        Array.from(script_tags).forEach(function (elem) {
+            elem.nonce = nonce;
+        });
+        Array.from(style_tags).forEach(function (elem) {
+            elem.nonce = nonce;
+        });
+        PAGE_NONCE = nonce
+        var meta = document.createElement("meta");
+        meta.content = `script-src 'self' nonce-${PAGE_NONCE}; img-src 'self'; style-src 'self' nonce-${PAGE_NONCE}; child-src 'none'; object-src 'none'`;
+        meta.httpEquiv = "Content-Security-Policy";
+        document.head.appendChild(meta);
     });
+});
 
 let domContentLoad = (again = false) => {
     doc_set = document.getElementsByTagName("pipe");
@@ -145,7 +162,15 @@ let domContentLoad = (again = false) => {
 
     let elements_mouse = document.querySelectorAll(".mouse");
     Array.from(elements_mouse).forEach(function (elem) {
-
+        console.log(elem);
+        if (elem.hasAttribute("tool-tip")) {
+            console.log(elem.getAttribute("tool-tip") + "...");
+            elem.addEventListener('mouseover', function () {
+                const x = elem.offsetLeft + window.scrollX;
+                const y = elem.offsetTop + window.scrollY;
+                textCard(elem.getAttribute("tool-tip"), '', '', x + 15, y + 15, 1500, 100);
+            });
+        }
         var ev = elem.getAttribute("event");
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
@@ -171,6 +196,22 @@ let domContentLoad = (again = false) => {
     });
 }
 
+function sha256(message) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    return crypto.subtle.digest('SHA-256', data).then(hash => {
+        return Array.from(new Uint8Array(hash))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
+    });
+}
+
+// Usage example to generate a nonce
+function generateNonce() {
+    const randomBytes = new Uint8Array(16);
+    crypto.getRandomValues(randomBytes);
+    return sha256(randomBytes.join('')).then(hash => hash.slice(0, 16));
+}
 
 function copyContentById(id) {
     // Get the element with the specified ID
@@ -1101,19 +1142,36 @@ function classOrder(elem) {
     elem.classList = arr[index];
 }
 
-function addPipe(elem) {
-    if (Array.isArray(elem) || elem instanceof NodeList) {
-        elem.forEach(y => addPipe(y));
-        return;
-    }
-    
-    if (elem instanceof Element) {
-        elem.addEventListener('click', () => {
-            if (!hasPipeListener(elem)) {
+const processedElements = new WeakSet();
+
+function addPipe(elem = document) {
+    // Attach global listeners to document
+    ['click'].forEach(eventType => {
+        document.addEventListener(eventType, function (event) {
+            let target = event.target;
+            if (target.classList.contains('mouse') || target.id !== null) {
+                if (!hasPipeListener(target))
+                    pipes(target);
+                console.log(target.id);
+            }
+        }, true);
+    });
+}
+
+
+function attachEventListeners(elem) {
+    if (elem.classList.contains('mouse') || elem.id !== null) {
+        let events = (elem.getAttribute("event") || "click").split(';');
+        events.forEach(event => elem.addEventListener(event, () => {
+            pipes(elem);
+            console.log(elem.id);
+        }));
+        if (!hasPipeListener(elem)) {
+            elem.addEventListener('click', () => {
                 pipes(elem);
-            }    
-        });
-        
+                console.log(elem.id);
+            });
+        }
     }
 }
 
@@ -1126,12 +1184,12 @@ function pipes(elem, stop = false) {
     var query = "";
     var headers = new Map();
     var formclass = "";
-//
-//    if (elem.id === null)
-//        return;
+    //
+    if (elem.id === null)
+        return;
 
     if (elem.classList.contains("redirect"))
-	window.location.href = elem.getAttribute("ajax");
+        window.location.href = elem.getAttribute("ajax");
     if (elem.classList.contains("disabled"))
         return;
     if (elem.classList.contains("clear-node")) {
@@ -1332,8 +1390,6 @@ function pipes(elem, stop = false) {
         document.body.removeChild(element);
         return;
     }
-    if (stop == true)
-        return;
     if (elem.hasAttribute("ajax"))
         navigate(elem, headers, query, formclass);
     else if (elem.hasAttribute("modal")) {
@@ -1371,7 +1427,7 @@ function formAJAX(elem, classname) {
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
-        elem_qstring = elem_qstring + elem_value.id + "=" + elem_value.getAttribute('value') + "&";
+        elem_qstring = elem_qstring + elem_value.getAttribute('name') + "=" + elem_value.getAttribute('value') + "&";
         // Multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {
@@ -1389,7 +1445,7 @@ function formAJAX(elem, classname) {
 
 function navigate(elem, opts = null, query = "", classname = "") {
     //formAJAX at the end of this line
-    //	console.log();
+    console.log(classname);
     elem_qstring = query + ((document.getElementsByClassName(classname).length > 0) ? formAJAX(elem, classname) : "");
     //    elem_qstring = elem_qstring;
     elem_qstring = encodeURI(elem_qstring);
@@ -1499,6 +1555,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
             else
                 document.getElementById(rems).value = "";
+            domContentLoad();
         }
         catch (e) {
             console.error(e);
@@ -1513,6 +1570,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).innerHTML = (rawFile.responseText);
                     }
+                    domContentLoad();
                     return allText;
                 }
                 catch (e) {
@@ -1531,6 +1589,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
                     }
+                    domContentLoad();
                     return allText;
                 }
                 catch (e) {
@@ -1551,7 +1610,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     editNode.innerHTML = "";
                     // editNode.innerHTML = allText;
                     renderTree(allText, editNode);
-                    addPipe(editNode);
+                    domContentLoad();
                     return;
                 }
                 catch (e) {
@@ -1570,6 +1629,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     if (elem.hasAttribute("insert")) {
                         document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
                     }
+                    domContentLoad();
                     return allText;
                 }
                 catch (e) {
@@ -1602,6 +1662,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     document.getElementById(elem.getAttribute("insert")).firstChild.remove();
                 }
                 modala(allText, document.getElementById(elem.getAttribute("insert")));
+                domContentLoad();
             }
         }
     }
@@ -1619,4 +1680,5 @@ function navigate(elem, opts = null, query = "", classname = "") {
     } catch (e) {
         // console.log(e);
     }
+    domContentLoad();
 }

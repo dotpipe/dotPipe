@@ -19,6 +19,7 @@
                 "class": "sale-label mouse",
                 "id": "sales-tag1",
                 "tool-tip": "Tool-tips!",
+                "event": "mouseover",
                 "textContent": "On Sale!!!",
                 "style": "color: #666;"
             }
