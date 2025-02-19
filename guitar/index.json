@@ -121,7 +121,8 @@
 					"id": "dark-mode-button",
 					"textContent": "Deals",
 					"class": "multi-part modala-multi-last deal-button modala",
-					"ajax": "learn-more-info.json:learn-more-content:1"
+					"ajax": "learn-more-info.json:learn-more-content",
+					"boxes": 3
 				},
 				"menuItemA": {
 					"tagname": "a",

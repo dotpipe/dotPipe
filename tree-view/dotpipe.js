@@ -715,12 +715,18 @@ function modala(value, tempTag, root, id) {
                     tempTag.appendChild(div);
                 });
         }
+        else if (k.toLowerCase() == "boxes") {
+            console.log(v);
+            temp.setAttribute("boxes", v);
+        }
         else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
             try {
                 temp.setAttribute(k, v);
             }
-            catch (e) { }
-        }
+            catch (e) { 
+                console.error(`Error setting attribute ${k}:`, e);
+            }
+        }              
         else if (!Number(k) && k.toLowerCase() != "tagname" && (k.toLowerCase() == "textcontent" || k.toLowerCase() == "innerhtml" || k.toLowerCase() == "innertext")) {
             const val = v.replace(/\r?\n/g, "<br>");
             (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
@@ -1067,24 +1073,7 @@ function pipes(elem, stop = false) {
             document.getElementById(e).innerHTML = "";
         });
     }
-    if (elem.classList.contains("multi-part") == true) {
-        var pages = elem.getAttribute("ajax").split(";");
-        pages.forEach((e) => {
-            var g = e.split(":");
-            var stag = elem.cloneNode();
-            stag.classList.toggle("multi-part");
-            stag.setAttribute("insert", g[1]);
-            stag.setAttribute("ajax", g[0]);
-            if (g.length == 3) {
-                stag.setAttribute("boxes", g[2]);
-            }
-            else {
-                stag.setAttribute("boxes", 1);
-            }
-            pipes(stag);
-        });
-        return;
-    }
+    
     if (elem.tagName == "lnk") {
         window.open(elem.getAttribute("ajax") + (elem.hasAttribute("query") ? "?" + elem.getAttribute("query") : ""), "_blank");
     }
@@ -1236,6 +1225,20 @@ function pipes(elem, stop = false) {
     if (elem.tagName != "carousel" && elem.hasAttribute("file-order")) {
         fileOrder(elem);
     }
+    if (elem.classList.contains("multi-part")) {
+        var parts = elem.getAttribute("ajax").split(";");
+        parts.forEach((part) => {
+            var [file, target, limit] = part.split(":");
+            var clone = elem.cloneNode(true);
+            clone.classList.remove("multi-part");
+            clone.setAttribute("ajax", file);
+            clone.setAttribute("insert", target);
+            if (limit) {
+                clone.setAttribute("boxes", limit);
+            }
+            navigate(clone, headers, query, formclass);
+        });
+    }
     if (elem.classList.contains("carousel")) {
         var auto = true;
         if (elem.classList.contains("time-active")) {
@@ -1316,7 +1319,7 @@ function formAJAX(elem, classname) {
 
 function navigate(elem, opts = null, query = "", classname = "") {
     //formAJAX at the end of this line
-    console.log(classname);
+    console.log(elem);
     elem_qstring = query + ((document.getElementsByClassName(classname).length > 0) ? formAJAX(elem, classname) : "");
     //    elem_qstring = elem_qstring;
     elem_qstring = encodeURI(elem_qstring);
@@ -1512,31 +1515,32 @@ function navigate(elem, opts = null, query = "", classname = "") {
     else if (elem.classList.contains("modala")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
-                var allText = "" //JSON.parse(rawFile.responseText);
-                var html = "";
-                try {
-                    allText = JSON.parse(rawFile.responseText);
-                } catch (e) {
-                    html = rawFile.responseText;
-                }
-                var boxOF = false;
-                console.log(elem.getAttribute("boxes") + " " + document.getElementById(elem.getAttribute("insert")).childElementCount);
-                if (elem.hasAttribute("boxes") && elem.getAttribute("boxes") <= document.getElementById(elem.getAttribute("insert")).childElementCount)
-                    boxOF = true;
+                var allText = JSON.parse(rawFile.responseText);
+                var insertElement = document.getElementById(elem.getAttribute("insert"));
+                var boxLimit = elem.getAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : Infinity;
+                
                 if (!elem.classList.contains("modala-multi-first") && !elem.classList.contains("modala-multi-last")) {
-                    document.getElementById(elem.getAttribute("insert")).innerHTML = "";
+                    insertElement.innerHTML = "";
+                } else if (insertElement.children.length >= boxLimit) {
+                    if (elem.classList.contains("modala-multi-first")) {
+                        insertElement.lastChild.remove();
+                    } else if (elem.classList.contains("modala-multi-last")) {
+                        insertElement.firstChild.remove();
+                    }
                 }
-                if (elem.classList.contains("modala-multi-first") && boxOF) {
-                    document.getElementById(elem.getAttribute("insert")).lastChild.remove();
+                
+                var newContent = document.createElement('div');
+                modala(allText, newContent);
+                
+                if (elem.classList.contains("modala-multi-first")) {
+                    insertElement.insertBefore(newContent, insertElement.firstChild);
+                } else {
+                    insertElement.appendChild(newContent);
                 }
-                else if (elem.classList.contains("modala-multi-last") && boxOF) {
-                    document.getElementById(elem.getAttribute("insert")).firstChild.remove();
-                }
-                modala(allText, document.getElementById(elem.getAttribute("insert")));
-                domContentLoad();
             }
         }
     }
+    
     else if (!elem.classList.contains("json") && !elem.hasAttribute("callback")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
