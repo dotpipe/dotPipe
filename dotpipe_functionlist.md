@@ -9,7 +9,7 @@ Or BTC Cash: **bitcoincash:qq6qugkmnl42sm3lgymrnsdrkpgt3a24pqllt4mlsg**
 
 # DotPipe.js Function Compendium
 
-This document details the functions within `dotpipe.js`, outlining their purpose, parameters, attributes, and how they interconnect. It serves as a guide for beginners, amateurs, and professionals to understand and utilize DotPipe.js effectively.
+This document details the functions within `dotpipe.js`, outlining their purpose, parameters, attributes, and how they interconnect. It serves as a guide for beginners, amateurs, and professionals to understand and utilize DotPipe.js effectively.  
 
 # Custom Tagnames in DotPipe.js
 

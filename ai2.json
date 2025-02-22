@@ -1,0 +1,1045 @@
+{
+    "test_cases": [
+      {
+        "description": "Check modala() keyword in button elements",
+        "input": {
+          "tagname": "a",
+          "id": "dark-mode-button",
+          "class": "multi-part modala-multi-last deal-button modala",
+          "ajax": "learn-more-info.json:learn-more-content"
+        },
+        "expected_output": "Valid modala keyword usage with correct AJAX target"
+      },
+      {
+        "description": "Incorrect modala class usage",
+        "input": {
+          "tagname": "a",
+          "class": "multi-part modala-multi-last-deal modala"
+        },
+        "expected_output": "Error: Invalid modala class format"
+      },
+      {
+        "description": "Missing AJAX reference in modala element",
+        "input": {
+          "tagname": "a",
+          "class": "modala",
+          "textContent": "Deals"
+        },
+        "expected_output": "Warning: modala element missing AJAX target"
+      },
+      {
+        "description": "Check nested children properties",
+        "input": {
+          "tagname": "tr",
+          "children00": {
+            "tagname": "td",
+            "h11": {
+              "tagname": "table",
+              "id": "nested-table"
+            }
+          }
+        },
+        "expected_output": "Valid nested structure"
+      },
+      {
+        "description": "Check ID and class consistency",
+        "input": {
+          "tagname": "td",
+          "id": "dark-mode-finance",
+          "h11": {
+            "tagname": "h5",
+            "class": "modala",
+            "ajax": "reasons_to_work.json"
+          }
+        },
+        "expected_output": "Valid modala usage with AJAX reference"
+      },
+      {
+        "description": "Suggest adding tool-tip attribute for user guidance",
+        "input": {
+          "tagname": "a",
+          "class": "modala",
+          "textContent": "Click Me"
+        },
+        "expected_output": "Suggestion: Add a tool-tip attribute to improve user guidance, e.g., tool-tip='Click to open modal'"
+      },
+      {
+        "description": "Ensure carousel elements have navigation buttons",
+        "input": {
+          "tagname": "carousel",
+          "id": "main-carousel",
+          "boxes": "5"
+        },
+        "expected_output": "Suggestion: Add left and right navigation buttons for carousel usability, e.g., <button class='carousel-slide-left'>‹</button> <button class='carousel-slide-right'>›</button>"
+      },
+      {
+        "description": "Misspelled key in modala context",
+        "input": {
+          "tagname": "div",
+          "moadla": "popup.json:target"
+        },
+        "expected_output": "Error: Unrecognized key 'moadla'. Did you mean 'modala'?"
+      },
+      {
+        "description": "Non-integer 'br' value",
+        "input": {
+          "tagname": "div",
+          "br": "two"
+        },
+        "expected_output": "Error: 'br' must be an integer."
+      },
+      {
+        "description": "Misspelled 'onclick' attribute",
+        "input": {
+          "tagname": "button",
+          "onclik": "submitForm()",
+          "textContent": "Submit"
+        },
+        "expected_output": "Suggestion: Attribute 'onclik' is misspelled. Did you mean 'onclick'?"
+      },
+      {
+        "description": "Invalid AJAX format (missing target)",
+        "input": {
+          "tagname": "a",
+          "class": "modala",
+          "ajax": "file.json:"
+        },
+        "expected_output": "Error: AJAX attribute format invalid. Missing target ID."
+      },
+      {
+        "description": "Invalid AJAX format (too many colon separators)",
+        "input": {
+          "tagname": "a",
+          "class": "modala",
+          "ajax": "file.json:target:extra"
+        },
+        "expected_output": "Error: AJAX attribute format invalid. Too many colon separators."
+      },
+      {
+        "description": "Invalid type for 'css' key",
+        "input": {
+          "tagname": "div",
+          "css": 123
+        },
+        "expected_output": "Error: 'css' must be a string representing a stylesheet file."
+      },
+      {
+        "description": "Invalid 'children' type (string instead of object/array)",
+        "input": {
+          "tagname": "div",
+          "children": "not an object or array"
+        },
+        "expected_output": "Error: 'children' must be an object or array of JSON nodes."
+      },
+      {
+        "description": "Valid modal usage",
+        "input": {
+          "tagname": "div",
+          "modal": "popup.json:container"
+        },
+        "expected_output": "Valid modal attribute usage."
+      },
+      {
+        "description": "Misformatted 'insert' attribute",
+        "input": {
+          "tagname": "a",
+          "class": "download",
+          "file": "example.zip",
+          "insert": 123
+        },
+        "expected_output": "Error: 'insert' attribute must be a string identifier."
+      },
+      {
+        "description": "Valid carousel without navigation buttons",
+        "input": {
+          "tagname": "carousel",
+          "id": "carousel1",
+          "boxes": 3,
+          "type": "img",
+          "sources": "img1.jpg;img2.jpg;img3.jpg"
+        },
+        "expected_output": "Valid carousel structure. Suggestion: Add left/right navigation buttons for better usability."
+      },
+      {
+        "description": "Missing required 'tagname' field",
+        "input": {
+          "id": "noTag"
+        },
+        "expected_output": "Error: Missing required 'tagname' field."
+      },
+      {
+        "description": "Unexpected extra key in modala context",
+        "input": {
+          "tagname": "div",
+          "modala": "content.json:target",
+          "extrakey": "unexpected"
+        },
+        "expected_output": "Warning: Unrecognized key 'extrakey'."
+      },
+      {
+        "description": "Misspelled key in header object",
+        "input": {
+          "header": {
+            "titl": "Page Title",
+            "css": "style.css"
+          }
+        },
+        "expected_output": "Error: Key 'titl' is misspelled. Did you mean 'title'?"
+      },
+      {
+        "description": "Valid tree-view structure",
+        "input": {
+          "tagname": "ul",
+          "tree-view": "true",
+          "children": [
+            { "tagname": "li", "textContent": "Item 1" }
+          ]
+        },
+        "expected_output": "Valid tree-view structure."
+      },
+      {
+        "description": "Invalid AJAX value type (number instead of string)",
+        "input": {
+          "tagname": "a",
+          "class": "modala",
+          "ajax": 12345
+        },
+        "expected_output": "Error: 'ajax' must be a string in the format 'filename.json:insertID'."
+      },
+      {
+        "description": "Misformatted 'query' attribute (missing colon separator)",
+        "input": {
+          "tagname": "a",
+          "query": "key0value0;"
+        },
+        "expected_output": "Error: 'query' attribute format invalid. Expected format 'key:value;' pairs."
+      },
+      {
+        "description": "Valid complete dotpipe structure with header and body",
+        "input": {
+          "header": {
+            "title": "Sample Page",
+            "css": "dark-theme.css",
+            "meta": {
+              "a": {
+                "tagname": "meta",
+                "name": "viewport",
+                "content": "width=device-width, initial-scale=1.0"
+              }
+            }
+          },
+          "body": {
+            "tagname": "div",
+            "id": "pageBody",
+            "children": [
+              {
+                "tagname": "div",
+                "id": "navBarContainer",
+                "children": [
+                  {
+                    "tagname": "table",
+                    "id": "navBar",
+                    "children1": {
+                      "tagname": "tr",
+                      "menuItem1": {
+                        "tagname": "a",
+                        "id": "homeLink",
+                        "textContent": "Home",
+                        "class": "modala",
+                        "ajax": "home.json:mainContent"
+                      },
+                      "menuItem2": {
+                        "tagname": "a",
+                        "id": "productsLink",
+                        "textContent": "Products",
+                        "class": "modala",
+                        "ajax": "products.json:mainContent"
+                      },
+                      "menuItem3": {
+                        "tagname": "a",
+                        "id": "contactLink",
+                        "textContent": "Contact",
+                        "class": "modala",
+                        "ajax": "contact.json:mainContent"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "tagname": "div",
+                "id": "contentSection",
+                "children": [
+                  {
+                    "tagname": "carousel",
+                    "id": "imageCarousel",
+                    "type": "img",
+                    "boxes": 3,
+                    "sources": "image1.jpg;image2.jpg;image3.jpg",
+                    "class": "carousel"
+                  }
+                ]
+              },
+              {
+                "tagname": "div",
+                "id": "footerSection",
+                "children": [
+                  {
+                    "tagname": "p",
+                    "textContent": "Contact us at contact@example.com"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "expected_output": "Valid dotpipe structure with header and body."
+      },
+      {
+        "description": "Children property with an unexpected type (string instead of object or array)",
+        "input": {
+          "tagname": "div",
+          "children": "just a string"
+        },
+        "expected_output": "Error: 'children' must be an object or array of JSON nodes."
+      },
+      {
+        "description": "Children with inconsistent naming keys",
+        "input": {
+          "tagname": "table",
+          "children1": {
+            "tagname": "tr"
+          },
+          "childrenX": {
+            "tagname": "tr"
+          }
+        },
+        "expected_output": "Warning: Inconsistent children naming keys detected: 'children1', 'childrenX'."
+      },
+      {
+        "description": "Valid usage of 'br' with an integer value",
+        "input": {
+          "tagname": "div",
+          "br": 3
+        },
+        "expected_output": "Valid 'br' usage; three line breaks inserted."
+      },
+      {
+        "description": "Invalid type for 'modal' key (number instead of string)",
+        "input": {
+          "tagname": "div",
+          "modal": 456
+        },
+        "expected_output": "Error: 'modal' must be a string in the format 'filename.json:targetID'."
+      },
+      {
+        "description": "Valid download link with proper 'file' and 'directory' attributes",
+        "input": {
+          "tagname": "a",
+          "class": "download",
+          "file": "setup.zip",
+          "directory": "/downloads/"
+        },
+        "expected_output": "Valid download element."
+      },
+      {
+        "description": "Conflicting attributes: both 'time-active' and 'time-inactive'",
+        "input": {
+          "tagname": "div",
+          "class": "time-active time-inactive"
+        },
+        "expected_output": "Error: Conflicting attributes 'time-active' and 'time-inactive'. Only one should be present."
+      },
+      {
+        "description": "Invalid negative value for 'br'",
+        "input": {
+          "tagname": "div",
+          "br": -2
+        },
+        "expected_output": "Error: 'br' must be a non-negative integer."
+      },
+      {
+        "description": "Invalid 'boxes' value as non-integer",
+        "input": {
+          "tagname": "div",
+          "boxes": "three"
+        },
+        "expected_output": "Error: 'boxes' must be an integer."
+      },
+      {
+        "description": "Misformatted 'ajax' attribute with empty target",
+        "input": {
+          "tagname": "a",
+          "ajax": "data.json:"
+        },
+        "expected_output": "Error: AJAX attribute format invalid. Missing target ID."
+      },
+      {
+        "description": "Misformatted 'ajax' attribute with extra separators",
+        "input": {
+          "tagname": "a",
+          "ajax": "data.json:target:extra"
+        },
+        "expected_output": "Error: AJAX attribute format invalid. Too many colon separators."
+      },
+      {
+        "description": "Misformatted 'query' attribute without colon",
+        "input": {
+          "tagname": "a",
+          "query": "keyvalue;"
+        },
+        "expected_output": "Error: 'query' attribute format invalid. Expected format 'key:value;' pairs."
+      },
+      {
+        "description": "Misplaced 'modal' attribute on an inline element",
+        "input": {
+          "tagname": "span",
+          "modal": "popup.json:target"
+        },
+        "expected_output": "Warning: 'modal' attribute is not typically used on inline elements like 'span'."
+      },
+      {
+        "description": "Duplicate 'id' values in nested elements",
+        "input": {
+          "tagname": "div",
+          "id": "dup",
+          "children": [
+            { "tagname": "p", "id": "dup", "textContent": "Test" }
+          ]
+        },
+        "expected_output": "Warning: Duplicate id 'dup' detected."
+      },
+      {
+        "description": "Unexpected extra key not defined in documentation",
+        "input": {
+          "tagname": "div",
+          "unknown": "value"
+        },
+        "expected_output": "Warning: Unrecognized key 'unknown'."
+      },
+      {
+        "description": "Self-referential structure detected",
+        "input": {
+          "tagname": "div",
+          "selfRef": "$"
+        },
+        "expected_output": "Warning: Self-referential structure detected."
+      },
+      {
+        "description": "Invalid AJAX resource reference (wrong file extension)",
+        "input": {
+          "tagname": "a",
+          "ajax": "file.txt:target"
+        },
+        "expected_output": "Error: Invalid AJAX file extension; expected '.json'."
+      },
+      {
+        "description": "Invalid CSS resource reference (wrong file extension)",
+        "input": {
+          "tagname": "div",
+          "css": "style.txt"
+        },
+        "expected_output": "Error: Invalid CSS file extension; expected a stylesheet file (.css)."
+      },
+      {
+        "description": "Invalid delay value in timed element",
+        "input": {
+          "tagname": "timed",
+          "delay": "abc",
+          "ajax": "refresh.json:content"
+        },
+        "expected_output": "Error: 'delay' attribute must be a numeric value."
+      },
+      {
+        "description": "Valid header with JS and CSS references",
+        "input": {
+          "header": {
+            "title": "My Awesome Webpage",
+            "css": "main.css",
+            "js": "script.js",
+            "meta": {
+              "a": {
+                "tagname": "meta",
+                "name": "viewport",
+                "content": "width=device-width, initial-scale=1.0"
+              }
+            }
+          }
+        },
+        "expected_output": "Valid header with both JS and CSS references."
+      },
+      {
+        "description": "Missing 'meta' object in header",
+        "input": {
+          "header": {
+            "title": "My Webpage",
+            "css": "styles.css"
+          }
+        },
+        "expected_output": "Warning: 'meta' is missing; consider adding meta tags for responsiveness."
+      },
+      {
+        "description": "Valid form with AJAX and query attributes",
+        "input": {
+          "tagname": "form",
+          "ajax": "submit.json:response",
+          "query": "username:john;password:secret;"
+        },
+        "expected_output": "Valid form element with correct AJAX and query attributes."
+      },
+      {
+        "description": "Invalid form 'query' attribute with missing semicolon",
+        "input": {
+          "tagname": "form",
+          "ajax": "submit.json:response",
+          "query": "username:john password:secret"
+        },
+        "expected_output": "Error: 'query' attribute format invalid. Expected semicolon-separated pairs."
+      },
+      {
+        "description": "Valid modala element with dynamic content insertion using 'insert'",
+        "input": {
+          "tagname": "a",
+          "class": "modala",
+          "ajax": "data.json:content",
+          "insert": "targetDiv"
+        },
+        "expected_output": "Valid modala element with proper insert target."
+      },
+      {
+        "description": "Invalid 'file' attribute in download element (non-string)",
+        "input": {
+          "tagname": "a",
+          "class": "download",
+          "file": 456,
+          "directory": "/files/"
+        },
+        "expected_output": "Error: 'file' must be a string representing a file name."
+      },
+      {
+        "description": "Invalid attribute value for 'directory' (missing trailing slash)",
+        "input": {
+          "tagname": "a",
+          "class": "download",
+          "file": "file.zip",
+          "directory": "/files"
+        },
+        "expected_output": "Warning: 'directory' should end with a slash for proper file referencing."
+      },
+      {
+        "description": "Valid modala with multiple AJAX calls in one element",
+        "input": {
+          "tagname": "a",
+          "class": "modala modala-multi-first",
+          "ajax": "first.json:target1;second.json:target2"
+        },
+        "expected_output": "Valid modala with multi AJAX calls."
+      },
+      {
+        "description": "Invalid multi-AJAX format with missing separator",
+        "input": {
+          "tagname": "a",
+          "class": "modala modala-multi-last",
+          "ajax": "first.jsontarget1;second.json:target2"
+        },
+        "expected_output": "Error: AJAX attribute format invalid in multi-AJAX call; missing colon separator in first call."
+      },
+      {
+        "description": "Valid carousel with type 'video' and proper sources",
+        "input": {
+          "tagname": "carousel",
+          "id": "videoCarousel",
+          "type": "video",
+          "boxes": 2,
+          "sources": "vid1.mp4;vid2.mp4"
+        },
+        "expected_output": "Valid carousel for video content."
+      },
+      {
+        "description": "Invalid carousel type value (unsupported type)",
+        "input": {
+          "tagname": "carousel",
+          "id": "carouselError",
+          "type": "unknown",
+          "boxes": 2,
+          "sources": "file1.xyz;file2.xyz"
+        },
+        "expected_output": "Error: Unsupported carousel type 'unknown'."
+      },
+      {
+        "description": "Valid timed element with numeric delay",
+        "input": {
+          "tagname": "timed",
+          "delay": 3000,
+          "ajax": "refresh.json:content"
+        },
+        "expected_output": "Valid timed element with numeric delay."
+      },
+      {
+        "description": "Invalid timed element with non-numeric delay",
+        "input": {
+          "tagname": "timed",
+          "delay": "three seconds",
+          "ajax": "refresh.json:content"
+        },
+        "expected_output": "Error: 'delay' attribute must be numeric."
+      },
+      {
+        "description": "Valid element with multiple classes and a tool-tip",
+        "input": {
+          "tagname": "div",
+          "class": "modala tool-tip highlighted",
+          "tool-tip": "Hover for info",
+          "ajax": "info.json:detail"
+        },
+        "expected_output": "Valid element with multiple classes and a tool-tip."
+      },
+      {
+        "description": "Invalid element with numeric class value",
+        "input": {
+          "tagname": "div",
+          "class": 12345
+        },
+        "expected_output": "Error: 'class' attribute must be a string."
+      },
+      {
+        "description": "Valid image element within carousel",
+        "input": {
+          "tagname": "img",
+          "src": "image.jpg",
+          "alt": "Sample image"
+        },
+        "expected_output": "Valid image element."
+      },
+      {
+        "description": "Invalid image element with missing src",
+        "input": {
+          "tagname": "img",
+          "alt": "No source"
+        },
+        "expected_output": "Error: 'img' element must have a 'src' attribute."
+      },
+      {
+        "description": "Valid 'pipe' element for dynamic content",
+        "input": {
+          "tagname": "pipe",
+          "ajax": "data.json:pipeContent",
+          "query": "key:value;"
+        },
+        "expected_output": "Valid pipe element configuration."
+      },
+      {
+        "description": "Invalid 'pipe' element missing ajax attribute",
+        "input": {
+          "tagname": "pipe",
+          "query": "key:value;"
+        },
+        "expected_output": "Error: 'pipe' element must have an 'ajax' attribute."
+      },
+      {
+        "description": "Valid dynamic <dyn> element",
+        "input": {
+          "tagname": "dyn",
+          "ajax": "dynamic.json:content",
+          "query": "id:123;"
+        },
+        "expected_output": "Valid dynamic element."
+      },
+      {
+        "description": "Invalid dynamic <dyn> element with numeric ajax attribute",
+        "input": {
+          "tagname": "dyn",
+          "ajax": 789,
+          "query": "id:123;"
+        },
+        "expected_output": "Error: 'ajax' attribute must be a string for dynamic elements."
+      },
+      {
+        "description": "Valid use of 'x-toggle' attribute",
+        "input": {
+          "tagname": "div",
+          "x-toggle": "id1:class1;id2:class2"
+        },
+        "expected_output": "Valid x-toggle attribute usage."
+      },
+      {
+        "description": "Invalid 'x-toggle' attribute with missing colon",
+        "input": {
+          "tagname": "div",
+          "x-toggle": "id1class1;id2:class2"
+        },
+        "expected_output": "Error: 'x-toggle' attribute format invalid. Expected format 'id:class' pairs separated by semicolon."
+      },
+      {
+        "description": "Valid form element with multiple inputs and proper query construction",
+        "input": {
+          "tagname": "form",
+          "ajax": "submit.json:response",
+          "query": "username:john;password:secret;"
+        },
+        "expected_output": "Valid form element with correct AJAX and query attributes."
+      },
+      {
+        "description": "Invalid form element with extra ampersand in query",
+        "input": {
+          "tagname": "form",
+          "ajax": "submit.json:response",
+          "query": "username:john&&password:secret;"
+        },
+        "expected_output": "Error: 'query' attribute contains invalid characters. Remove extra ampersands."
+      },
+      {
+        "description": "Valid element with 'copy' attribute for clipboard functionality",
+        "input": {
+          "tagname": "button",
+          "copy": "elementId",
+          "textContent": "Copy"
+        },
+        "expected_output": "Valid element with clipboard copy functionality."
+      },
+      {
+        "description": "Invalid element with 'copy' attribute as non-string",
+        "input": {
+          "tagname": "button",
+          "copy": 1234,
+          "textContent": "Copy"
+        },
+        "expected_output": "Error: 'copy' attribute must be a string identifier."
+      },
+      {
+        "description": "Valid use of 'redirect' class to trigger page navigation",
+        "input": {
+          "tagname": "a",
+          "class": "redirect",
+          "ajax": "newPage.html"
+        },
+        "expected_output": "Valid redirect element. Clicking should navigate to newPage.html."
+      },
+      {
+        "description": "Invalid use of 'redirect' class without 'ajax' attribute",
+        "input": {
+          "tagname": "a",
+          "class": "redirect"
+        },
+        "expected_output": "Error: Redirect element missing 'ajax' attribute."
+      },
+      {
+        "description": "Valid multi-part modala call using modala-multi-first",
+        "input": {
+          "tagname": "a",
+          "class": "multi-part modala-multi-first modala",
+          "ajax": "first.json:target1;second.json:target2"
+        },
+        "expected_output": "Valid multi-part modala call using modala-multi-first."
+      },
+      {
+        "description": "Valid multi-part modala call using modala-multi-last",
+        "input": {
+          "tagname": "a",
+          "class": "multi-part modala-multi-last modala",
+          "ajax": "first.json:target1;second.json:target2"
+        },
+        "expected_output": "Valid multi-part modala call using modala-multi-last."
+      },
+      {
+        "description": "Invalid multi-part modala call with missing AJAX segments",
+        "input": {
+          "tagname": "a",
+          "class": "multi-part modala modala-multi-first",
+          "ajax": "first.json:target1;"
+        },
+        "expected_output": "Error: Incomplete multi-part AJAX call. Ensure all segments are properly formatted."
+      },
+      {
+        "description": "Valid tree structure with nested elements",
+        "input": {
+          "tagname": "ul",
+          "children": [
+            { "tagname": "li", "textContent": "Item 1" },
+            { "tagname": "li", "textContent": "Item 2" }
+          ]
+        },
+        "expected_output": "Valid nested tree structure."
+      },
+      {
+        "description": "Invalid tree structure with missing tagname in child",
+        "input": {
+          "tagname": "ul",
+          "children": [
+            { "textContent": "Item 1" }
+          ]
+        },
+        "expected_output": "Error: Child element missing required 'tagname' field."
+      },
+      {
+        "description": "Valid inclusion of external JS via 'js' key",
+        "input": {
+          "tagname": "div",
+          "js": "external.js"
+        },
+        "expected_output": "Valid JS inclusion. External script 'external.js' will be loaded."
+      },
+      {
+        "description": "Invalid 'js' key with numeric value",
+        "input": {
+          "tagname": "div",
+          "js": 789
+        },
+        "expected_output": "Error: 'js' must be a string representing a JavaScript file."
+      },
+      {
+        "description": "Valid use of 'headers' attribute in AJAX call",
+        "input": {
+          "tagname": "a",
+          "ajax": "data.json:content",
+          "headers": "Authorization:Bearer token123&Content-Type:application/json"
+        },
+        "expected_output": "Valid headers attribute with properly formatted header pairs."
+      },
+      {
+        "description": "Invalid 'headers' attribute with missing colon",
+        "input": {
+          "tagname": "a",
+          "ajax": "data.json:content",
+          "headers": "AuthorizationBearer token123&Content-Type:application/json"
+        },
+        "expected_output": "Error: 'headers' attribute format invalid. Expected 'key:value' pairs."
+      },
+      {
+        "description": "Valid element with 'action-class' for event handling",
+        "input": {
+          "tagname": "button",
+          "class": "action-class",
+          "textContent": "Click Me"
+        },
+        "expected_output": "Valid action-class usage for event handling."
+      },
+      {
+        "description": "Invalid element with 'action-class' used on unsupported tag",
+        "input": {
+          "tagname": "span",
+          "class": "action-class",
+          "textContent": "Not clickable"
+        },
+        "expected_output": "Warning: 'action-class' may not be supported on inline elements like 'span'."
+      },
+      {
+        "description": "Valid element with 'remove' attribute to delete target elements",
+        "input": {
+          "tagname": "button",
+          "remove": "target1;target2",
+          "textContent": "Remove Elements"
+        },
+        "expected_output": "Valid 'remove' attribute. Target elements 'target1' and 'target2' will be removed on action."
+      },
+      {
+        "description": "Invalid element with 'remove' attribute as non-string",
+        "input": {
+          "tagname": "button",
+          "remove": 123,
+          "textContent": "Remove Elements"
+        },
+        "expected_output": "Error: 'remove' attribute must be a string containing target IDs."
+      },
+      {
+        "description": "Valid element with 'display' attribute to toggle visibility",
+        "input": {
+          "tagname": "button",
+          "display": "section1;section2",
+          "textContent": "Toggle Display"
+        },
+        "expected_output": "Valid 'display' attribute usage."
+      },
+      {
+        "description": "Invalid element with 'display' attribute as non-string",
+        "input": {
+          "tagname": "button",
+          "display": 456,
+          "textContent": "Toggle Display"
+        },
+        "expected_output": "Error: 'display' attribute must be a string."
+      },
+      {
+        "description": "Valid element with 'form-class' for form inputs",
+        "input": {
+          "tagname": "input",
+          "form-class": "user-form",
+          "name": "email",
+          "value": "test@example.com"
+        },
+        "expected_output": "Valid 'form-class' usage for form element."
+      },
+      {
+        "description": "Invalid element with 'form-class' as a number",
+        "input": {
+          "tagname": "input",
+          "form-class": 789,
+          "name": "email",
+          "value": "test@example.com"
+        },
+        "expected_output": "Error: 'form-class' must be a string."
+      },
+      {
+        "description": "Valid element with 'multiple' class for multi-select",
+        "input": {
+          "tagname": "select",
+          "multiple": true,
+          "options": "Option1:1;Option2:2;Option3:3"
+        },
+        "expected_output": "Valid multi-select element with 'multiple' class."
+      },
+      {
+        "description": "Invalid element with 'multiple' attribute as non-boolean",
+        "input": {
+          "tagname": "select",
+          "multiple": "yes",
+          "options": "Option1:1;Option2:2"
+        },
+        "expected_output": "Error: 'multiple' attribute must be a boolean value."
+      },
+      {
+        "description": "Valid use of 'x-value-set' attribute for setting HTML values",
+        "input": {
+          "tagname": "a",
+          "class": "x-value-set",
+          "insert": "id1:id1-Value&id2:id2-Value",
+          "ajax": "setValues.json"
+        },
+        "expected_output": "Valid 'x-value-set' configuration."
+      },
+      {
+        "description": "Invalid 'x-value-set' attribute with incorrect format",
+        "input": {
+          "tagname": "a",
+          "class": "x-value-set",
+          "insert": "id1-id1-Value,id2:id2-Value",
+          "ajax": "setValues.json"
+        },
+        "expected_output": "Error: 'insert' format for 'x-value-set' invalid. Expected format 'id:attribute' pairs separated by '&'."
+      },
+      {
+        "description": "Valid use of 'x-value-get' attribute for retrieving HTML values",
+        "input": {
+          "tagname": "a",
+          "class": "x-value-get",
+          "insert": "id1:id1-Value&id2:id2-Value",
+          "ajax": "getValues.json"
+        },
+        "expected_output": "Valid 'x-value-get' configuration."
+      },
+      {
+        "description": "Valid use of 'x-value-clear' attribute to clear HTML values",
+        "input": {
+          "tagname": "a",
+          "class": "x-value-clear",
+          "insert": "id1;id2;id3",
+          "ajax": "clearValues.json"
+        },
+        "expected_output": "Valid 'x-value-clear' configuration."
+      },
+      {
+        "description": "Valid header with multiple CSS and JS files included",
+        "input": {
+          "tagname": "header",
+          "title": "Comprehensive Page",
+          "css": "main.css;theme.css",
+          "js": "utils.js;app.js"
+        },
+        "expected_output": "Valid header with multiple CSS and JS files included."
+      },
+      {
+        "description": "Invalid header with numeric title",
+        "input": {
+          "tagname": "header",
+          "title": 12345,
+          "css": "main.css"
+        },
+        "expected_output": "Error: 'title' must be a string."
+      },
+      {
+        "description": "Valid inclusion of a 'br' key in a footer",
+        "input": {
+          "tagname": "footer",
+          "br": 2,
+          "textContent": "Footer information"
+        },
+        "expected_output": "Valid footer with line breaks."
+      },
+      {
+        "description": "Invalid use of unknown key in a page structure",
+        "input": {
+          "tagname": "div",
+          "unknownKey": "some value"
+        },
+        "expected_output": "Warning: Unrecognized key 'unknownKey'."
+      },
+      {
+        "description": "Valid complete webpage with all elements integrated",
+        "input": {
+          "header": {
+            "title": "Ultimate Webpage",
+            "css": "ultimate.css",
+            "meta": {
+              "a": {
+                "tagname": "meta",
+                "name": "viewport",
+                "content": "width=device-width, initial-scale=1.0"
+              }
+            }
+          },
+          "body": {
+            "tagname": "div",
+            "id": "pageContainer",
+            "children": [
+              {
+                "tagname": "div",
+                "id": "navBar",
+                "children": [
+                  {
+                    "tagname": "a",
+                    "id": "homeLink",
+                    "textContent": "Home",
+                    "class": "modala",
+                    "ajax": "home.json:content"
+                  },
+                  {
+                    "tagname": "a",
+                    "id": "aboutLink",
+                    "textContent": "About",
+                    "class": "modala",
+                    "ajax": "about.json:content"
+                  }
+                ]
+              },
+              {
+                "tagname": "div",
+                "id": "mainContent",
+                "children": [
+                  {
+                    "tagname": "carousel",
+                    "id": "mainCarousel",
+                    "type": "img",
+                    "boxes": 4,
+                    "sources": "img1.jpg;img2.jpg;img3.jpg;img4.jpg",
+                    "class": "carousel"
+                  }
+                ]
+              },
+              {
+                "tagname": "footer",
+                "id": "pageFooter",
+                "children": [
+                  {
+                    "tagname": "p",
+                    "textContent": "© 2025 dotPipe. All rights reserved."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "expected_output": "Valid complete webpage with header, navigation, main content, and footer integrated."
+      }
+    ]
+  }
+  
