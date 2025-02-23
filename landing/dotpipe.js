@@ -1028,7 +1028,7 @@ function addPipe(elem = document) {
     });
 }
 
-function flashClickListener() {
+function flashClickListener(elem) {
     if (elem.id) {
         elem.removeEventListener('click', () => {
             pipes(elem);
@@ -1498,6 +1498,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                         }
                     }
                     domContentLoad();
+                    flashClickListener(elem);
                     return allText;
                 }
                 catch (e) {
@@ -1608,5 +1609,5 @@ function navigate(elem, opts = null, query = "", classname = "") {
         // console.log(e);
     }
     domContentLoad();
-    flashClickListener();
+    flashClickListener(elem);
 }

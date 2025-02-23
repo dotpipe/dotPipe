@@ -719,10 +719,10 @@ function modala(value, tempTag, root, id) {
             try {
                 temp.setAttribute(k, v);
             }
-            catch (e) { 
+            catch (e) {
                 console.error(`Error setting attribute ${k}:`, e);
             }
-        }              
+        }
         else if (!Number(k) && k.toLowerCase() != "tagname" && (k.toLowerCase() == "textcontent" || k.toLowerCase() == "innerhtml" || k.toLowerCase() == "innertext")) {
             const val = v.replace(/\r?\n/g, "<br>");
             (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
@@ -1028,6 +1028,18 @@ function addPipe(elem = document) {
     });
 }
 
+function flashClickListener(elem) {
+    if (elem.id) {
+        elem.removeEventListener('click', () => {
+            pipes(elem);
+            console.log(elem.id);
+        });
+        elem.addEventListener('click', () => {
+            pipes(elem);
+            console.log(elem.id);
+        });
+    }
+}
 
 function attachEventListeners(elem) {
     if (elem.classList.contains('mouse') || elem.id !== null) {
@@ -1069,7 +1081,7 @@ function pipes(elem, stop = false) {
             document.getElementById(e).innerHTML = "";
         });
     }
-    
+
     if (elem.tagName == "lnk") {
         window.open(elem.getAttribute("ajax") + (elem.hasAttribute("query") ? "?" + elem.getAttribute("query") : ""), "_blank");
     }
@@ -1311,7 +1323,44 @@ function formAJAX(elem, classname) {
         window.location.href = elem.getAttribute("ajax") + "?" + ((elem_qstring.length > 0) ? elem_qstring : "");
     return (elem_qstring);
 }
+var pretty = 0;
+function prettifyJsonWithColors(jsonObj) {
+    const prettyJson = JSON.stringify(jsonObj, null, 2);
+    if (pretty == 0) {
+        // Add CSS to pipes.js or index.html
+        const style = document.createElement('style');
+        style.textContent = `
+        .key { color: purple; }
+        .string { color: green; }
+        .number { color: darkorange; }
+        .boolean { color: blue; }
+        .null { color: magenta; }
+    `;
+        document.head.appendChild(style);
+    }
+    pretty = 1;
+    return prettyJson
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+            let cls = 'number';
+            if (/^"/.test(match)) {
+                cls = match.endsWith('":') ? 'key' : 'string';
+            } else if (/true|false/.test(match)) {
+                cls = 'boolean';
+            } else if (/null/.test(match)) {
+                cls = 'null';
+            }
+            return `<span class="${cls}">${match}</span>`;
+        });
+}
 
+// Usage
+function displayColoredJson(elementId, jsonObj) {
+    const prettyHtml = prettifyJsonWithColors(jsonObj);
+    document.getElementById(elementId).innerHTML = `<pre>${prettyHtml}</pre>`;
+}
 
 function navigate(elem, opts = null, query = "", classname = "") {
     //formAJAX at the end of this line
@@ -1431,6 +1480,33 @@ function navigate(elem, opts = null, query = "", classname = "") {
             console.error(e);
         }
     }
+    else if (elem.classList.contains("json")) {
+        rawFile.onreadystatechange = function () {
+            if (rawFile.readyState === 4) {
+                var allText = "";// JSON.parse(rawFile.responseText);
+                try {
+                    console.log(rawFile.responseText);
+                    var allPretty = JSON.parse(rawFile.responseText);
+                    // var allPretty = prettifyJsonWithColors(allText);
+                    // allText = JSON.stringify(allText, null, 4);
+                    displayColoredJson(elem.getAttribute("insert"), allPretty);
+                    if (elem.hasAttribute("insert")) {
+                        if (elem.classList.contains("text-html")) {
+                        //    document.getElementById(elem.getAttribute("insert")).innerHTML = (JSON.stringify(allPretty));
+                        } else {
+                            document.getElementById(elem.getAttribute("insert")).textContent = (JSON.stringify(allPretty, null, 2));
+                        }
+                    }
+                    domContentLoad();
+                    flashClickListener(elem);
+                    return allText;
+                }
+                catch (e) {
+                    console.log("Response not a JSON");
+                }
+            }
+        }
+    }
     else if (elem.classList.contains("text-html")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
@@ -1489,32 +1565,13 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
         }
     }
-    else if (elem.classList.contains("json")) {
-        rawFile.onreadystatechange = function () {
-            if (rawFile.readyState === 4) {
-                var allText = "";// JSON.parse(rawFile.responseText);
-                try {
-                    console.log(rawFile.responseText);
-                    allText = JSON.parse(rawFile.responseText);
-                    if (elem.hasAttribute("insert")) {
-                        document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
-                    }
-                    domContentLoad();
-                    return allText;
-                }
-                catch (e) {
-                    console.log("Response not a JSON");
-                }
-            }
-        }
-    }
     else if (elem.classList.contains("modala")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
                 var allText = JSON.parse(rawFile.responseText);
                 var insertElement = document.getElementById(elem.getAttribute("insert"));
                 var boxLimit = elem.getAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : Infinity;
-                
+
                 if (!elem.classList.contains("modala-multi-first") && !elem.classList.contains("modala-multi-last")) {
                     insertElement.innerHTML = "";
                 } else if (insertElement.children.length >= boxLimit) {
@@ -1524,10 +1581,10 @@ function navigate(elem, opts = null, query = "", classname = "") {
                         insertElement.firstChild.remove();
                     }
                 }
-                
+
                 var newContent = document.createElement('div');
                 modala(allText, newContent);
-                
+
                 if (elem.classList.contains("modala-multi-first")) {
                     insertElement.insertBefore(newContent, insertElement.firstChild);
                 } else {
@@ -1536,7 +1593,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
         }
     }
-    
+
     else if (!elem.classList.contains("json") && !elem.hasAttribute("callback")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
@@ -1552,4 +1609,5 @@ function navigate(elem, opts = null, query = "", classname = "") {
         // console.log(e);
     }
     domContentLoad();
+    flashClickListener(elem);
 }

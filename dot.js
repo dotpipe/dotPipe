@@ -37,24 +37,12 @@
   *  <timed>...........= [Tag] Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
   *  delay.............= [Attr] delay between <timed> tag refreshes (required for <timed> tag) ex: see <timed>
   *  <carousel>........= [Tag] to create a carousel that moves every a timeOut() delay="x" occurs ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
-  *  carousel-ajax.....= [Class] to create Modala sets for carousel use.
-  *         -images...= [Class] to use pure images for carousel use.
-  *         -auto-off.= [Class] to stop carousel from moving (better to create buttons)
-  *         -vert.....= [Class] to make carousel vertical, instead of horizontal (default)
-  *         -video....= [Class] to make video carousel
-  *         -audio....= [Class] to make audio carousel
-  *         -iframe...= [Class] to make iframe carousel
-  *         -link.....= [Class] to make link carousel
   *  boxes.............= [Attr] attribute to request for x boxes for carousel elementss ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
   *  file-order........= [Attr] ajax to these files, iterating [0,1,2,3]%array.length per call (delimited by ';') ex: <pipe query="key0:value0;" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  file-index........= [Attr] counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  incrIndex.........= [Class] increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  decrIndex.........= [Class] decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  interval..........= [Attr] Take this many steps when stepping through file-order default = 1
-  *  x-value-set.......= [Attr] set target HTML "value" ex: <pipe id="thisOrSomeId" class="x-value-set" insert="id2:id1-Value&id3=id4-Value;" ajax="foo.bar">
-  *  x-value-get.......= [Attr] get target HTML "value" ex: <pipe id="thisOrSomeId" class="x-value-get" insert="id2:id1-Value=id5-Value&id3=id4-Value;" ajax="foo.bar">
-  *  x-value-rem.......= [Attr] remove target HTML intrinsic "values" ex: <pipe id="thisOrSomeId" class="rem-value" insert="id2:gonekey&gonekey2;id1;id3" ajax="foo.bar">
-  *  x-value-clear.....= [Attr] remove all target HTML "value" ex: <pipe id="thisOrSomeId" class="rem-value-all" insert="id2;" ajax="foo.bar">
   *  mode..............= [Attr] "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
   *  pipe..............= [Class] creates a listener on the object. use listen="eventType" to relegate.
   *  multiple..........= [Class] states that this object has two or more key/value pairs use: states this is a multi-select form box
@@ -171,6 +159,14 @@ let domContentLoad = (again = false) => {
                 textCard(elem.getAttribute("tool-tip"), '', '', x + 15, y + 15, 1500, 100);
             });
         }
+        if (elem.hasAttribute("modal-tip")) {
+            console.log(elem.getAttribute("modal-tip") + "...");
+            elem.addEventListener('mouseover', function () {
+                const x = elem.offsetLeft + window.scrollX;
+                const y = elem.offsetTop + window.scrollY;
+                modalCard(elem.getAttribute("modal-tip"), x + 15, y + 15, 1500, 100);
+            });
+        }
         var ev = elem.getAttribute("event");
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
@@ -246,16 +242,16 @@ function copyContentById(id) {
     };
 }
 
-function modalCard(filename, insert_id, x_center = false, y_center = false, duration = -1, zindex = 100) {
+function modalCard(filename, x_center = false, y_center = false, duration = -1, zindex = 100) {
     var copied = document.createElement("div");
-    copied.id = insert_id;
+    copied.id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     copied.style.padding = "10px";
     copied.style.textAlign = "center";
     copied.style.backgroundColor = "lightgreen";
     copied.style.position = "absolute";
     var x_pos = 0;
     if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
-    else if (typeof x_center === 'boolean' && !x_centerS) x_pos = 0;
+    else if (typeof x_center === 'boolean' && !x_center) x_pos = 0;
     else x_pos = x_center;
     copied.style.left = x_pos + "px";
     var y_pos = 0;
@@ -264,7 +260,7 @@ function modalCard(filename, insert_id, x_center = false, y_center = false, dura
     else y_pos = y_center;
     copied.style.top = y_pos + "px";
     copied.style.zIndex = zindex;
-    copied.innerHTML = modal(filename, insert_id);
+    modal(filename, copied);
     document.body.appendChild(copied);
 
     if (duration > -1) {
@@ -723,10 +719,10 @@ function modala(value, tempTag, root, id) {
             try {
                 temp.setAttribute(k, v);
             }
-            catch (e) { 
+            catch (e) {
                 console.error(`Error setting attribute ${k}:`, e);
             }
-        }              
+        }
         else if (!Number(k) && k.toLowerCase() != "tagname" && (k.toLowerCase() == "textcontent" || k.toLowerCase() == "innerhtml" || k.toLowerCase() == "innertext")) {
             const val = v.replace(/\r?\n/g, "<br>");
             (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
@@ -1032,6 +1028,18 @@ function addPipe(elem = document) {
     });
 }
 
+function flashClickListener(elem) {
+    if (elem.id) {
+        elem.removeEventListener('click', () => {
+            pipes(elem);
+            console.log(elem.id);
+        });
+        elem.addEventListener('click', () => {
+            pipes(elem);
+            console.log(elem.id);
+        });
+    }
+}
 
 function attachEventListeners(elem) {
     if (elem.classList.contains('mouse') || elem.id !== null) {
@@ -1073,7 +1081,7 @@ function pipes(elem, stop = false) {
             document.getElementById(e).innerHTML = "";
         });
     }
-    
+
     if (elem.tagName == "lnk") {
         window.open(elem.getAttribute("ajax") + (elem.hasAttribute("query") ? "?" + elem.getAttribute("query") : ""), "_blank");
     }
@@ -1315,7 +1323,44 @@ function formAJAX(elem, classname) {
         window.location.href = elem.getAttribute("ajax") + "?" + ((elem_qstring.length > 0) ? elem_qstring : "");
     return (elem_qstring);
 }
+var pretty = 0;
+function prettifyJsonWithColors(jsonObj) {
+    const prettyJson = JSON.stringify(jsonObj, null, 2);
+    if (pretty == 0) {
+        // Add CSS to pipes.js or index.html
+        const style = document.createElement('style');
+        style.textContent = `
+        .key { color: purple; }
+        .string { color: green; }
+        .number { color: darkorange; }
+        .boolean { color: blue; }
+        .null { color: magenta; }
+    `;
+        document.head.appendChild(style);
+    }
+    pretty = 1;
+    return prettyJson
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+            let cls = 'number';
+            if (/^"/.test(match)) {
+                cls = match.endsWith('":') ? 'key' : 'string';
+            } else if (/true|false/.test(match)) {
+                cls = 'boolean';
+            } else if (/null/.test(match)) {
+                cls = 'null';
+            }
+            return `<span class="${cls}">${match}</span>`;
+        });
+}
 
+// Usage
+function displayColoredJson(elementId, jsonObj) {
+    const prettyHtml = prettifyJsonWithColors(jsonObj);
+    document.getElementById(elementId).innerHTML = `<pre>${prettyHtml}</pre>`;
+}
 
 function navigate(elem, opts = null, query = "", classname = "") {
     //formAJAX at the end of this line
@@ -1435,6 +1480,33 @@ function navigate(elem, opts = null, query = "", classname = "") {
             console.error(e);
         }
     }
+    else if (elem.classList.contains("json")) {
+        rawFile.onreadystatechange = function () {
+            if (rawFile.readyState === 4) {
+                var allText = "";// JSON.parse(rawFile.responseText);
+                try {
+                    console.log(rawFile.responseText);
+                    var allPretty = JSON.parse(rawFile.responseText);
+                    // var allPretty = prettifyJsonWithColors(allText);
+                    // allText = JSON.stringify(allText, null, 4);
+                    displayColoredJson(elem.getAttribute("insert"), allPretty);
+                    if (elem.hasAttribute("insert")) {
+                        if (elem.classList.contains("text-html")) {
+                        //    document.getElementById(elem.getAttribute("insert")).innerHTML = (JSON.stringify(allPretty));
+                        } else {
+                            document.getElementById(elem.getAttribute("insert")).textContent = (JSON.stringify(allPretty, null, 2));
+                        }
+                    }
+                    domContentLoad();
+                    flashClickListener(elem);
+                    return allText;
+                }
+                catch (e) {
+                    console.log("Response not a JSON");
+                }
+            }
+        }
+    }
     else if (elem.classList.contains("text-html")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
@@ -1493,32 +1565,13 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
         }
     }
-    else if (elem.classList.contains("json")) {
-        rawFile.onreadystatechange = function () {
-            if (rawFile.readyState === 4) {
-                var allText = "";// JSON.parse(rawFile.responseText);
-                try {
-                    console.log(rawFile.responseText);
-                    allText = JSON.parse(rawFile.responseText);
-                    if (elem.hasAttribute("insert")) {
-                        document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
-                    }
-                    domContentLoad();
-                    return allText;
-                }
-                catch (e) {
-                    console.log("Response not a JSON");
-                }
-            }
-        }
-    }
     else if (elem.classList.contains("modala")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
                 var allText = JSON.parse(rawFile.responseText);
                 var insertElement = document.getElementById(elem.getAttribute("insert"));
                 var boxLimit = elem.getAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : Infinity;
-                
+
                 if (!elem.classList.contains("modala-multi-first") && !elem.classList.contains("modala-multi-last")) {
                     insertElement.innerHTML = "";
                 } else if (insertElement.children.length >= boxLimit) {
@@ -1528,10 +1581,10 @@ function navigate(elem, opts = null, query = "", classname = "") {
                         insertElement.firstChild.remove();
                     }
                 }
-                
+
                 var newContent = document.createElement('div');
                 modala(allText, newContent);
-                
+
                 if (elem.classList.contains("modala-multi-first")) {
                     insertElement.insertBefore(newContent, insertElement.firstChild);
                 } else {
@@ -1540,7 +1593,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
         }
     }
-    
+
     else if (!elem.classList.contains("json") && !elem.hasAttribute("callback")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
@@ -1556,4 +1609,5 @@ function navigate(elem, opts = null, query = "", classname = "") {
         // console.log(e);
     }
     domContentLoad();
+    flashClickListener(elem);
 }
