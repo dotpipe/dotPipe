@@ -1517,6 +1517,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                         document.getElementById(elem.getAttribute("insert")).innerHTML = (rawFile.responseText);
                     }
                     domContentLoad();
+                    flashClickListener(elem);
                     return allText;
                 }
                 catch (e) {
@@ -1536,6 +1537,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                         document.getElementById(elem.getAttribute("insert")).textContent = (rawFile.responseText);
                     }
                     domContentLoad();
+                    flashClickListener(elem);
                     return allText;
                 }
                 catch (e) {
@@ -1557,6 +1559,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     // editNode.innerHTML = allText;
                     renderTree(allText, editNode);
                     domContentLoad();
+                    flashClickListener(elem);
                     return;
                 }
                 catch (e) {
