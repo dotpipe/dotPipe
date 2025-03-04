@@ -1066,6 +1066,24 @@ function hasPipeListener(elem) {
     return elem && typeof elem.onclick === 'function';
 }
 
+function test(param1, param2) {
+    console.log(param1, param2);
+}
+
+function sortNodesByName(selector) {
+    const nodes = document.querySelectorAll(selector);
+    const nodesArray = Array.from(nodes);
+  
+    nodesArray.sort((a, b) => {
+      const nameA = a.getAttribute('name') || '';
+      const nameB = b.getAttribute('name') || '';
+      return nameA.localeCompare(nameB);
+    });
+
+    return nodesArray;
+  }
+
+
 function pipes(elem, stop = false) {
 
     var query = "";
@@ -1076,16 +1094,13 @@ function pipes(elem, stop = false) {
         return;
 
     if (elem.hasAttribute("callback") && typeof window[elem.getAttribute("callback")] === "function") {
-        var params = "";
-        const calls = document.getElementsByClassName(elem.getAttribute("callback-class"));
-        console.log(calls);
-        const sorted = calls.sort((a, b) => {
-            return parseInt(a.getAttribute("name")) - parseInt(b.getAttribute("name"));
+        var params = [];
+        const calls = sortNodesByName("." + elem.getAttribute("callback-class"));
+        Object.keys(calls).forEach((key, n) => {
+            params.push(calls[key].getAttribute("value"));
         });
-        Array.from(sorted).forEach((e) => {
-            params = params + ", " + e.getAttribute("value");
-        });
-        params = params.substring(2);
+        console.log(params);
+        params = params.join(", ");
         window[elem.getAttribute("callback")](params);
     }
     if (elem.classList.contains("redirect"))
