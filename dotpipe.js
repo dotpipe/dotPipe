@@ -9,6 +9,8 @@
   *  insert............= [Attr] return ajax call to this id
   *  ajax..............= [Attr] * calls and returns the value file's output ex: <pipe id="id1" ajax="foo.bar:insert1:countByEvent" query="key0:value0;" insert="someID">
   *  query.............= [Attr] default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
+  *  callback..........= [Attr] callback function ex: <pipe id="id1" callback="foo" class="class1 class2" value="submit" callback-class="class1 class2" ajax="page.foo;insert-id1">
+  *  callback-class....= [Attr] class to be used in the callback function ex: <pipe id="id1" callback="foo" class="class1 class2" value="submit" callback-class="class1 class2" ajax="page.foo;insert-id1">
   *  modal.............= [Modala Key] * Inserts JSON files in the insert targets for template ease of use. "modal": "json1.json:insert1.insert2.insert3;continued"
   *  download..........= [Class] for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
   *  file..............= [Attr] filename to download
@@ -208,6 +210,9 @@ function generateNonce() {
     crypto.getRandomValues(randomBytes);
     return sha256(randomBytes.join('')).then(hash => hash.slice(0, 16));
 }
+
+
+
 
 function copyContentById(id) {
     // Get the element with the specified ID
@@ -1070,6 +1075,16 @@ function pipes(elem, stop = false) {
     if (elem.id === null)
         return;
 
+    if (elem.hasAttribute("callback") && typeof window[elem.getAttribute("callback")] === "function") {
+        var params = "";
+        const calls = document.getElementsByClassName(elem.getAttribute("callback-class"));
+        console.log(calls);
+        Array.from(calls).forEach((e) => {
+            params = params + ", " + e.getAttribute("value");
+        });
+        params = params.substring(2);
+        window[elem.getAttribute("callback")](params);
+    }
     if (elem.classList.contains("redirect"))
         window.location.href = elem.getAttribute("ajax");
     if (elem.classList.contains("disabled"))
