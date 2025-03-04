@@ -1079,7 +1079,10 @@ function pipes(elem, stop = false) {
         var params = "";
         const calls = document.getElementsByClassName(elem.getAttribute("callback-class"));
         console.log(calls);
-        Array.from(calls).forEach((e) => {
+        const sorted = calls.sort((a, b) => {
+            return parseInt(a.getAttribute("name")) - parseInt(b.getAttribute("name"));
+        });
+        Array.from(sorted).forEach((e) => {
             params = params + ", " + e.getAttribute("value");
         });
         params = params.substring(2);
