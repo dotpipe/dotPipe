@@ -33,6 +33,7 @@
   *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
   *  modala............= [Specifically a] Modala key/value pair. Allows access to Modala files in scope of top nest.
   *  tree-view.........= [Specifically a] Modala key/value pair or class. Allows access to Tree files in scope of top nest.
+  *  strict-json.......= [Class] returns only JSON to full page as response. Error on non-parse
   *  <lnk>.............= [Tag] tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
   *  <pipe>............= [Tag] (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  <dyn>.............= [Tag] Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
@@ -1478,6 +1479,23 @@ function navigate(elem, opts = null, query = "", classname = "") {
         }
         catch (e) {
             console.error(e);
+        }
+    }
+    else if (elem.classList.contains("strict-json")) {
+        rawFile.onreadystatechange = function () {
+            if (rawFile.readyState === 4) {
+                var allText = "";// JSON.parse(rawFile.responseText);
+                try {
+                    console.log(rawFile.responseText);
+                    JSON.parse(rawFile.responseText);
+                }
+                catch (e) {
+                    console.log("Error: ", e, rawFile.responseText);
+                    return;
+                }
+                var json = document.createTextNode(rawFile.responseText);
+                document.appendChild(json);
+            }
         }
     }
     else if (elem.classList.contains("json")) {

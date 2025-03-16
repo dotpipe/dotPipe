@@ -33,6 +33,7 @@
   *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
   *  modala............= [Specifically a] Modala key/value pair. Allows access to Modala files in scope of top nest.
   *  tree-view.........= [Specifically a] Modala key/value pair or class. Allows access to Tree files in scope of top nest.
+  *  strict-json.......= [Class] returns only JSON to full page as response. Error on non-parse
   *  <lnk>.............= [Tag] tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
   *  <pipe>............= [Tag] (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  <dyn>.............= [Tag] Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
@@ -1377,107 +1378,20 @@ function navigate(elem, opts = null, query = "", classname = "") {
     rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + elem_qstring, true);
     console.log(elem);
 
-    if (elem.classList.contains("x-value-set")) {
-        try {
-            var str = "";
-            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
-            if (rems.length > 1) {
-                Array.from(rems).forEach(function (e) {
-                    try {
-                        var v = e.split(":")[1].split("&");
-                        var s = elem.getAttribute("insert");
-                        v.forEach(function (f) {
-                            if (s.indexOf(f) == -1) {
-                                str += f + "&";
-                            }
-                            else {
-                                var emplace = f.split("=")[1];
-                                str += f.split("=")[0] + "=" + emplace + "&";
-                            }
-                        });
-                        document.getElementById(e.split(":")[0]).value = str;
-                    }
-                    catch (e) {
-                        console.error(e);
-                    }
-                });
+    if (elem.classList.contains("strict-json")) {
+        rawFile.onreadystatechange = function () {
+            if (rawFile.readyState === 4) {
+                var allText = "";// JSON.parse(rawFile.responseText);
+                try {
+                    console.log(rawFile.responseText);
+                    JSON.parse(rawFile.responseText);
+                }
+                catch (e) {
+                    console.log("Error: ", e, rawFile.responseText);
+                    return;
+                }
+                document.body.innerHTML = rawFile.responseText;
             }
-            else {
-                document.getElementById(rems).value = elem.value;
-            }
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-    if (elem.classList.contains("x-value-get")) {
-        try {
-            var str = "";
-            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
-            if (rems.length > 1) {
-                Array.from(rems).forEach(function (e) {
-                    try {
-                        var v = e.split(":")[1].split("&");
-                        var s = elem.getAttribute("insert");
-                        v.forEach(function (f) {
-                            if (s.indexOf(f) == 0) {
-                                var emplace = f.split("=")[1];
-                                str += f.split("=")[0] + "=" + emplace + "&";
-                            }
-                        });
-                        document.getElementById(e.split(":")[0]).value = str;
-                    }
-                    catch (e) {
-                        console.error(e);
-                    }
-                });
-            }
-            else {
-                document.getElementById(rems).value = elem.value;
-            }
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-    if (elem.classList.contains("x-value-rem")) {
-        try {
-            var str = "";
-            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
-            if (rems.length > 1) {
-                Array.from(rems).forEach(function (e) {
-                    var v = e.split(":")[1].split(".");
-                    var s = elem.value;
-                    v.forEach(function (f) {
-                        if (s.indexOf(f) > -1) { }
-                        else
-                            str += f.split("=")[0] + "=" + f.split("=")[1] + "&";
-                    });
-                    document.getElementById(e.split(":")[0]).value = str;
-                });
-            }
-            else if (document.getElementById(rems.split()).value != "") {
-                document.getElementById(rems).value = "";
-            }
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-    if (elem.classList.contains("x-value-clear")) {
-        try {
-            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
-            if (rems.length > 1) {
-                Array.from(rems).forEach(function (f) {
-                    document.getElementById(f).value = "";
-                });
-            }
-            else
-                document.getElementById(rems).value = "";
-            domContentLoad();
-        }
-        catch (e) {
-            console.error(e);
         }
     }
     else if (elem.classList.contains("json")) {
