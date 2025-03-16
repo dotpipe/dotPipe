@@ -160,6 +160,7 @@ let domContentLoad = (again = false) => {
     });
 
     let elements_mouse = document.querySelectorAll(".mouse");
+    console.log(elements_mouse.length);
     Array.from(elements_mouse).forEach(function (elem) {
         console.log(elem);
         if (elem.hasAttribute("tool-tip")) {
@@ -167,7 +168,7 @@ let domContentLoad = (again = false) => {
             elem.addEventListener('mouseover', function () {
                 const x = elem.offsetLeft + window.scrollX;
                 const y = elem.offsetTop + window.scrollY;
-                textCard(elem.getAttribute("tool-tip"), '', '', x + 15, y + 15, 1500, 100);
+                textCard(elem.getAttribute("tool-tip"), elem.getAttribute("id"), '', x + 15, y + 15, 1500, 100);
             });
         }
         if (elem.hasAttribute("modal-tip")) {
@@ -179,6 +180,12 @@ let domContentLoad = (again = false) => {
             });
         }
         var ev = elem.getAttribute("event");
+        if (!ev) {
+            elem.addEventListener("click", function () {
+                (pipes(elem, auto));
+            });
+            return;
+        }
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
             elem.addEventListener(v, function () {
@@ -258,7 +265,7 @@ function modalCard(filename, x_center = false, y_center = false, duration = -1, 
     copied.id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     copied.style.padding = "10px";
     copied.style.textAlign = "center";
-    copied.style.backgroundColor = "lightgreen";
+    copied.style.backgroundColor = "white";
     copied.style.position = "absolute";
     var x_pos = 0;
     if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
@@ -288,7 +295,7 @@ function textCard(text, id = "", classes = "", x_center = false, y_center = fals
         copied.classList.add(classes);
     copied.style.padding = "10px";
     copied.style.textAlign = "center";
-    copied.style.backgroundColor = "lightgreen";
+    copied.style.backgroundColor = "white";
     copied.style.position = "absolute";
     var x_pos = 0;
     if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
@@ -1033,6 +1040,7 @@ function flashClickListener(elem) {
             console.log(elem.id);
         });
     }
+    domContentLoad(true);
 }
 
 function attachEventListeners(elem) {
@@ -1378,110 +1386,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
     rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + elem_qstring, true);
     console.log(elem);
 
-    if (elem.classList.contains("x-value-set")) {
-        try {
-            var str = "";
-            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
-            if (rems.length > 1) {
-                Array.from(rems).forEach(function (e) {
-                    try {
-                        var v = e.split(":")[1].split("&");
-                        var s = elem.getAttribute("insert");
-                        v.forEach(function (f) {
-                            if (s.indexOf(f) == -1) {
-                                str += f + "&";
-                            }
-                            else {
-                                var emplace = f.split("=")[1];
-                                str += f.split("=")[0] + "=" + emplace + "&";
-                            }
-                        });
-                        document.getElementById(e.split(":")[0]).value = str;
-                    }
-                    catch (e) {
-                        console.error(e);
-                    }
-                });
-            }
-            else {
-                document.getElementById(rems).value = elem.value;
-            }
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-    if (elem.classList.contains("x-value-get")) {
-        try {
-            var str = "";
-            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
-            if (rems.length > 1) {
-                Array.from(rems).forEach(function (e) {
-                    try {
-                        var v = e.split(":")[1].split("&");
-                        var s = elem.getAttribute("insert");
-                        v.forEach(function (f) {
-                            if (s.indexOf(f) == 0) {
-                                var emplace = f.split("=")[1];
-                                str += f.split("=")[0] + "=" + emplace + "&";
-                            }
-                        });
-                        document.getElementById(e.split(":")[0]).value = str;
-                    }
-                    catch (e) {
-                        console.error(e);
-                    }
-                });
-            }
-            else {
-                document.getElementById(rems).value = elem.value;
-            }
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-    if (elem.classList.contains("x-value-rem")) {
-        try {
-            var str = "";
-            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
-            if (rems.length > 1) {
-                Array.from(rems).forEach(function (e) {
-                    var v = e.split(":")[1].split(".");
-                    var s = elem.value;
-                    v.forEach(function (f) {
-                        if (s.indexOf(f) > -1) { }
-                        else
-                            str += f.split("=")[0] + "=" + f.split("=")[1] + "&";
-                    });
-                    document.getElementById(e.split(":")[0]).value = str;
-                });
-            }
-            else if (document.getElementById(rems.split()).value != "") {
-                document.getElementById(rems).value = "";
-            }
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-    if (elem.classList.contains("x-value-clear")) {
-        try {
-            var rems = document.getElementById(elem.getAttribute("insert")).split(";");
-            if (rems.length > 1) {
-                Array.from(rems).forEach(function (f) {
-                    document.getElementById(f).value = "";
-                });
-            }
-            else
-                document.getElementById(rems).value = "";
-            domContentLoad();
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-    else if (elem.classList.contains("strict-json")) {
+    if (elem.classList.contains("strict-json")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
                 var allText = "";// JSON.parse(rawFile.responseText);
@@ -1493,8 +1398,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     console.log("Error: ", e, rawFile.responseText);
                     return;
                 }
-                var json = document.createTextNode(rawFile.responseText);
-                document.appendChild(json);
+                document.body.innerHTML = rawFile.responseText;
             }
         }
     }
@@ -1602,10 +1506,10 @@ function navigate(elem, opts = null, query = "", classname = "") {
                         insertElement.firstChild.remove();
                     }
                 }
-
                 var newContent = document.createElement('div');
                 modala(allText, newContent);
-
+                domContentLoad()
+                flashClickListener(elem);
                 if (elem.classList.contains("modala-multi-first")) {
                     insertElement.insertBefore(newContent, insertElement.firstChild);
                 } else {
@@ -1629,6 +1533,4 @@ function navigate(elem, opts = null, query = "", classname = "") {
     } catch (e) {
         // console.log(e);
     }
-    domContentLoad();
-    flashClickListener(elem);
 }
