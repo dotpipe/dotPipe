@@ -106,6 +106,7 @@
     });
 });
 
+
 let domContentLoad = (again = false) => {
     doc_set = document.getElementsByTagName("pipe");
     if (again == false) {
@@ -161,6 +162,7 @@ let domContentLoad = (again = false) => {
 
     let elements_mouse = document.querySelectorAll(".mouse");
     console.log(elements_mouse.length);
+    
     Array.from(elements_mouse).forEach(function (elem) {
         console.log(elem);
         if (elem.hasAttribute("tool-tip")) {
@@ -169,7 +171,7 @@ let domContentLoad = (again = false) => {
                 const rect = el.target.getBoundingClientRect();
                 const x = rect.left;
                 const y = rect.top;
-                textCard(elem.getAttribute("tool-tip"), elem.getAttribute("id"), '', x + 15, y + 15, 1500, 100);
+                textCard(elem.getAttribute("tool-tip"), elem.getAttribute("id"), '', x + 15, y + 15, 750, 100);
             });
         }
         if (elem.hasAttribute("modal-tip")) {
@@ -178,7 +180,7 @@ let domContentLoad = (again = false) => {
                 const rect = el.target.getBoundingClientRect();
                 const x = rect.left;
                 const y = rect.top;
-                modalCard(elem.getAttribute("modal-tip"), x + 15, y + 15, 1500, 100);
+                modalCard(elem.getAttribute("modal-tip"), x + 15, y + 15, 750, 100);
             });
         }
         var ev = elem.getAttribute("event");
@@ -193,21 +195,6 @@ let domContentLoad = (again = false) => {
             elem.addEventListener(v, function () {
                 (pipes(elem, auto));
             });
-        });
-    });
-
-    let elements_pipe = document.querySelectorAll(".pipe");
-    Array.from(elements_pipe).forEach(function (elem) {
-        var ev = elem.getAttribute("event");
-        elem.addEventListener(ev, function () {
-            if (elem.classList.contains("dyn-one") && !elem.classList.contains("dyn-done")) {
-                elem.classList.toggle("dyn-done");
-                pipes(elem);
-                return;
-            }
-            else if (elem.classList.contains("dyn-one") && elem.classList.contains("dyn-done")) { }
-            else
-                pipes(elem);
         });
     });
 }
@@ -1341,6 +1328,7 @@ function prettifyJsonWithColors(jsonObj) {
     if (pretty == 0) {
         // Add CSS to pipes.js or index.html
         const style = document.createElement('style');
+        style.nonce = PAGE_NONCE;
         style.textContent = `
         .key { color: purple; }
         .string { color: green; }

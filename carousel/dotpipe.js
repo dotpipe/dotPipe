@@ -169,7 +169,7 @@ let domContentLoad = (again = false) => {
                 const rect = el.target.getBoundingClientRect();
                 const x = rect.left;
                 const y = rect.top;
-                textCard(elem.getAttribute("tool-tip"), elem.getAttribute("id"), '', x + 15, y + 15, 1500, 100);
+                textCard(elem.getAttribute("tool-tip"), elem.getAttribute("id"), '', x + 15, y + 15, 750, 100);
             });
         }
         if (elem.hasAttribute("modal-tip")) {
@@ -178,7 +178,7 @@ let domContentLoad = (again = false) => {
                 const rect = el.target.getBoundingClientRect();
                 const x = rect.left;
                 const y = rect.top;
-                modalCard(elem.getAttribute("modal-tip"), x + 15, y + 15, 1500, 100);
+                modalCard(elem.getAttribute("modal-tip"), x + 15, y + 15, 750, 100);
             });
         }
         var ev = elem.getAttribute("event");
@@ -193,21 +193,6 @@ let domContentLoad = (again = false) => {
             elem.addEventListener(v, function () {
                 (pipes(elem, auto));
             });
-        });
-    });
-
-    let elements_pipe = document.querySelectorAll(".pipe");
-    Array.from(elements_pipe).forEach(function (elem) {
-        var ev = elem.getAttribute("event");
-        elem.addEventListener(ev, function () {
-            if (elem.classList.contains("dyn-one") && !elem.classList.contains("dyn-done")) {
-                elem.classList.toggle("dyn-done");
-                pipes(elem);
-                return;
-            }
-            else if (elem.classList.contains("dyn-one") && elem.classList.contains("dyn-done")) { }
-            else
-                pipes(elem);
         });
     });
 }
