@@ -1233,6 +1233,17 @@ function pipes(elem, stop = false) {
     if (elem.tagName != "carousel" && elem.hasAttribute("file-order")) {
         fileOrder(elem);
     }
+    if (elem.classList.contains("carousel")) {
+        var auto = true;
+        if (elem.classList.contains("time-active")) {
+            auto = true;
+        }
+        else if (elem.classList.contains("time-inactive")) {
+            auto = false;
+        }
+        carousel(elem, auto);
+        return;
+    }
     if (elem.classList.contains("ajax-limit")) {
         var parts = elem.getAttribute("ajax").split(";");
         parts.forEach((part) => {
@@ -1245,16 +1256,6 @@ function pipes(elem, stop = false) {
             }
             navigate(clone, headers, query, formclass);
         });
-    }
-    if (elem.classList.contains("carousel")) {
-        var auto = true;
-        if (elem.classList.contains("time-active")) {
-            auto = true;
-        }
-        else if (elem.classList.contains("time-inactive")) {
-            auto = false;
-        }
-        carousel(elem, auto);
         return;
     }
     // This is a quick way to make a downloadable link in an href
