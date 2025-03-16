@@ -1,9 +1,6 @@
 /**
-  *  only usage: onclick="pipes(this)"
-  *  to begin using the PipesJS code in other ways than <dyn> <pipe> and <timed>.
-  *  Usable DOM Attributes (almost all are optional
-  *  upto x > 134,217,000 different configurations 
-  *  with unlimited inputs/outputs):
+  *  All tags being used must have an id attribute
+  *  Usable DOM Attributes (almost all are enabled for a combinations)
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
   *  insert............= [Attr] return ajax call to this id
@@ -11,6 +8,7 @@
   *  query.............= [Attr] default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
   *  callback..........= [Attr] callback function ex: <pipe id="id1" callback="foo" class="class1 class2" value="submit" callback-class="class1 class2" ajax="page.foo;insert-id1">
   *  callback-class....= [Attr] class to be used in the callback function ex: <pipe id="id1" callback="foo" class="class1 class2" value="submit" callback-class="class1 class2" ajax="page.foo;insert-id1">
+  *     - note: names will be sorted alphabetically in the param list. Params can be infinite. just ready your function for that consolidatoin of params.
   *  modal.............= [Modala Key] * Inserts JSON files in the insert targets for template ease of use. "modal": "json1.json:insert1.insert2.insert3;continued"
   *  download..........= [Class] for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
   *  file..............= [Attr] filename to download

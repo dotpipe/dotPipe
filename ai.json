@@ -254,12 +254,10 @@
       "input": {
         "tagname": "ul",
         "tree-view": "true",
-        "children": [
-          {
-            "tagname": "li",
-            "textContent": "Item 1"
-          }
-        ]
+        "render": {
+          "tagname": "li",
+          "textContent": "Item 1"
+        }
       },
       "expected_output": "Valid tree-view structure."
     },
@@ -462,12 +460,10 @@
       "input": {
         "tagname": "ul",
         "tree-view": "true",
-        "children": [
-          {
-            "tagname": "li",
-            "textContent": "Item 1"
-          }
-        ]
+        "render": {
+          "tagname": "li",
+          "textContent": "Item 1"
+        }
       },
       "expected_output": "Valid tree-view structure."
     },
@@ -504,18 +500,16 @@
         },
         "body": {
           "tagname": "div",
-          "children": [
-            {
-              "tagname": "h1",
-              "textContent": "Welcome"
-            },
-            {
-              "tagname": "a",
-              "class": "modala",
-              "ajax": "info.json:content",
-              "textContent": "More Info"
-            }
-          ]
+          "children": {
+            "tagname": "h1",
+            "textContent": "Welcome"
+          },
+          "child": {
+            "tagname": "a",
+            "class": "modala",
+            "ajax": "info.json:content",
+            "textContent": "More Info"
+          }
         }
       },
       "expected_output": "Valid dotpipe structure with header and body."
@@ -745,12 +739,10 @@
       "input": {
         "tagname": "ul",
         "tree-view": "true",
-        "children": [
-          {
-            "tagname": "li",
-            "textContent": "Item 1"
-          }
-        ]
+        "child": {
+          "tagname": "li",
+          "textContent": "Item 1"
+        }
       },
       "expected_output": "Valid tree-view structure."
     },
@@ -787,18 +779,16 @@
         },
         "body": {
           "tagname": "div",
-          "children": [
-            {
-              "tagname": "h1",
-              "textContent": "Welcome"
-            },
-            {
-              "tagname": "a",
-              "class": "modala",
-              "ajax": "info.json:content",
-              "textContent": "More Info"
-            }
-          ]
+          "child": {
+            "tagname": "h1",
+            "textContent": "Welcome"
+          },
+          "child2": {
+            "tagname": "a",
+            "class": "modala",
+            "ajax": "info.json:content",
+            "textContent": "More Info"
+          }
         }
       },
       "expected_output": "Valid dotpipe structure with header and body."
@@ -911,13 +901,11 @@
       "input": {
         "tagname": "div",
         "id": "dup",
-        "children": [
-          {
-            "tagname": "p",
-            "id": "dup",
-            "textContent": "Test"
-          }
-        ]
+        "child": {
+          "tagname": "p",
+          "id": "dup",
+          "textContent": "Test"
+        }
       },
       "expected_output": "Warning: Duplicate id 'dup' detected."
     },
@@ -963,4 +951,3 @@
     }
   ]
 }
-  
