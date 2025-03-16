@@ -14,7 +14,9 @@
   *  modal.............= [Modala Key] * Inserts JSON files in the insert targets for template ease of use. "modal": "json1.json:insert1.insert2.insert3;continued"
   *  download..........= [Class] for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
   *  file..............= [Attr] filename to download
-  *  set...............= [Attr] set the value of the element ex: <tagName set="set-this-id:attribute-name:value">
+  *  set...............= [Attr] set the value of the element attribute ex: <tagName set="set-this-id:attribute-name:value">
+  *  get...............= [Attr] get the value of the element attribute ex: <tagName get="get-this-id:attribute-name">
+  *  delete............= [Attr] delete the value of the element attribute ex: <tagName delete="delete-this-id:attribute-name">
   *  x-toggle..........= [Attr] toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
   *  directory.........= [Attr] relative or full path of 'file'
   *  tool-tip..........= [Attr] tooltip for the element ex: <tagName tool-tip="this is a tooltip">
@@ -1149,9 +1151,28 @@ function pipes(elem, stop = false) {
     if (elem.hasAttribute("set") && elem.getAttribute("set")) {
         js = elem.getAttribute("set");
         js.split(";").forEach((e, f) => {
-            var g = e.split(":");
-            if (g[0] != '' && g[0] != undefined)
-                document.getElementById(g[0]).setAttribute(g[1], g[2]);
+            var [ id, name, value ] = e.split(":");
+            if (id != '' && id != undefined)
+                document.getElementById(id).setAttribute(name, value);
+        });
+    }
+    if (elem.hasAttribute("get") && elem.getAttribute("get")) {
+        js = elem.getAttribute("get");
+        js.split(";").forEach((e, f) => {
+            var [ id, name ] = e.split(":");
+            if (g[0] != '' && g[0] != undefined && g[1] != undefined) {
+                var n = document.getElementById(id).getAttribute(name);
+                elem.setAttribute(name, n);
+            }
+        });
+    }
+    if (elem.hasAttribute("delete") && elem.getAttribute("delete")) {
+        js = elem.getAttribute("delete");
+        js.split(";").forEach((e, f) => {
+            var [ id, name ] = e.split(":");
+            if (g[0] != '' && g[0] != undefined && g[1] != undefined) {
+                document.getElementById(id).removeAttribute(name);
+            }
         });
     }
     if (elem.hasAttribute("remove") && elem.getAttribute("remove")) {
