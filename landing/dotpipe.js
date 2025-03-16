@@ -165,17 +165,19 @@ let domContentLoad = (again = false) => {
         console.log(elem);
         if (elem.hasAttribute("tool-tip")) {
             console.log(elem.getAttribute("tool-tip") + "...");
-            elem.addEventListener('mouseover', function () {
-                const x = elem.offsetLeft + window.scrollX;
-                const y = elem.offsetTop + window.scrollY;
+            elem.addEventListener('mouseover', function (el) {
+                const rect = el.target.getBoundingClientRect();
+                const x = rect.left;
+                const y = rect.top;
                 textCard(elem.getAttribute("tool-tip"), elem.getAttribute("id"), '', x + 15, y + 15, 1500, 100);
             });
         }
         if (elem.hasAttribute("modal-tip")) {
             console.log(elem.getAttribute("modal-tip") + "...");
-            elem.addEventListener('mouseover', function () {
-                const x = elem.offsetLeft + window.scrollX;
-                const y = elem.offsetTop + window.scrollY;
+            elem.addEventListener('mouseover', function (el) {
+                const rect = el.target.getBoundingClientRect();
+                const x = rect.left;
+                const y = rect.top;
                 modalCard(elem.getAttribute("modal-tip"), x + 15, y + 15, 1500, 100);
             });
         }
