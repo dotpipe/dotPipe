@@ -5,13 +5,16 @@
   *  -------------------------------------------------------------
   *  insert............= [Attr] return ajax call to this id
   *  ajax..............= [Attr] * calls and returns the value file's output ex: <pipe id="id1" ajax="foo.bar:insert1:countByEvent" query="key0:value0;" insert="someID">
+  *  ajax-limit........= [Attr] * limit the insertions to a element ex: <pipe id="id1" class="ajax-limit" ajax="foo.bar:insert1" boxes="countByEvent" query="key0:value0;">
   *  query.............= [Attr] default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
+  *  turn..............= [Attr] * turns based element routine element ex: <anyTag turn="firstelem;secondelem;" class="decrIndex" index="1"> 
   *  callback..........= [Attr] callback function ex: <pipe id="id1" callback="foo" class="class1 class2" value="submit" callback-class="class1 class2" ajax="page.foo;insert-id1">
   *  callback-class....= [Attr] class to be used in the callback function ex: <pipe id="id1" callback="foo" class="class1 class2" value="submit" callback-class="class1 class2" ajax="page.foo;insert-id1">
   *     - note: names will be sorted alphabetically in the param list. Params can be infinite. just ready your function for that consolidatoin of params.
   *  modal.............= [Modala Key] * Inserts JSON files in the insert targets for template ease of use. "modal": "json1.json:insert1.insert2.insert3;continued"
   *  download..........= [Class] for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
   *  file..............= [Attr] filename to download
+  *  set...............= [Attr] set the value of the element ex: <tagName set="set-this-id:attribute-name:value">
   *  x-toggle..........= [Attr] toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
   *  directory.........= [Attr] relative or full path of 'file'
   *  tool-tip..........= [Attr] tooltip for the element ex: <tagName tool-tip="this is a tooltip">
@@ -34,9 +37,14 @@
   *  \n................= [-] RegEx emplacement to insert <br /> in Modala contents for innerHTML
   *  plain-text........= [Class] plain text returned to the insertion point
   *  plain-html........= [Class] returns as true HTML
+  *  redirect..........= [Class] redirects to the ajax call in POST or GET mode ex: <tag id="someref" ajax="foo.bar" class="redirect" query="key0:value0;">
   *  <timed>...........= [Tag] Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
   *  delay.............= [Attr] delay between <timed> tag refreshes (required for <timed> tag) ex: see <timed>
   *  <carousel>........= [Tag] to create a carousel that moves every a timeOut() delay="x" occurs ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
+  *  carousel-step-right.= [Class] to move the carousel to the right
+  *  carousel-step-left.= [Class] to move the carousel to the left
+  *  carousel-slide-right.= [Class] to iterate the carousel to the right
+  *  carousel-slide-left.= [Class] to iterate the carousel to the left
   *  boxes.............= [Attr] attribute to request for x boxes for carousel elementss ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
   *  file-order........= [Attr] ajax to these files, iterating [0,1,2,3]%array.length per call (delimited by ';') ex: <pipe query="key0:value0;" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  file-index........= [Attr] counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
@@ -208,9 +216,6 @@ function generateNonce() {
     crypto.getRandomValues(randomBytes);
     return sha256(randomBytes.join('')).then(hash => hash.slice(0, 16));
 }
-
-
-
 
 function copyContentById(id) {
     // Get the element with the specified ID
@@ -998,23 +1003,6 @@ function htmlToJson(htmlString) {
     return elementToJson(doc.body.firstChild);
 }
 
-function classOrder(elem) {
-    arr = elem.getAttribute("class-switch").split(";");
-    if (!elem.hasAttribute("class-index"))
-        elem.setAttribute("class-index", "0");
-    index = parseInt(elem.getAttribute("class-index").toString());
-    var interv = elem.getAttribute("interval");
-    if (elem.classList.contains("decrIndex"))
-        index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) - interv;
-    else
-        index = Math.abs(parseInt(ppfc.getAttribute("file-index").toString())) + interv;
-    if (index < 0)
-        index = arr.length - 1;
-    index = index % arr.length;
-    elem.setAttribute("class-index", index.toString());
-    elem.classList = arr[index];
-}
-
 const processedElements = new WeakSet();
 
 function addPipe(elem = document) {
@@ -1128,8 +1116,9 @@ function pipes(elem, stop = false) {
     }
     if (elem.hasAttribute("turn")) {
         var optsArray = elem.getAttribute("turn").split(";");
+        var index = 0;
         if (elem.hasAttribute("turn-index")) {
-            var index = parseInt(elem.getAttribute("turn-index"));
+            index = parseInt(elem.getAttribute("turn-index"));
             var interv = elem.getAttribute("interval");
             if (elem.classList.contains("decrIndex"))
                 index = Math.abs(parseInt(elem.getAttribute("turn-index").toString())) - interv;
@@ -1143,7 +1132,10 @@ function pipes(elem, stop = false) {
         else
             elem.setAttribute("turn-index", "0");
         optsArray.forEach((e, f) => {
-            this.pipes(e.target);
+            if (f == index) {
+                var x = document.getElementById(e);
+                this.pipes(e.target);
+            }
         });
     }
     if (elem.hasAttribute("x-toggle")) {
@@ -1154,30 +1146,13 @@ function pipes(elem, stop = false) {
                 document.getElementById(g[0]).classList.toggle(g[1]);
         });
     }
-    if (elem.hasAttribute("get-var") && elem.getAttribute("get-var")) {
-        query = document.getElementById(elem.getAttribute("insert")).getAttribute("query");
-        js = query.split(";");
-        var str = "";
-        var vars = elem.getAttribute("get-var").split('&')
-        js.forEach((i, f) => {
-            var g = i.split(":");
-            if (vars.contains(g[0]))
-                str += `${g[0]}:${window[g[0]]}&`;
+    if (elem.hasAttribute("set") && elem.getAttribute("set")) {
+        js = elem.getAttribute("set");
+        js.split(";").forEach((e, f) => {
+            var g = e.split(":");
+            if (g[0] != '' && g[0] != undefined)
+                document.getElementById(g[0]).setAttribute(g[1], g[2]);
         });
-        document.getElementById(elem.id).setAttribute("query", str.toString())
-    }
-    if (elem.hasAttribute("set-var") && elem.getAttribute("set-var")) {
-        js = elem.getAttribute("set-var").split("&");
-        js.forEach((e, f) => {
-            var i = e.split(":");
-            window[i[0]] = i[1];
-            json.set(i[0], window[i[0]]);
-        });
-        let str = "";
-        json.forEach((i, f) => {
-            str += `${i}:${window[i]}&`;
-        });
-        document.getElementById(elem.getAttribute("insert")).setAttribute("query", str.toString())
     }
     if (elem.hasAttribute("remove") && elem.getAttribute("remove")) {
         var optsArray = elem.getAttribute("remove").split(";");
@@ -1189,52 +1164,28 @@ function pipes(elem, stop = false) {
     if (elem.classList.contains("carousel-step-right")) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
-
-            if (elem.classList.contains("time-active")) {
-                auto = true;
-            }
-            else if (elem.classList.contains("time-inactive")) {
-                auto = false;
-            }
+            auto = false;
             shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-step-left")) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
-
-            if (elem.classList.contains("time-active")) {
-                auto = true;
-            }
-            else if (elem.classList.contains("time-inactive")) {
-                auto = false;
-            }
+            auto = false;
             shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-left")) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
-
-            if (elem.classList.contains("time-active")) {
-                auto = true;
-            }
-            else if (elem.classList.contains("time-inactive")) {
-                auto = false;
-            }
+            auto = true;
             shiftFilesLeft(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
     if (elem.classList.contains("carousel-slide-right")) {
         if (elem.hasAttribute("insert")) {
             var x = document.getElementById(elem.getAttribute("insert"));
-
-            if (elem.classList.contains("time-active")) {
-                auto = true;
-            }
-            else if (elem.classList.contains("time-inactive")) {
-                auto = false;
-            }
+            auto = true;
             shiftFilesRight(x, auto, parseInt(x.getAttribute("delay")));
         }
     }
@@ -1258,18 +1209,14 @@ function pipes(elem, stop = false) {
     if (elem.hasAttribute("form-class")) {
         formclass = elem.getAttribute("form-class");
     }
-    if (elem.hasAttribute("class-switch")) {
-        classOrder(elem);
-    }
     if (elem.tagName != "carousel" && elem.hasAttribute("file-order")) {
         fileOrder(elem);
     }
-    if (elem.classList.contains("multi-part")) {
+    if (elem.classList.contains("ajax-limit")) {
         var parts = elem.getAttribute("ajax").split(";");
         parts.forEach((part) => {
             var [file, target, limit] = part.split(":");
             var clone = elem.cloneNode(true);
-            clone.classList.remove("multi-part");
             clone.setAttribute("ajax", file);
             clone.setAttribute("insert", target);
             if (limit) {
