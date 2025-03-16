@@ -752,6 +752,7 @@ function modala(value, tempTag, root, id) {
         }
     });
     tempTag.appendChild(temp);
+    domContentLoad();
     return tempTag;
 }
 
