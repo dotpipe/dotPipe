@@ -1,6 +1,6 @@
 /**
-  *  All tags being used must have an id attribute
-  *  Usable DOM Attributes (almost all are enabled for a combinations)
+  *  All tags being used must have an 'id' attribute
+  *  Usable DOM Attributes (almost all are enabled for combinations)
   *  Attribute/Tag   |   Use Case
   *  -------------------------------------------------------------
   *  insert............= [Attr] return ajax call to this id
@@ -15,7 +15,7 @@
   *  download..........= [Class] for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
   *  file..............= [Attr] filename to download
   *  set...............= [Attr] set the value of the element attribute ex: <tagName set="set-this-id:attribute-name:value">
-  *  get...............= [Attr] get the value of the element attribute ex: <tagName get="get-this-id:attribute-name">
+  *  get...............= [Attr] get the value of the element attribute and return to this element ex: <tagName get="get-this-id:attribute-name">
   *  delete............= [Attr] delete the value of the element attribute ex: <tagName delete="delete-this-id:attribute-name">
   *  x-toggle..........= [Attr] toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
   *  directory.........= [Attr] relative or full path of 'file'
@@ -55,7 +55,6 @@
   *  decrIndex.........= [Class] decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
   *  interval..........= [Attr] Take this many steps when stepping through file-order default = 1
   *  mode..............= [Attr] "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
-  *  pipe..............= [Class] creates a listener on the object. use listen="eventType" to relegate.
   *  multiple..........= [Class] states that this object has two or more key/value pairs use: states this is a multi-select form box
   *  remove............= [Attr] * remove element in tag ex: <anyTag remove="someID;someOtherId;">
   *  display...........= [Attr] toggle visible and invisible of anything in the value ex: <anyTag display="someID;someOtherId;">
@@ -105,7 +104,6 @@
         document.head.appendChild(meta);
     });
 });
-
 
 let domContentLoad = (again = false) => {
     doc_set = document.getElementsByTagName("pipe");
@@ -162,7 +160,6 @@ let domContentLoad = (again = false) => {
 
     let elements_mouse = document.querySelectorAll(".mouse");
     console.log(elements_mouse.length);
-    
     Array.from(elements_mouse).forEach(function (elem) {
         console.log(elem);
         if (elem.hasAttribute("tool-tip")) {
@@ -1158,10 +1155,10 @@ function pipes(elem, stop = false) {
     if (elem.hasAttribute("get") && elem.getAttribute("get")) {
         js = elem.getAttribute("get");
         js.split(";").forEach((e, f) => {
-            var [ id, name ] = e.split(":");
-            if (g[0] != '' && g[0] != undefined && g[1] != undefined) {
+            var [ id, name, target ] = e.split(":");
+            if (id != undefined && name != undefined && target != undefined) {
                 var n = document.getElementById(id).getAttribute(name);
-                elem.setAttribute(name, n);
+                document.getElementById(target).setAttribute(name, n);
             }
         });
     }
@@ -1328,7 +1325,6 @@ function prettifyJsonWithColors(jsonObj) {
     if (pretty == 0) {
         // Add CSS to pipes.js or index.html
         const style = document.createElement('style');
-        style.nonce = PAGE_NONCE;
         style.textContent = `
         .key { color: purple; }
         .string { color: green; }
