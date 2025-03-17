@@ -1113,7 +1113,7 @@ function pipes(elem, stop = false) {
         });
     }
     if (elem.hasAttribute("turn")) {
-        var optsArray = elem.getAttribute("turn").split(";");
+        var optsArray = elem.getAttribute("turn");
         var index = 0;
         if (elem.hasAttribute("turn-index")) {
             index = parseInt(elem.getAttribute("turn-index"));
@@ -1129,10 +1129,11 @@ function pipes(elem, stop = false) {
         }
         else
             elem.setAttribute("turn-index", "0");
-        optsArray.forEach((e, f) => {
+
+        const classLists = document.querySelectorAll("." + elem.getAttribute("turn"));
+        classLists.forEach((e, f) => {
             if (f == index) {
-                var x = document.getElementById(e);
-                this.pipes(e.target);
+                pipes(e);
             }
         });
     }

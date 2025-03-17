@@ -39,7 +39,7 @@ The main function for using Modala is `modala(value, tempTag, root, id)`.
 - `value`: JSON object describing the DOM structure
 - `tempTag`: Target DOM element or its ID
 - `root`: Default container (optional)
-- `id`: Optional ID for the element
+- `id`: Optional ID for the element (optional)
 
 Example:
 
