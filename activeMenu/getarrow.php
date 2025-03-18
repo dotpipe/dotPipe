@@ -34,7 +34,7 @@ $file = '{
         "class": "mouse",
         "textContent":"'.$page.'",
         "display": "main;",
-        "tool-tip": "'.$page.'",
+        "tool-tip": "'.$page.';;;1000;100",
         "footer": {
             "tagname": "div",
             "id": "footer",
