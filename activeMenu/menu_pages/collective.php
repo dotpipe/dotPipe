@@ -31,7 +31,7 @@ for($i = 1 ; $i <= 11 ; $i++) {
             "class": "mouse arrow'.$i.' modala",
             "innerHTML": "➤",
             "method": "GET",
-            "tool-tip": "'. $keys[$i - 1]. '",
+            "tool-tip": "'. $keys[$i - 1]. ';;;1000;100",
             "ajax": "getarrow.php",
             "name": "main",
             "value": "'.$i.'",

@@ -19,7 +19,8 @@
   *  delete............= [Attr] delete the value of the element attribute ex: <tagName delete="delete-this-id:attribute-name">
   *  x-toggle..........= [Attr] toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
   *  directory.........= [Attr] relative or full path of 'file'
-  *  tool-tip..........= [Attr] tooltip for the element ex: <tagName tool-tip="this is a tooltip">
+  *  tool-tip..........= [Attr] tooltip for the element ex: <tagName tool-tip="this is a tooltip;id;class;duration;zIndex">
+  *  modal-tip..........= [Attr] tooltip for the element ex: <tagName tool-tip="filename.json;duration;zIndex">
   *  copy..............= [Attr] copy the value of the element to the clipboard ex: <tagName copy="copy-this-id">
   *  clear-node........= [Class] clear nodes. delimited in insert="first;second;thirdnode" by ';'
   *  redirect..........= [Class] "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
@@ -160,37 +161,54 @@ let domContentLoad = (again = false) => {
 
     let elements_mouse = document.querySelectorAll(".mouse");
     console.log(elements_mouse.length);
-    Array.from(elements_mouse).forEach(function (elem) {
-        console.log(elem);
-        if (elem.hasAttribute("tool-tip")) {
-            console.log(elem.getAttribute("tool-tip") + "...");
-            elem.addEventListener('mouseover', function (el) {
-                const rect = el.target.getBoundingClientRect();
-                const x = rect.left;
-                const y = rect.top;
-                textCard(elem.getAttribute("tool-tip"), elem.getAttribute("id"), '', x + 15, y + 15, 750, 100);
+    Array.from(elements_mouse).forEach(function (elemv) {
+        console.log(elemv);
+        if (elemv.hasAttribute("tool-tip")) {
+            console.log(elemv.getAttribute("modal-tip") + "...");
+            var eve = elemv.getAttribute("event");
+            rv = ['mouseover'];
+            if (eve) {
+                rv = ev.split(";");
+            }
+            Array.from(rv).forEach((ev) => {
+                elemv.addEventListener(ev, function (el) {
+                    const rect = el.target.getBoundingClientRect();
+                    const x = rect.left;
+                    const y = rect.top;
+                    var duration = 750;
+                    var [tip, id, classes, duration, z] = el.target.getAttribute("tool-tip").split(";");
+                    textCard(tip, id, classes, x + 15, y + 15, duration, z);
+                });
             });
         }
-        if (elem.hasAttribute("modal-tip")) {
-            console.log(elem.getAttribute("modal-tip") + "...");
-            elem.addEventListener('mouseover', function (el) {
-                const rect = el.target.getBoundingClientRect();
-                const x = rect.left;
-                const y = rect.top;
-                modalCard(elem.getAttribute("modal-tip"), x + 15, y + 15, 750, 100);
+        if (elemv.hasAttribute("modal-tip")) {
+            console.log(elemv.getAttribute("modal-tip") + "...");
+            var eve = elemv.getAttribute("event");
+            rv = ['mouseover'];
+            if (eve) {
+                rv = ev.split(";");
+            }
+            Array.from(rv).forEach((ev) => {
+                elemv.addEventListener(ev, function (el) {
+                    const rect = el.target.getBoundingClientRect();
+                    const x = rect.left;
+                    const y = rect.top;
+                    var [filename, duration, z] = el.target.getAttribute("modal-tip").split(";");
+                    modalCard(filename, x + 15, y + 15, duration, z);
+                });
             });
         }
-        var ev = elem.getAttribute("event");
+        var ev = elemv.getAttribute("event");
         if (!ev) {
-            elem.addEventListener("click", function () {
-                (pipes(elem, auto));
+            elemv.addEventListener("click", function () {
+                pipes(elemv, auto);
             });
             return;
         }
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
-            elem.addEventListener(v, function () {
-                (pipes(elem, auto));
+            elemv.addEventListener(v, function () {
+                pipes(elemv, auto);
             });
         });
     });
@@ -236,7 +254,8 @@ function copyContentById(id) {
 
         // Remove the textarea from the body
         document.body.removeChild(textarea);
-        textCard("Copied to the clipboard!", "", "", true, 25, 3000, 100);
+        textCard("Copied to the clipboard!", "id-copy", "", true, 25, 3000, 100);
+        domContentLoad();
         return true;
         // Alert the user that the content has been copied
     } else {
@@ -1057,15 +1076,15 @@ function test(param1, param2) {
 function sortNodesByName(selector) {
     const nodes = document.querySelectorAll(selector);
     const nodesArray = Array.from(nodes);
-  
+
     nodesArray.sort((a, b) => {
-      const nameA = a.getAttribute('name') || '';
-      const nameB = b.getAttribute('name') || '';
-      return nameA.localeCompare(nameB);
+        const nameA = a.getAttribute('name') || '';
+        const nameB = b.getAttribute('name') || '';
+        return nameA.localeCompare(nameB);
     });
 
     return nodesArray;
-  }
+}
 
 
 function pipes(elem, stop = false) {
@@ -1148,7 +1167,7 @@ function pipes(elem, stop = false) {
     if (elem.hasAttribute("set") && elem.getAttribute("set")) {
         js = elem.getAttribute("set");
         js.split(";").forEach((e, f) => {
-            var [ id, name, value ] = e.split(":");
+            var [id, name, value] = e.split(":");
             if (id != '' && id != undefined)
                 document.getElementById(id).setAttribute(name, value);
         });
@@ -1156,7 +1175,7 @@ function pipes(elem, stop = false) {
     if (elem.hasAttribute("get") && elem.getAttribute("get")) {
         js = elem.getAttribute("get");
         js.split(";").forEach((e, f) => {
-            var [ id, name, target ] = e.split(":");
+            var [id, name, target] = e.split(":");
             if (id != undefined && name != undefined && target != undefined) {
                 var n = document.getElementById(id).getAttribute(name);
                 document.getElementById(target).setAttribute(name, n);
@@ -1166,7 +1185,7 @@ function pipes(elem, stop = false) {
     if (elem.hasAttribute("delete") && elem.getAttribute("delete")) {
         js = elem.getAttribute("delete");
         js.split(";").forEach((e, f) => {
-            var [ id, name ] = e.split(":");
+            var [id, name] = e.split(":");
             if (g[0] != '' && g[0] != undefined && g[1] != undefined) {
                 document.getElementById(id).removeAttribute(name);
             }
@@ -1402,7 +1421,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     displayColoredJson(elem.getAttribute("insert"), allPretty);
                     if (elem.hasAttribute("insert")) {
                         if (elem.classList.contains("text-html")) {
-                        //    document.getElementById(elem.getAttribute("insert")).innerHTML = (JSON.stringify(allPretty));
+                            //    document.getElementById(elem.getAttribute("insert")).innerHTML = (JSON.stringify(allPretty));
                         } else {
                             document.getElementById(elem.getAttribute("insert")).textContent = (JSON.stringify(allPretty, null, 2));
                         }
