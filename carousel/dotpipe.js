@@ -1123,7 +1123,7 @@ function pipes(elem, stop = false) {
     }
     if (elem.hasAttribute("display") && elem.getAttribute("display")) {
         var optsArray = elem.getAttribute("display").split(";");
-        optsArray.forEach((e, f) => {
+        optsArray.forEach((e) => {
             var x = document.getElementById(e);
             if (x !== null && x.style.display !== "none")
                 x.style.display = "none";
