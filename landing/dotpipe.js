@@ -1260,20 +1260,7 @@ function pipes(elem, stop = false) {
         carousel(elem, auto);
         return;
     }
-    if (elem.classList.contains("ajax-limit")) {
-        var parts = elem.getAttribute("ajax").split(";");
-        parts.forEach((part) => {
-            var [file, target, limit] = part.split(":");
-            var clone = elem.cloneNode(true);
-            clone.setAttribute("ajax", file);
-            clone.setAttribute("insert", target);
-            if (limit) {
-                clone.setAttribute("boxes", limit);
-            }
-            navigate(clone, headers, query, formclass);
-        });
-        return;
-    }
+
     // This is a quick way to make a downloadable link in an href
     //     else
     if (elem.classList.contains("download")) {
@@ -1288,8 +1275,28 @@ function pipes(elem, stop = false) {
         document.body.removeChild(element);
         return;
     }
-    if (elem.hasAttribute("ajax"))
-        navigate(elem, headers, query, formclass);
+    if (elem.hasAttribute("ajax")) {
+        var parts = elem.getAttribute("ajax").split(";");
+        parts.forEach((part) => {
+            var [file, target, limit] = part.split(":");
+            var clone = elem.cloneNode(true);
+            clone.setAttribute("ajax", file);
+            clone.setAttribute("insert", target);
+            if (document.getElementById(target) == null) {
+                console.error("Target element not found:", target);
+                return;
+            }
+            else if (document.getElementById(target).childElementCount >= limit) {
+                if (document.getElementById(target).classList.contains("modala-multi-first")) {
+                    document.getElementById(target).removeChild(document.getElementById(target).firstChild.remove);
+                }
+                else if (document.getElementById(target).classList.contains("modala-multi-last")) {
+                    document.getElementById(target).removeChild(document.getElementById(target).lastChild.remove);
+                }
+            }
+            navigate(clone, headers, query, formclass);
+        });
+    }
     else if (elem.hasAttribute("modal")) {
         modalList(elem.getAttribute("modal"));
     }
