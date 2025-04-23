@@ -14,7 +14,7 @@
       "description": "Incorrect modala class usage",
       "input": {
         "tagname": "a",
-        "class": "multi-part modala-multi-last-deal modala"
+        "class": "multi-part modala-multi-last deal-button modala"
       },
       "expected_output": "Error: Invalid modala class format"
     },
@@ -61,7 +61,7 @@
         "class": "modala",
         "textContent": "Click Me"
       },
-      "expected_output": "Suggestion: Add a tool-tip attribute to improve user guidance, e.g., tool-tip='Click to open modal'"
+      "expected_output": "Suggestion: Add ajax attribute to include JSON modala. Add id to activate. Add a tool-tip attribute to improve user guidance, e.g., tool-tip='Click to open modal'"
     },
     {
       "description": "Ensure carousel elements have navigation buttons",
@@ -113,7 +113,7 @@
         "class": "modala",
         "ajax": "file.json:target:extra"
       },
-      "expected_output": "Error: AJAX attribute format invalid. Too many colon separators."
+      "expected_output": "Error: AJAX attribute format invalid. Too many colon separators. Delimiter 2 should be followed by a numeric or be non-existent"
     },
     {
       "description": "Invalid type for 'css' key",
