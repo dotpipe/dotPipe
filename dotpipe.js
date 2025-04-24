@@ -1277,7 +1277,11 @@ function pipes(elem, stop = false) {
     if (elem.hasAttribute("ajax")) {
         var parts = elem.getAttribute("ajax").split(";");
         parts.forEach((part) => {
-            var [file, target, limit] = part.split(":");
+            var url = part.split("://");
+            var file, target, limit;
+            if (part.includes("://") && url.length > 0)
+                [file, target, limit] = url[1].split(":");
+            else [file, target, limit] = url.split(":");
             var clone = elem.cloneNode(true);
             clone.setAttribute("ajax", file);
             clone.setAttribute("insert", target);
