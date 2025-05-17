@@ -176,7 +176,7 @@ let domContentLoad = (again = false) => {
                     const x = rect.left;
                     const y = rect.top;
                     var duration = 750;
-                    var [tip, id, classes, duration, z] = el.target.getAttribute("tool-tip").split(";");
+                    var [tip, id, classes, duration, z] = elemv.getAttribute("tool-tip").split(";");
                     textCard(tip, id, classes, x + 15, y + 15, duration, z);
                 });
             });
@@ -188,15 +188,15 @@ let domContentLoad = (again = false) => {
             if (eve) {
                 rv = eve.split(";");
             }
+            else rv = ['mouseover'];
             Array.from(rv).forEach((ev) => {
                 elemv.addEventListener(ev, function (el) {
                     const rect = el.target.getBoundingClientRect();
                     const x = rect.left;
                     const y = rect.top;
-                    var [filename, id, classes, duration, xx, yy, z] = el.target.getAttribute("modal-tip").split(";");
-                    xx = parseInt(xx || x);
-                    yy = parseInt(yy || y);
-                    modalCard(filename, id, classes, xx + 15, yy + 15, duration, z);
+                    console.log(elemv);
+                    var [filename, id, classes, duration, z] = elemv.getAttribute("modal-tip").split(";");
+                    modalCard(filename, id, classes, x + 15, y + 15, duration, z);
                 });
             });
         }
@@ -1468,6 +1468,182 @@ function displayColoredJson(elementId, jsonObj) {
     const prettyHtml = prettifyJsonWithColors(jsonObj);
     document.getElementById(elementId).innerHTML = `<pre>${prettyHtml}</pre>`;
 }
+// Add these utility functions at the top of the file
+function interpolateColor(color1, color2, factor) {
+    const result = color1.slice();
+    for (let i = 0; i < 3; i++) {
+        result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+    }
+    return result;
+}
+
+function componentToHex(c) {
+    const hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(rgb) {
+    return "#" + componentToHex(rgb[0]) + componentToHex(rgb[1]) + componentToHex(rgb[2]);
+}
+
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+    ] : null;
+}
+
+/**
+ * Creates a table from CSV data with optional color gradients
+ * @param {string} csvData - The CSV data as a string
+ * @param {Object} options - Configuration options
+ * @param {string} options.delimiter - CSV delimiter (default: ',')
+ * @param {boolean} options.hasHeader - Whether CSV has header row (default: true)
+ * @param {string} options.tableClass - CSS class for the table
+ * @param {Object} options.gradient - Gradient configuration
+ * @param {string} options.gradient.type - 'row', 'column', 'matrix', or 'none'
+ * @param {string} options.gradient.startColor - Starting color in hex
+ * @param {string} options.gradient.endColor - Ending color in hex
+ * @param {string} options.gradient.textColor - Text color in hex (default: '#000000')
+ * @param {function} options.gradient.valueMapper - Function to map cell values to gradient positions
+ * @returns {HTMLTableElement} The generated table element
+ */
+function createTableFromCSV(csvData, options = {}) {
+    // Default options
+    const defaults = {
+        delimiter: ',',
+        hasHeader: true,
+        tableClass: 'csv-table',
+        gradient: {
+            type: 'none',
+            startColor: '#ffffff',
+            endColor: '#ff0000',
+            textColor: '#000000',
+            valueMapper: (value) => parseFloat(value) || 0
+        }
+    };
+
+    // Merge options with defaults
+    options = { ...defaults, ...options };
+    options.gradient = { ...defaults.gradient, ...options.gradient };
+
+    // Parse CSV
+    const rows = csvData.trim().split('\n').map(row => 
+        row.split(options.delimiter).map(cell => cell.trim())
+    );
+
+    // Create table
+    const table = document.createElement('table');
+    table.className = options.tableClass;
+
+    // Add default table styling
+    table.style.borderCollapse = 'collapse';
+    table.style.width = '100%';
+
+    // Process header if present
+    if (options.hasHeader) {
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        rows[0].forEach(header => {
+            const th = document.createElement('th');
+            th.textContent = header;
+            th.style.padding = '8px';
+            th.style.borderBottom = '2px solid #ddd';
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+    }
+
+    // Create tbody
+    const tbody = document.createElement('tbody');
+    const dataRows = options.hasHeader ? rows.slice(1) : rows;
+
+    // Find min/max values for gradient scaling if needed
+    let minValue = Infinity, maxValue = -Infinity;
+    if (options.gradient.type !== 'none') {
+        dataRows.forEach(row => {
+            row.forEach(cell => {
+                const value = options.gradient.valueMapper(cell);
+                minValue = Math.min(minValue, value);
+                maxValue = Math.max(maxValue, value);
+            });
+        });
+    }
+
+    // Convert gradient colors to RGB arrays
+    const startColor = hexToRgb(options.gradient.startColor);
+    const endColor = hexToRgb(options.gradient.endColor);
+
+    // Create table rows
+    dataRows.forEach((row, rowIndex) => {
+        const tr = document.createElement('tr');
+        row.forEach((cell, colIndex) => {
+            const td = document.createElement('td');
+            td.textContent = cell;
+            td.style.padding = '8px';
+            td.style.border = '1px solid #ddd';
+
+            // Apply gradient coloring based on type
+            if (options.gradient.type !== 'none') {
+                let factor = 0;
+                const value = options.gradient.valueMapper(cell);
+
+                switch (options.gradient.type) {
+                    case 'row':
+                        factor = colIndex / (row.length - 1);
+                        break;
+                    case 'column':
+                        factor = rowIndex / (dataRows.length - 1);
+                        break;
+                    case 'matrix':
+                        // Normalize value between 0 and 1
+                        factor = (value - minValue) / (maxValue - minValue);
+                        break;
+                }
+
+                const color = interpolateColor(startColor, endColor, factor);
+                td.style.backgroundColor = rgbToHex(color);
+                td.style.color = options.gradient.textColor;
+            }
+
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    return table;
+}
+
+// Add this to the pipes function to handle CSV files
+function handleCSV(elem, csvData) {
+    const options = {
+        delimiter: elem.getAttribute('csv-delimiter') || ',',
+        hasHeader: elem.getAttribute('csv-header') !== 'false',
+        tableClass: elem.getAttribute('csv-table-class') || 'csv-table',
+        gradient: {
+            type: elem.getAttribute('csv-gradient-type') || 'none',
+            startColor: elem.getAttribute('csv-gradient-start') || '#ffffff',
+            endColor: elem.getAttribute('csv-gradient-end') || '#ff0000',
+            textColor: elem.getAttribute('csv-text-color') || '#000000',
+            valueMapper: (value) => parseFloat(value) || 0
+        }
+    };
+
+    const table = createTableFromCSV(csvData, options);
+    
+    if (elem.hasAttribute('insert')) {
+        const target = document.getElementById(elem.getAttribute('insert'));
+        if (target) {
+            target.innerHTML = '';
+            target.appendChild(table);
+        }
+    }
+    return table;
+}
 
 function navigate(elem, opts = null, query = "", classname = "") {
     //formAJAX at the end of this line
@@ -1616,7 +1792,19 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
         }
     }
-
+    else if (elem.classList.contains("csv")) {
+        rawFile.onreadystatechange = function () {
+            if (rawFile.readyState === 4) {
+                try {
+                    handleCSV(elem, rawFile.responseText);
+                    domContentLoad();
+                    flashClickListener(elem);
+                } catch (e) {
+                    console.error("Error handling CSV:", e);
+                }
+            }
+        }
+    }
     else if (!elem.classList.contains("json") && !elem.hasAttribute("callback")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
