@@ -72,7 +72,7 @@
   **** go on if there is no input to replace them.
   */
 
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     try {
         if (document.body != null && JSON.parse(document.body.textContent)) {
             const irc = JSON.parse(document.body.textContent);
@@ -168,7 +168,7 @@ let domContentLoad = (again = false) => {
             var eve = elemv.getAttribute("event");
             rv = ['mouseover'];
             if (eve) {
-                rv = ev.split(";");
+                rv = eve.split(";");
             }
             Array.from(rv).forEach((ev) => {
                 elemv.addEventListener(ev, function (el) {
@@ -186,15 +186,17 @@ let domContentLoad = (again = false) => {
             var eve = elemv.getAttribute("event");
             rv = ['mouseover'];
             if (eve) {
-                rv = ev.split(";");
+                rv = eve.split(";");
             }
             Array.from(rv).forEach((ev) => {
                 elemv.addEventListener(ev, function (el) {
                     const rect = el.target.getBoundingClientRect();
                     const x = rect.left;
                     const y = rect.top;
-                    var [filename, duration, z] = el.target.getAttribute("modal-tip").split(";");
-                    modalCard(filename, x + 15, y + 15, duration, z);
+                    var [filename, id, classes, duration, xx, yy, z] = el.target.getAttribute("modal-tip").split(";");
+                    xx = parseInt(xx || x);
+                    yy = parseInt(yy || y);
+                    modalCard(filename, id, classes, xx + 15, yy + 15, duration, z);
                 });
             });
         }
@@ -205,12 +207,13 @@ let domContentLoad = (again = false) => {
             });
             return;
         }
-        var rv = ev.split(";");
-        Array.from(rv).forEach((v) => {
-            elemv.addEventListener(v, function () {
-                pipes(elemv, auto);
+        if (!ev.includes(";")) {
+            Array.from(rv).forEach((v) => {
+                elemv.addEventListener(v, function () {
+                    pipes(elemv, false);
+                });
             });
-        });
+        }
     });
 }
 
@@ -265,13 +268,13 @@ function copyContentById(id) {
     };
 }
 
-function modalCard(filename, x_center = false, y_center = false, duration = -1, zindex = 100) {
+function modalCard(filename, id = "", classes = "", x_center = false, y_center = false, duration = 1000, zindex = 100) {
     var copied = document.createElement("div");
-    copied.id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    copied.id = id;
     copied.style.padding = "10px";
-    copied.style.textAlign = "center";
-    copied.style.backgroundColor = "white";
     copied.style.position = "absolute";
+    if (classes != undefined && classes != "")
+        copied.classList.add(classes);
     var x_pos = 0;
     if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
     else if (typeof x_center === 'boolean' && !x_center) x_pos = 0;
@@ -300,7 +303,6 @@ function textCard(text, id = "", classes = "", x_center = false, y_center = fals
         copied.classList.add(classes);
     copied.style.padding = "10px";
     copied.style.textAlign = "center";
-    copied.style.backgroundColor = "white";
     copied.style.position = "absolute";
     var x_pos = 0;
     if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
@@ -325,38 +327,109 @@ function textCard(text, id = "", classes = "", x_center = false, y_center = fals
 
 let highlightedItem = null;
 
+// function renderTree(value, tempTag) {
+//     if (typeof tempTag == "string") {
+//         tempTag = document.getElementById(tempTag);
+//     }
+//     if (value == undefined) {
+//         console.log(tempTag + "******");
+//         console.error("value of reference incorrect");
+//         return;
+//     }
+
+//     var temp = document.createElement(value["tagname"] || 'span');
+//     temp.id = value["id"];
+//     temp.classList.add('tree-item');
+
+//     if (value["icon"]) {
+//         let img = document.createElement('img');
+//         img.src = value["icon"];
+//         img.style.marginRight = '5px';
+//         temp.appendChild(img);
+//     }
+
+//     temp.id = value.id;
+//     temp.textContent = value.textContent || value.label;
+//     if (temp.textContent.length == 0) {
+//         console.error("No text content for tree item. Use \"label\" or \"textContent\"");
+//         exit();
+//     }
+
+//     Object.entries(value).forEach(([k, v]) => {
+//         let keyName = (!isNaN(k.toString()) ? "data-" + k.toString() : k);
+//         if (v instanceof Object) {
+//             let subContainer = document.createElement('span');
+//             subContainer.classList.add('sub-tree');
+//             temp.appendChild(subContainer);
+//             renderTree(v, subContainer);
+//             temp.addEventListener('click', (e) => {
+//                 e.stopPropagation();
+//                 subContainer.style.display = subContainer.style.display === 'none' ? 'block' : 'none';
+//             });
+//         } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
+//             temp.setAttribute(k, v);
+//         }
+//     });
+
+//     temp.addEventListener('click', (e) => {
+//         e.stopPropagation();
+//         document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+//         temp.classList.add('highlight');
+//         pipes(temp);
+//     });
+
+//     // temp = htmlDecode(temp);
+
+//     tempTag.appendChild(temp);
+
+//     return tempTag;
+// }
 function renderTree(value, tempTag) {
     if (typeof tempTag == "string") {
         tempTag = document.getElementById(tempTag);
     }
     if (value == undefined) {
-        console.log(tempTag + "******");
         console.error("value of reference incorrect");
         return;
     }
 
     var temp = document.createElement(value["tagname"] || 'span');
-    temp.id = value["textContent"] || value["label"] || value.keyName;
+    temp.id = value["id"];
     temp.classList.add('tree-item');
 
-    if (value.icon) {
-        let img = document.createElement('img');
-        img.src = value.icon;
-        img.style.marginRight = '5px';
-        temp.appendChild(img);
+    // Create container for icon and text
+    const contentContainer = document.createElement('div');
+    contentContainer.style.display = 'flex';
+    contentContainer.style.alignItems = 'center';
+    contentContainer.style.gap = '5px';
+
+    // Handle custom icon if specified
+    if (value["icon"]) {
+        const img = document.createElement('img');
+        img.src = value["icon"];
+        img.classList.add('tree-icon');
+        img.onerror = function () {
+            // Remove broken image if icon fails to load
+            this.remove();
+        };
+        contentContainer.appendChild(img);
     }
 
-    temp.id = value.id;
-    temp.textContent = value.textContent || value.label;
-    if (temp.textContent.length == 0) {
-        console.error("No text content for tree item. Use \"label\" or \"textContent\"");
-        exit();
-    }
+    // Add text content
+    const textSpan = document.createElement('span');
+    textSpan.textContent = value.textContent || value.label;
+    contentContainer.appendChild(textSpan);
+
+    temp.appendChild(contentContainer);
+
+    // Check if item has children
+    const hasChildren = Object.entries(value).some(([k, v]) => v instanceof Object);
+    temp.setAttribute('data-has-children', hasChildren);
 
     Object.entries(value).forEach(([k, v]) => {
         let keyName = (!isNaN(k.toString()) ? "data-" + k.toString() : k);
         if (v instanceof Object) {
-            let subContainer = document.createElement('span');
+            let subContainer = document.createElement('div');
             subContainer.classList.add('sub-tree');
             temp.appendChild(subContainer);
             renderTree(v, subContainer);
@@ -364,7 +437,8 @@ function renderTree(value, tempTag) {
                 e.stopPropagation();
                 subContainer.style.display = subContainer.style.display === 'none' ? 'block' : 'none';
             });
-        } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
+        } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" &&
+            k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
             temp.setAttribute(k, v);
         }
     });
@@ -376,10 +450,7 @@ function renderTree(value, tempTag) {
         pipes(temp);
     });
 
-    // temp = htmlDecode(temp);
-
     tempTag.appendChild(temp);
-
     return tempTag;
 }
 
@@ -1260,7 +1331,20 @@ function pipes(elem, stop = false) {
         carousel(elem, auto);
         return;
     }
-
+    if (elem.classList.contains("ajax-limit")) {
+        var parts = elem.getAttribute("ajax").split(";");
+        parts.forEach((part) => {
+            var [file, target, limit] = part.split(":");
+            var clone = elem.cloneNode(true);
+            clone.setAttribute("ajax", file);
+            clone.setAttribute("insert", target);
+            if (limit) {
+                clone.setAttribute("boxes", limit);
+            }
+            navigate(clone, headers, query, formclass);
+        });
+        return;
+    }
     // This is a quick way to make a downloadable link in an href
     //     else
     if (elem.classList.contains("download")) {
