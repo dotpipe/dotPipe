@@ -5,20 +5,19 @@
         "sales": {
             "textContent": "Sales",
             "td2": {
-                "ajax": "tree.json",
+                "tagname": "td",
+                "ajax": "tree.json;sales-tag2",
                 "class": "sale-label tree-view",
-                "id": "sales-tag",
-                "insert": "sales-tag",
+                "id": "sales-tag2",
                 "textContent": "On Sale!",
                 "style": "color: #666;"
             },
             "sale1": {
                 "textContent": "Sale 1",
-                "ajax": "index2.html",
                 "tagname": "td",
                 "class": "sale-label mouse",
-                "id": "sales-tag1",
-                "tool-tip": "Tool-tips!",
+                "id": "sales-tag-tip",
+                "tool-tip": "Tool-tips!;id1;class2;2000;1000",
                 "event": "mouseover",
                 "textContent": "On Sale!!!",
                 "style": "color: #666;"
