@@ -325,7 +325,7 @@ function addInternalStyles(styles) {
         return `${selector} { ${rules} }`;
     }).join('\n');
 
-    styleTag.textContent = uniqueStyles;
+    styleTag.setAttribute('textContent', uniqueStyles);
 }
 
 function modalCard(filename, id = "", classes = "", x_center = false, y_center = false, duration = 1000, zindex = 100) {
@@ -351,7 +351,7 @@ function modalCard(filename, id = "", classes = "", x_center = false, y_center =
 
     if (duration > -1) {
         setTimeout(() => {
-            document.body.removeChild(copied);
+            copied.remove();
         }, duration);
     }
     return copied;
@@ -376,7 +376,7 @@ function textCard(text, id = "", classes = "", x_center = false, y_center = fals
 
     if (duration > -1) {
         setTimeout(() => {
-            document.body.removeChild(copied);
+            copied.remove();
         }, duration);
     }
     return copied;
