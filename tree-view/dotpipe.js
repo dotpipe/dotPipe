@@ -194,7 +194,6 @@ let domContentLoad = (again = false) => {
             });
         }
         if (elemv.hasAttribute("modal-tip")) {
-            console.log(elemv.getAttribute("modal-tip") + "...");
             var eve = elemv.getAttribute("event");
             rv = ['mouseover'];
             if (eve) {
@@ -208,9 +207,9 @@ let domContentLoad = (again = false) => {
                         currentModalTip = null;
                     }
                     const rect = el.target.getBoundingClientRect();
-                    const x = rect.left;
-                    const y = rect.top;
-                    console.log(elemv);
+                    const x = el.screenX;
+                    const y = el.screenY;
+                    console.log(el);
                     var [filename, id, classes, duration, z] = elemv.getAttribute("modal-tip").split(";");
                     currentModalTip = null;
                     currentModalTip = modalCard(filename, id, classes, x + 15, y + 15, duration, z);
@@ -330,24 +329,23 @@ function addInternalStyles(styles) {
 
 function modalCard(filename, id = "", classes = "", x_center = false, y_center = false, duration = 1000, zindex = 100) {
     var copied = document.createElement("div");
-    if (document.getElementById(id) != null)
+    if (id)
         copied.id = id;
-    else
-        document.removeChild(document.getElementById(id));
+
     if (classes != undefined && classes != "")
         copied.classList.add(classes);
     var x_pos = 0;
     if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
     else if (typeof x_center === 'boolean' && !x_center) x_pos = 0;
     else x_pos = x_center;
-    // copied.style.left = x_pos + "px";
     var y_pos = 0;
     if (typeof y_center === 'boolean' && y_center) y_pos = window.scrollY + Math.abs((window.innerHeight / 2) - copied.style.height / 2);
     else if (typeof y_center === 'boolean' && !y_center) y_pos = 0;
     else y_pos = y_center;
-    addInternalStyles("." + id + " { left:" + x_pos + "px; top:" + y_pos + "px; z-index:" + zindex + "; padding:10px; position:absolute; }");
-    modal(filename, copied);
+    addInternalStyles(`#${copied.id} { margin-left: ${x_pos}px; margin-top: ${y_pos}px; z-index: ${zindex}; padding: 10px; position: absolute; }`);
+
     document.body.appendChild(copied);
+    modal(filename, copied);
 
     if (duration > -1) {
         setTimeout(() => {
@@ -371,7 +369,7 @@ function textCard(text, id = "", classes = "", x_center = false, y_center = fals
     if (typeof y_center === 'boolean' && y_center) y_pos = window.scrollY + Math.abs((window.innerHeight / 2) - copied.style.height / 2);
     else if (typeof y_center === 'boolean' && !y_center) y_pos = 0;
     else y_pos = y_center;
-    addInternalStyles("." + id + " { left:" + x_pos + "px; top:" + y_pos + "px; z-index:" + zindex + "; padding:10px; position:absolute; }");
+    addInternalStyles("#" + copied.id + " { left:" + x_pos + "px; top:" + y_pos + "px; z-index:" + zindex + "; padding:10px; position:absolute; }");
     document.body.appendChild(copied);
 
     if (duration > -1) {
@@ -634,7 +632,7 @@ function modala(value, tempTag, root, id) {
     }
 
     var temp = document.createElement(value["tagname"]);
-    if (value["tagname"] == "undefined") {
+    if (value["tagname"] == undefined) {
         temp.tagName = "div";
         temp = document.createElement("div");
     }
@@ -648,8 +646,7 @@ function modala(value, tempTag, root, id) {
     }
     Object.entries(value).forEach((nest) => {
         const [k, v] = nest;
-        if (k.toLocaleLowerCase() == "style");
-        else if (k.toLowerCase() == "header");
+        if (k.toLowerCase() == "header");
         else if (k.toLocaleLowerCase() == "buttons" && v instanceof Object) {
             var buttons = document.createElement("div");
             v.forEach(z => {
@@ -813,7 +810,7 @@ function modala(value, tempTag, root, id) {
         }
         else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
             try {
-                temp.setAttribute(k, v);
+                addInternalStyles("." + temp.id + " { " + k + ": " + v + "; }");
             }
             catch (e) {
                 console.error(`Error setting attribute ${k}:`, e);
@@ -1505,7 +1502,7 @@ function hexToRgb(hex) {
 }
 
 /**
- * Creates a table from CSV data with optional color gradients
+ * Creates a table from CSV data with optional color gradients, checkboxes, radio buttons, and modala functionality
  * @param {string} csvData - The CSV data as a string
  * @param {Object} options - Configuration options
  * @param {string} options.delimiter - CSV delimiter (default: ',')
@@ -1517,10 +1514,12 @@ function hexToRgb(hex) {
  * @param {string} options.gradient.endColor - Ending color in hex
  * @param {string} options.gradient.textColor - Text color in hex (default: '#000000')
  * @param {function} options.gradient.valueMapper - Function to map cell values to gradient positions
+ * @param {string} options.selectionType - 'checkbox', 'radio', or 'none' (default: 'none')
+ * @param {string} options.selectionName - Name attribute for radio buttons (required if selectionType is 'radio')
+ * @param {boolean} options.enableModala - Enable modala functionality for cells (default: false)
  * @returns {HTMLTableElement} The generated table element
  */
 function createTableFromCSV(csvData, options = {}) {
-    // Default options
     const defaults = {
         delimiter: ',',
         hasHeader: true,
@@ -1531,31 +1530,41 @@ function createTableFromCSV(csvData, options = {}) {
             endColor: '#ff0000',
             textColor: '#000000',
             valueMapper: (value) => parseFloat(value) || 0
-        }
+        },
+        selectionType: 'none',
+        selectionName: ''
     };
 
-    // Merge options with defaults
     options = { ...defaults, ...options };
     options.gradient = { ...defaults.gradient, ...options.gradient };
 
-    // Parse CSV
     const rows = csvData.trim().split('\n').map(row =>
         row.split(options.delimiter).map(cell => cell.trim())
     );
 
-    // Create table
     const table = document.createElement('table');
     table.className = options.tableClass;
-
-    // Add default table styling
-
     table.style.borderCollapse = 'collapse';
     table.style.width = '100%';
 
-    // Process header if present
     if (options.hasHeader) {
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
+
+        if (options.selectionType !== 'none') {
+            const selectionHeader = document.createElement('th');
+            if (options.selectionType === 'checkbox') {
+                const headerCheckbox = document.createElement('input');
+                headerCheckbox.type = 'checkbox';
+                headerCheckbox.addEventListener('change', (e) => {
+                    table.querySelectorAll('tbody input[type="checkbox"]')
+                         .forEach(input => input.checked = e.target.checked);
+                });
+                selectionHeader.appendChild(headerCheckbox);
+            }
+            headerRow.appendChild(selectionHeader);
+        }
+
         rows[0].forEach(header => {
             const th = document.createElement('th');
             th.textContent = header;
@@ -1567,11 +1576,9 @@ function createTableFromCSV(csvData, options = {}) {
         table.appendChild(thead);
     }
 
-    // Create tbody
     const tbody = document.createElement('tbody');
     const dataRows = options.hasHeader ? rows.slice(1) : rows;
 
-    // Find min/max values for gradient scaling if needed
     let minValue = Infinity, maxValue = -Infinity;
     if (options.gradient.type !== 'none') {
         dataRows.forEach(row => {
@@ -1583,20 +1590,36 @@ function createTableFromCSV(csvData, options = {}) {
         });
     }
 
-    // Convert gradient colors to RGB arrays
     const startColor = hexToRgb(options.gradient.startColor);
     const endColor = hexToRgb(options.gradient.endColor);
 
-    // Create table rows
     dataRows.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
+
+        if (options.selectionType !== 'none') {
+            const selectionCell = document.createElement('td');
+            const input = document.createElement('input');
+            input.type = options.selectionType;
+            if (options.selectionType === 'radio') {
+                input.name = options.selectionName;
+            }
+            selectionCell.appendChild(input);
+            tr.appendChild(selectionCell);
+        }
+
         row.forEach((cell, colIndex) => {
             const td = document.createElement('td');
-            td.textContent = cell;
             td.style.padding = '8px';
             td.style.border = '1px solid #ddd';
 
-            // Apply gradient coloring based on type
+            if (cell.startsWith('modala:')) {
+                const [_, filename, targetId, limit] = cell.split(':');
+                td.id = targetId || `modala-cell-${rowIndex}-${colIndex}`;
+                modal(filename, td, limit);
+            } else {
+                td.textContent = cell;
+            }
+
             if (options.gradient.type !== 'none') {
                 let factor = 0;
                 const value = options.gradient.valueMapper(cell);
@@ -1609,7 +1632,6 @@ function createTableFromCSV(csvData, options = {}) {
                         factor = rowIndex / (dataRows.length - 1);
                         break;
                     case 'matrix':
-                        // Normalize value between 0 and 1
                         factor = (value - minValue) / (maxValue - minValue);
                         break;
                 }

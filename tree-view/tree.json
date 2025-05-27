@@ -5,7 +5,7 @@
         "sales": {
             "textContent": "Sales",
             "td2": {
-                "tagname": "td",
+                "tagname": "div",
                 "ajax": "tree.json;sales-tag2",
                 "class": "sale-label tree-view",
                 "id": "sales-tag2",
@@ -13,7 +13,7 @@
                 "style": "color: #666;"
             },
             "sale1": {
-                "tagname": "td",
+                "tagname": "div",
                 "class": "sale-label mouse",
                 "id": "sales-tag-tip",
                 "tool-tip": "Tool-tips!;id1;class2;2000;1000",

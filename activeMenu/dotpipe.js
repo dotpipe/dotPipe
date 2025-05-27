@@ -159,10 +159,17 @@ let domContentLoad = (again = false) => {
 
     });
 
+    let currentModalTip = null;
+
     let elements_mouse = document.querySelectorAll(".mouse");
     console.log(elements_mouse.length);
     Array.from(elements_mouse).forEach(function (elemv) {
         console.log(elemv);
+        if (!elemv.dataset.hasListener) {
+            // Add your event listener here
+            elemv.dataset.hasListener = 'true';
+        }
+        else return;
         if (elemv.hasAttribute("tool-tip")) {
             console.log(elemv.getAttribute("modal-tip") + "...");
             var eve = elemv.getAttribute("event");
@@ -172,17 +179,21 @@ let domContentLoad = (again = false) => {
             }
             Array.from(rv).forEach((ev) => {
                 elemv.addEventListener(ev, function (el) {
+                    if (currentModalTip) {
+                        currentModalTip.remove();
+                        currentModalTip = null;
+                    }
                     const rect = el.target.getBoundingClientRect();
                     const x = rect.left;
                     const y = rect.top;
                     var duration = 750;
                     var [tip, id, classes, duration, z] = elemv.getAttribute("tool-tip").split(";");
-                    textCard(tip, id, classes, x + 15, y + 15, duration, z);
+                    currentModalTip = null;
+                    currentModalTip = textCard(tip, id, classes, x + 15, y + 15, duration, z);
                 });
             });
         }
         if (elemv.hasAttribute("modal-tip")) {
-            console.log(elemv.getAttribute("modal-tip") + "...");
             var eve = elemv.getAttribute("event");
             rv = ['mouseover'];
             if (eve) {
@@ -191,26 +202,32 @@ let domContentLoad = (again = false) => {
             else rv = ['mouseover'];
             Array.from(rv).forEach((ev) => {
                 elemv.addEventListener(ev, function (el) {
+                    if (currentModalTip) {
+                        currentModalTip.remove();
+                        currentModalTip = null;
+                    }
                     const rect = el.target.getBoundingClientRect();
-                    const x = rect.left;
-                    const y = rect.top;
-                    console.log(elemv);
+                    const x = el.screenX;
+                    const y = el.screenY;
+                    console.log(el);
                     var [filename, id, classes, duration, z] = elemv.getAttribute("modal-tip").split(";");
-                    modalCard(filename, id, classes, x + 15, y + 15, duration, z);
+                    currentModalTip = null;
+                    currentModalTip = modalCard(filename, id, classes, x + 15, y + 15, duration, z);
                 });
             });
         }
         var ev = elemv.getAttribute("event");
-        if (!ev) {
+        if (ev && !ev.includes(";")) {
+
             elemv.addEventListener("click", function () {
-                pipes(elemv, auto);
+                pipes(elemv);
             });
             return;
         }
-        if (!ev.includes(";")) {
+        if (ev && ev.includes(";")) {
             Array.from(rv).forEach((v) => {
                 elemv.addEventListener(v, function () {
-                    pipes(elemv, false);
+                    pipes(elemv);
                 });
             });
         }
@@ -268,32 +285,74 @@ function copyContentById(id) {
     };
 }
 
+function addInternalStyles(styles) {
+    let styleTag = document.getElementById('dotpipe-internal-styles');
+    if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'dotpipe-internal-styles';
+        document.head.appendChild(styleTag);
+    }
+
+    if (typeof PAGE_NONCE !== 'undefined') {
+        styleTag.nonce = PAGE_NONCE;
+    }
+
+    // Parse the existing styles
+    let existingStyles = styleTag.textContent;
+    let styleMap = new Map();
+
+    // Parse new styles
+    let newStyles = styles.match(/[^}]+\{[^}]+\}/g) || [];
+
+    newStyles.forEach(style => {
+        let [selector, rules] = style.split('{');
+        selector = selector.trim();
+        rules = rules.replace('}', '').trim();
+
+        if (styleMap.has(selector)) {
+            // Merge rules if selector already exists
+            let existingRules = styleMap.get(selector);
+            let mergedRules = new Set([...existingRules.split(';'), ...rules.split(';')]);
+            styleMap.set(selector, Array.from(mergedRules).join(';'));
+        } else {
+            styleMap.set(selector, rules);
+        }
+    });
+
+    // Rebuild the style content
+    let uniqueStyles = Array.from(styleMap.entries()).map(([selector, rules]) => {
+        return `${selector} { ${rules} }`;
+    }).join('\n');
+
+    styleTag.setAttribute('textContent', uniqueStyles);
+}
+
 function modalCard(filename, id = "", classes = "", x_center = false, y_center = false, duration = 1000, zindex = 100) {
     var copied = document.createElement("div");
-    copied.id = id;
-    copied.style.padding = "10px";
-    copied.style.position = "absolute";
+    if (id)
+        copied.id = id;
+
     if (classes != undefined && classes != "")
         copied.classList.add(classes);
     var x_pos = 0;
     if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
     else if (typeof x_center === 'boolean' && !x_center) x_pos = 0;
     else x_pos = x_center;
-    copied.style.left = x_pos + "px";
     var y_pos = 0;
     if (typeof y_center === 'boolean' && y_center) y_pos = window.scrollY + Math.abs((window.innerHeight / 2) - copied.style.height / 2);
     else if (typeof y_center === 'boolean' && !y_center) y_pos = 0;
     else y_pos = y_center;
-    copied.style.top = y_pos + "px";
-    copied.style.zIndex = zindex;
-    modal(filename, copied);
+    addInternalStyles(`#${copied.id} { margin-left: ${x_pos}px; margin-top: ${y_pos}px; z-index: ${zindex}; padding: 10px; position: absolute; }`);
+
     document.body.appendChild(copied);
+    modal(filename, copied);
 
     if (duration > -1) {
         setTimeout(() => {
-            document.body.removeChild(copied);
+            copied.remove();
         }, duration);
     }
+    return copied;
 }
 
 function textCard(text, id = "", classes = "", x_center = false, y_center = false, duration = -1, zindex = 100) {
@@ -301,89 +360,28 @@ function textCard(text, id = "", classes = "", x_center = false, y_center = fals
     copied.id = id;
     if (classes != undefined && classes != "")
         copied.classList.add(classes);
-    copied.style.padding = "10px";
-    copied.style.textAlign = "center";
-    copied.style.position = "absolute";
     var x_pos = 0;
     if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
     else if (typeof x_center === 'boolean' && !x_center) x_pos = 0;
     else x_pos = x_center;
-    copied.style.left = x_pos + "px";
-    copied.style.zIndex = zindex;
     copied.textContent = text;
     var y_pos = 0;
     if (typeof y_center === 'boolean' && y_center) y_pos = window.scrollY + Math.abs((window.innerHeight / 2) - copied.style.height / 2);
     else if (typeof y_center === 'boolean' && !y_center) y_pos = 0;
     else y_pos = y_center;
-    copied.style.top = y_pos + "px";
+    addInternalStyles("#" + copied.id + " { left:" + x_pos + "px; top:" + y_pos + "px; z-index:" + zindex + "; padding:10px; position:absolute; }");
     document.body.appendChild(copied);
 
     if (duration > -1) {
         setTimeout(() => {
-            document.body.removeChild(copied);
+            copied.remove();
         }, duration);
     }
+    return copied;
 }
 
 let highlightedItem = null;
 
-// function renderTree(value, tempTag) {
-//     if (typeof tempTag == "string") {
-//         tempTag = document.getElementById(tempTag);
-//     }
-//     if (value == undefined) {
-//         console.log(tempTag + "******");
-//         console.error("value of reference incorrect");
-//         return;
-//     }
-
-//     var temp = document.createElement(value["tagname"] || 'span');
-//     temp.id = value["id"];
-//     temp.classList.add('tree-item');
-
-//     if (value["icon"]) {
-//         let img = document.createElement('img');
-//         img.src = value["icon"];
-//         img.style.marginRight = '5px';
-//         temp.appendChild(img);
-//     }
-
-//     temp.id = value.id;
-//     temp.textContent = value.textContent || value.label;
-//     if (temp.textContent.length == 0) {
-//         console.error("No text content for tree item. Use \"label\" or \"textContent\"");
-//         exit();
-//     }
-
-//     Object.entries(value).forEach(([k, v]) => {
-//         let keyName = (!isNaN(k.toString()) ? "data-" + k.toString() : k);
-//         if (v instanceof Object) {
-//             let subContainer = document.createElement('span');
-//             subContainer.classList.add('sub-tree');
-//             temp.appendChild(subContainer);
-//             renderTree(v, subContainer);
-//             temp.addEventListener('click', (e) => {
-//                 e.stopPropagation();
-//                 subContainer.style.display = subContainer.style.display === 'none' ? 'block' : 'none';
-//             });
-//         } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
-//             temp.setAttribute(k, v);
-//         }
-//     });
-
-//     temp.addEventListener('click', (e) => {
-//         e.stopPropagation();
-//         document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
-//         temp.classList.add('highlight');
-//         pipes(temp);
-//     });
-
-//     // temp = htmlDecode(temp);
-
-//     tempTag.appendChild(temp);
-
-//     return tempTag;
-// }
 function renderTree(value, tempTag) {
     if (typeof tempTag == "string") {
         tempTag = document.getElementById(tempTag);
@@ -399,9 +397,7 @@ function renderTree(value, tempTag) {
 
     // Create container for icon and text
     const contentContainer = document.createElement('div');
-    contentContainer.style.display = 'flex';
-    contentContainer.style.alignItems = 'center';
-    contentContainer.style.gap = '5px';
+    addInternalStyles("display:flex;align-items:center;gap:5px;");
 
     // Handle custom icon if specified
     if (value["icon"]) {
@@ -636,7 +632,7 @@ function modala(value, tempTag, root, id) {
     }
 
     var temp = document.createElement(value["tagname"]);
-    if (value["tagname"] == "undefined") {
+    if (value["tagname"] == undefined) {
         temp.tagName = "div";
         temp = document.createElement("div");
     }
@@ -715,7 +711,9 @@ function modala(value, tempTag, root, id) {
                     gth.src = e;
                     gth.width = value['width'];
                     gth.height = value['height'];
-                    gth.style.display = "hidden";
+                    // gth.style.display = "hidden";
+                    temp.classList.add("id-" + temp.id + "-img");
+                    addInternalStyles(".id-" + temp.id + "-img { display:hidden; }");
                     temp.setAttribute("sources", value['sources'])
                     temp.appendChild(gth);
                 }
@@ -734,11 +732,12 @@ function modala(value, tempTag, root, id) {
                     gth.src = e;
                     gth.width = value['width'];
                     gth.height = value['height'];
-                    gth.style.display = "hidden";
+                    addInternalStyles(".id-" + temp.id + "-video { display:hidden; }");
                     var i = 0;
                     while (e.substr(-i, 1) != '.') i++;
                     gth.type = "video/" + e.substring(-(i - 1));
                     gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
+                    temp.classList.add("id-" + temp.id + "-video");
                     temp.appendChild(gth);
                 }
                 else if (value['type'] == "modal") {
@@ -811,7 +810,7 @@ function modala(value, tempTag, root, id) {
         }
         else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
             try {
-                temp.setAttribute(k, v);
+                addInternalStyles("." + temp.id + " { " + k + ": " + v + "; }");
             }
             catch (e) {
                 console.error(`Error setting attribute ${k}:`, e);
@@ -822,7 +821,8 @@ function modala(value, tempTag, root, id) {
             (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
         }
         else if (k.toLowerCase() == "style") {
-            temp.style.cssText = v;
+            addInternalStyles(".id-" + temp.id + " { " + v + " }");
+            temp.classList.add("id-" + temp.id);
         }
     });
     tempTag.appendChild(temp);
@@ -917,9 +917,9 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     }
 
     if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
-        elem.style.display = "block";
+        addInternalStyles("." + elem.id + "{ display:hidden; }");
     else
-        elem.style.display = "inline-block";
+        addInternalStyles("." + elem.id + "{ display:inline-block; }");
 
     if (elem.classList.contains("time-active")) {
         auto = true;
@@ -966,9 +966,9 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
     }
 
     if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
-        elem.style.display = "block";
+        addInternalStyles("." + id + " { display:block; }");
     else
-        elem.style.display = "inline-block";
+        addInternalStyles("." + id + " { display:inline-block; }");
 
     if (elem.classList.contains("time-active")) {
         auto = true;
@@ -1055,7 +1055,6 @@ function fileOrder(elem) {
     }
 }
 
-
 function htmlToJson(htmlString) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlString, 'text/html');
@@ -1098,7 +1097,7 @@ function addPipe(elem = document) {
         document.addEventListener(eventType, function (event) {
             let target = event.target;
             if (target.classList.contains('mouse') || target.id !== null) {
-                if (!hasPipeListener(target))
+                if (!target.dataset.hasListener)
                     pipes(target);
                 console.log(target.id);
             }
@@ -1107,11 +1106,12 @@ function addPipe(elem = document) {
 }
 
 function flashClickListener(elem) {
+    if (!elem.dataset.hasListener) {
+        // Add your event listener here
+        elem.dataset.hasListener = 'true';
+    }
+    else if (elem.dataset.hasListener || document.getElementById(elem.id) != null) return;
     if (elem.id) {
-        elem.removeEventListener('click', () => {
-            pipes(elem);
-            console.log(elem.id);
-        });
         elem.addEventListener('click', () => {
             pipes(elem);
             console.log(elem.id);
@@ -1121,13 +1121,17 @@ function flashClickListener(elem) {
 }
 
 function attachEventListeners(elem) {
+    if (elem.dataset.hasListener || document.getElementById(elem.id) != null) {
+        return;
+    }
     if (elem.classList.contains('mouse') || elem.id !== null) {
         let events = (elem.getAttribute("event") || "click").split(';');
         events.forEach(event => elem.addEventListener(event, () => {
             pipes(elem);
             console.log(elem.id);
         }));
-        if (!hasPipeListener(elem)) {
+        if (!elem.dataset.hasListener) {
+            elem.dataset.hasListener = 'true';
             elem.addEventListener('click', () => {
                 pipes(elem);
                 console.log(elem.id);
@@ -1197,9 +1201,9 @@ function pipes(elem, stop = false) {
         optsArray.forEach((e) => {
             var x = document.getElementById(e);
             if (x !== null && x.style.display !== "none")
-                x.style.display = "none";
+                addInternalStyles("." + x.id + "{ display:hidden; }");
             else if (x !== null)
-                x.style.display = "block";
+                addInternalStyles("." + x.id + "{ display:block; }");
         });
     }
     if (elem.hasAttribute("turn")) {
@@ -1353,7 +1357,7 @@ function pipes(elem, stop = false) {
         var element = document.createElement('a');
         var location = (elem.hasAttribute("directory")) ? elem.getAttribute("directory") : "./";
         element.setAttribute('href', location + encodeURIComponent(text));
-        element.style.display = 'none';
+        addInternalStyles("." + element.id + "{ display:none; }");
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
@@ -1430,19 +1434,21 @@ function formAJAX(elem, classname) {
         window.location.href = elem.getAttribute("ajax") + "?" + ((elem_qstring.length > 0) ? elem_qstring : "");
     return (elem_qstring);
 }
+
 var pretty = 0;
+
 function prettifyJsonWithColors(jsonObj) {
     const prettyJson = JSON.stringify(jsonObj, null, 2);
     if (pretty == 0) {
         // Add CSS to pipes.js or index.html
         const style = document.createElement('style');
-        style.textContent = `
-        .key { color: purple; }
-        .string { color: green; }
-        .number { color: darkorange; }
-        .boolean { color: blue; }
-        .null { color: magenta; }
-    `;
+        addInternalStyles(`
+            .key { color: purple; }
+            .string { color: green; }
+            .number { color: darkorange; }
+            .boolean { color: blue; }
+            .null { color: magenta; }
+        `);
         document.head.appendChild(style);
     }
     pretty = 1;
@@ -1496,7 +1502,7 @@ function hexToRgb(hex) {
 }
 
 /**
- * Creates a table from CSV data with optional color gradients
+ * Creates a table from CSV data with optional color gradients, checkboxes, radio buttons, and modala functionality
  * @param {string} csvData - The CSV data as a string
  * @param {Object} options - Configuration options
  * @param {string} options.delimiter - CSV delimiter (default: ',')
@@ -1508,10 +1514,12 @@ function hexToRgb(hex) {
  * @param {string} options.gradient.endColor - Ending color in hex
  * @param {string} options.gradient.textColor - Text color in hex (default: '#000000')
  * @param {function} options.gradient.valueMapper - Function to map cell values to gradient positions
+ * @param {string} options.selectionType - 'checkbox', 'radio', or 'none' (default: 'none')
+ * @param {string} options.selectionName - Name attribute for radio buttons (required if selectionType is 'radio')
+ * @param {boolean} options.enableModala - Enable modala functionality for cells (default: false)
  * @returns {HTMLTableElement} The generated table element
  */
 function createTableFromCSV(csvData, options = {}) {
-    // Default options
     const defaults = {
         delimiter: ',',
         hasHeader: true,
@@ -1522,30 +1530,41 @@ function createTableFromCSV(csvData, options = {}) {
             endColor: '#ff0000',
             textColor: '#000000',
             valueMapper: (value) => parseFloat(value) || 0
-        }
+        },
+        selectionType: 'none',
+        selectionName: ''
     };
 
-    // Merge options with defaults
     options = { ...defaults, ...options };
     options.gradient = { ...defaults.gradient, ...options.gradient };
 
-    // Parse CSV
-    const rows = csvData.trim().split('\n').map(row => 
+    const rows = csvData.trim().split('\n').map(row =>
         row.split(options.delimiter).map(cell => cell.trim())
     );
 
-    // Create table
     const table = document.createElement('table');
     table.className = options.tableClass;
-
-    // Add default table styling
     table.style.borderCollapse = 'collapse';
     table.style.width = '100%';
 
-    // Process header if present
     if (options.hasHeader) {
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
+
+        if (options.selectionType !== 'none') {
+            const selectionHeader = document.createElement('th');
+            if (options.selectionType === 'checkbox') {
+                const headerCheckbox = document.createElement('input');
+                headerCheckbox.type = 'checkbox';
+                headerCheckbox.addEventListener('change', (e) => {
+                    table.querySelectorAll('tbody input[type="checkbox"]')
+                         .forEach(input => input.checked = e.target.checked);
+                });
+                selectionHeader.appendChild(headerCheckbox);
+            }
+            headerRow.appendChild(selectionHeader);
+        }
+
         rows[0].forEach(header => {
             const th = document.createElement('th');
             th.textContent = header;
@@ -1557,11 +1576,9 @@ function createTableFromCSV(csvData, options = {}) {
         table.appendChild(thead);
     }
 
-    // Create tbody
     const tbody = document.createElement('tbody');
     const dataRows = options.hasHeader ? rows.slice(1) : rows;
 
-    // Find min/max values for gradient scaling if needed
     let minValue = Infinity, maxValue = -Infinity;
     if (options.gradient.type !== 'none') {
         dataRows.forEach(row => {
@@ -1573,20 +1590,36 @@ function createTableFromCSV(csvData, options = {}) {
         });
     }
 
-    // Convert gradient colors to RGB arrays
     const startColor = hexToRgb(options.gradient.startColor);
     const endColor = hexToRgb(options.gradient.endColor);
 
-    // Create table rows
     dataRows.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
+
+        if (options.selectionType !== 'none') {
+            const selectionCell = document.createElement('td');
+            const input = document.createElement('input');
+            input.type = options.selectionType;
+            if (options.selectionType === 'radio') {
+                input.name = options.selectionName;
+            }
+            selectionCell.appendChild(input);
+            tr.appendChild(selectionCell);
+        }
+
         row.forEach((cell, colIndex) => {
             const td = document.createElement('td');
-            td.textContent = cell;
             td.style.padding = '8px';
             td.style.border = '1px solid #ddd';
 
-            // Apply gradient coloring based on type
+            if (cell.startsWith('modala:')) {
+                const [_, filename, targetId, limit] = cell.split(':');
+                td.id = targetId || `modala-cell-${rowIndex}-${colIndex}`;
+                modal(filename, td, limit);
+            } else {
+                td.textContent = cell;
+            }
+
             if (options.gradient.type !== 'none') {
                 let factor = 0;
                 const value = options.gradient.valueMapper(cell);
@@ -1599,7 +1632,6 @@ function createTableFromCSV(csvData, options = {}) {
                         factor = rowIndex / (dataRows.length - 1);
                         break;
                     case 'matrix':
-                        // Normalize value between 0 and 1
                         factor = (value - minValue) / (maxValue - minValue);
                         break;
                 }
@@ -1634,7 +1666,7 @@ function handleCSV(elem, csvData) {
     };
 
     const table = createTableFromCSV(csvData, options);
-    
+
     if (elem.hasAttribute('insert')) {
         const target = document.getElementById(elem.getAttribute('insert'));
         if (target) {
