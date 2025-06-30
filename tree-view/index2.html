@@ -74,12 +74,7 @@
 
 <script src="dotpipe.js"></script>
 <script>
-
     var chocolate = {
-        "form": {
-            "tagname": "form",
-            "id": "order-form",
-            "class": "order-form",
             "children": {
                 "nest0": {
                     "tagname": "h3",
@@ -87,13 +82,13 @@
                 },
                 "nest1": {
                     "tagname": "label",
-                    "for": "quantity",
+                    "for": "quantity1",
                     "textContent": "Quantity:"
                 },
                 "nest2": {
                     "tagname": "input",
                     "type": "number",
-                    "id": "quantity",
+                    "id": "quantity1",
                     "name": "quantity",
                     "min": "1",
                     "value": "1",
@@ -101,26 +96,26 @@
                 },
                 "nest3": {
                     "tagname": "label",
-                    "for": "name",
+                    "for": "name1",
                     "textContent": "Your Name:"
                 },
                 "nest4": {
                     "tagname": "input",
                     "type": "text",
-                    "id": "name",
+                    "id": "name1",
                     "name": "name",
                     "required": true,
                     "class": "order-form"
                 },
                 "nest5": {
                     "tagname": "label",
-                    "for": "email",
+                    "for": "email1",
                     "textContent": "Email:"
                 },
                 "nest6": {
                     "tagname": "input",
                     "type": "email",
-                    "id": "email",
+                    "id": "email1",
                     "name": "email",
                     "required": true,
                     "class": "order-form"
@@ -128,20 +123,19 @@
                 "nest7": {
                     "tagname": "button",
                     "type": "submit",
+                    "id": "submit-order-one",
                     "textContent": "Submit Order",
-                    "class": "submit-button json",
-                    "ajax": "process-order.php",
-                    "insert": "order-confirmation",
-                    "method": "POST",
+                    "class": "order-form json",
+                    "ajax": "./process-order.php;order-confirmation",
+                    "method": "GET",
                     "form-class": "order-form"
                 },
                 "nest8": {
                     "tagname": "div",
                     "id": "order-confirmation"
+
                 }
             }
-        }
-
-    }
+        };
     modala(chocolate, document.body);
 </script>

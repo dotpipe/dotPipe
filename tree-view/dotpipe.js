@@ -72,7 +72,7 @@
   **** go on if there is no input to replace them.
   */
 
-document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", function () {
     try {
         if (document.body != null && JSON.parse(document.body.textContent)) {
             const irc = JSON.parse(document.body.textContent);
@@ -159,78 +159,58 @@ let domContentLoad = (again = false) => {
 
     });
 
-    let currentModalTip = null;
-
     let elements_mouse = document.querySelectorAll(".mouse");
     console.log(elements_mouse.length);
     Array.from(elements_mouse).forEach(function (elemv) {
         console.log(elemv);
-        if (!elemv.dataset.hasListener) {
-            // Add your event listener here
-            elemv.dataset.hasListener = 'true';
-        }
-        else return;
         if (elemv.hasAttribute("tool-tip")) {
             console.log(elemv.getAttribute("modal-tip") + "...");
             var eve = elemv.getAttribute("event");
             rv = ['mouseover'];
             if (eve) {
-                rv = eve.split(";");
+                rv = ev.split(";");
             }
             Array.from(rv).forEach((ev) => {
                 elemv.addEventListener(ev, function (el) {
-                    if (currentModalTip) {
-                        currentModalTip.remove();
-                        currentModalTip = null;
-                    }
                     const rect = el.target.getBoundingClientRect();
                     const x = rect.left;
                     const y = rect.top;
                     var duration = 750;
-                    var [tip, id, classes, duration, z] = elemv.getAttribute("tool-tip").split(";");
-                    currentModalTip = null;
-                    currentModalTip = textCard(tip, id, classes, x + 15, y + 15, duration, z);
+                    var [tip, id, classes, duration, z] = el.target.getAttribute("tool-tip").split(";");
+                    textCard(tip, id, classes, x + 15, y + 15, duration, z);
                 });
             });
         }
         if (elemv.hasAttribute("modal-tip")) {
+            console.log(elemv.getAttribute("modal-tip") + "...");
             var eve = elemv.getAttribute("event");
             rv = ['mouseover'];
             if (eve) {
-                rv = eve.split(";");
+                rv = ev.split(";");
             }
-            else rv = ['mouseover'];
             Array.from(rv).forEach((ev) => {
                 elemv.addEventListener(ev, function (el) {
-                    if (currentModalTip) {
-                        currentModalTip.remove();
-                        currentModalTip = null;
-                    }
                     const rect = el.target.getBoundingClientRect();
-                    const x = el.screenX;
-                    const y = el.screenY;
-                    console.log(el);
-                    var [filename, id, classes, duration, z] = elemv.getAttribute("modal-tip").split(";");
-                    currentModalTip = null;
-                    currentModalTip = modalCard(filename, id, classes, x + 15, y + 15, duration, z);
+                    const x = rect.left;
+                    const y = rect.top;
+                    var [filename, duration, z] = el.target.getAttribute("modal-tip").split(";");
+                    modalCard(filename, x + 15, y + 15, duration, z);
                 });
             });
         }
         var ev = elemv.getAttribute("event");
-        if (ev && !ev.includes(";")) {
-
+        if (!ev) {
             elemv.addEventListener("click", function () {
-                pipes(elemv);
+                pipes(elemv, auto);
             });
             return;
         }
-        if (ev && ev.includes(";")) {
-            Array.from(rv).forEach((v) => {
-                elemv.addEventListener(v, function () {
-                    pipes(elemv);
-                });
+        var rv = ev.split(";");
+        Array.from(rv).forEach((v) => {
+            elemv.addEventListener(v, function () {
+                pipes(elemv, auto);
             });
-        }
+        });
     });
 }
 
@@ -285,74 +265,32 @@ function copyContentById(id) {
     };
 }
 
-function addInternalStyles(styles) {
-    let styleTag = document.getElementById('dotpipe-internal-styles');
-    if (!styleTag) {
-        styleTag = document.createElement('style');
-        styleTag.id = 'dotpipe-internal-styles';
-        document.head.appendChild(styleTag);
-    }
-
-    if (typeof PAGE_NONCE !== 'undefined') {
-        styleTag.nonce = PAGE_NONCE;
-    }
-
-    // Parse the existing styles
-    let existingStyles = styleTag.textContent;
-    let styleMap = new Map();
-
-    // Parse new styles
-    let newStyles = styles.match(/[^}]+\{[^}]+\}/g) || [];
-
-    newStyles.forEach(style => {
-        let [selector, rules] = style.split('{');
-        selector = selector.trim();
-        rules = rules.replace('}', '').trim();
-
-        if (styleMap.has(selector)) {
-            // Merge rules if selector already exists
-            let existingRules = styleMap.get(selector);
-            let mergedRules = new Set([...existingRules.split(';'), ...rules.split(';')]);
-            styleMap.set(selector, Array.from(mergedRules).join(';'));
-        } else {
-            styleMap.set(selector, rules);
-        }
-    });
-
-    // Rebuild the style content
-    let uniqueStyles = Array.from(styleMap.entries()).map(([selector, rules]) => {
-        return `${selector} { ${rules} }`;
-    }).join('\n');
-
-    styleTag.setAttribute('textContent', uniqueStyles);
-}
-
-function modalCard(filename, id = "", classes = "", x_center = false, y_center = false, duration = 1000, zindex = 100) {
+function modalCard(filename, x_center = false, y_center = false, duration = -1, zindex = 100) {
     var copied = document.createElement("div");
-    if (id)
-        copied.id = id;
-
-    if (classes != undefined && classes != "")
-        copied.classList.add(classes);
+    copied.id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    copied.style.padding = "10px";
+    copied.style.textAlign = "center";
+    copied.style.backgroundColor = "white";
+    copied.style.position = "absolute";
     var x_pos = 0;
     if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
     else if (typeof x_center === 'boolean' && !x_center) x_pos = 0;
     else x_pos = x_center;
+    copied.style.left = x_pos + "px";
     var y_pos = 0;
     if (typeof y_center === 'boolean' && y_center) y_pos = window.scrollY + Math.abs((window.innerHeight / 2) - copied.style.height / 2);
     else if (typeof y_center === 'boolean' && !y_center) y_pos = 0;
     else y_pos = y_center;
-    addInternalStyles(`#${copied.id} { margin-left: ${x_pos}px; margin-top: ${y_pos}px; z-index: ${zindex}; padding: 10px; position: absolute; }`);
-
-    document.body.appendChild(copied);
+    copied.style.top = y_pos + "px";
+    copied.style.zIndex = zindex;
     modal(filename, copied);
+    document.body.appendChild(copied);
 
     if (duration > -1) {
         setTimeout(() => {
-            copied.remove();
+            document.body.removeChild(copied);
         }, duration);
     }
-    return copied;
 }
 
 function textCard(text, id = "", classes = "", x_center = false, y_center = false, duration = -1, zindex = 100) {
@@ -360,24 +298,29 @@ function textCard(text, id = "", classes = "", x_center = false, y_center = fals
     copied.id = id;
     if (classes != undefined && classes != "")
         copied.classList.add(classes);
+    copied.style.padding = "10px";
+    copied.style.textAlign = "center";
+    copied.style.backgroundColor = "white";
+    copied.style.position = "absolute";
     var x_pos = 0;
     if (typeof x_center === 'boolean' && x_center) x_pos = (document.body.offsetWidth - copied.style.width) / 2;
     else if (typeof x_center === 'boolean' && !x_center) x_pos = 0;
     else x_pos = x_center;
+    copied.style.left = x_pos + "px";
+    copied.style.zIndex = zindex;
     copied.textContent = text;
     var y_pos = 0;
     if (typeof y_center === 'boolean' && y_center) y_pos = window.scrollY + Math.abs((window.innerHeight / 2) - copied.style.height / 2);
     else if (typeof y_center === 'boolean' && !y_center) y_pos = 0;
     else y_pos = y_center;
-    addInternalStyles("#" + copied.id + " { left:" + x_pos + "px; top:" + y_pos + "px; z-index:" + zindex + "; padding:10px; position:absolute; }");
+    copied.style.top = y_pos + "px";
     document.body.appendChild(copied);
 
     if (duration > -1) {
         setTimeout(() => {
-            copied.remove();
+            document.body.removeChild(copied);
         }, duration);
     }
-    return copied;
 }
 
 let highlightedItem = null;
@@ -387,6 +330,7 @@ function renderTree(value, tempTag) {
         tempTag = document.getElementById(tempTag);
     }
     if (value == undefined) {
+        console.log(tempTag + "******");
         console.error("value of reference incorrect");
         return;
     }
@@ -395,37 +339,24 @@ function renderTree(value, tempTag) {
     temp.id = value["id"];
     temp.classList.add('tree-item');
 
-    // Create container for icon and text
-    const contentContainer = document.createElement('div');
-    addInternalStyles("display:flex;align-items:center;gap:5px;");
-
-    // Handle custom icon if specified
     if (value["icon"]) {
-        const img = document.createElement('img');
+        let img = document.createElement('img');
         img.src = value["icon"];
-        img.classList.add('tree-icon');
-        img.onerror = function () {
-            // Remove broken image if icon fails to load
-            this.remove();
-        };
-        contentContainer.appendChild(img);
+        img.style.marginRight = '5px';
+        temp.appendChild(img);
     }
 
-    // Add text content
-    const textSpan = document.createElement('span');
-    textSpan.textContent = value.textContent || value.label;
-    contentContainer.appendChild(textSpan);
-
-    temp.appendChild(contentContainer);
-
-    // Check if item has children
-    const hasChildren = Object.entries(value).some(([k, v]) => v instanceof Object);
-    temp.setAttribute('data-has-children', hasChildren);
+    temp.id = value.id;
+    temp.textContent = value.textContent || value.label;
+    if (temp.textContent.length == 0) {
+        console.error("No text content for tree item. Use \"label\" or \"textContent\"");
+        exit();
+    }
 
     Object.entries(value).forEach(([k, v]) => {
         let keyName = (!isNaN(k.toString()) ? "data-" + k.toString() : k);
         if (v instanceof Object) {
-            let subContainer = document.createElement('div');
+            let subContainer = document.createElement('span');
             subContainer.classList.add('sub-tree');
             temp.appendChild(subContainer);
             renderTree(v, subContainer);
@@ -433,8 +364,7 @@ function renderTree(value, tempTag) {
                 e.stopPropagation();
                 subContainer.style.display = subContainer.style.display === 'none' ? 'block' : 'none';
             });
-        } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" &&
-            k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
+        } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
             temp.setAttribute(k, v);
         }
     });
@@ -446,10 +376,81 @@ function renderTree(value, tempTag) {
         pipes(temp);
     });
 
+    // temp = htmlDecode(temp);
+
     tempTag.appendChild(temp);
+
     return tempTag;
 }
+// function renderTree(value, tempTag) {
+//     if (typeof tempTag == "string") {
+//         tempTag = document.getElementById(tempTag);
+//     }
+//     if (value == undefined) {
+//         console.error("value of reference incorrect");
+//         return;
+//     }
 
+//     var temp = document.createElement(value["tagname"] || 'span');
+//     temp.id = value["id"];
+//     temp.classList.add('tree-item');
+
+//     // Create container for icon and text
+//     const contentContainer = document.createElement('div');
+//     contentContainer.style.display = 'flex';
+//     contentContainer.style.alignItems = 'center';
+//     contentContainer.style.gap = '5px';
+
+//     // Handle custom icon if specified
+//     if (value["icon"]) {
+//         const img = document.createElement('img');
+//         img.src = value["icon"];
+//         img.classList.add('tree-icon');
+//         img.onerror = function () {
+//             // Remove broken image if icon fails to load
+//             this.remove();
+//         };
+//         contentContainer.appendChild(img);
+//     }
+
+//     // Add text content
+//     const textSpan = document.createElement('span');
+//     textSpan.textContent = value.textContent || value.label;
+//     contentContainer.appendChild(textSpan);
+
+//     temp.appendChild(contentContainer);
+
+//     // Check if item has children
+//     const hasChildren = Object.entries(value).some(([k, v]) => v instanceof Object);
+//     temp.setAttribute('data-has-children', hasChildren);
+
+//     Object.entries(value).forEach(([k, v]) => {
+//         let keyName = (!isNaN(k.toString()) ? "data-" + k.toString() : k);
+//         if (v instanceof Object) {
+//             let subContainer = document.createElement('div');
+//             subContainer.classList.add('sub-tree');
+//             temp.appendChild(subContainer);
+//             renderTree(v, subContainer);
+//             temp.addEventListener('click', (e) => {
+//                 e.stopPropagation();
+//                 subContainer.style.display = subContainer.style.display === 'none' ? 'block' : 'none';
+//             });
+//         } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" &&
+//             k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
+//             temp.setAttribute(k, v);
+//         }
+//     });
+
+//     temp.addEventListener('click', (e) => {
+//         e.stopPropagation();
+//         document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+//         temp.classList.add('highlight');
+//         pipes(temp);
+//     });
+
+//     tempTag.appendChild(temp);
+//     return tempTag;
+// }
 /**
  * Recursively creates HTML elements based on a JSON object and appends them to the document head.
  *
@@ -632,7 +633,7 @@ function modala(value, tempTag, root, id) {
     }
 
     var temp = document.createElement(value["tagname"]);
-    if (value["tagname"] == undefined) {
+    if (value["tagname"] == "undefined") {
         temp.tagName = "div";
         temp = document.createElement("div");
     }
@@ -711,9 +712,7 @@ function modala(value, tempTag, root, id) {
                     gth.src = e;
                     gth.width = value['width'];
                     gth.height = value['height'];
-                    // gth.style.display = "hidden";
-                    temp.classList.add("id-" + temp.id + "-img");
-                    addInternalStyles(".id-" + temp.id + "-img { display:hidden; }");
+                    gth.style.display = "hidden";
                     temp.setAttribute("sources", value['sources'])
                     temp.appendChild(gth);
                 }
@@ -732,12 +731,11 @@ function modala(value, tempTag, root, id) {
                     gth.src = e;
                     gth.width = value['width'];
                     gth.height = value['height'];
-                    addInternalStyles(".id-" + temp.id + "-video { display:hidden; }");
+                    gth.style.display = "hidden";
                     var i = 0;
                     while (e.substr(-i, 1) != '.') i++;
                     gth.type = "video/" + e.substring(-(i - 1));
                     gth.controls = (values['controls'] != undefined && value['controls'] != false) ? true : false;
-                    temp.classList.add("id-" + temp.id + "-video");
                     temp.appendChild(gth);
                 }
                 else if (value['type'] == "modal") {
@@ -810,7 +808,7 @@ function modala(value, tempTag, root, id) {
         }
         else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
             try {
-                addInternalStyles("." + temp.id + " { " + k + ": " + v + "; }");
+                temp.setAttribute(k, v);
             }
             catch (e) {
                 console.error(`Error setting attribute ${k}:`, e);
@@ -821,8 +819,7 @@ function modala(value, tempTag, root, id) {
             (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
         }
         else if (k.toLowerCase() == "style") {
-            addInternalStyles(".id-" + temp.id + " { " + v + " }");
-            temp.classList.add("id-" + temp.id);
+            temp.style.cssText = v;
         }
     });
     tempTag.appendChild(temp);
@@ -917,9 +914,9 @@ function shiftFilesLeft(elem, auto = false, delay = 1000) {
     }
 
     if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
-        addInternalStyles("." + elem.id + "{ display:hidden; }");
+        elem.style.display = "block";
     else
-        addInternalStyles("." + elem.id + "{ display:inline-block; }");
+        elem.style.display = "inline-block";
 
     if (elem.classList.contains("time-active")) {
         auto = true;
@@ -966,9 +963,9 @@ function shiftFilesRight(elem, auto = false, delay = 1000) {
     }
 
     if (elem.hasAttribute("vertical") && elem.getAttribute("vertical") == "true")
-        addInternalStyles("." + id + " { display:block; }");
+        elem.style.display = "block";
     else
-        addInternalStyles("." + id + " { display:inline-block; }");
+        elem.style.display = "inline-block";
 
     if (elem.classList.contains("time-active")) {
         auto = true;
@@ -1055,6 +1052,7 @@ function fileOrder(elem) {
     }
 }
 
+
 function htmlToJson(htmlString) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlString, 'text/html');
@@ -1097,7 +1095,7 @@ function addPipe(elem = document) {
         document.addEventListener(eventType, function (event) {
             let target = event.target;
             if (target.classList.contains('mouse') || target.id !== null) {
-                if (!target.dataset.hasListener)
+                if (!hasPipeListener(target))
                     pipes(target);
                 console.log(target.id);
             }
@@ -1106,12 +1104,11 @@ function addPipe(elem = document) {
 }
 
 function flashClickListener(elem) {
-    if (!elem.dataset.hasListener) {
-        // Add your event listener here
-        elem.dataset.hasListener = 'true';
-    }
-    else if (elem.dataset.hasListener || document.getElementById(elem.id) != null) return;
     if (elem.id) {
+        elem.removeEventListener('click', () => {
+            pipes(elem);
+            console.log(elem.id);
+        });
         elem.addEventListener('click', () => {
             pipes(elem);
             console.log(elem.id);
@@ -1121,17 +1118,13 @@ function flashClickListener(elem) {
 }
 
 function attachEventListeners(elem) {
-    if (elem.dataset.hasListener || document.getElementById(elem.id) != null) {
-        return;
-    }
     if (elem.classList.contains('mouse') || elem.id !== null) {
         let events = (elem.getAttribute("event") || "click").split(';');
         events.forEach(event => elem.addEventListener(event, () => {
             pipes(elem);
             console.log(elem.id);
         }));
-        if (!elem.dataset.hasListener) {
-            elem.dataset.hasListener = 'true';
+        if (!hasPipeListener(elem)) {
             elem.addEventListener('click', () => {
                 pipes(elem);
                 console.log(elem.id);
@@ -1198,12 +1191,12 @@ function pipes(elem, stop = false) {
     }
     if (elem.hasAttribute("display") && elem.getAttribute("display")) {
         var optsArray = elem.getAttribute("display").split(";");
-        optsArray.forEach((e) => {
+        optsArray.forEach((e, f) => {
             var x = document.getElementById(e);
             if (x !== null && x.style.display !== "none")
-                addInternalStyles("." + x.id + "{ display:hidden; }");
+                x.style.display = "none";
             else if (x !== null)
-                addInternalStyles("." + x.id + "{ display:block; }");
+                x.style.display = "block";
         });
     }
     if (elem.hasAttribute("turn")) {
@@ -1357,34 +1350,14 @@ function pipes(elem, stop = false) {
         var element = document.createElement('a');
         var location = (elem.hasAttribute("directory")) ? elem.getAttribute("directory") : "./";
         element.setAttribute('href', location + encodeURIComponent(text));
-        addInternalStyles("." + element.id + "{ display:none; }");
+        element.style.display = 'none';
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
         return;
     }
-    if (elem.hasAttribute("ajax")) {
-        var parts = elem.getAttribute("ajax").split(";");
-        parts.forEach((part) => {
-            var [file, target, limit] = part.split(":");
-            var clone = elem.cloneNode(true);
-            clone.setAttribute("ajax", file);
-            clone.setAttribute("insert", target);
-            if (document.getElementById(target) == null) {
-                console.error("Target element not found:", target);
-                return;
-            }
-            else if (document.getElementById(target).childElementCount >= limit) {
-                if (document.getElementById(target).classList.contains("modala-multi-first")) {
-                    document.getElementById(target).removeChild(document.getElementById(target).firstChild.remove);
-                }
-                else if (document.getElementById(target).classList.contains("modala-multi-last")) {
-                    document.getElementById(target).removeChild(document.getElementById(target).lastChild.remove);
-                }
-            }
-            navigate(clone, headers, query, formclass);
-        });
-    }
+    if (elem.hasAttribute("ajax"))
+        navigate(elem, headers, query, formclass);
     else if (elem.hasAttribute("modal")) {
         modalList(elem.getAttribute("modal"));
     }
@@ -1434,21 +1407,19 @@ function formAJAX(elem, classname) {
         window.location.href = elem.getAttribute("ajax") + "?" + ((elem_qstring.length > 0) ? elem_qstring : "");
     return (elem_qstring);
 }
-
 var pretty = 0;
-
 function prettifyJsonWithColors(jsonObj) {
     const prettyJson = JSON.stringify(jsonObj, null, 2);
     if (pretty == 0) {
         // Add CSS to pipes.js or index.html
         const style = document.createElement('style');
-        addInternalStyles(`
-            .key { color: purple; }
-            .string { color: green; }
-            .number { color: darkorange; }
-            .boolean { color: blue; }
-            .null { color: magenta; }
-        `);
+        style.textContent = `
+        .key { color: purple; }
+        .string { color: green; }
+        .number { color: darkorange; }
+        .boolean { color: blue; }
+        .null { color: magenta; }
+    `;
         document.head.appendChild(style);
     }
     pretty = 1;
@@ -1473,208 +1444,6 @@ function prettifyJsonWithColors(jsonObj) {
 function displayColoredJson(elementId, jsonObj) {
     const prettyHtml = prettifyJsonWithColors(jsonObj);
     document.getElementById(elementId).innerHTML = `<pre>${prettyHtml}</pre>`;
-}
-// Add these utility functions at the top of the file
-function interpolateColor(color1, color2, factor) {
-    const result = color1.slice();
-    for (let i = 0; i < 3; i++) {
-        result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
-    }
-    return result;
-}
-
-function componentToHex(c) {
-    const hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
-}
-
-function rgbToHex(rgb) {
-    return "#" + componentToHex(rgb[0]) + componentToHex(rgb[1]) + componentToHex(rgb[2]);
-}
-
-function hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16)
-    ] : null;
-}
-
-/**
- * Creates a table from CSV data with optional color gradients, checkboxes, radio buttons, and modala functionality
- * @param {string} csvData - The CSV data as a string
- * @param {Object} options - Configuration options
- * @param {string} options.delimiter - CSV delimiter (default: ',')
- * @param {boolean} options.hasHeader - Whether CSV has header row (default: true)
- * @param {string} options.tableClass - CSS class for the table
- * @param {Object} options.gradient - Gradient configuration
- * @param {string} options.gradient.type - 'row', 'column', 'matrix', or 'none'
- * @param {string} options.gradient.startColor - Starting color in hex
- * @param {string} options.gradient.endColor - Ending color in hex
- * @param {string} options.gradient.textColor - Text color in hex (default: '#000000')
- * @param {function} options.gradient.valueMapper - Function to map cell values to gradient positions
- * @param {string} options.selectionType - 'checkbox', 'radio', or 'none' (default: 'none')
- * @param {string} options.selectionName - Name attribute for radio buttons (required if selectionType is 'radio')
- * @param {boolean} options.enableModala - Enable modala functionality for cells (default: false)
- * @returns {HTMLTableElement} The generated table element
- */
-function createTableFromCSV(csvData, options = {}) {
-    const defaults = {
-        delimiter: ',',
-        hasHeader: true,
-        tableClass: 'csv-table',
-        gradient: {
-            type: 'none',
-            startColor: '#ffffff',
-            endColor: '#ff0000',
-            textColor: '#000000',
-            valueMapper: (value) => parseFloat(value) || 0
-        },
-        selectionType: 'none',
-        selectionName: ''
-    };
-
-    options = { ...defaults, ...options };
-    options.gradient = { ...defaults.gradient, ...options.gradient };
-
-    const rows = csvData.trim().split('\n').map(row =>
-        row.split(options.delimiter).map(cell => cell.trim())
-    );
-
-    const table = document.createElement('table');
-    table.className = options.tableClass;
-    table.style.borderCollapse = 'collapse';
-    table.style.width = '100%';
-
-    if (options.hasHeader) {
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-
-        if (options.selectionType !== 'none') {
-            const selectionHeader = document.createElement('th');
-            if (options.selectionType === 'checkbox') {
-                const headerCheckbox = document.createElement('input');
-                headerCheckbox.type = 'checkbox';
-                headerCheckbox.addEventListener('change', (e) => {
-                    table.querySelectorAll('tbody input[type="checkbox"]')
-                         .forEach(input => input.checked = e.target.checked);
-                });
-                selectionHeader.appendChild(headerCheckbox);
-            }
-            headerRow.appendChild(selectionHeader);
-        }
-
-        rows[0].forEach(header => {
-            const th = document.createElement('th');
-            th.textContent = header;
-            th.style.padding = '8px';
-            th.style.borderBottom = '2px solid #ddd';
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-    }
-
-    const tbody = document.createElement('tbody');
-    const dataRows = options.hasHeader ? rows.slice(1) : rows;
-
-    let minValue = Infinity, maxValue = -Infinity;
-    if (options.gradient.type !== 'none') {
-        dataRows.forEach(row => {
-            row.forEach(cell => {
-                const value = options.gradient.valueMapper(cell);
-                minValue = Math.min(minValue, value);
-                maxValue = Math.max(maxValue, value);
-            });
-        });
-    }
-
-    const startColor = hexToRgb(options.gradient.startColor);
-    const endColor = hexToRgb(options.gradient.endColor);
-
-    dataRows.forEach((row, rowIndex) => {
-        const tr = document.createElement('tr');
-
-        if (options.selectionType !== 'none') {
-            const selectionCell = document.createElement('td');
-            const input = document.createElement('input');
-            input.type = options.selectionType;
-            if (options.selectionType === 'radio') {
-                input.name = options.selectionName;
-            }
-            selectionCell.appendChild(input);
-            tr.appendChild(selectionCell);
-        }
-
-        row.forEach((cell, colIndex) => {
-            const td = document.createElement('td');
-            td.style.padding = '8px';
-            td.style.border = '1px solid #ddd';
-
-            if (cell.startsWith('modala:')) {
-                const [_, filename, targetId, limit] = cell.split(':');
-                td.id = targetId || `modala-cell-${rowIndex}-${colIndex}`;
-                modal(filename, td, limit);
-            } else {
-                td.textContent = cell;
-            }
-
-            if (options.gradient.type !== 'none') {
-                let factor = 0;
-                const value = options.gradient.valueMapper(cell);
-
-                switch (options.gradient.type) {
-                    case 'row':
-                        factor = colIndex / (row.length - 1);
-                        break;
-                    case 'column':
-                        factor = rowIndex / (dataRows.length - 1);
-                        break;
-                    case 'matrix':
-                        factor = (value - minValue) / (maxValue - minValue);
-                        break;
-                }
-
-                const color = interpolateColor(startColor, endColor, factor);
-                td.style.backgroundColor = rgbToHex(color);
-                td.style.color = options.gradient.textColor;
-            }
-
-            tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-    });
-
-    table.appendChild(tbody);
-    return table;
-}
-
-// Add this to the pipes function to handle CSV files
-function handleCSV(elem, csvData) {
-    const options = {
-        delimiter: elem.getAttribute('csv-delimiter') || ',',
-        hasHeader: elem.getAttribute('csv-header') !== 'false',
-        tableClass: elem.getAttribute('csv-table-class') || 'csv-table',
-        gradient: {
-            type: elem.getAttribute('csv-gradient-type') || 'none',
-            startColor: elem.getAttribute('csv-gradient-start') || '#ffffff',
-            endColor: elem.getAttribute('csv-gradient-end') || '#ff0000',
-            textColor: elem.getAttribute('csv-text-color') || '#000000',
-            valueMapper: (value) => parseFloat(value) || 0
-        }
-    };
-
-    const table = createTableFromCSV(csvData, options);
-
-    if (elem.hasAttribute('insert')) {
-        const target = document.getElementById(elem.getAttribute('insert'));
-        if (target) {
-            target.innerHTML = '';
-            target.appendChild(table);
-        }
-    }
-    return table;
 }
 
 function navigate(elem, opts = null, query = "", classname = "") {
@@ -1824,19 +1593,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
         }
     }
-    else if (elem.classList.contains("csv")) {
-        rawFile.onreadystatechange = function () {
-            if (rawFile.readyState === 4) {
-                try {
-                    handleCSV(elem, rawFile.responseText);
-                    domContentLoad();
-                    flashClickListener(elem);
-                } catch (e) {
-                    console.error("Error handling CSV:", e);
-                }
-            }
-        }
-    }
+
     else if (!elem.classList.contains("json") && !elem.hasAttribute("callback")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {

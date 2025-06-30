@@ -8,64 +8,28 @@
     <script src="./dotpipe.js"></script>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #2c2c2c;
-            color: #e0e0e0;
-            padding: 30px;
-            line-height: 1.6;
-        }
-
-        h1 {
-            color: #4CAF50;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-
-        #jsonTree {
-            background-color: #363636;
-            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #fff;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .tree-item {
             margin-left: 20px;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tree-item:hover {
-            color: #4CAF50;
         }
 
         .highlight {
-            background-color: #4CAF50;
-            color: #fff;
+            background-color: #444;
             border-radius: 5px;
-            padding: 2px 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        .highlight:hover {
-            background-color: #45a049;
+            padding: 2px;
         }
 
         .sub-tree {
             display: none;
             margin-left: 20px;
-            border-left: 1px solid #4CAF50;
-            padding-left: 10px;
-        }
-
-        .tree-icon {
-            width: 16px;
-            height: 16px;
-            margin-right: 5px;
-            vertical-align: middle;
         }
     </style>
-
 </head>
 
 <body>
@@ -80,56 +44,42 @@
                 "sales": {
                     "textContent": "Sales",
                     "td2": {
-                        "ajax": "./tree.json;sales-tag",    // call tree.json and send the data to sales-tag element
-                        "tagname": "div",
-                        "class": "sale-label tree-view",    // tree-view infers this link will be processed by renderTree()
-                        "id": "sales-tag",              // id of the element to be updated
-                        "textContent": "On Sale!",  //can also use label for tree item key
-                        "style": "color: #406;"
-                    },
-                    "sale1": {
-                        "tagname": "div",
+                        "ajax": "tree-view/tree.json",
                         "icon": "apes.jpg",
                         "class": "sale-label tree-view",
                         "id": "sales-tag",
+                        "insert": "sales-tag",
                         "textContent": "On Sale!",
                         "style": "color: #406;"
                     },
                     "sale1": {
-                        "tagname": "div",
-                        "icon": "apes.jpg",                 // image to be displayed as icon
-                        "class": "sale-label tree-view",
-                        "id": "sales-tag",
-                        "textContent": "On Sale!",
-                        "style": "color: #406;"
-                    },
-                    "sale1": {
-                        "tagname": "div",
+                        "tagname": "td",
                         "class": "sale-label mouse",
                         "id": "sales-tag1",
-                        "modal-tip": "tree.json;id3;;2000", // call tree.json and send the data to sales-tag1 element ;class: tree-view; duration: 2000ms; z-index: 100
+                        "modal-tip": "tree-view/tree.json;sales-tag1;tree-item;;;2000;100",
                         "textContent": "On Sale!!!",
                         "style": "color: #406;"
                     },
                     "sale2": {
-                        "tagname": "div",
+                        "tagname": "td",
                         "class": "sale-label mouse test-callback",
                         "id": "sales-tag1",
+                        "modal-tip": "tree-view/tree.json;sales-tag1;tree-item;;;2000;100",
                         "textContent": "NEW ARRIVAL!!!",
                         "style": "color: #406;",
                         "name": "test2",
                         "value": "test1"
                     },
                     "sale3": {
-                        "tagname": "div",
+                        "tagname": "td",
                         "class": "sale-label mouse test-callback",
                         "id": "sales-tag1",
-                        "callback": "test", // callback function to be called when clicked on the tree item
-                        "callback-class": "test-callback", // class to look for for the callback function
+                        "callback": "test",
+                        "callback-class": "test-callback",
                         "textContent": "NEW DEAL!!!",
                         "style": "color: #406;",
-                        "name": "test1", // parameter name to pass to the callback function
-                        "value": "test2" // value to pass to the callback function (passes ...args array with all name/value pairs to the function)
+                        "name": "test1",
+                        "value": "test2"
                     }
                 }
             }

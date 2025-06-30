@@ -4,13 +4,14 @@
         "label": "Table",
         "sales": {
             "textContent": "Sales",
+            "style": "position: absolute; left: 100px; top: 100px;;",
             "td2": {
                 "tagname": "div",
-                "ajax": "tree.json;sales-tag2",
+                "ajax": "tree-view/tree.json;sales-tag2",
                 "class": "sale-label tree-view",
                 "id": "sales-tag2",
                 "textContent": "On Sale!",
-                "style": "color: #666;"
+                "style": "color: black;"
             },
             "sale1": {
                 "tagname": "div",
@@ -18,8 +19,7 @@
                 "id": "sales-tag-tip",
                 "tool-tip": "Tool-tips!;id1;class2;2000;1000",
                 "event": "mouseover",
-                "textContent": "On Sale!!!",
-                "style": "color: #666;"
+                "style": "color:black;position: absolute; left: 100px; top: 100px;"
             }
         }
     }
