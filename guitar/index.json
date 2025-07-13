@@ -140,7 +140,8 @@
 					"tagname": "a",
 					"textContent": "Home",
 					"id": "test",
-					"class": "					"ajax": "./reasons_to_work.json:me:2;./learn-more-info.json:learn-more-content:3",
+					"class": "modala",
+					"ajax": "./reasons_to_work.json:me:2;./learn-more-info.json:learn-more-content:3",
 					"style": "margin: 5px;"
 				},
 				"menuItem2": {
@@ -213,5 +214,5 @@
 		}
 	},
 	"php": "makefile.php",
-    "modal": "reasons_to_work.json"
+	"modal": "reasons_to_work.json"
 }

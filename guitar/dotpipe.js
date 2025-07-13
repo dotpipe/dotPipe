@@ -5,7 +5,7 @@
   *  -------------------------------------------------------------
   *  insert............= [Attr] return ajax call to this id
   *  ajax..............= [Attr] * calls and returns the value file's output ex: <pipe id="id1" ajax="foo.bar:insert1:countByEvent" query="key0:value0;" insert="someID">
-  *  query.............= [Attr] default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
+  *    *  *  query.............= [Attr] default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
   *  turn..............= [Attr] * turns based element routine element ex: <anyTag turn="firstelem;secondelem;" class="decrIndex" index="1"> 
   *  callback..........= [Attr] callback function ex: <pipe id="id1" callback="foo" class="class1 class2" value="submit" callback-class="class1 class2" ajax="page.foo;insert-id1">
   *  callback-class....= [Attr] class to be used in the callback function ex: <pipe id="id1" callback="foo" class="class1 class2" value="submit" callback-class="class1 class2" ajax="page.foo;insert-id1">
@@ -540,31 +540,6 @@ function escapeHtml(html) {
     return p.innerHTML;
 }
 
-const dotpipeStyleManager = {
-    styleMap: new Map(),
-    styleElem: null,
-    ensureStyleElem: function() {
-        if (!this.styleElem) {
-            this.styleElem = document.createElement('style');
-            if (typeof PAGE_NONCE !== 'undefined') this.styleElem.setAttribute('nonce', PAGE_NONCE);
-            document.head.appendChild(this.styleElem);
-        }
-    },
-    addStyle: function(cssText) {
-        let className;
-        if (this.styleMap.has(cssText)) {
-            className = this.styleMap.get(cssText);
-        } else {
-            className = md5(cssText);
-            this.ensureStyleElem();
-            this.styleElem.textContent += `.${className} { ${cssText} }\n`;
-            this.styleMap.set(cssText, className);
-        }
-        return className;
-    }
-};
-
-
 /**
  * 
  * @param {JSON Object} value 
@@ -762,13 +737,7 @@ function modala(value, tempTag, root, id) {
             console.log(v);
             temp.setAttribute("boxes", v);
         }
-        else if (k.toLowerCase() == "style") {
-            // Dedup style, assign class, no inline!
-            const className = dotpipeStyleManager.addStyle(v);
-            temp.classList.add(className);
-            // Do NOT set temp.style.cssText!
-        }
-        else if (!Number(k) && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
+        else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
             try {
                 temp.setAttribute(k, v);
             }
@@ -779,6 +748,9 @@ function modala(value, tempTag, root, id) {
         else if (!Number(k) && k.toLowerCase() != "tagname" && (k.toLowerCase() == "textcontent" || k.toLowerCase() == "innerhtml" || k.toLowerCase() == "innertext")) {
             const val = v.replace(/\r?\n/g, "<br>");
             (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
+        }
+        else if (k.toLowerCase() == "style") {
+            temp.style.cssText = v;
         }
     });
     tempTag.appendChild(temp);
@@ -1299,7 +1271,6 @@ function pipes(elem, stop = false) {
             }
             navigate(clone, headers, query, formclass);
         });
-        return;
     }
     // This is a quick way to make a downloadable link in an href
     //     else
@@ -1540,15 +1511,14 @@ function navigate(elem, opts = null, query = "", classname = "") {
                         insertElement.firstChild.remove();
                     }
                 }
-                var newContent = elem.getAttribute("ajax").split(':')[1] ?? elem.getAttribute("insert");
-                var newNode = document.createElement(newContent);
-                modala(allText, newNode);
+                var newContent = document.createElement('div');
+                modala(allText, newContent);
                 domContentLoad()
                 flashClickListener(elem);
                 if (elem.classList.contains("modala-multi-first")) {
-                    insertElement.insertBefore(newNode, insertElement.firstChild);
+                    insertElement.insertBefore(newContent, insertElement.firstChild);
                 } else {
-                    insertElement.appendChild(newNode);
+                    insertElement.appendChild(newContent);
                 }
             }
         }
