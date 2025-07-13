@@ -1260,7 +1260,7 @@ function pipes(elem, stop = false) {
         carousel(elem, auto);
         return;
     }
-    if (elem.classList.contains("ajax-limit")) {
+    if (elem.hasAttribute("ajax")) {
         var parts = elem.getAttribute("ajax").split(";");
         parts.forEach((part) => {
             var [file, target, limit] = part.split(":");
@@ -1513,14 +1513,15 @@ function navigate(elem, opts = null, query = "", classname = "") {
                         insertElement.firstChild.remove();
                     }
                 }
-                var newContent = document.createElement('div');
-                modala(allText, newContent);
+                var newContent = elem.getAttribute("ajax").split(':')[1] ?? elem.getAttribute("insert");
+                var newNode = document.createElement(newContent);
+                modala(allText, newNode);
                 domContentLoad()
                 flashClickListener(elem);
                 if (elem.classList.contains("modala-multi-first")) {
-                    insertElement.insertBefore(newContent, insertElement.firstChild);
+                    insertElement.insertBefore(newNode, insertElement.firstChild);
                 } else {
-                    insertElement.appendChild(newContent);
+                    insertElement.appendChild(newNode);
                 }
             }
         }

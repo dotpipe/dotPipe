@@ -1328,7 +1328,7 @@ function pipes(elem, stop = false) {
         carousel(elem, auto);
         return;
     }
-    if (elem.classList.contains("ajax-limit")) {
+    if (elem.hasAttribute("ajax")) {
         var parts = elem.getAttribute("ajax").split(";");
         parts.forEach((part) => {
             var [file, target, limit] = part.split(":");
@@ -1393,20 +1393,22 @@ function formAJAX(elem, classname) {
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
-        elem_qstring = elem_qstring + elem_value.name + "=" + elem_value.value + "&";
-        // Multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {
                 if (o.selected) {
-                    elem_qstring = elem_qstring + "&" + elem_value.getAttribute('name') + "=" + o.getAttribute('name');
+                    elem_qstring = elem_qstring + elem_value.name + "=" + o.value + "&";
                 }
             }
         }
+        elem_qstring = elem_qstring + elem_value.name + "=" + elem_value.value + "&";
+        // Multi-select box
+
     }
     if (elem.classList.contains("redirect"))
         window.location.href = elem.getAttribute("ajax") + "?" + ((elem_qstring.length > 0) ? elem_qstring : "");
     return (elem_qstring);
 }
+
 var pretty = 0;
 function prettifyJsonWithColors(jsonObj) {
     const prettyJson = JSON.stringify(jsonObj, null, 2);
@@ -1581,19 +1583,19 @@ function navigate(elem, opts = null, query = "", classname = "") {
                         insertElement.firstChild.remove();
                     }
                 }
-                var newContent = document.createElement('div');
-                modala(allText, newContent);
+                var newContent = elem.getAttribute("ajax").split(':')[1] ?? elem.getAttribute("insert");
+                var newNode = document.createElement(newContent);
+                modala(allText, newNode);
                 domContentLoad()
                 flashClickListener(elem);
                 if (elem.classList.contains("modala-multi-first")) {
-                    insertElement.insertBefore(newContent, insertElement.firstChild);
+                    insertElement.insertBefore(newNode, insertElement.firstChild);
                 } else {
-                    insertElement.appendChild(newContent);
+                    insertElement.appendChild(newNode);
                 }
             }
         }
     }
-
     else if (!elem.classList.contains("json") && !elem.hasAttribute("callback")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {

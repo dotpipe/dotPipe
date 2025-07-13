@@ -86,7 +86,7 @@
 					"style": "float: right; font-size:8px; padding: 30px;",
 					"textContent": "Learn More About Financing Through David's",
 					"class": "modala",
-					"ajax": "reasons_to_work.json",
+					"ajax": "./reasons_to_work.json",
 					"insert": "me"
 				},
 				"colspan": "4"
@@ -121,7 +121,7 @@
 					"id": "dark-mode-button",
 					"textContent": "Deals",
 					"class": "multi-part modala-multi-last deal-button modala",
-					"ajax": "learn-more-info.json:learn-more-content",
+					"ajax": "./learn-more-info.json:learn-more-content",
 					"boxes": 3
 				},
 				"menuItemA": {
@@ -140,8 +140,8 @@
 					"tagname": "a",
 					"textContent": "Home",
 					"id": "test",
-					"class": "multi-part modala-multi-first modala menu-item",
-					"ajax": "reasons_to_work.json:me:2;learn-more-info.json:learn-more-content:3",
+					"class": "ajax-limit multi-part modala-multi-first modala menu-item",
+					"ajax": "./reasons_to_work.json:me:2;./learn-more-info.json:learn-more-content:3",
 					"style": "margin: 5px;"
 				},
 				"menuItem2": {

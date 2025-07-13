@@ -72,7 +72,10 @@
   **** go on if there is no input to replace them.
   */
 
-  document.addEventListener("DOMContentLoaded", function () {
+
+let PAGE_NONCE = ''; // This will be set later in the script
+
+document.addEventListener("DOMContentLoaded", function () {
     try {
         if (document.body != null && JSON.parse(document.body.textContent)) {
             const irc = JSON.parse(document.body.textContent);
@@ -85,6 +88,8 @@
     catch (e) {
     }
 
+    nonceAllStyleTags();
+    extractInlineStylesWithNonce();
     domContentLoad();
     addPipe(document.body);
 
@@ -214,23 +219,77 @@ let domContentLoad = (again = false) => {
     });
 }
 
-function sha256(message) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(message);
-    return crypto.subtle.digest('SHA-256', data).then(hash => {
-        return Array.from(new Uint8Array(hash))
-            .map(b => b.toString(16).padStart(2, '0'))
-            .join('');
+// Make sure PAGE_NONCE is defined somewhere globally
+// Example: const PAGE_NONCE = 'myRandomNonceString';
+
+function nonceAllStyleTags() {
+    // 1. Nonce every <style> tag with PAGE_NONCE
+    document.querySelectorAll('style').forEach(styleTag => {
+        styleTag.setAttribute('nonce', PAGE_NONCE);
     });
 }
 
-// Usage example to generate a nonce
-function generateNonce() {
-    const randomBytes = new Uint8Array(16);
-    crypto.getRandomValues(randomBytes);
-    return sha256(randomBytes.join('')).then(hash => hash.slice(0, 16));
+// Helper: Hash generator for unique classnames (simple, for demo)
+function hashStyle(length = 16) {
+    // Creates a random alphanumeric string (not cryptographically secure)
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let nonce = '';
+    for (let i = 0; i < length; i++) {
+        nonce += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return nonce;
 }
 
+function extractInlineStylesWithNonce() {
+    const styleMap = new Map();
+    let styleElem = document.createElement('style');
+    styleElem.setAttribute('nonce', PAGE_NONCE);
+    document.head.appendChild(styleElem);
+
+    document.querySelectorAll('[style]').forEach(elem => {
+        const cssText = elem.getAttribute('style');
+        if (!cssText) return;
+        // Use or create a class for this style text
+        let className;
+        if (styleMap.has(cssText)) {
+            className = styleMap.get(cssText);
+        } else {
+            className = hashStyle(cssText);
+            styleElem.textContent += `.${className} { ${cssText} }\n`;
+            styleMap.set(cssText, className);
+        }
+        elem.classList.add(className);
+        elem.removeAttribute('style');
+    });
+}
+
+function hashStyle(str) {
+    let h = 5381, i = str.length;
+    while(i) h = (h * 33) ^ str.charCodeAt(--i);
+    return 'dp-style-' + (h >>> 0).toString(36);
+}
+
+function extractInlineStylesWithNonce() {
+    const styleMap = new Map();
+    let styleElem = document.createElement('style');
+    styleElem.setAttribute('nonce', PAGE_NONCE);
+    document.head.appendChild(styleElem);
+
+    document.querySelectorAll('[style]').forEach(elem => {
+    const cssText = elem.getAttribute('style');
+    if (!cssText) return;
+    let className;
+    if (styleMap.has(cssText)) {
+        className = styleMap.get(cssText);
+    } else {
+        className = hashStyle(cssText);
+        styleElem.textContent += `.${className} { ${cssText} }\n`;
+        styleMap.set(cssText, className);
+    }
+    elem.classList.add(className);
+    elem.removeAttribute('style');
+    });
+}
 function copyContentById(id) {
     // Get the element with the specified ID
     var element = document.getElementById(id);
@@ -336,12 +395,12 @@ function renderTree(value, tempTag) {
     }
 
     var temp = document.createElement(value["tagname"] || 'span');
-    temp.id = value["id"];
+    temp.id = value["textContent"] || value["label"] || value.keyName;
     temp.classList.add('tree-item');
 
-    if (value["icon"]) {
+    if (value.icon) {
         let img = document.createElement('img');
-        img.src = value["icon"];
+        img.src = value.icon;
         img.style.marginRight = '5px';
         temp.appendChild(img);
     }
@@ -382,75 +441,7 @@ function renderTree(value, tempTag) {
 
     return tempTag;
 }
-// function renderTree(value, tempTag) {
-//     if (typeof tempTag == "string") {
-//         tempTag = document.getElementById(tempTag);
-//     }
-//     if (value == undefined) {
-//         console.error("value of reference incorrect");
-//         return;
-//     }
 
-//     var temp = document.createElement(value["tagname"] || 'span');
-//     temp.id = value["id"];
-//     temp.classList.add('tree-item');
-
-//     // Create container for icon and text
-//     const contentContainer = document.createElement('div');
-//     contentContainer.style.display = 'flex';
-//     contentContainer.style.alignItems = 'center';
-//     contentContainer.style.gap = '5px';
-
-//     // Handle custom icon if specified
-//     if (value["icon"]) {
-//         const img = document.createElement('img');
-//         img.src = value["icon"];
-//         img.classList.add('tree-icon');
-//         img.onerror = function () {
-//             // Remove broken image if icon fails to load
-//             this.remove();
-//         };
-//         contentContainer.appendChild(img);
-//     }
-
-//     // Add text content
-//     const textSpan = document.createElement('span');
-//     textSpan.textContent = value.textContent || value.label;
-//     contentContainer.appendChild(textSpan);
-
-//     temp.appendChild(contentContainer);
-
-//     // Check if item has children
-//     const hasChildren = Object.entries(value).some(([k, v]) => v instanceof Object);
-//     temp.setAttribute('data-has-children', hasChildren);
-
-//     Object.entries(value).forEach(([k, v]) => {
-//         let keyName = (!isNaN(k.toString()) ? "data-" + k.toString() : k);
-//         if (v instanceof Object) {
-//             let subContainer = document.createElement('div');
-//             subContainer.classList.add('sub-tree');
-//             temp.appendChild(subContainer);
-//             renderTree(v, subContainer);
-//             temp.addEventListener('click', (e) => {
-//                 e.stopPropagation();
-//                 subContainer.style.display = subContainer.style.display === 'none' ? 'block' : 'none';
-//             });
-//         } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" &&
-//             k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
-//             temp.setAttribute(k, v);
-//         }
-//     });
-
-//     temp.addEventListener('click', (e) => {
-//         e.stopPropagation();
-//         document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
-//         temp.classList.add('highlight');
-//         pipes(temp);
-//     });
-
-//     tempTag.appendChild(temp);
-//     return tempTag;
-// }
 /**
  * Recursively creates HTML elements based on a JSON object and appends them to the document head.
  *
@@ -825,6 +816,30 @@ function modala(value, tempTag, root, id) {
     tempTag.appendChild(temp);
     domContentLoad();
     return tempTag;
+}
+
+function substituteVars(str, vars) {
+    return String(str).replace(/\{\{(.*?)\}\}/g, (_, key) =>
+        (vars[key.trim()] !== undefined ? vars[key.trim()] : '')
+    );
+}
+
+function deepSubstitute(obj, vars) {
+    if (typeof obj === 'string') {
+        return obj.replace(/\{\{(.*?)\}\}/g, (_, key) =>
+            vars[key.trim()] !== undefined ? vars[key.trim()] : ''
+        );
+    } else if (Array.isArray(obj)) {
+        return obj.map(item => deepSubstitute(item, vars));
+    } else if (obj && typeof obj === 'object') {
+        let out = {};
+        for (let k in obj) {
+            out[k] = deepSubstitute(obj[k], vars);
+        }
+        return out;
+    } else {
+        return obj;
+    }
 }
 
 /**
@@ -1393,22 +1408,20 @@ function formAJAX(elem, classname) {
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
+        elem_qstring = elem_qstring + elem_value.name + "=" + elem_value.value + "&";
+        // Multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {
                 if (o.selected) {
-                    elem_qstring = elem_qstring + elem_value.name + "=" + o.value + "&";
+                    elem_qstring = elem_qstring + "&" + elem_value.getAttribute('name') + "=" + o.getAttribute('name');
                 }
             }
         }
-        elem_qstring = elem_qstring + elem_value.name + "=" + elem_value.value + "&";
-        // Multi-select box
-
     }
     if (elem.classList.contains("redirect"))
         window.location.href = elem.getAttribute("ajax") + "?" + ((elem_qstring.length > 0) ? elem_qstring : "");
     return (elem_qstring);
 }
-
 var pretty = 0;
 function prettifyJsonWithColors(jsonObj) {
     const prettyJson = JSON.stringify(jsonObj, null, 2);
@@ -1583,19 +1596,19 @@ function navigate(elem, opts = null, query = "", classname = "") {
                         insertElement.firstChild.remove();
                     }
                 }
-                var newContent = elem.getAttribute("ajax").split(':')[1] ?? elem.getAttribute("insert");
-                var newNode = document.createElement(newContent);
-                modala(allText, newNode);
+                let resolved = deepSubstitute(allText, allText); // or use a custom vars object
+                modala(resolved, tempTag, root, id);
                 domContentLoad()
                 flashClickListener(elem);
                 if (elem.classList.contains("modala-multi-first")) {
-                    insertElement.insertBefore(newNode, insertElement.firstChild);
+                    insertElement.insertBefore(newContent, insertElement.firstChild);
                 } else {
-                    insertElement.appendChild(newNode);
+                    insertElement.appendChild(newContent);
                 }
             }
         }
     }
+
     else if (!elem.classList.contains("json") && !elem.hasAttribute("callback")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
