@@ -5,7 +5,6 @@
   *  -------------------------------------------------------------
   *  insert............= [Attr] return ajax call to this id
   *  ajax..............= [Attr] * calls and returns the value file's output ex: <pipe id="id1" ajax="foo.bar:insert1:countByEvent" query="key0:value0;" insert="someID">
-  *  ajax-limit........= [Attr] * limit the insertions to a element ex: <pipe id="id1" class="ajax-limit" ajax="foo.bar:insert1" boxes="countByEvent" query="key0:value0;">
   *  query.............= [Attr] default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
   *  turn..............= [Attr] * turns based element routine element ex: <anyTag turn="firstelem;secondelem;" class="decrIndex" index="1"> 
   *  callback..........= [Attr] callback function ex: <pipe id="id1" callback="foo" class="class1 class2" value="submit" callback-class="class1 class2" ajax="page.foo;insert-id1">
@@ -336,12 +335,12 @@ function renderTree(value, tempTag) {
     }
 
     var temp = document.createElement(value["tagname"] || 'span');
-    temp.id = value["id"];
+    temp.id = value["textContent"] || value["label"] || value.keyName;
     temp.classList.add('tree-item');
 
-    if (value["icon"]) {
+    if (value.icon) {
         let img = document.createElement('img');
-        img.src = value["icon"];
+        img.src = value.icon;
         img.style.marginRight = '5px';
         temp.appendChild(img);
     }
@@ -382,75 +381,7 @@ function renderTree(value, tempTag) {
 
     return tempTag;
 }
-// function renderTree(value, tempTag) {
-//     if (typeof tempTag == "string") {
-//         tempTag = document.getElementById(tempTag);
-//     }
-//     if (value == undefined) {
-//         console.error("value of reference incorrect");
-//         return;
-//     }
 
-//     var temp = document.createElement(value["tagname"] || 'span');
-//     temp.id = value["id"];
-//     temp.classList.add('tree-item');
-
-//     // Create container for icon and text
-//     const contentContainer = document.createElement('div');
-//     contentContainer.style.display = 'flex';
-//     contentContainer.style.alignItems = 'center';
-//     contentContainer.style.gap = '5px';
-
-//     // Handle custom icon if specified
-//     if (value["icon"]) {
-//         const img = document.createElement('img');
-//         img.src = value["icon"];
-//         img.classList.add('tree-icon');
-//         img.onerror = function () {
-//             // Remove broken image if icon fails to load
-//             this.remove();
-//         };
-//         contentContainer.appendChild(img);
-//     }
-
-//     // Add text content
-//     const textSpan = document.createElement('span');
-//     textSpan.textContent = value.textContent || value.label;
-//     contentContainer.appendChild(textSpan);
-
-//     temp.appendChild(contentContainer);
-
-//     // Check if item has children
-//     const hasChildren = Object.entries(value).some(([k, v]) => v instanceof Object);
-//     temp.setAttribute('data-has-children', hasChildren);
-
-//     Object.entries(value).forEach(([k, v]) => {
-//         let keyName = (!isNaN(k.toString()) ? "data-" + k.toString() : k);
-//         if (v instanceof Object) {
-//             let subContainer = document.createElement('div');
-//             subContainer.classList.add('sub-tree');
-//             temp.appendChild(subContainer);
-//             renderTree(v, subContainer);
-//             temp.addEventListener('click', (e) => {
-//                 e.stopPropagation();
-//                 subContainer.style.display = subContainer.style.display === 'none' ? 'block' : 'none';
-//             });
-//         } else if (k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" &&
-//             k.toLowerCase() != "label" && k.toLowerCase() != "icon") {
-//             temp.setAttribute(k, v);
-//         }
-//     });
-
-//     temp.addEventListener('click', (e) => {
-//         e.stopPropagation();
-//         document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
-//         temp.classList.add('highlight');
-//         pipes(temp);
-//     });
-
-//     tempTag.appendChild(temp);
-//     return tempTag;
-// }
 /**
  * Recursively creates HTML elements based on a JSON object and appends them to the document head.
  *
@@ -608,6 +539,31 @@ function escapeHtml(html) {
     console.log(p);
     return p.innerHTML;
 }
+
+const dotpipeStyleManager = {
+    styleMap: new Map(),
+    styleElem: null,
+    ensureStyleElem: function() {
+        if (!this.styleElem) {
+            this.styleElem = document.createElement('style');
+            if (typeof PAGE_NONCE !== 'undefined') this.styleElem.setAttribute('nonce', PAGE_NONCE);
+            document.head.appendChild(this.styleElem);
+        }
+    },
+    addStyle: function(cssText) {
+        let className;
+        if (this.styleMap.has(cssText)) {
+            className = this.styleMap.get(cssText);
+        } else {
+            className = md5(cssText);
+            this.ensureStyleElem();
+            this.styleElem.textContent += `.${className} { ${cssText} }\n`;
+            this.styleMap.set(cssText, className);
+        }
+        return className;
+    }
+};
+
 
 /**
  * 
@@ -806,7 +762,13 @@ function modala(value, tempTag, root, id) {
             console.log(v);
             temp.setAttribute("boxes", v);
         }
-        else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
+        else if (k.toLowerCase() == "style") {
+            // Dedup style, assign class, no inline!
+            const className = dotpipeStyleManager.addStyle(v);
+            temp.classList.add(className);
+            // Do NOT set temp.style.cssText!
+        }
+        else if (!Number(k) && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
             try {
                 temp.setAttribute(k, v);
             }
@@ -817,9 +779,6 @@ function modala(value, tempTag, root, id) {
         else if (!Number(k) && k.toLowerCase() != "tagname" && (k.toLowerCase() == "textcontent" || k.toLowerCase() == "innerhtml" || k.toLowerCase() == "innertext")) {
             const val = v.replace(/\r?\n/g, "<br>");
             (k.toLowerCase() == "textcontent") ? temp.textContent = val : (k.toLowerCase() == "innerhtml") ? temp.innerHTML = val : temp.innerText = val;
-        }
-        else if (k.toLowerCase() == "style") {
-            temp.style.cssText = v;
         }
     });
     tempTag.appendChild(temp);
@@ -1393,22 +1352,20 @@ function formAJAX(elem, classname) {
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
+        elem_qstring = elem_qstring + elem_value.name + "=" + elem_value.value + "&";
+        // Multi-select box
         if (elem_value.hasOwnProperty("multiple")) {
             for (var o of elem_value.options) {
                 if (o.selected) {
-                    elem_qstring = elem_qstring + elem_value.name + "=" + o.value + "&";
+                    elem_qstring = elem_qstring + "&" + elem_value.getAttribute('name') + "=" + o.getAttribute('name');
                 }
             }
         }
-        elem_qstring = elem_qstring + elem_value.name + "=" + elem_value.value + "&";
-        // Multi-select box
-
     }
     if (elem.classList.contains("redirect"))
         window.location.href = elem.getAttribute("ajax") + "?" + ((elem_qstring.length > 0) ? elem_qstring : "");
     return (elem_qstring);
 }
-
 var pretty = 0;
 function prettifyJsonWithColors(jsonObj) {
     const prettyJson = JSON.stringify(jsonObj, null, 2);
@@ -1596,6 +1553,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
             }
         }
     }
+
     else if (!elem.classList.contains("json") && !elem.hasAttribute("callback")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {

@@ -83,7 +83,7 @@
 				"id": "dark-mode-finance",
 				"h11": {
 					"tagname": "h5",
-					"style": "float: right; font-size:8px; padding: 30px;",
+					"style": "background:orange;color:white;padding:2em;border-radius:12px;font-size:2em;",
 					"textContent": "Learn More About Financing Through David's",
 					"class": "modala",
 					"ajax": "./reasons_to_work.json",
@@ -140,8 +140,7 @@
 					"tagname": "a",
 					"textContent": "Home",
 					"id": "test",
-					"class": "ajax-limit multi-part modala-multi-first modala menu-item",
-					"ajax": "./reasons_to_work.json:me:2;./learn-more-info.json:learn-more-content:3",
+					"class": "					"ajax": "./reasons_to_work.json:me:2;./learn-more-info.json:learn-more-content:3",
 					"style": "margin: 5px;"
 				},
 				"menuItem2": {
