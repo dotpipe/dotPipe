@@ -71,7 +71,7 @@
   **** go on if there is no input to replace them.
   */
 
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     try {
         if (document.body != null && JSON.parse(document.body.textContent)) {
             const irc = JSON.parse(document.body.textContent);
@@ -135,7 +135,9 @@ let domContentLoad = (again = false) => {
             return;
         elem.classList.toggle("disabled");
     });
-
+    // Add this inside your existing domContentLoad function
+    processCsvForeach();
+    initCsvSorting();
     let elements_Carousel = document.getElementsByTagName("carousel");
     Array.from(elements_Carousel).forEach(function (elem) {
         if (elem.classList.contains("time-inactive"))
@@ -211,6 +213,609 @@ let domContentLoad = (again = false) => {
             });
         });
     });
+}
+
+/**
+ * Process all csv-foreach elements in the document
+ * This function handles the loading and processing of CSV data with foreach loops
+ */
+function processCsvForeach() {
+    let csvForEachElements = document.getElementsByTagName("csv-foreach");
+
+    Array.from(csvForEachElements).forEach(function (element) {
+        if (element.classList.contains("processed")) {
+            return;
+        }
+
+        const csvUrl = element.getAttribute("src");
+        const templateSelector = element.getAttribute("template");
+        const filterAttr = element.getAttribute("filter");
+        const limitAttr = element.getAttribute("limit");
+        const sortByAttr = element.getAttribute("sort-by");
+        const sortDirAttr = element.getAttribute("sort-direction") || "asc";
+
+        if (!csvUrl || !templateSelector) {
+            console.error("csv-foreach requires src and template attributes");
+            return;
+        }
+
+        // Mark as being processed to avoid duplicate processing
+        element.classList.add("processing");
+
+        // Fetch the CSV data
+        fetch(csvUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(csvText => {
+                // Parse CSV
+                const rows = parseCSV(csvText);
+
+                // Get header row
+                const headers = rows[0];
+
+                // Convert rows to objects with named properties
+                let dataRows = rows.slice(1).map(row => {
+                    const obj = {};
+                    headers.forEach((header, index) => {
+                        obj[header.trim()] = row[index];
+                    });
+                    return obj;
+                });
+
+                // Apply filtering if specified
+                if (filterAttr) {
+                    const filters = parseFilters(filterAttr);
+                    dataRows = dataRows.filter(row => matchesFilters(row, filters));
+                }
+
+                // Apply sorting if specified
+                if (sortByAttr) {
+                    dataRows = sortData(dataRows, sortByAttr, sortDirAttr);
+                }
+
+                // Apply limit if specified
+                if (limitAttr && !isNaN(parseInt(limitAttr))) {
+                    dataRows = dataRows.slice(0, parseInt(limitAttr));
+                }
+
+                // Get the template
+                const template = document.querySelector(templateSelector);
+                if (!template) {
+                    throw new Error(`Template not found: ${templateSelector}`);
+                }
+
+                // Clear the element
+                element.innerHTML = '';
+
+                // Process each row
+                dataRows.forEach(row => {
+                    const clone = template.content.cloneNode(true);
+
+                    // Process all elements in the template
+                    processTemplateBindings(clone, row);
+
+                    // Append to the container
+                    element.appendChild(clone);
+                });
+
+                // Mark as processed
+                element.classList.remove("processing");
+                element.classList.add("processed");
+
+                // Re-initialize DotPipe elements
+                addPipe(element);
+            })
+            .catch(error => {
+                console.error("Error processing csv-foreach:", error);
+                element.innerHTML = `<div class="error">Error loading CSV data: ${error.message}</div>`;
+                element.classList.remove("processing");
+            });
+    });
+}
+
+/**
+ * Parse CSV text into a 2D array
+ * @param {string} text - The CSV text to parse
+ * @returns {Array} - 2D array of CSV data
+ */
+function parseCSV(text) {
+    // Handle different line endings
+    const lines = text.replace(/\r\n/g, '\n').split('\n');
+    const result = [];
+
+    lines.forEach(line => {
+        if (line.trim() === '') return;
+
+        // Handle quoted values with commas inside
+        const values = [];
+        let inQuote = false;
+        let currentValue = '';
+
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+
+            if (char === '"') {
+                inQuote = !inQuote;
+            } else if (char === ',' && !inQuote) {
+                values.push(currentValue);
+                currentValue = '';
+            } else {
+                currentValue += char;
+            }
+        }
+
+        // Add the last value
+        values.push(currentValue);
+
+        // Clean up values - remove quotes and trim
+        const cleanValues = values.map(val => {
+            val = val.trim();
+            if (val.startsWith('"') && val.endsWith('"')) {
+                val = val.substring(1, val.length - 1);
+            }
+            return val;
+        });
+
+        result.push(cleanValues);
+    });
+
+    return result;
+}
+/**
+ * Parse filter string into a structured format
+ * @param {string} filterStr - Filter string in format "column:value;column2:value2"
+ * @returns {Array} - Array of filter objects
+ */
+function parseFilters(filterStr) {
+    return filterStr.split(';').map(filter => {
+        const [column, value] = filter.split(':');
+        return {
+            column: column.trim(),
+            value: value.trim()
+        };
+    });
+}
+
+/**
+ * Check if a row matches all filters
+ * @param {Object} row - Data row object
+ * @param {Array} filters - Array of filter objects
+ * @returns {boolean} - True if row matches all filters
+ */
+function matchesFilters(row, filters) {
+    return filters.every(filter => {
+        // Handle special operators
+        if (filter.value.startsWith('>')) {
+            return parseFloat(row[filter.column]) > parseFloat(filter.value.substring(1));
+        } else if (filter.value.startsWith('<')) {
+            return parseFloat(row[filter.column]) < parseFloat(filter.value.substring(1));
+        } else if (filter.value.startsWith('!')) {
+            return row[filter.column] !== filter.value.substring(1);
+        } else if (filter.value.includes('*')) {
+            // Wildcard matching
+            const regex = new RegExp('^' + filter.value.replace(/\*/g, '.*') + '$', 'i');
+            return regex.test(row[filter.column]);
+        } else {
+            // Default exact match
+            return row[filter.column] === filter.value;
+        }
+    });
+}
+
+/**
+ * Sort data rows by specified column
+ * @param {Array} data - Array of data row objects
+ * @param {string} sortBy - Column to sort by
+ * @param {string} direction - Sort direction ('asc' or 'desc')
+ * @returns {Array} - Sorted array
+ */
+function sortData(data, sortBy, direction) {
+    return data.sort((a, b) => {
+        let valA = a[sortBy];
+        let valB = b[sortBy];
+
+        // Try to convert to numbers if possible
+        const numA = parseFloat(valA);
+        const numB = parseFloat(valB);
+
+        if (!isNaN(numA) && !isNaN(numB)) {
+            valA = numA;
+            valB = numB;
+        }
+
+        if (valA < valB) {
+            return direction === 'asc' ? -1 : 1;
+        }
+        if (valA > valB) {
+            return direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+    });
+}
+
+/**
+ * Process template bindings with data
+ * @param {Node} template - Template DOM node
+ * @param {Object} data - Data object with properties to bind
+ */
+function processTemplateBindings(template, data) {
+    // Process attributes
+    const allElements = template.querySelectorAll('*');
+    allElements.forEach(el => {
+        // Process text content with {{property}} syntax
+        if (el.textContent && el.textContent.includes('{{')) {
+            el.textContent = el.textContent.replace(/\{\{([^}]+)\}\}/g, (match, prop) => {
+                return data[prop.trim()] || '';
+            });
+        }
+
+        // Process attributes with {{property}} syntax
+        Array.from(el.attributes).forEach(attr => {
+            if (attr.value.includes('{{')) {
+                attr.value = attr.value.replace(/\{\{([^}]+)\}\}/g, (match, prop) => {
+                    return data[prop.trim()] || '';
+                });
+            }
+        });
+
+        // Handle special data-if attribute for conditional rendering
+        if (el.hasAttribute('data-if')) {
+            const condition = el.getAttribute('data-if');
+            const result = evaluateCondition(condition, data);
+            if (!result) {
+                el.style.display = 'none';
+            }
+            el.removeAttribute('data-if');
+        }
+
+        // Handle special data-class attribute for conditional classes
+        if (el.hasAttribute('data-class')) {
+            const classExpr = el.getAttribute('data-class');
+            const classes = classExpr.split(';');
+
+            classes.forEach(classItem => {
+                const [className, condition] = classItem.split(':');
+                if (evaluateCondition(condition, data)) {
+                    el.classList.add(className.trim());
+                }
+            });
+
+            el.removeAttribute('data-class');
+        }
+    });
+}
+
+/**
+ * Evaluate a condition expression against data
+ * @param {string} condition - Condition expression
+ * @param {Object} data - Data object
+ * @returns {boolean} - Result of condition evaluation
+ */
+function evaluateCondition(condition, data) {
+    // Handle simple property check
+    if (!condition.includes('==') && !condition.includes('!=') &&
+        !condition.includes('>') && !condition.includes('<')) {
+        return !!data[condition.trim()];
+    }
+
+    // Handle comparison operators
+    if (condition.includes('==')) {
+        const [left, right] = condition.split('==').map(s => s.trim());
+        const leftVal = data[left] || left;
+        const rightVal = data[right] || right;
+        return leftVal == rightVal;
+    } else if (condition.includes('!=')) {
+        const [left, right] = condition.split('!=').map(s => s.trim());
+        const leftVal = data[left] || left;
+        const rightVal = data[right] || right;
+        return leftVal != rightVal;
+    } else if (condition.includes('>=')) {
+        const [left, right] = condition.split('>=').map(s => s.trim());
+        const leftVal = parseFloat(data[left]) || parseFloat(left);
+        const rightVal = parseFloat(data[right]) || parseFloat(right);
+        return leftVal >= rightVal;
+    } else if (condition.includes('<=')) {
+        const [left, right] = condition.split('<=').map(s => s.trim());
+        const leftVal = parseFloat(data[left]) || parseFloat(left);
+        const rightVal = parseFloat(data[right]) || parseFloat(right);
+        return leftVal <= rightVal;
+    } else if (condition.includes('>')) {
+        const [left, right] = condition.split('>').map(s => s.trim());
+        const leftVal = parseFloat(data[left]) || parseFloat(left);
+        const rightVal = parseFloat(data[right]) || parseFloat(right);
+        return leftVal > rightVal;
+    } else if (condition.includes('<')) {
+        const [left, right] = condition.split('<').map(s => s.trim());
+        const leftVal = parseFloat(data[left]) || parseFloat(left);
+        const rightVal = parseFloat(data[right]) || parseFloat(right);
+        return leftVal < rightVal;
+    }
+
+    return false;
+}
+
+/**
+ * CSV Sorting functionality for DotPipe
+ */
+
+// Add this to your existing domContentLoad function
+function initCsvSorting() {
+    const containers = document.querySelectorAll('.csv-sort-container');
+    containers.forEach(container => {
+        if (container.dataset.initialized === 'true') return;
+
+        // Mark as initialized
+        container.dataset.initialized = 'true';
+
+        // Find the data source
+        const dataSourceId = container.dataset.source;
+        const dataSource = document.getElementById(dataSourceId);
+        if (!dataSource) {
+            console.error(`CSV data source not found: ${dataSourceId}`);
+            return;
+        }
+
+        // Find the template
+        const templateId = container.dataset.template;
+        const template = document.getElementById(templateId);
+        if (!template) {
+            console.error(`Template not found: ${templateId}`);
+            return;
+        }
+
+        // Find sort headers
+        const sortHeaders = container.querySelectorAll('.csv-sort-header');
+        sortHeaders.forEach(header => {
+            const column = header.dataset.column;
+            if (!column) return;
+
+            // Add click handler
+            header.addEventListener('click', function () {
+                // Toggle sort direction
+                const currentDirection = header.dataset.direction || 'none';
+                let newDirection = 'asc';
+
+                if (currentDirection === 'asc') {
+                    newDirection = 'desc';
+                } else if (currentDirection === 'desc') {
+                    newDirection = 'asc';
+                }
+
+                // Update UI for all headers
+                sortHeaders.forEach(h => {
+                    h.classList.remove('sort-asc', 'sort-desc');
+                    h.dataset.direction = 'none';
+                });
+
+                // Update current header
+                header.dataset.direction = newDirection;
+                header.classList.add(newDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+
+                // Perform the sort
+                sortCsvData(dataSource, container, column, newDirection, template);
+            });
+        });
+
+        // Initial sort if specified
+        const initialSortColumn = container.dataset.initialSort;
+        const initialSortDirection = container.dataset.initialDirection || 'asc';
+
+        if (initialSortColumn) {
+            const header = container.querySelector(`.csv-sort-header[data-column="${initialSortColumn}"]`);
+            if (header) {
+                header.dataset.direction = initialSortDirection;
+                header.classList.add(initialSortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+                sortCsvData(dataSource, container, initialSortColumn, initialSortDirection, template);
+            }
+        }
+    });
+}
+
+/**
+ * Sort CSV data and update the display
+ * @param {Element} dataSource - Element containing or referencing the CSV data
+ * @param {Element} container - Container element for the sorted output
+ * @param {string} column - Column name to sort by
+ * @param {string} direction - Sort direction ('asc' or 'desc')
+ * @param {Element} template - Template element for rendering rows
+ */
+function sortCsvData(dataSource, container, column, direction, template) {
+    // Get the data
+    let data;
+
+    if (dataSource.tagName === 'TABLE') {
+        // Extract data from table
+        data = extractDataFromTable(dataSource, column);
+    } else if (dataSource.tagName === 'CSV-FOREACH' || dataSource.tagName === 'CSV') {
+        // For csv-foreach elements, we need to re-fetch and process the data
+        const csvUrl = dataSource.getAttribute('src') || dataSource.getAttribute('ajax');
+        if (!csvUrl) {
+            console.error('No CSV source URL found');
+            return;
+        }
+
+        fetchAndSortCsv(csvUrl, column, direction, container, template);
+        return;
+    } else {
+        // Try to parse as JSON or CSV
+        try {
+            // First try as JSON
+            data = JSON.parse(dataSource.textContent);
+        } catch (e) {
+            // If not JSON, try as CSV
+            try {
+                const csvText = dataSource.textContent;
+                const rows = parseCSV(csvText);
+
+                // Get header row
+                const headers = rows[0];
+
+                // Convert rows to objects with named properties
+                data = rows.slice(1).map(row => {
+                    const obj = {};
+                    headers.forEach((header, index) => {
+                        obj[header.trim()] = row[index];
+                    });
+                    return obj;
+                });
+            } catch (e2) {
+                console.error('Unable to parse data source:', e2);
+                return;
+            }
+        }
+    }
+
+    // Sort the data
+    data.sort((a, b) => {
+        let valA = a[column];
+        let valB = b[column];
+
+        // Try to convert to numbers if possible
+        const numA = parseFloat(valA);
+        const numB = parseFloat(valB);
+
+        if (!isNaN(numA) && !isNaN(numB)) {
+            valA = numA;
+            valB = numB;
+        }
+
+        if (valA < valB) {
+            return direction === 'asc' ? -1 : 1;
+        }
+        if (valA > valB) {
+            return direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+    });
+
+    // Update the display
+    updateSortedDisplay(data, container, template);
+}
+
+/**
+ * Extract data from an HTML table
+ * @param {Element} table - Table element
+ * @param {string} sortColumn - Column to sort by
+ * @returns {Array} - Array of data objects
+ */
+function extractDataFromTable(table, sortColumn) {
+    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+    const rows = table.querySelectorAll('tbody tr');
+    const data = [];
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const rowData = {};
+
+        headers.forEach((header, index) => {
+            if (index < cells.length) {
+                rowData[header] = cells[index].textContent.trim();
+
+                // Store original HTML for later reconstruction
+                rowData[`_html_${header}`] = cells[index].innerHTML;
+            }
+        });
+
+        data.push(rowData);
+    });
+
+    return data;
+}
+
+/**
+ * Fetch CSV data, sort it, and update the display
+ * @param {string} url - URL of the CSV file
+ * @param {string} column - Column to sort by
+ * @param {string} direction - Sort direction ('asc' or 'desc')
+ * @param {Element} container - Container element for output
+ * @param {Element} template - Template element for rendering
+ */
+function fetchAndSortCsv(url, column, direction, container, template) {
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(csvText => {
+            // Parse CSV
+            const rows = parseCSV(csvText);
+
+            // Get header row
+            const headers = rows[0];
+
+            // Convert rows to objects with named properties
+            let dataRows = rows.slice(1).map(row => {
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header.trim()] = row[index];
+                });
+                return obj;
+            });
+
+            // Sort the data
+            dataRows.sort((a, b) => {
+                let valA = a[column];
+                let valB = b[column];
+
+                // Try to convert to numbers if possible
+                const numA = parseFloat(valA);
+                const numB = parseFloat(valB);
+
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    valA = numA;
+                    valB = numB;
+                }
+
+                if (valA < valB) {
+                    return direction === 'asc' ? -1 : 1;
+                }
+                if (valA > valB) {
+                    return direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+
+            // Update the display
+            updateSortedDisplay(dataRows, container, template);
+        })
+        .catch(error => {
+            console.error("Error fetching or processing CSV:", error);
+            container.innerHTML = `<div class="error">Error loading CSV data: ${error.message}</div>`;
+        });
+}
+
+/**
+ * Update the display with sorted data
+ * @param {Array} data - Sorted data array
+ * @param {Element} container - Container element for output
+ * @param {Element} template - Template element for rendering
+ */
+function updateSortedDisplay(data, container, template) {
+    // Find the content container
+    const contentContainer = container.querySelector('.csv-content') || container;
+
+    // Clear existing content
+    contentContainer.innerHTML = '';
+
+    // Render each row using the template
+    data.forEach(row => {
+        const clone = template.content.cloneNode(true);
+
+        // Process all elements in the template
+        processTemplateBindings(clone, row);
+
+        // Append to the container
+        contentContainer.appendChild(clone);
+    });
+
+    // Re-initialize DotPipe elements
+    domContentLoad(true);
 }
 
 function sha256(message) {
@@ -1032,6 +1637,14 @@ function addPipe(elem = document) {
             }
         }, true);
     });
+    // Add this inside your existing addPipe function
+    const csvForEachElements = document.getElementsByTagName("csv-foreach");
+    Array.from(csvForEachElements).forEach(function (elem) {
+        if (!elem.classList.contains("processed")) {
+            processCsvForeach();
+        }
+    });
+
 }
 
 function flashClickListener(elem) {

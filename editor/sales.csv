@@ -1,0 +1,7 @@
+id,name,price,description,imageUrl,category,stock,onSale
+1,Wireless Headphones,$129.99,Premium noise-canceling headphones with 30-hour battery life,images/headphones.jpg,electronics,25,true
+2,Smart Watch,$199.99,Fitness tracker with heart rate monitor and GPS,images/smartwatch.jpg,electronics,15,false
+3,Bluetooth Speaker,$79.99,Waterproof portable speaker with 12-hour playback,images/speaker.jpg,electronics,8,true
+4,Cotton T-Shirt,$24.99,Comfortable 100% cotton t-shirt in various colors,images/tshirt.jpg,clothing,50,false
+5,Denim Jeans,$59.99,Classic fit denim jeans with stretch comfort,images/jeans.jpg,clothing,30,true
+6,Running Shoes,$89.99,Lightweight running shoes with cushioned soles,images/shoes.jpg,clothing,12,false
