@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DotPipe CSV Example</title>
+    <script src="dotpipe.js"></script>
+    <style>
+        /* General styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+         */
+        h1, h2 {
+            color: #2c3e50;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #3a80d2;
+        }
+        
+        /* CSV component styling */
+        .csv-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        /* Search styling */
+        .csv-search-container {
+            display: flex;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .csv-search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .csv-search-button {
+            padding: 8px 16px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .csv-search-button:hover {
+            background-color: #3a80d2;
+        }
+
+        /* Table styling */
+        .csv-table-container {
+            overflow-x: auto;
+            margin-bottom: 15px;
+        }
+
+        .csv-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+        }
+
+        .csv-table th, .csv-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .csv-table thead th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #ddd;
+            position: relative;
+            cursor: pointer;
+            padding-right: 25px;
+        }
+        
+        .csv-table thead th:hover {
+            background-color: #e9ecef;
+        }
+        
+        .csv-table thead th.csv-sort-asc::after {
+            content: "↑";
+            position: absolute;
+            right: 8px;
+            color: #333;
+        }
+        
+        .csv-table thead th.csv-sort-desc::after {
+            content: "↓";
+            position: absolute;
+            right: 8px;
+            color: #333;
+        }
+
+        .csv-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        /* Cards styling */
+        .csv-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .csv-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .csv-field {
+            margin-bottom: 8px;
+        }
+
+        .csv-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        /* Pagination styling */
+        .csv-pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        
+        .csv-pagination-prev, 
+        .csv-pagination-next, 
+        .csv-pagination-number {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .csv-pagination-number.csv-pagination-current {
+            background-color: #4a90e2;
+            color: white;
+            border-color: #4a90e2;
+        }
+        
+        .csv-pagination-prev:disabled, 
+        .csv-pagination-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .csv-pagination-ellipsis {
+            padding: 5px;
+        }
+        
+        /* Load more button */
+        .csv-load-more-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .csv-load-more-button {
+            padding: 8px 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .csv-load-more-button:hover {
+            background-color: #218838;
+        }
+        
+        /* Custom class for the CSV block */
+        .csv-used-in-this-block {
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        /* Content box styling */
+        .content-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        
+        /* Search component styling */
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .search-button {
+            padding: 6px 12px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .search-button:hover {
+            background-color: #3a80d2;
+        }
+
+        .search-highlight {
+            background-color: #ffeb3b;
+            font-weight: bold;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>CSV Data Example</h1>
+
+    <div class="controls">
+        <button id="refresh-btn">Refresh Data</button>
+        <button id="change-view-btn">Toggle View Mode</button>
+        <button id="change-sort-btn">Change Sort Order</button>
+    </div>
+
+    <div id="csv-container">
+        <csv id="product-csv" csv-class="csv-used-in-this-block" sources="sales.csv;products.csv" sort="name:csv-asc"
+            csv-as="table" page-size="5">
+            <template>
+                <tr>
+                    <td>{{name}}</td>
+                    <td>{{price}}</td>
+                    <td>{{category}}</td>
+                    <td>{{stock}}</td>
+                </tr>
+            </template>
+        </csv>
+    </div>
+
+    <script>
+        // Initialize when the page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            // Process CSV tags
+            processCsvTags();
+
+            // Set up event handlers for controls
+            document.getElementById('refresh-btn').addEventListener('click', function () {
+                // Re-process CSV tags to refresh data
+                processCsvTags();
+            });
+
+            document.getElementById('change-view-btn').addEventListener('click', function () {
+                const csvElement = document.getElementById('product-csv');
+                const currentView = csvElement.getAttribute('csv-as') || 'table';
+
+                // Toggle between table and cards view
+                if (currentView === 'table') {
+                    csvElement.setAttribute('csv-as', 'cards');
+                } else {
+                    csvElement.setAttribute('csv-as', 'table');
+                }
+
+                // Re-process to apply the change
+                processCsvTags();
+            });
+
+            document.getElementById('change-sort-btn').addEventListener('click', function () {
+                const csvElement = document.getElementById('product-csv');
+                const currentSort = csvElement.getAttribute('sort') || 'name:csv-asc';
+
+                // Toggle between ascending and descending sort
+                if (currentSort.includes('csv-asc')) {
+                    csvElement.setAttribute('sort', 'name:csv-desc');
+                } else {
+                    csvElement.setAttribute('sort', 'name:csv-asc');
+                }
+
+                // Re-process to apply the change
+                processCsvTags();
+            });
+        });
+
+        // Listen for CSV load events
+        document.addEventListener('csvLoaded', function (e) {
+            console.log('CSV data loaded:', e.detail.element.id);
+            // You can perform additional actions here after CSV is loaded
+        });
+    </script>
+</body>
+
+</html>
