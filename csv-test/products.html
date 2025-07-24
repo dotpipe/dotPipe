@@ -16,7 +16,7 @@
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         /* .container {
             background-color: white;
             border-radius: 8px;
@@ -25,16 +25,17 @@
             margin-bottom: 30px;
         }
          */
-        h1, h2 {
+        h1,
+        h2 {
             color: #2c3e50;
         }
-        
+
         .controls {
             margin-bottom: 20px;
             display: flex;
             gap: 10px;
         }
-        
+
         button {
             padding: 8px 16px;
             background-color: #4a90e2;
@@ -43,11 +44,11 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        
+
         button:hover {
             background-color: #3a80d2;
         }
-        
+
         /* CSV component styling */
         .csv-container {
             width: 100%;
@@ -84,21 +85,32 @@
         }
 
         /* Table styling */
+        /* Improved table styling */
         .csv-table-container {
             overflow-x: auto;
             margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
         }
 
         .csv-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 0;
+            border-spacing: 0;
         }
 
-        .csv-table th, .csv-table td {
+        .csv-table th,
+        .csv-table td {
             padding: 10px 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+
+        .csv-table th:last-child,
+        .csv-table td:last-child {
+            border-right: none;
         }
 
         .csv-table thead th {
@@ -108,29 +120,23 @@
             cursor: pointer;
             padding-right: 25px;
         }
-        
-        .csv-table thead th:hover {
-            background-color: #e9ecef;
-        }
-        
-        .csv-table thead th.csv-sort-asc::after {
-            content: "↑";
-            position: absolute;
-            right: 8px;
-            color: #333;
-        }
-        
-        .csv-table thead th.csv-sort-desc::after {
-            content: "↓";
-            position: absolute;
-            right: 8px;
-            color: #333;
+
+        .csv-table tbody tr:last-child td {
+            border-bottom: none;
         }
 
-        .csv-table tbody tr:hover {
-            background-color: #f5f5f5;
+        /* Remove any unwanted margins/padding */
+        .csv-content-container {
+            padding: 0;
+            margin: 0;
         }
-        
+
+        /* Fix for any potential table overflow */
+        .csv-table-container {
+            max-width: 100%;
+        }
+
+
         /* Cards styling */
         .csv-cards {
             display: grid;
@@ -143,7 +149,7 @@
             border-radius: 8px;
             padding: 15px;
             background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .csv-field {
@@ -154,47 +160,62 @@
             font-weight: bold;
             margin-right: 5px;
         }
-        
+
         /* Pagination styling */
+        /* Ensure pagination buttons are always visible */
         .csv-pagination-container {
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
             margin-top: 20px;
-            gap: 5px;
+            gap: 8px;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
-        
-        .csv-pagination-prev, 
-        .csv-pagination-next, 
+
+        .csv-pagination-prev,
+        .csv-pagination-next,
         .csv-pagination-number {
-            padding: 5px 10px;
-            border: 1px solid #ddd;
-            background-color: #fff;
+            padding: 6px 12px;
+            border: 1px solid #dddddd;
+            background-color: #2f319b;
             cursor: pointer;
             border-radius: 4px;
+            font-size: 14px;
+            min-width: 40px;
+            text-align: center;
+            transition: background-color 0.2s ease;
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
-        
-        .csv-pagination-number.csv-pagination-current {
-            background-color: #4a90e2;
-            color: white;
-            border-color: #4a90e2;
+
+        /* Make sure the pagination numbers container is visible */
+        .csv-pagination-numbers {
+            display: flex !important;
+            align-items: center;
+            gap: 5px;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
-        
-        .csv-pagination-prev:disabled, 
-        .csv-pagination-next:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
+
+        /* Ensure ellipsis is visible */
         .csv-pagination-ellipsis {
-            padding: 5px;
+            padding: 0 5px;
+            color: #666;
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
-        
+
+
         /* Load more button */
         .csv-load-more-container {
             text-align: center;
             margin-top: 20px;
         }
-        
+
         .csv-load-more-button {
             padding: 8px 16px;
             background-color: #28a745;
@@ -203,17 +224,9 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        
+
         .csv-load-more-button:hover {
             background-color: #218838;
-        }
-        
-        /* Custom class for the CSV block */
-        .csv-used-in-this-block {
-            border: 1px solid #e0e0e0;
-            padding: 15px;
-            border-radius: 5px;
-            background-color: #fafafa;
         }
 
         /* Table styling */
@@ -222,22 +235,23 @@
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-        
-        th, td {
+
+        th,
+        td {
             padding: 10px;
             border: 1px solid #ddd;
             text-align: left;
         }
-        
+
         th {
             background-color: #f8f9fa;
             font-weight: bold;
         }
-        
+
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
-        
+
         /* Content box styling */
         .content-box {
             border: 1px solid #ddd;
@@ -245,7 +259,7 @@
             margin-bottom: 15px;
             border-radius: 4px;
         }
-        
+
         /* Search component styling */
         .search-container {
             display: flex;

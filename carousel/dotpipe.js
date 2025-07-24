@@ -481,16 +481,6 @@ function processCsvTags() {
     });
 }
 
-/**
- * Process multiple CSV sources and concatenate the results
- * @param {Array} sources - Array of CSV file URLs
- * @param {Element} element - The CSV element
- * @param {string} displayMode - How to display the CSV
- * @param {string} sortAttr - Sorting attribute
- * @param {number} pageSize - Number of items per page
- * @param {boolean} lazyLoad - Whether to use lazy loading
- * @param {string} originalContent - Original inner content of the element
- */
 function processMultipleCSVSources(sources, element, displayMode, sortAttr, pageSize, lazyLoad, originalContent) {
     // Create a container for the combined data
     let combinedData = {
@@ -499,16 +489,12 @@ function processMultipleCSVSources(sources, element, displayMode, sortAttr, page
         originalSources: sources
     };
 
-    // Counter for loaded sources
+    // If lazy loading is enabled, only load the first source initially
+    const sourcesToLoad = lazyLoad ? [sources[0]] : sources;
     let loadedCount = 0;
 
-    // Process each source
-    sources.forEach((source, index) => {
-        // If lazy loading and not the first source, skip for now
-        if (lazyLoad && index > 0) {
-            return;
-        }
-
+    // Process each source that should be loaded initially
+    sourcesToLoad.forEach((source) => {
         fetch(source)
             .then(response => {
                 if (!response.ok) {
@@ -521,7 +507,7 @@ function processMultipleCSVSources(sources, element, displayMode, sortAttr, page
                 const data = parseCSV(csvText);
 
                 // For the first source, use its headers
-                if (index === 0 || combinedData.headers.length === 0) {
+                if (loadedCount === 0) {
                     combinedData.headers = [...data.headers];
                 }
 
@@ -532,7 +518,7 @@ function processMultipleCSVSources(sources, element, displayMode, sortAttr, page
                 loadedCount++;
 
                 // If all requested sources are loaded, display the data
-                if (loadedCount === (lazyLoad ? 1 : sources.length)) {
+                if (loadedCount === sourcesToLoad.length) {
                     // Apply sorting if specified
                     if (sortAttr) {
                         const [column, direction] = parseSortAttribute(sortAttr, combinedData);
@@ -550,7 +536,11 @@ function processMultipleCSVSources(sources, element, displayMode, sortAttr, page
 
                     // Dispatch event for other components
                     const event = new CustomEvent('csvLoaded', {
-                        detail: { element: element, data: combinedData }
+                        detail: { 
+                            element: element, 
+                            data: combinedData,
+                            loadedSources: sourcesToLoad
+                        }
                     });
                     document.dispatchEvent(event);
                     element.dispatchEvent(event);
@@ -563,7 +553,7 @@ function processMultipleCSVSources(sources, element, displayMode, sortAttr, page
                 loadedCount++;
 
                 // If all requested sources are loaded, display whatever data we have
-                if (loadedCount === (lazyLoad ? 1 : sources.length)) {
+                if (loadedCount === sourcesToLoad.length) {
                     if (combinedData.rows.length > 0) {
                         // We have some data, so display it
                         displayCSVData(element, combinedData, displayMode, pageSize, originalContent);
@@ -578,6 +568,7 @@ function processMultipleCSVSources(sources, element, displayMode, sortAttr, page
             });
     });
 }
+
 
 /**
  * Parse sort attribute, handling dynamic placeholders
@@ -679,6 +670,7 @@ function displayCSVData(element, data, displayMode, pageSize, originalContent) {
     paginationContainer.className = 'csv-pagination-container';
     csvContainer.appendChild(paginationContainer);
 
+
     // Create load more button for lazy loading
     if (data.originalSources.length > 1) {
         const loadMoreContainer = document.createElement('div');
@@ -687,12 +679,15 @@ function displayCSVData(element, data, displayMode, pageSize, originalContent) {
         const loadMoreButton = document.createElement('button');
         loadMoreButton.className = 'csv-load-more-button';
         loadMoreButton.textContent = 'Load More Data';
+        
+        // Track which sources have been loaded
+        const loadedSources = new Set([data.originalSources[0]]);
+        
         loadMoreButton.addEventListener('click', function () {
-            // Get the next unloaded source
-            const loadedCount = data.rows.length > 0 ? 1 : 0;
-            if (loadedCount < data.originalSources.length) {
-                const nextSource = data.originalSources[loadedCount];
-
+            // Find the next unloaded source
+            const nextSource = data.originalSources.find(source => !loadedSources.has(source));
+            
+            if (nextSource) {
                 // Show loading indicator
                 this.textContent = 'Loading...';
                 this.disabled = true;
@@ -708,6 +703,9 @@ function displayCSVData(element, data, displayMode, pageSize, originalContent) {
                     .then(csvText => {
                         // Parse CSV
                         const newData = parseCSV(csvText);
+                        
+                        // Add the source to our loaded sources set
+                        loadedSources.add(nextSource);
 
                         // Add rows to the combined data
                         data.rows = data.rows.concat(newData.rows);
@@ -716,12 +714,23 @@ function displayCSVData(element, data, displayMode, pageSize, originalContent) {
                         updateDisplayWithData(element, data, displayMode, pageSize, originalContent);
 
                         // Update button state
-                        if (loadedCount + 1 < data.originalSources.length) {
+                        if (loadedSources.size < data.originalSources.length) {
                             this.textContent = 'Load More Data';
                             this.disabled = false;
                         } else {
                             loadMoreContainer.remove(); // All sources loaded
                         }
+                        
+                        // Dispatch event for other components
+                        const event = new CustomEvent('csvMoreDataLoaded', {
+                            detail: { 
+                                element: element, 
+                                data: data,
+                                loadedSources: Array.from(loadedSources)
+                            }
+                        });
+                        document.dispatchEvent(event);
+                        element.dispatchEvent(event);
                     })
                     .catch(error => {
                         console.error(`Error loading additional source ${nextSource}:`, error);
@@ -917,7 +926,6 @@ function updateDisplayWithData(element, data, displayMode, pageSize, originalCon
     // Display the first page
     displayPage(1);
 }
-
 /**
  * Render table view of CSV data
  * @param {Element} container - Container element
@@ -928,154 +936,196 @@ function updateDisplayWithData(element, data, displayMode, pageSize, originalCon
 function renderTableView(container, headers, rows, originalContent) {
     // Check if there's a template in the original content
     const templateMatch = originalContent.match(/<template[^>]*>([\s\S]*?)<\/template>/i);
-
+    
+    // Create table container
+    const tableContainer = document.createElement('div');
+    tableContainer.className = 'csv-table-container';
+    
+    // Create table
+    const table = document.createElement('table');
+    table.className = 'csv-table';
+    
+    // Add headers
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    
+    // Check if the template contains custom headers
+    let hasCustomHeaders = false;
     if (templateMatch) {
-        // Use template for rendering
         const templateContent = templateMatch[1];
-        const tableContainer = document.createElement('div');
-        tableContainer.className = 'csv-table-container';
-
-        // Create table with headers
-        const table = document.createElement('table');
-        table.className = 'csv-table';
-
-        // Add headers
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-
+        hasCustomHeaders = /<thead[^>]*>[\s\S]*?<\/thead>/i.test(templateContent);
+    }
+    
+    // If no custom headers in template, use CSV headers
+    if (!hasCustomHeaders) {
         headers.forEach(header => {
             const th = document.createElement('th');
             th.textContent = header;
             th.className = 'csv-header';
             th.setAttribute('data-column', header);
-
+            
             // Add click handler for sorting
             th.addEventListener('click', function () {
                 const currentDir = this.getAttribute('data-direction') || 'none';
                 let newDir = 'csv-asc';
-
+                
                 if (currentDir === 'csv-asc') {
                     newDir = 'csv-desc';
                 } else if (currentDir === 'csv-desc') {
                     newDir = 'csv-asc';
                 }
-
+                
                 // Update all headers
                 Array.from(thead.querySelectorAll('th')).forEach(h => {
                     h.removeAttribute('data-direction');
                     h.classList.remove('csv-sort-asc', 'csv-sort-desc');
                 });
-
+                
                 // Update this header
                 this.setAttribute('data-direction', newDir);
                 this.classList.add(newDir === 'csv-asc' ? 'csv-sort-asc' : 'csv-sort-desc');
-
+                
                 // Get the parent CSV element
                 const csvElement = container.closest('csv');
                 if (csvElement) {
                     // Update the sort attribute
                     csvElement.setAttribute('sort', `${header}:${newDir}`);
-
+                    
                     // Re-process the CSV tag
                     processCsvTags();
                 }
             });
-
+            
             headerRow.appendChild(th);
         });
-
+        
         thead.appendChild(headerRow);
         table.appendChild(thead);
-
-        // Add data rows using template
+    }
+    
+    // Process template or create default table body
+    if (templateMatch) {
+        const templateContent = templateMatch[1];
+        
+        // Check if template has both thead and tbody
+        const theadMatch = templateContent.match(/<thead[^>]*>([\s\S]*?)<\/thead>/i);
+        const tbodyMatch = templateContent.match(/<tbody[^>]*>([\s\S]*?)<\/tbody>/i);
+        
+        // If template has custom thead, use it
+        if (theadMatch) {
+            const tempHead = document.createElement('div');
+            tempHead.innerHTML = theadMatch[1];
+            thead.innerHTML = tempHead.innerHTML;
+            table.appendChild(thead);
+            
+            // Add click handlers for sorting to custom headers
+            Array.from(thead.querySelectorAll('th')).forEach((th, index) => {
+                const columnName = headers[index] || th.textContent;
+                th.setAttribute('data-column', columnName);
+                
+                th.addEventListener('click', function() {
+                    const currentDir = this.getAttribute('data-direction') || 'none';
+                    let newDir = 'csv-asc';
+                    
+                    if (currentDir === 'csv-asc') {
+                        newDir = 'csv-desc';
+                    } else if (currentDir === 'csv-desc') {
+                        newDir = 'csv-asc';
+                    }
+                    
+                    // Update all headers
+                    Array.from(thead.querySelectorAll('th')).forEach(h => {
+                        h.removeAttribute('data-direction');
+                        h.classList.remove('csv-sort-asc', 'csv-sort-desc');
+                    });
+                    
+                    // Update this header
+                    this.setAttribute('data-direction', newDir);
+                    this.classList.add(newDir === 'csv-asc' ? 'csv-sort-asc' : 'csv-sort-desc');
+                    
+                    // Get the parent CSV element
+                    const csvElement = container.closest('csv');
+                    if (csvElement) {
+                        // Update the sort attribute
+                        csvElement.setAttribute('sort', `${columnName}:${newDir}`);
+                        
+                        // Re-process the CSV tag
+                        processCsvTags();
+                    }
+                });
+            });
+        }
+        
+        // Create tbody
         const tbody = document.createElement('tbody');
-
-        rows.forEach(row => {
-            // Create a row object with named properties
-            const rowObj = {};
-            headers.forEach((header, i) => {
-                rowObj[header] = row[i];
+        
+        // If template has custom tbody, use its structure
+        if (tbodyMatch) {
+            const rowTemplate = tbodyMatch[1];
+            
+            rows.forEach(row => {
+                // Create a row object with named properties
+                const rowObj = {};
+                headers.forEach((header, i) => {
+                    rowObj[header] = row[i];
+                });
+                
+                // Apply template to row
+                let rowHtml = rowTemplate;
+                
+                // Replace {{column}} placeholders
+                rowHtml = rowHtml.replace(/\{\{([^}]+)\}\}/g, (match, column) => {
+                    return rowObj[column] || '';
+                });
+                
+                // Create a temporary container
+                const temp = document.createElement('div');
+                temp.innerHTML = rowHtml;
+                
+                // Append the row
+                Array.from(temp.children).forEach(child => {
+                    tbody.appendChild(child);
+                });
             });
-
-            // Apply template to row
-            let rowHtml = templateContent;
-
-            // Replace {{column}} placeholders
-            rowHtml = rowHtml.replace(/\{\{([^}]+)\}\}/g, (match, column) => {
-                return rowObj[column] || '';
+        } else {
+            // Use simple row template
+            const rowTemplateContent = templateContent.replace(/<thead[^>]*>[\s\S]*?<\/thead>/i, '');
+            
+            rows.forEach(row => {
+                // Create a row object with named properties
+                const rowObj = {};
+                headers.forEach((header, i) => {
+                    rowObj[header] = row[i];
+                });
+                
+                // Apply template to row
+                let rowHtml = rowTemplateContent;
+                
+                // Replace {{column}} placeholders
+                rowHtml = rowHtml.replace(/\{\{([^}]+)\}\}/g, (match, column) => {
+                    return rowObj[column] || '';
+                });
+                
+                // Create a temporary container
+                const temp = document.createElement('div');
+                temp.innerHTML = rowHtml;
+                
+                // Append the row
+                Array.from(temp.children).forEach(child => {
+                    tbody.appendChild(child);
+                });
             });
-
-            // Create a temporary container
-            const temp = document.createElement('tr');
-            temp.innerHTML = rowHtml;
-
-            // Append the row
-            tbody.appendChild(temp);
-        });
-
+        }
+        
         table.appendChild(tbody);
-        tableContainer.appendChild(table);
-        container.appendChild(tableContainer);
     } else {
-        // Default table rendering
-        const table = document.createElement('table');
-        table.className = 'csv-table';
-
-        // Add headers
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-
-        headers.forEach(header => {
-            const th = document.createElement('th');
-            th.textContent = header;
-            th.className = 'csv-header';
-            th.setAttribute('data-column', header);
-
-            // Add click handler for sorting
-            th.addEventListener('click', function () {
-                const currentDir = this.getAttribute('data-direction') || 'none';
-                let newDir = 'csv-asc';
-
-                if (currentDir === 'csv-asc') {
-                    newDir = 'csv-desc';
-                } else if (currentDir === 'csv-desc') {
-                    newDir = 'csv-asc';
-                }
-
-                // Update all headers
-                Array.from(thead.querySelectorAll('th')).forEach(h => {
-                    h.removeAttribute('data-direction');
-                    h.classList.remove('csv-sort-asc', 'csv-sort-desc');
-                });
-
-                // Update this header
-                this.setAttribute('data-direction', newDir);
-                this.classList.add(newDir === 'csv-asc' ? 'csv-sort-asc' : 'csv-sort-desc');
-
-                // Get the parent CSV element
-                const csvElement = container.closest('csv');
-                if (csvElement) {
-                    // Update the sort attribute
-                    csvElement.setAttribute('sort', `${header}:${newDir}`);
-
-                    // Re-process the CSV tag
-                    processCsvTags();
-                }
-            });
-
-            headerRow.appendChild(th);
-        });
-
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-
-        // Add data rows
+        // Default table rendering without template
         const tbody = document.createElement('tbody');
-
+        
         rows.forEach(row => {
             const tr = document.createElement('tr');
             tr.className = 'csv-row';
-
+            
             row.forEach((cell, i) => {
                 const td = document.createElement('td');
                 td.className = 'csv-cell';
@@ -1083,14 +1133,17 @@ function renderTableView(container, headers, rows, originalContent) {
                 td.textContent = cell;
                 tr.appendChild(td);
             });
-
+            
             tbody.appendChild(tr);
         });
-
+        
         table.appendChild(tbody);
-        container.appendChild(table);
     }
+    
+    tableContainer.appendChild(table);
+    container.appendChild(tableContainer);
 }
+
 
 /**
  * Render list view of CSV data
