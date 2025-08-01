@@ -140,6 +140,7 @@ let domContentLoad = (again = false) => {
     processSearchTags();
     // Process CSV tags
     processCsvTags();
+    processLoginTags();
     let elements_Carousel = document.getElementsByTagName("carousel");
     Array.from(elements_Carousel).forEach(function (elem) {
         if (elem.classList.contains("time-inactive"))
@@ -217,6 +218,339 @@ let domContentLoad = (again = false) => {
     });
 }
 
+/**
+ * Process all login tags in the document
+ * This function should be called when the document is loaded
+ */
+function processLoginTags() {
+    let loginElements = document.getElementsByTagName("login");
+
+    Array.from(loginElements).forEach(function (element) {
+        if (element.classList.contains("processed")) {
+            return;
+        }
+
+        // Get attributes
+        const loginPage = element.getAttribute("login-page") || "";
+        const registrationPage = element.getAttribute("registration-page") || "";
+        const cssPage = element.getAttribute("css-page") || "";
+        
+        // Check if we have at least one page to show
+        if (!loginPage && !registrationPage) {
+            console.error("Login tag requires at least one of login-page or registration-page attributes");
+            element.innerHTML = "<div class='auth-error'>Configuration error: No login or registration page specified</div>";
+            element.classList.add("processed");
+            return;
+        }
+        
+        // Generate the login/registration HTML
+        const loginHTML = createLoginRegistrationTabs(loginPage, registrationPage, cssPage);
+        
+        // Replace the login tag content with our generated HTML
+        element.innerHTML = loginHTML;
+        
+        // Mark as processed
+        element.classList.add("processed");
+        
+        // Process the newly added elements with dotpipe.js
+        domContentLoad();
+    });
+}
+
+/**
+ * Creates a tabbed login and registration interface based on provided attributes
+ * @param {string} loginPage - The URL for the login form submission (empty if not provided)
+ * @param {string} registrationPage - The URL for the registration form submission (empty if not provided)
+ * @param {string} cssPage - Optional URL to an external CSS file
+ * @returns {string} HTML for the login/registration interface
+ */
+function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
+    const externalCss = cssPage ? `<link rel="stylesheet" href="${cssPage}">` : '';
+    
+    // Determine which tabs to show
+    const showLogin = !!loginPage;
+    const showRegistration = !!registrationPage;
+    
+    // Set default active tab
+    const loginActive = showLogin ? 'active' : '';
+    const registerActive = !showLogin && showRegistration ? 'active' : '';
+    
+    // Create tabs HTML
+    let tabsHtml = '';
+    if (showLogin && showRegistration) {
+        // Show both tabs with switcher
+        tabsHtml = `
+        <div class="auth-tabs">
+            <div class="auth-tab ${loginActive}" id="login-tab" onclick="switchTab('login')">Login</div>
+            <div class="auth-tab ${registerActive}" id="register-tab" onclick="switchTab('register')">Register</div>
+        </div>`;
+    }
+    
+    // Create login form HTML if needed
+    let loginFormHtml = '';
+    if (showLogin) {
+        loginFormHtml = `
+        <div class="auth-form ${loginActive}" id="login-form">
+            <h2>Login to Your Account</h2>
+            <form>
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" name="email" class="login-form-class" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" class="login-form-class" required>
+                </div>
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember-me" name="remember" class="login-form-class">
+                        <label for="remember-me">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                </div>
+                <div class="form-group">
+                    <pipe id="login-button" class="auth-button" form-class="login-form-class" ajax="${loginPage}" insert="login-response">Login</pipe>
+                </div>
+                <div id="login-response" class="response-message"></div>
+            </form>
+            <div class="social-login">
+                <p>Or login with</p>
+                <div class="social-buttons">
+                    <button class="social-button google">Google</button>
+                    <button class="social-button facebook">Facebook</button>
+                </div>
+            </div>
+        </div>`;
+    }
+    
+    // Create registration form HTML if needed
+    let registrationFormHtml = '';
+    if (showRegistration) {
+        registrationFormHtml = `
+        <div class="auth-form ${registerActive}" id="register-form">
+            <h2>Create an Account</h2>
+            <form>
+                <div class="form-group">
+                    <label for="register-name">Full Name</label>
+                    <input type="text" id="register-name" name="name" class="register-form-class" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" name="email" class="register-form-class" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" name="password" class="register-form-class" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm-password">Confirm Password</label>
+                    <input type="password" id="register-confirm-password" name="confirm_password" class="register-form-class" required>
+                </div>
+                <div class="form-options">
+                    <div class="terms">
+                        <input type="checkbox" id="terms" name="terms" class="register-form-class" required>
+                        <label for="terms">I agree to the <a href="#">Terms and Conditions</a></label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <pipe id="register-button" class="auth-button" form-class="register-form-class" ajax="${registrationPage}" insert="register-response">Register</pipe>
+                </div>
+                <div id="register-response" class="response-message"></div>
+            </form>
+        </div>`;
+    }
+    
+    const html = `
+    ${externalCss}
+    <div class="auth-container">
+        ${tabsHtml}
+        
+        <div class="auth-content">
+            ${loginFormHtml}
+            ${registrationFormHtml}
+        </div>
+    </div>
+
+    <style>
+        .auth-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-tab.active {
+            background: #f8f9fa;
+            border-bottom: 3px solid #4a90e2;
+        }
+        
+        .auth-content {
+            padding: 20px;
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .remember-me, .terms {
+            display: flex;
+            align-items: center;
+        }
+        
+        .remember-me input, .terms input {
+            margin-right: 5px;
+        }
+        
+        .forgot-password {
+            color: #4a90e2;
+            text-decoration: none;
+        }
+        
+        .auth-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .auth-button:hover {
+            background: #3a80d2;
+        }
+        
+        .social-login {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .social-button {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .social-button.google {
+            color: #DB4437;
+        }
+        
+        .social-button.facebook {
+            color: #4267B2;
+        }
+        
+        .response-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .response-message.error {
+            background: #ffebee;
+            color: #c62828;
+            display: block;
+        }
+        
+        .response-message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            display: block;
+        }
+        
+        .auth-error {
+            padding: 15px;
+            background: #ffebee;
+            color: #c62828;
+            border-radius: 4px;
+            text-align: center;
+        }
+    </style>
+
+    ${(showLogin && showRegistration) ? `
+    <script>
+        function switchTab(tab) {
+            // Hide all forms
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.auth-tab').forEach(tabElem => {
+                tabElem.classList.remove('active');
+            });
+            
+            // Activate selected tab and form
+            document.getElementById(tab + '-form').classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
+    </script>
+    ` : ''}
+    `;
+    
+    return html;
+}
 /**
  * Process all search tags in the document
  */
@@ -1349,161 +1683,11 @@ function parseCSVLine(line) {
     });
 }
 
-/**
- * Computes the SHA-256 hash of the given data
- * @param {string|ArrayBuffer} data - The data to hash
- * @returns {Promise<string>} - A promise that resolves to the hex string of the hash
- */
-async function sha256(data) {
-    // Convert string data to ArrayBuffer if needed
-    const dataBuffer = (typeof data === 'string') 
-        ? new TextEncoder().encode(data) 
-        : data;
-    
-    // Use the Web Crypto API to compute the hash
-    const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
-    
-    // Convert the hash to a hex string
-    return Array.from(new Uint8Array(hashBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-}
-
-/**
- * Synchronous version of SHA-256 using a pure JavaScript implementation
- * Use this only if Web Crypto API is not available
- * @param {string} data - The string to hash
- * @returns {string} - The hex string of the hash
- */
-function sha256Sync(data) {
-    // Constants used in SHA-256
-    const K = [
-        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-        0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-        0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-        0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-        0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-        0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-    ];
-    
-    // Initial hash values (first 32 bits of the fractional parts of the square roots of the first 8 primes)
-    let H = [
-        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
-    ];
-    
-    // Pre-processing: padding the message
-    let binary = '';
-    for (let i = 0; i < data.length; i++) {
-        binary += data.charCodeAt(i).toString(2).padStart(8, '0');
-    }
-    
-    // Append the bit '1' to the message
-    binary += '1';
-    
-    // Append k bits '0', where k is the minimum number >= 0 such that (message length + 1 + k + 64) is a multiple of 512
-    while (binary.length % 512 !== 448) {
-        binary += '0';
-    }
-    
-    // Append the length of the original message as a 64-bit big-endian integer
-    const msgLength = data.length * 8;
-    binary += msgLength.toString(2).padStart(64, '0');
-    
-    // Process the message in 512-bit chunks
-    for (let i = 0; i < binary.length; i += 512) {
-        const chunk = binary.slice(i, i + 512);
-        
-        // Break chunk into sixteen 32-bit big-endian words
-        const words = [];
-        for (let j = 0; j < chunk.length; j += 32) {
-            words.push(parseInt(chunk.slice(j, j + 32), 2));
-        }
-        
-        // Extend the sixteen 32-bit words into sixty-four 32-bit words
-        for (let j = 16; j < 64; j++) {
-            const s0 = rightRotate(words[j - 15], 7) ^ rightRotate(words[j - 15], 18) ^ (words[j - 15] >>> 3);
-            const s1 = rightRotate(words[j - 2], 17) ^ rightRotate(words[j - 2], 19) ^ (words[j - 2] >>> 10);
-            words[j] = (words[j - 16] + s0 + words[j - 7] + s1) >>> 0;
-        }
-        
-        // Initialize working variables to current hash value
-        let [a, b, c, d, e, f, g, h] = H;
-        
-        // Compression function main loop
-        for (let j = 0; j < 64; j++) {
-            const S1 = rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25);
-            const ch = (e & f) ^ (~e & g);
-            const temp1 = (h + S1 + ch + K[j] + words[j]) >>> 0;
-            const S0 = rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22);
-            const maj = (a & b) ^ (a & c) ^ (b & c);
-            const temp2 = (S0 + maj) >>> 0;
-            
-            h = g;
-            g = f;
-            f = e;
-            e = (d + temp1) >>> 0;
-            d = c;
-            c = b;
-            b = a;
-            a = (temp1 + temp2) >>> 0;
-        }
-        
-        // Add the compressed chunk to the current hash value
-        H[0] = (H[0] + a) >>> 0;
-        H[1] = (H[1] + b) >>> 0;
-        H[2] = (H[2] + c) >>> 0;
-        H[3] = (H[3] + d) >>> 0;
-        H[4] = (H[4] + e) >>> 0;
-        H[5] = (H[5] + f) >>> 0;
-        H[6] = (H[6] + g) >>> 0;
-        H[7] = (H[7] + h) >>> 0;
-    }
-    
-    // Produce the final hash value as a 256-bit number (as a hex string)
-    return H.map(h => h.toString(16).padStart(8, '0')).join('');
-    
-    // Helper function for right rotation
-    function rightRotate(value, amount) {
-        return ((value >>> amount) | (value << (32 - amount))) >>> 0;
-    }
-}
-
-/**
- * Generate a secure random nonce and hash it with SHA-256
- * @returns {Promise<string>} - A promise that resolves to the nonce
- */
-async function generateNonce() {
-    // Generate 16 random bytes
+// Usage example to generate a nonce
+function generateNonce() {
     const randomBytes = new Uint8Array(16);
     crypto.getRandomValues(randomBytes);
-    
-    // Convert to string and hash
-    const randomString = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-    return await sha256(randomString);
-}
-
-/**
- * Generate a secure random nonce synchronously
- * @returns {string} - The nonce
- */
-function generateNonceSync() {
-    // Generate random string if crypto.getRandomValues is available
-    let randomString;
-    
-    try {
-        const randomBytes = new Uint8Array(16);
-        crypto.getRandomValues(randomBytes);
-        randomString = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-    } catch (e) {
-        // Fallback if crypto.getRandomValues is not available
-        randomString = Math.random().toString(36).substring(2, 15) + 
-                       Math.random().toString(36).substring(2, 15) +
-                       Date.now().toString(36);
-    }
-    
-    return sha256Sync(randomString);
+    return sha256(randomBytes.join('')).then(hash => hash.slice(0, 16));
 }
 
 function copyContentById(id) {
