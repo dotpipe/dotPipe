@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Refresh Component Example</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="dotpipe.js"></script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Refresh Component Example</h1>
+    </div>
+  </header>
+  
+  <main class="container">
+    <h2>Content Refresh Examples</h2>
+    
+    <div class="example-section">
+      <h3>Single Target Refresh</h3>
+      <div id="content1" class="content-box">
+        <p>This is the initial content for box 1.</p>
+      </div>
+      <refresh id="refreshBtn1" target="content1:content1-updated.html">Refresh Content</refresh>
+    </div>
+    
+    <div class="example-section">
+      <h3>Multiple Target Refresh</h3>
+      <div class="content-grid">
+        <div id="content2" class="content-box">
+          <p>This is the initial content for box 2.</p>
+        </div>
+        <div id="content3" class="content-box">
+          <p>This is the initial content for box 3.</p>
+        </div>
+      </div>
+      <refresh id="refreshBtn2" target="content2:content2-updated.html;content3:content3-updated.html">Refresh Both</refresh>
+    </div>
+    
+    <div class="example-section">
+      <h3>JSON Content Refresh</h3>
+      <div id="jsonContent" class="content-box">
+        <p>This box will be updated with JSON content.</p>
+      </div>
+      <refresh id="refreshBtn3" target="jsonContent:data.json">Load JSON</refresh>
+    </div>
+    
+    <div class="example-section">
+      <h3>Auto-Refresh Example</h3>
+      <div id="autoContent" class="content-box">
+        <p>This content will auto-refresh every 10 seconds.</p>
+        <p>Last updated: <span id="timestamp"></span></p>
+      </div>
+      <refresh id="autoRefreshBtn" target="autoContent:auto-content.html" interval="10">Manual Refresh</refresh>
+      <script>
+        // Update timestamp
+        document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+        
+        // Listen for refresh events
+        document.getElementById('autoContent').addEventListener('refreshCompleted', function() {
+          document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+        });
+      </script>
+    </div>
+    
+    <div class="example-section">
+      <h3>Column Refresh Example</h3>
+      <columns id="cols" count="2" height="200" width="100%" pages="column1.html;column2.html"></columns>
+      <div class="button-group">
+        <refresh id="refreshCol1" target="cols-1:column1-updated.html">Refresh Column 1</refresh>
+        <refresh id="refreshCol2" target="cols-2:column2-updated.html">Refresh Column 2</refresh>
+      </div>
+    </div>
+    
+    <div class="example-section">
+      <h3>Page Refresh</h3>
+      <refresh id="refreshPage" target="_page">Refresh Entire Page</refresh>
+    </div>
+  </main>
+  
+  <footer>
+    <div class="container">
+      <p>© 2025 Your Website. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>

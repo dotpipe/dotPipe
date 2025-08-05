@@ -1,7 +1,12 @@
 .vscode
-readme2.md
 package.json
 dotpipe_functionlist.js
 dotpipe_documentation.html
 ai*
 copy_to.sh
+endpoint.php
+README.md
+readme2.md
+test.html
+dotpipe_documentation.html
+dotpipe_functionlist.md

@@ -37,6 +37,10 @@
   *  <lnk>.............= [Tag] tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
   *  <pipe>............= [Tag] (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
   *  <dyn>.............= [Tag] Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
+  *  <search>..........= [Tag] Search tag for searching in the page ex: <search use-id="id1;id2;id3;" input-width="200px" input-height="30px" placeholder="Search..." search-delay="300">
+  *  <csv>.............= [Tag] CSV tag for displaying CSV data in a table format ex: <csv ajax="data.csv" insert="tableId" headers="true">
+  *  <tabs>............= [Tag] Tabs tag for creating tabbed interfaces ex: <tabs tab="Tab1:tab1Id:source1;Tab2:tab2Id:source2" class="tab-class" style="width:100%;height:50px;">
+  *  <login>...........= [Tag] Login tag for creating login and registration forms ex: <login login-page="login.php" registration-page="register.php" css-page="styles.css">
   *  \n................= [-] RegEx emplacement to insert <br /> in Modala contents for innerHTML
   *  plain-text........= [Class] plain text returned to the insertion point
   *  plain-html........= [Class] returns as true HTML
@@ -141,16 +145,17 @@ let domContentLoad = (again = false) => {
     // Process CSV tags
     processCsvTags();
     processLoginTags();
+    processTabTags();
+    processCartTags();
+    processOrderConfirmationTags();
+    processColumnsTags();
     let elements_Carousel = document.getElementsByTagName("carousel");
     Array.from(elements_Carousel).forEach(function (elem) {
-        if (elem.classList.contains("time-inactive"))
+        if (!elem.classList.contains("turn-auto"))
             return;
-        if (elem.classList.contains("time-active")) {
+        if (elem.classList.contains("turn-auto")) {
             auto = true;
             setTimers(elem);
-        }
-        else if (elem.classList.contains("time-inactive")) {
-            auto = false;
         }
         setTimeout(carousel(elem, auto), elem.getAttribute("delay"));
     });
@@ -219,6 +224,2278 @@ let domContentLoad = (again = false) => {
 }
 
 /**
+ * columns-component.js - Multi-column layout component for dotPipe.js
+ * This handles the <columns> custom element for creating responsive multi-column layouts
+ * with dynamic content loading
+ */
+
+// Initialize columns component functionality when DOM is loaded
+document.addEventListener("DOMContentLoaded", function () {
+    // Process all columns tags
+    processColumnsTags();
+});
+
+/**
+ * Process all columns tags in the document
+ */
+function processColumnsTags() {
+    const columnsElements = document.getElementsByTagName("columns");
+
+    Array.from(columnsElements).forEach(function (columnsElement) {
+        if (columnsElement.classList.contains("processed")) {
+            return;
+        }
+
+        // Get attributes
+        const columnCount = parseInt(columnsElement.getAttribute("count") || "2");
+        const columnPercents = parseColumnPercents(columnsElement.getAttribute("percents"), columnCount);
+        const height = columnsElement.getAttribute("height") || "auto";
+        const width = columnsElement.getAttribute("width") || "100%";
+        const pages = columnsElement.getAttribute("pages")?.split(";") || [];
+
+        // Set up columns element
+        setupColumnsElement(columnsElement, columnCount, columnPercents, height, width, pages);
+
+        // Mark as processed
+        columnsElement.classList.add("processed");
+    });
+}
+
+/**
+ * Parse column percentages from attribute
+ * @param {string} percentsAttr - The percents attribute value (comma-separated)
+ * @param {number} columnCount - The number of columns
+ * @returns {Array} - Array of percentage values
+ */
+function parseColumnPercents(percentsAttr, columnCount) {
+    if (!percentsAttr) {
+        // If no percentages provided, distribute evenly
+        const equalPercent = 100 / columnCount;
+        return Array(columnCount).fill(equalPercent);
+    }
+
+    // Parse comma-separated percentages
+    const percents = percentsAttr.split(',').map(p => parseFloat(p.trim()));
+
+    // Validate percentages
+    if (percents.length !== columnCount) {
+        console.warn(`Column count (${columnCount}) doesn't match percentage count (${percents.length}). Using equal distribution.`);
+        const equalPercent = 100 / columnCount;
+        return Array(columnCount).fill(equalPercent);
+    }
+
+    // Check if percentages sum to 100
+    const sum = percents.reduce((total, p) => total + p, 0);
+    if (Math.abs(sum - 100) > 0.1) {
+        console.warn(`Column percentages sum to ${sum}, not 100. Normalizing.`);
+        // Normalize to 100%
+        return percents.map(p => (p / sum) * 100);
+    }
+
+    return percents;
+}
+
+/**
+ * Set up a columns element with necessary structure and content
+ * @param {Element} columnsElement - The columns element to set up
+ * @param {number} columnCount - Number of columns
+ * @param {Array} columnPercents - Array of column percentages
+ * @param {string} height - Height of the columns container
+ * @param {string} width - Width of the columns container
+ * @param {Array} pages - Array of page URLs to load into columns
+ */
+function setupColumnsElement(columnsElement, columnCount, columnPercents, height, width, pages) {
+    // Create columns container
+    const columnsContainer = document.createElement('div');
+    columnsContainer.className = 'columns-container';
+    columnsContainer.style.display = 'flex';
+    columnsContainer.style.flexWrap = 'nowrap';
+    columnsContainer.style.height = height.includes('px') ? height : `${height}px`;
+    columnsContainer.style.width = width.includes('%') || width.includes('px') ? width : `${width}px`;
+
+    // Create columns
+    for (let i = 0; i < columnCount; i++) {
+        const column = document.createElement('div');
+        column.className = `column column-${i + 1}`;
+        column.id = `${columnsElement.id}-column-${i + 1}`;
+        column.style.flex = `0 0 ${columnPercents[i]}%`;
+        column.style.overflow = 'auto';
+        column.style.padding = '15px';
+        column.style.boxSizing = 'border-box';
+
+        // Add loading indicator
+        column.innerHTML = '<div class="column-loading">Loading content...</div>';
+
+        // Add to container
+        columnsContainer.appendChild(column);
+    }
+
+    // Replace columns tag content with our container
+    columnsElement.innerHTML = '';
+    columnsElement.appendChild(columnsContainer);
+
+    // Load content into columns
+    loadColumnContent(columnsElement, pages);
+}
+
+/**
+ * Load content into columns
+ * @param {Element} columnsElement - The columns element
+ * @param {Array} pages - Array of page URLs to load
+ */
+function loadColumnContent(columnsElement, pages) {
+    const columns = columnsElement.querySelectorAll('.column');
+
+    // Load content for each column that has a corresponding page
+    columns.forEach((column, index) => {
+        if (index < pages.length && pages[index]) {
+            loadContentIntoColumn(column, pages[index]);
+        } else {
+            // No content specified for this column
+            column.innerHTML = '<div class="column-empty">No content specified for this column</div>';
+        }
+    });
+}
+
+/**
+ * Load content into a specific column
+ * @param {Element} column - The column element
+ * @param {string} pageUrl - The URL of the content to load
+ */
+function loadContentIntoColumn(column, pageUrl) {
+    const fileExtension = pageUrl.split('.').pop().toLowerCase();
+
+    if (fileExtension === 'json') {
+        // Load JSON content using modala
+        loadJsonContent(column, pageUrl);
+    } else if (fileExtension === 'html' || fileExtension === 'htm') {
+        // Load HTML content
+        loadHtmlContent(column, pageUrl);
+    } else {
+        // Load other content types (like .cf) as text/html
+        loadGenericContent(column, pageUrl);
+    }
+}
+
+/**
+ * Load JSON content into a column using modala
+ * @param {Element} column - The column element
+ * @param {string} jsonUrl - The URL of the JSON file
+ */
+function loadJsonContent(column, jsonUrl) {
+    // Create a temporary container for the JSON content
+    const tempContainer = document.createElement('div');
+    tempContainer.style.display = 'none';
+    document.body.appendChild(tempContainer);
+
+    // Use modal function from dotPipe.js to load JSON
+    modal(jsonUrl, tempContainer)
+        .then(() => {
+            // Move content from temp container to column
+            column.innerHTML = '';
+            while (tempContainer.firstChild) {
+                column.appendChild(tempContainer.firstChild);
+            }
+
+            // Remove temp container
+            document.body.removeChild(tempContainer);
+
+            // Dispatch content loaded event
+            dispatchColumnContentLoaded(column);
+        })
+        .catch(error => {
+            column.innerHTML = `<div class="column-error">Error loading JSON content: ${error.message}</div>`;
+            console.error('Error loading JSON content:', error);
+        });
+}
+
+/**
+ * Load HTML content into a column
+ * @param {Element} column - The column element
+ * @param {string} htmlUrl - The URL of the HTML file
+ */
+function loadHtmlContent(column, htmlUrl) {
+    // Create a pipe element to fetch HTML content
+    const pipeElement = document.createElement('pipe');
+    pipeElement.setAttribute('ajax', htmlUrl);
+    pipeElement.setAttribute('insert', column.id);
+    pipeElement.classList.add('column-content-loader');
+    pipeElement.classList.add('plain-html');
+
+    // Add to document
+    document.body.appendChild(pipeElement);
+
+    // Trigger the pipe to load content
+    pipes(pipeElement);
+
+    // Set up event listener to handle when content is loaded
+    document.addEventListener('DOMNodeInserted', function handler(event) {
+        if (event.target.parentNode && event.target.parentNode.id === column.id) {
+            // Content has been inserted into the column
+            setTimeout(() => {
+                // Remove loading indicator if it exists
+                const loadingIndicator = column.querySelector('.column-loading');
+                if (loadingIndicator) {
+                    loadingIndicator.remove();
+                }
+
+                // Dispatch content loaded event
+                dispatchColumnContentLoaded(column);
+
+                // Remove event listener
+                document.removeEventListener('DOMNodeInserted', handler);
+            }, 100);
+        }
+    });
+}
+
+/**
+ * Load generic content into a column
+ * @param {Element} column - The column element
+ * @param {string} contentUrl - The URL of the content file
+ */
+function loadGenericContent(column, contentUrl) {
+    fetch(contentUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(content => {
+            column.innerHTML = content;
+
+            // Process any dotPipe elements in the loaded content
+            domContentLoad();
+
+            // Dispatch content loaded event
+            dispatchColumnContentLoaded(column);
+        })
+        .catch(error => {
+            column.innerHTML = `<div class="column-error">Error loading content: ${error.message}</div>`;
+            console.error('Error loading content:', error);
+        });
+}
+
+/**
+ * Dispatch a custom event when column content is loaded
+ * @param {Element} column - The column element
+ */
+function dispatchColumnContentLoaded(column) {
+    const event = new CustomEvent('columnContentLoaded', {
+        detail: {
+            columnId: column.id,
+            column: column
+        },
+        bubbles: true
+    });
+    column.dispatchEvent(event);
+}
+
+/**
+ * Add CSS styles for columns component
+ */
+function addColumnsStyles() {
+    // Check if styles already exist
+    if (document.getElementById('columns-component-styles')) {
+        return;
+    }
+
+    // Create style element
+    const style = document.createElement('style');
+    style.id = 'columns-component-styles';
+
+    // Add CSS rules
+    style.textContent = `
+    .columns-container {
+      display: flex;
+      flex-wrap: nowrap;
+      width: 100%;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .column {
+      position: relative;
+      min-height: 100px;
+      transition: all 0.3s ease;
+    }
+    
+    .column:not(:last-child) {
+      border-right: 1px solid #eee;
+    }
+    
+    .column-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #6c757d;
+      font-style: italic;
+    }
+    
+    .column-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #6c757d;
+      font-style: italic;
+      background-color: #f8f9fa;
+    }
+    
+    .column-error {
+      padding: 15px;
+      color: #dc3545;
+      background-color: #f8d7da;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .columns-container {
+        flex-direction: column;
+        height: auto !important;
+      }
+      
+      .column {
+        flex: 1 1 auto !important;
+        width: 100% !important;
+        border-right: none !important;
+      }
+      
+      .column:not(:last-child) {
+        border-bottom: 1px solid #eee;
+      }
+    }
+  `;
+
+    // Add to document head
+    document.head.appendChild(style);
+}
+
+// Add styles when the script loads
+addColumnsStyles();
+
+/**
+ * Public API for columns component
+ */
+window.columnsComponent = {
+    /**
+     * Refresh content in a specific column
+     * @param {string} columnsId - ID of the columns element
+     * @param {number} columnIndex - Index of the column to refresh (0-based)
+     */
+    refreshColumn: function (columnsId, columnIndex) {
+        const columnsElement = document.getElementById(columnsId);
+        if (!columnsElement) {
+            console.error(`Columns element with ID '${columnsId}' not found`);
+            return;
+        }
+
+        const pages = columnsElement.getAttribute("pages")?.split(";") || [];
+        if (columnIndex >= pages.length) {
+            console.error(`Column index ${columnIndex} is out of bounds`);
+            return;
+        }
+
+        const column = columnsElement.querySelector(`.column-${columnIndex + 1}`);
+        if (column) {
+            column.innerHTML = '<div class="column-loading">Refreshing content...</div>';
+            loadContentIntoColumn(column, pages[columnIndex]);
+        }
+    },
+
+    /**
+     * Update content in a specific column
+     * @param {string} columnsId - ID of the columns element
+     * @param {number} columnIndex - Index of the column to update (0-based)
+     * @param {string} newContent - New content to display (HTML string)
+     */
+    updateColumnContent: function (columnsId, columnIndex, newContent) {
+        const columnsElement = document.getElementById(columnsId);
+        if (!columnsElement) {
+            console.error(`Columns element with ID '${columnsId}' not found`);
+            return;
+        }
+
+        const column = columnsElement.querySelector(`.column-${columnIndex + 1}`);
+        if (column) {
+            column.innerHTML = newContent;
+            domContentLoad(); // Process any dotPipe elements in the new content
+        }
+    },
+
+    /**
+     * Load a new page into a specific column
+     * @param {string} columnsId - ID of the columns element
+     * @param {number} columnIndex - Index of the column to update (0-based)
+     * @param {string} pageUrl - URL of the new page to load
+     */
+    loadColumnPage: function (columnsId, columnIndex, pageUrl) {
+        const columnsElement = document.getElementById(columnsId);
+        if (!columnsElement) {
+            console.error(`Columns element with ID '${columnsId}' not found`);
+            return;
+        }
+
+        const column = columnsElement.querySelector(`.column-${columnIndex + 1}`);
+        if (column) {
+            column.innerHTML = '<div class="column-loading">Loading content...</div>';
+            loadContentIntoColumn(column, pageUrl);
+
+            // Update the pages attribute to reflect the change
+            const pages = columnsElement.getAttribute("pages")?.split(";") || [];
+            pages[columnIndex] = pageUrl;
+            columnsElement.setAttribute("pages", pages.join(";"));
+        }
+    }
+};
+
+/**
+ * refresh-component.js - Custom refresh component for dotPipe.js
+ * This handles the <refresh> custom element for refreshing content in specific targets
+ * or reloading the entire page
+ */
+
+// Initialize refresh component functionality when DOM is loaded
+document.addEventListener("DOMContentLoaded", function() {
+  // Process all refresh tags
+  processRefreshTags();
+});
+
+/**
+ * Process all refresh tags in the document
+ */
+function processRefreshTags() {
+  const refreshElements = document.getElementsByTagName("refresh");
+  
+  Array.from(refreshElements).forEach(function(refreshElement) {
+    if (refreshElement.classList.contains("processed")) {
+      return;
+    }
+    
+    // Get attributes
+    const target = refreshElement.getAttribute("target") || "";
+    
+    // Set up refresh element
+    setupRefreshElement(refreshElement, target);
+    
+    // Mark as processed
+    refreshElement.classList.add("processed");
+  });
+}
+
+/**
+ * Set up a refresh element with necessary functionality
+ * @param {Element} refreshElement - The refresh element to set up
+ * @param {string} target - The target specification string
+ */
+function setupRefreshElement(refreshElement, target) {
+  // Create refresh button
+  const refreshButton = document.createElement('button');
+  refreshButton.className = 'refresh-button';
+  
+  // Get button text from element content or use default
+  const buttonText = refreshElement.textContent.trim() || 'Refresh';
+  refreshButton.textContent = buttonText;
+  
+  // Get button attributes from the refresh element
+  for (let i = 0; i < refreshElement.attributes.length; i++) {
+    const attr = refreshElement.attributes[i];
+    if (attr.name !== 'target' && attr.name !== 'id' && attr.name !== 'class') {
+      refreshButton.setAttribute(attr.name, attr.value);
+    }
+  }
+  
+  // Add click event listener
+  refreshButton.addEventListener('click', function() {
+    handleRefresh(target);
+  });
+  
+  // Replace refresh tag content with our button
+  refreshElement.innerHTML = '';
+  refreshElement.appendChild(refreshButton);
+  
+  // Add auto-refresh functionality if interval is specified
+  if (refreshElement.hasAttribute('interval')) {
+    const interval = parseInt(refreshElement.getAttribute('interval'));
+    if (!isNaN(interval) && interval > 0) {
+      setInterval(() => {
+        handleRefresh(target);
+      }, interval * 1000); // Convert to milliseconds
+    }
+  }
+}
+
+/**
+ * Handle refresh action based on target specification
+ * @param {string} target - The target specification string
+ */
+function handleRefresh(target) {
+  if (!target) {
+    console.error('No target specified for refresh');
+    return;
+  }
+  
+  // Check if target is to refresh the whole page
+  if (target === '_page') {
+    window.location.reload();
+    return;
+  }
+  
+  // Parse target specifications (format: "targetId:pageUrl;targetId2:pageUrl2")
+  const targetSpecs = target.split(';');
+  
+  targetSpecs.forEach(spec => {
+    const [targetId, pageUrl] = spec.split(':');
+    
+    if (!targetId || !pageUrl) {
+      console.error(`Invalid target specification: ${spec}`);
+      return;
+    }
+    
+    // Handle different target types
+    if (targetId.startsWith('cols-')) {
+      // Target is a column in a columns component
+      refreshColumnTarget(targetId, pageUrl);
+    } else {
+      // Standard target refresh
+      refreshStandardTarget(targetId, pageUrl);
+    }
+  });
+}
+
+/**
+ * Refresh a standard target element with content from a URL
+ * @param {string} targetId - The ID of the target element
+ * @param {string} pageUrl - The URL of the content to load
+ */
+function refreshStandardTarget(targetId, pageUrl) {
+  const targetElement = document.getElementById(targetId);
+  
+  if (!targetElement) {
+    console.error(`Target element with ID '${targetId}' not found`);
+    return;
+  }
+  
+  // Show loading indicator
+  const originalContent = targetElement.innerHTML;
+  targetElement.innerHTML = '<div class="refresh-loading">Loading content...</div>';
+  
+  // Determine content type based on file extension
+  const fileExtension = pageUrl.split('.').pop().toLowerCase();
+  
+  if (fileExtension === 'json') {
+    // Load JSON content using modala
+    refreshJsonContent(targetElement, pageUrl);
+  } else if (fileExtension === 'html' || fileExtension === 'htm') {
+    // Load HTML content
+    refreshHtmlContent(targetElement, pageUrl);
+  } else {
+    // Load other content types as text/html
+    refreshGenericContent(targetElement, pageUrl);
+  }
+  
+  // Dispatch refresh started event
+  dispatchRefreshEvent(targetElement, 'refreshStarted', {
+    targetId: targetId,
+    pageUrl: pageUrl,
+    originalContent: originalContent
+  });
+}
+
+/**
+ * Refresh a column in a columns component
+ * @param {string} targetId - The ID specification for the column (format: "cols-columnIndex")
+ * @param {string} pageUrl - The URL of the content to load
+ */
+function refreshColumnTarget(targetId, pageUrl) {
+  // Parse column specification (format: "cols-columnIndex")
+  const parts = targetId.split('-');
+  if (parts.length !== 2) {
+    console.error(`Invalid column target specification: ${targetId}`);
+    return;
+  }
+  
+  const columnsId = parts[0];
+  const columnIndex = parseInt(parts[1]) - 1; // Convert to 0-based index
+  
+  // Check if columns component API is available
+  if (typeof window.columnsComponent === 'undefined') {
+    console.error('Columns component not loaded');
+    return;
+  }
+  
+  // Use columns component API to refresh the column
+  window.columnsComponent.loadColumnPage(columnsId, columnIndex, pageUrl);
+}
+
+/**
+ * Load JSON content into a target element using modala
+ * @param {Element} targetElement - The target element
+ * @param {string} jsonUrl - The URL of the JSON file
+ */
+function refreshJsonContent(targetElement, jsonUrl) {
+  // Create a temporary container for the JSON content
+  const tempContainer = document.createElement('div');
+  tempContainer.style.display = 'none';
+  document.body.appendChild(tempContainer);
+  
+  // Use modal function from dotPipe.js to load JSON
+  modal(jsonUrl, tempContainer)
+    .then(() => {
+      // Move content from temp container to target element
+      targetElement.innerHTML = '';
+      while (tempContainer.firstChild) {
+        targetElement.appendChild(tempContainer.firstChild);
+      }
+      
+      // Remove temp container
+      document.body.removeChild(tempContainer);
+      
+      // Dispatch refresh completed event
+      dispatchRefreshEvent(targetElement, 'refreshCompleted', {
+        targetId: targetElement.id,
+        pageUrl: jsonUrl,
+        success: true
+      });
+    })
+    .catch(error => {
+      targetElement.innerHTML = `<div class="refresh-error">Error loading content: ${error.message}</div>`;
+      console.error('Error loading JSON content:', error);
+      
+      // Dispatch refresh failed event
+      dispatchRefreshEvent(targetElement, 'refreshFailed', {
+        targetId: targetElement.id,
+        pageUrl: jsonUrl,
+        error: error.message
+      });
+    });
+}
+
+/**
+ * Load HTML content into a target element
+ * @param {Element} targetElement - The target element
+ * @param {string} htmlUrl - The URL of the HTML file
+ */
+function refreshHtmlContent(targetElement, htmlUrl) {
+  // Create a pipe element to fetch HTML content
+  const pipeElement = document.createElement('pipe');
+  pipeElement.setAttribute('ajax', htmlUrl);
+  pipeElement.setAttribute('insert', targetElement.id);
+  pipeElement.classList.add('refresh-content-loader');
+  pipeElement.classList.add('plain-html');
+  
+  // Add to document
+  document.body.appendChild(pipeElement);
+  
+  // Trigger the pipe to load content
+  pipes(pipeElement);
+  
+  // Set up event listener to handle when content is loaded
+  document.addEventListener('DOMNodeInserted', function handler(event) {
+    if (event.target.parentNode && event.target.parentNode.id === targetElement.id) {
+      // Content has been inserted into the target element
+      setTimeout(() => {
+        // Remove loading indicator if it exists
+        const loadingIndicator = targetElement.querySelector('.refresh-loading');
+        if (loadingIndicator) {
+          loadingIndicator.remove();
+        }
+        
+        // Dispatch refresh completed event
+        dispatchRefreshEvent(targetElement, 'refreshCompleted', {
+          targetId: targetElement.id,
+          pageUrl: htmlUrl,
+          success: true
+        });
+        
+        // Remove event listener
+        document.removeEventListener('DOMNodeInserted', handler);
+        
+        // Remove the pipe element
+        if (document.body.contains(pipeElement)) {
+          document.body.removeChild(pipeElement);
+        }
+      }, 100);
+    }
+  });
+  
+  // Set up error handling
+  setTimeout(() => {
+    if (targetElement.querySelector('.refresh-loading')) {
+      // Content hasn't loaded within timeout period
+      targetElement.innerHTML = `<div class="refresh-error">Error loading content: Timeout</div>`;
+      
+      // Dispatch refresh failed event
+      dispatchRefreshEvent(targetElement, 'refreshFailed', {
+        targetId: targetElement.id,
+        pageUrl: htmlUrl,
+        error: 'Timeout'
+      });
+      
+      // Remove the pipe element
+      if (document.body.contains(pipeElement)) {
+        document.body.removeChild(pipeElement);
+      }
+    }
+  }, 10000); // 10 second timeout
+}
+
+/**
+ * Load generic content into a target element
+ * @param {Element} targetElement - The target element
+ * @param {string} contentUrl - The URL of the content file
+ */
+function refreshGenericContent(targetElement, contentUrl) {
+  fetch(contentUrl)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(content => {
+      targetElement.innerHTML = content;
+      
+      // Process any dotPipe elements in the loaded content
+      domContentLoad();
+      
+      // Dispatch refresh completed event
+      dispatchRefreshEvent(targetElement, 'refreshCompleted', {
+        targetId: targetElement.id,
+        pageUrl: contentUrl,
+        success: true
+      });
+    })
+    .catch(error => {
+      targetElement.innerHTML = `<div class="refresh-error">Error loading content: ${error.message}</div>`;
+      console.error('Error loading content:', error);
+      
+      // Dispatch refresh failed event
+      dispatchRefreshEvent(targetElement, 'refreshFailed', {
+        targetId: targetElement.id,
+        pageUrl: contentUrl,
+        error: error.message
+      });
+    });
+}
+
+/**
+ * Dispatch a custom event for refresh actions
+ * @param {Element} element - The element to dispatch the event on
+ * @param {string} eventName - The name of the event
+ * @param {Object} detail - Event details
+ */
+function dispatchRefreshEvent(element, eventName, detail) {
+  const event = new CustomEvent(eventName, {
+    detail: detail,
+    bubbles: true
+  });
+  element.dispatchEvent(event);
+}
+
+/**
+ * Add CSS styles for refresh component
+ */
+function addRefreshStyles() {
+  // Check if styles already exist
+  if (document.getElementById('refresh-component-styles')) {
+    return;
+  }
+  
+  // Create style element
+  const style = document.createElement('style');
+  style.id = 'refresh-component-styles';
+  
+  // Add CSS rules
+  style.textContent = `
+    .refresh-button {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    
+    .refresh-button:hover {
+      background-color: #0069d9;
+    }
+    
+    .refresh-button:active {
+      background-color: #0062cc;
+    }
+    
+    .refresh-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #6c757d;
+      font-style: italic;
+      position: relative;
+    }
+    
+    .refresh-loading:before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #3498db;
+      border-radius: 50%;
+      animation: refresh-spin 1s linear infinite;
+    }
+    
+    @keyframes refresh-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .refresh-error {
+      padding: 15px;
+      color: #dc3545;
+      background-color: #f8d7da;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+  `;
+  
+  // Add to document head
+  document.head.appendChild(style);
+}
+
+// Add styles when the script loads
+addRefreshStyles();
+
+/**
+ * Public API for refresh component
+ */
+window.refreshComponent = {
+  /**
+   * Refresh content in a target element
+   * @param {string} targetId - ID of the target element
+   * @param {string} pageUrl - URL of the content to load
+   */
+  refreshTarget: function(targetId, pageUrl) {
+    if (targetId === '_page') {
+      window.location.reload();
+      return;
+    }
+    
+    if (targetId.startsWith('cols-')) {
+      refreshColumnTarget(targetId, pageUrl);
+    } else {
+      refreshStandardTarget(targetId, pageUrl);
+    }
+  },
+  
+  /**
+   * Refresh multiple targets
+   * @param {string} targetSpec - Target specification string (format: "targetId:pageUrl;targetId2:pageUrl2")
+   */
+  refreshTargets: function(targetSpec) {
+    handleRefresh(targetSpec);
+  }
+};
+
+/**
+ * Process all checkout tags in the document
+ */
+function processCheckoutTags() {
+    const checkoutElements = document.getElementsByTagName("checkout");
+
+    Array.from(checkoutElements).forEach(function (checkoutElement) {
+        if (checkoutElement.classList.contains("processed")) {
+            return;
+        }
+
+        // Check if cart exists and has items
+        const cart = JSON.parse(localStorage.getItem('dotPipeCart') || '{"items":[]}');
+
+        if (cart.items.length === 0) {
+            // Cart is empty, show message and return
+            checkoutElement.innerHTML = `
+        <div class="empty-checkout">
+          <h2>Your cart is empty</h2>
+          <p>Please add items to your cart before proceeding to checkout.</p>
+          <a href="index.html" class="btn">Continue Shopping</a>
+        </div>
+      `;
+            checkoutElement.classList.add("processed");
+            return;
+        }
+
+        // Get validation mode
+        const validateMode = checkoutElement.getAttribute('validate') === 'true';
+
+        // Set up checkout element
+        setupCheckoutElement(checkoutElement, validateMode);
+
+        // Mark as processed
+        checkoutElement.classList.add("processed");
+    });
+}
+
+/**
+ * Set up a checkout element with necessary functionality
+ * @param {Element} checkoutElement - The checkout element to set up
+ * @param {boolean} validateMode - Whether to run in validation mode (debug)
+ */
+function setupCheckoutElement(checkoutElement, validateMode) {
+    // Create checkout container
+    const checkoutContainer = document.createElement('div');
+    checkoutContainer.className = 'checkout-container';
+
+    // Create checkout form
+    const formContainer = document.createElement('div');
+    formContainer.className = 'checkout-form-container';
+    formContainer.innerHTML = `
+    <h2>Shipping & Payment</h2>
+    <form id="checkout-form">
+      <div class="form-section">
+        <h3>Contact Information</h3>
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" name="fullName" required>
+          <div id="fullName-error" class="error-message"></div>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required>
+          <div id="email-error" class="error-message"></div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>Shipping Address</h3>
+        <div class="form-group">
+          <label for="address">Street Address</label>
+          <input type="text" id="address" name="address" required>
+          <div id="address-error" class="error-message"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" name="city" required>
+            <div id="city-error" class="error-message"></div>
+          </div>
+          <div class="form-group">
+            <label for="state">State</label>
+            <select id="state" name="state" required>
+              <option value="">Select State</option>
+              <option value="AL">Alabama</option>
+              <option value="AK">Alaska</option>
+              <option value="AZ">Arizona</option>
+              <option value="AR">Arkansas</option>
+              <option value="CA">California</option>
+              <option value="CO">Colorado</option>
+              <option value="CT">Connecticut</option>
+              <option value="DE">Delaware</option>
+              <option value="FL">Florida</option>
+              <option value="GA">Georgia</option>
+              <option value="HI">Hawaii</option>
+              <option value="ID">Idaho</option>
+              <option value="IL">Illinois</option>
+              <option value="IN">Indiana</option>
+              <option value="IA">Iowa</option>
+              <option value="KS">Kansas</option>
+              <option value="KY">Kentucky</option>
+              <option value="LA">Louisiana</option>
+              <option value="ME">Maine</option>
+              <option value="MD">Maryland</option>
+              <option value="MA">Massachusetts</option>
+              <option value="MI">Michigan</option>
+              <option value="MN">Minnesota</option>
+              <option value="MS">Mississippi</option>
+              <option value="MO">Missouri</option>
+              <option value="MT">Montana</option>
+              <option value="NE">Nebraska</option>
+              <option value="NV">Nevada</option>
+              <option value="NH">New Hampshire</option>
+              <option value="NJ">New Jersey</option>
+              <option value="NM">New Mexico</option>
+              <option value="NY">New York</option>
+              <option value="NC">North Carolina</option>
+              <option value="ND">North Dakota</option>
+              <option value="OH">Ohio</option>
+              <option value="OK">Oklahoma</option>
+              <option value="OR">Oregon</option>
+              <option value="PA">Pennsylvania</option>
+              <option value="RI">Rhode Island</option>
+              <option value="SC">South Carolina</option>
+              <option value="SD">South Dakota</option>
+              <option value="TN">Tennessee</option>
+              <option value="TX">Texas</option>
+              <option value="UT">Utah</option>
+              <option value="VT">Vermont</option>
+              <option value="VA">Virginia</option>
+              <option value="WA">Washington</option>
+              <option value="WV">West Virginia</option>
+              <option value="WI">Wisconsin</option>
+              <option value="WY">Wyoming</option>
+            </select>
+            <div id="state-error" class="error-message"></div>
+          </div>
+          <div class="form-group">
+            <label for="zipCode">ZIP Code</label>
+            <input type="text" id="zipCode" name="zipCode" required>
+            <div id="zipCode-error" class="error-message"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>Payment Information</h3>
+        <div class="form-group">
+          <label for="cardNumber">Card Number</label>
+          <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" required>
+          <div id="cardNumber-error" class="error-message"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cardExpiry">Expiry Date</label>
+            <input type="text" id="cardExpiry" name="cardExpiry" placeholder="MM/YY" required>
+            <div id="cardExpiry-error" class="error-message"></div>
+          </div>
+          <div class="form-group">
+            <label for="cardCvv">CVV</label>
+            <input type="text" id="cardCvv" name="cardCvv" placeholder="123" required>
+            <div id="cardCvv-error" class="error-message"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <a href="cart.html" class="btn secondary">Back to Cart</a>
+        <button type="submit" class="btn primary">Complete Order</button>
+      </div>
+    </form>
+  `;
+
+    // Create order summary
+    const summaryContainer = document.createElement('div');
+    summaryContainer.className = 'checkout-summary';
+    summaryContainer.innerHTML = '<div id="order-summary"></div>';
+
+    // Add to checkout container
+    checkoutContainer.appendChild(formContainer);
+    checkoutContainer.appendChild(summaryContainer);
+
+    // Replace checkout tag content with our container
+    checkoutElement.innerHTML = '';
+    checkoutElement.appendChild(checkoutContainer);
+
+    // Display order summary
+    displayOrderSummary();
+
+    // Set up form validation
+    setupFormValidation(validateMode);
+}
+
+/**
+ * Display order summary on checkout page
+ */
+function displayOrderSummary() {
+    const cart = JSON.parse(localStorage.getItem('dotPipeCart'));
+    const orderSummary = document.getElementById('order-summary');
+    if (!orderSummary) return;
+
+    // Clear current content
+    orderSummary.innerHTML = '';
+
+    // Create summary HTML
+    let summaryHTML = '<h3>Order Summary</h3>';
+
+    // Add items
+    summaryHTML += '<div class="summary-items">';
+    cart.items.forEach(item => {
+        summaryHTML += `
+      <div class="summary-item">
+        <span class="item-name">${item.name} × ${item.quantity}</span>
+        <span class="item-price">$${(item.price * item.quantity).toFixed(2)}</span>
+      </div>
+    `;
+    });
+    summaryHTML += '</div>';
+
+    // Add totals
+    summaryHTML += `
+    <div class="summary-totals">
+      <div class="summary-subtotal">
+        <span>Subtotal</span>
+        <span>$${cart.subtotal.toFixed(2)}</span>
+      </div>
+      <div class="summary-tax">
+        <span>Tax</span>
+        <span>$${cart.tax.toFixed(2)}</span>
+      </div>
+      <div class="summary-shipping">
+        <span>Shipping</span>
+        <span>${cart.shipping > 0 ? '$' + cart.shipping.toFixed(2) : 'Free'}</span>
+      </div>
+      <div class="summary-total">
+        <span>Total</span>
+        <span>$${cart.total.toFixed(2)}</span>
+      </div>
+    </div>
+  `;
+
+    // Add to DOM
+    orderSummary.innerHTML = summaryHTML;
+}
+
+/**
+ * Set up form validation
+ * @param {boolean} validateMode - Whether to run in validation mode (debug)
+ */
+function setupFormValidation(validateMode) {
+    const checkoutForm = document.getElementById('checkout-form');
+    if (!checkoutForm) return;
+
+    checkoutForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        // Validate form
+        if (validateCheckoutForm()) {
+            // Process order
+            processOrder(validateMode);
+        }
+    });
+
+    // Add input validation listeners
+    const inputs = checkoutForm.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function () {
+            validateField(this);
+        });
+    });
+}
+
+/**
+ * Validate individual form field
+ * @param {Element} field - The field to validate
+ * @returns {boolean} - Whether the field is valid
+ */
+function validateField(field) {
+    const fieldName = field.name;
+    const value = field.value.trim();
+    let isValid = true;
+    let errorMessage = '';
+
+    // Get error element
+    const errorElement = document.getElementById(`${fieldName}-error`);
+
+    // Validation rules
+    switch (fieldName) {
+        case 'fullName':
+            if (value === '') {
+                isValid = false;
+                errorMessage = 'Please enter your full name';
+            }
+            break;
+
+        case 'email':
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                isValid = false;
+                errorMessage = 'Please enter a valid email address';
+            }
+            break;
+
+        case 'address':
+            if (value === '') {
+                isValid = false;
+                errorMessage = 'Please enter your address';
+            }
+            break;
+
+        case 'city':
+            if (value === '') {
+                isValid = false;
+                errorMessage = 'Please enter your city';
+            }
+            break;
+
+        case 'state':
+            if (value === '') {
+                isValid = false;
+                errorMessage = 'Please select your state';
+            }
+            break;
+
+        case 'zipCode':
+            const zipRegex = /^\d{5}(-\d{4})?$/;
+            if (!zipRegex.test(value)) {
+                isValid = false;
+                errorMessage = 'Please enter a valid ZIP code';
+            }
+            break;
+
+        case 'cardNumber':
+            // Simple validation - would use a library in production
+            const cardRegex = /^\d{13,19}$/;
+            if (!cardRegex.test(value.replace(/\s/g, ''))) {
+                isValid = false;
+                errorMessage = 'Please enter a valid card number';
+            }
+            break;
+
+        case 'cardExpiry':
+            const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+            if (!expiryRegex.test(value)) {
+                isValid = false;
+                errorMessage = 'Please enter a valid expiry date (MM/YY)';
+            } else {
+                // Check if card is expired
+                const [month, year] = value.split('/');
+                const expiryDate = new Date(2000 + parseInt(year), parseInt(month) - 1);
+                const currentDate = new Date();
+
+                if (expiryDate < currentDate) {
+                    isValid = false;
+                    errorMessage = 'Card has expired';
+                }
+            }
+            break;
+
+        case 'cardCvv':
+            const cvvRegex = /^\d{3,4}$/;
+            if (!cvvRegex.test(value)) {
+                isValid = false;
+                errorMessage = 'Please enter a valid CVV';
+            }
+            break;
+    }
+
+    // Update UI based on validation
+    if (errorElement) {
+        errorElement.textContent = errorMessage;
+    }
+
+    if (isValid) {
+        field.classList.remove('invalid');
+        field.classList.add('valid');
+    } else {
+        field.classList.remove('valid');
+        field.classList.add('invalid');
+    }
+
+    return isValid;
+}
+
+/**
+ * Validate entire checkout form
+ * @returns {boolean} - Whether the form is valid
+ */
+function validateCheckoutForm() {
+    const checkoutForm = document.getElementById('checkout-form');
+    if (!checkoutForm) return false;
+
+    const inputs = checkoutForm.querySelectorAll('input, select');
+    let isFormValid = true;
+
+    inputs.forEach(input => {
+        const fieldIsValid = validateField(input);
+        if (!fieldIsValid) {
+            isFormValid = false;
+        }
+    });
+
+    return isFormValid;
+}
+
+/**
+ * Process order
+ * @param {boolean} validateMode - Whether to run in validation mode (debug)
+ */
+function processOrder(validateMode) {
+    const checkoutForm = document.getElementById('checkout-form');
+    if (!checkoutForm) return;
+
+    // Get form data
+    const formData = new FormData(checkoutForm);
+    const orderData = {};
+
+    for (const [key, value] of formData.entries()) {
+        orderData[key] = value;
+    }
+
+    // Get cart data
+    const cart = JSON.parse(localStorage.getItem('dotPipeCart'));
+
+    // Create order object
+    const order = {
+        id: generateOrderId(),
+        date: new Date().toISOString(),
+        customer: {
+            fullName: orderData.fullName,
+            email: orderData.email,
+            address: orderData.address,
+            city: orderData.city,
+            state: orderData.state,
+            zipCode: orderData.zipCode
+        },
+        items: cart.items,
+        payment: {
+            method: 'credit_card',
+            last4: orderData.cardNumber.slice(-4)
+        },
+        subtotal: cart.subtotal,
+        tax: cart.tax,
+        shipping: cart.shipping,
+        total: cart.total,
+        validateMode: validateMode
+    };
+
+    // If in validate mode, show debug information
+    if (validateMode) {
+        console.log('Validate mode enabled - Order would be processed with:', order);
+        textCard("Validation mode: Order would be processed (see console for details)", "validation-notice", "validation-notice", true, true, 5000, 100);
+    }
+
+    // Save order to localStorage
+    saveOrder(order);
+
+    // Clear cart
+    clearCart();
+
+    // Show confirmation or redirect
+    if (validateMode) {
+        // In validate mode, just show a confirmation message
+        const checkoutContainer = document.querySelector('.checkout-container');
+        if (checkoutContainer) {
+            checkoutContainer.innerHTML = `
+        <div class="order-success">
+          <h2>Order Validated Successfully</h2>
+          <p>Your order has been validated in debug mode.</p>
+          <p>Order ID: ${order.id}</p>
+          <div class="order-actions">
+            <a href="index.html" class="btn">Continue Shopping</a>
+          </div>
+        </div>
+      `;
+        }
+    } else {
+        // In normal mode, redirect to confirmation page
+        window.location.href = `order-confirmation.html?orderId=${order.id}`;
+    }
+}
+
+/**
+ * Generate a unique order ID
+ * @returns {string} - The generated order ID
+ */
+function generateOrderId() {
+    return 'ORD-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+}
+
+/**
+ * Save order to localStorage
+ * @param {Object} order - The order object to save
+ */
+function saveOrder(order) {
+    // Get existing orders or initialize empty array
+    const orders = JSON.parse(localStorage.getItem('dotPipeOrders') || '[]');
+
+    // Add new order
+    orders.push(order);
+
+    // Save back to localStorage
+    localStorage.setItem('dotPipeOrders', JSON.stringify(orders));
+}
+
+/**
+ * Clear the cart after successful order
+ */
+function clearCart() {
+    localStorage.setItem('dotPipeCart', JSON.stringify({
+        items: [],
+        subtotal: 0,
+        tax: 0,
+        shipping: 0,
+        total: 0
+    }));
+}
+
+/**
+ * Process all order-confirmation tags in the document
+ */
+function processOrderConfirmationTags() {
+    const confirmationElements = document.getElementsByTagName("order-confirmation");
+
+    if (confirmationElements.length === 0) {
+        // If no custom tags, check if we're on the confirmation page
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+
+        if (orderId && document.getElementById('order-confirmation')) {
+            initOrderConfirmation(orderId, document.getElementById('order-confirmation'));
+        }
+        return;
+    }
+
+    Array.from(confirmationElements).forEach(function (confirmationElement) {
+        if (confirmationElement.classList.contains("processed")) {
+            return;
+        }
+
+        // Get order ID from URL or attribute
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = confirmationElement.getAttribute('order-id') || urlParams.get('orderId');
+
+        if (!orderId) {
+            // No order ID found, show error
+            confirmationElement.innerHTML = `
+        <div class="order-not-found">
+          <h2>Order Not Found</h2>
+          <p>No order ID was provided.</p>
+          <a href="index.html" class="btn">Return to Home</a>
+        </div>
+      `;
+            confirmationElement.classList.add("processed");
+            return;
+        }
+
+        // Initialize order confirmation with the order ID
+        initOrderConfirmation(orderId, confirmationElement);
+
+        // Mark as processed
+        confirmationElement.classList.add("processed");
+    });
+}
+
+/**
+ * Initialize order confirmation with the given order ID
+ * @param {string} orderId - The order ID to display
+ * @param {Element} container - The container element
+ */
+function initOrderConfirmation(orderId, container) {
+    // Get order details
+    const order = getOrderById(orderId);
+
+    if (!order) {
+        // Order not found, show error
+        container.innerHTML = `
+      <div class="order-not-found">
+        <h2>Order Not Found</h2>
+        <p>We couldn't find the order you're looking for.</p>
+        <a href="index.html" class="btn">Return to Home</a>
+      </div>
+    `;
+        return;
+    }
+
+    // Display order details
+    displayOrderConfirmation(order, container);
+}
+
+/**
+ * Get order by ID from localStorage
+ * @param {string} orderId - The order ID to find
+ * @returns {Object|null} - The order object or null if not found
+ */
+function getOrderById(orderId) {
+    const orders = JSON.parse(localStorage.getItem('dotPipeOrders') || '[]');
+    return orders.find(order => order.id === orderId);
+}
+
+/**
+ * Display order confirmation details
+ * @param {Object} order - The order object
+ * @param {Element} container - The container element
+ */
+function displayOrderConfirmation(order, container) {
+    // Format date
+    const orderDate = new Date(order.date);
+    const formattedDate = orderDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    // Create confirmation HTML
+    let confirmationHTML = `
+    <div class="confirmation-header">
+      <h2>Order Confirmed!</h2>
+      <p>Thank you for your purchase, ${order.customer.fullName}.</p>
+    </div>
+    
+    <div class="confirmation-details">
+      <div class="confirmation-info">
+        <p><strong>Order ID:</strong> ${order.id}</p>
+        <p><strong>Date:</strong> ${formattedDate}</p>
+        <p><strong>Email:</strong> ${order.customer.email}</p>
+      </div>
+      
+      <div class="shipping-info">
+        <h3>Shipping Address</h3>
+        <p>${order.customer.fullName}</p>
+        <p>${order.customer.address}</p>
+        <p>${order.customer.city}, ${order.customer.state} ${order.customer.zipCode}</p>
+      </div>
+      
+      <div class="payment-info">
+        <h3>Payment Method</h3>
+        <p>Credit Card ending in ${order.payment.last4}</p>
+      </div>
+    </div>
+    
+    <div class="order-items">
+      <h3>Order Items</h3>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+    // Add items
+    order.items.forEach(item => {
+        confirmationHTML += `
+      <tr>
+        <td>${item.name}</td>
+        <td>${item.quantity}</td>
+        <td>$${item.price.toFixed(2)}</td>
+        <td>$${(item.price * item.quantity).toFixed(2)}</td>
+      </tr>
+    `;
+    });
+
+    // Add order summary
+    confirmationHTML += `
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="order-summary">
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span>$${order.subtotal.toFixed(2)}</span>
+      </div>
+      <div class="summary-row">
+        <span>Tax</span>
+        <span>$${order.tax.toFixed(2)}</span>
+      </div>
+      <div class="summary-row">
+        <span>Shipping</span>
+        <span>${order.shipping > 0 ? '$' + order.shipping.toFixed(2) : 'Free'}</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total</span>
+        <span>$${order.total.toFixed(2)}</span>
+      </div>
+    </div>
+    
+    <div class="confirmation-actions">
+      <a href="index.html" class="btn">Continue Shopping</a>
+      <button id="print-receipt" class="btn">Print Receipt</button>
+    </div>
+  `;
+
+    // Add to DOM
+    container.innerHTML = confirmationHTML;
+
+    // Add event listener for print button
+    const printButton = container.querySelector('#print-receipt');
+    if (printButton) {
+        printButton.addEventListener('click', function () {
+            window.print();
+        });
+    }
+}
+
+/**
+ * Process all cart tags in the document
+ */
+function processCartTags() {
+    const cartElements = document.getElementsByTagName("cart");
+
+    Array.from(cartElements).forEach(function (cartElement) {
+        if (cartElement.classList.contains("processed")) {
+            return;
+        }
+
+        // Initialize cart in localStorage if it doesn't exist
+        initCart();
+
+        // Process the cart element
+        setupCartElement(cartElement);
+
+        // Process all item elements within this cart
+        const itemElements = cartElement.getElementsByTagName("item");
+        Array.from(itemElements).forEach(function (itemElement) {
+            setupItemElement(itemElement, cartElement);
+        });
+
+        // Mark as processed
+        cartElement.classList.add("processed");
+    });
+}
+
+/**
+ * Set up a cart element with necessary functionality
+ * @param {Element} cartElement - The cart element to set up
+ */
+function setupCartElement(cartElement) {
+    // Create cart UI container
+    const cartContainer = document.createElement('div');
+    cartContainer.className = 'cart-container';
+
+    // Create cart items container
+    const itemsContainer = document.createElement('div');
+    itemsContainer.className = 'cart-items';
+    itemsContainer.id = 'cart-items';
+
+    // Create cart summary container
+    const summaryContainer = document.createElement('div');
+    summaryContainer.className = 'cart-summary';
+    summaryContainer.innerHTML = `
+    <h3>Cart Summary</h3>
+    <div class="summary-row">
+      <span>Subtotal</span>
+      <span id="cart-subtotal">$0.00</span>
+    </div>
+    <div class="summary-row">
+      <span>Tax</span>
+      <span id="cart-tax">$0.00</span>
+    </div>
+    <div class="summary-row">
+      <span>Shipping</span>
+      <span id="cart-shipping">$0.00</span>
+    </div>
+    <div class="summary-row total">
+      <span>Total</span>
+      <span id="cart-total">$0.00</span>
+    </div>
+    <div class="cart-actions">
+      <button id="clear-cart" class="btn secondary">Clear Cart</button>
+      <button id="checkout-button" class="btn redirect primary" ajax="checkout.html">Checkout</button>
+    </div>
+  `;
+
+    // Add to cart container
+    cartContainer.appendChild(itemsContainer);
+    cartContainer.appendChild(summaryContainer);
+
+    // Replace cart tag content with our container
+    cartElement.innerHTML = '';
+    cartElement.appendChild(cartContainer);
+
+    // Add event listener for clear cart button
+    const clearCartButton = cartContainer.querySelector('#clear-cart');
+    if (clearCartButton) {
+        clearCartButton.addEventListener('click', clearCart);
+    }
+
+    // Update cart display
+    updateCartDisplay();
+}
+
+/**
+ * Set up an item element with necessary functionality
+ * @param {Element} itemElement - The item element to set up
+ * @param {Element} cartElement - The parent cart element
+ */
+function setupItemElement(itemElement, cartElement) {
+    // Get product ID from the item element
+    const productId = itemElement.getAttribute('id');
+
+    if (!productId) {
+        console.error('Item element must have an id attribute');
+        return;
+    }
+
+    // Check if item has ajax attribute
+    if (itemElement.hasAttribute('ajax')) {
+        // Fetch product data from server
+        const ajaxAttr = itemElement.getAttribute('ajax');
+        const [file, target, limit] = ajaxAttr.split(':');
+
+        // Create a pipe element to fetch product data
+        const pipeElement = document.createElement('pipe');
+        pipeElement.setAttribute('ajax', file);
+        pipeElement.setAttribute('insert', `product-data-${productId}`);
+        pipeElement.classList.add('product-data-loader');
+
+        // Create container for product data
+        const productDataContainer = document.createElement('div');
+        productDataContainer.id = `product-data-${productId}`;
+        productDataContainer.classList.add('product-data-container');
+        productDataContainer.style.display = 'none';
+
+        // Add to document
+        document.body.appendChild(productDataContainer);
+        document.body.appendChild(pipeElement);
+
+        // Trigger the pipe to load product data
+        pipes(pipeElement);
+
+        // Set up event listener to process product data when loaded
+        document.addEventListener('DOMNodeInserted', function (event) {
+            if (event.target.id === `product-data-${productId}`) {
+                setTimeout(() => {
+                    processProductData(productId, productDataContainer, itemElement);
+                }, 100);
+            }
+        });
+    } else {
+        // Use data from item element attributes
+        const name = itemElement.getAttribute('name') || 'Product';
+        const price = parseFloat(itemElement.getAttribute('price') || '0');
+        const image = itemElement.getAttribute('image') || '';
+
+        // Create add to cart button
+        createAddToCartButton(productId, name, price, image, itemElement);
+    }
+}
+
+/**
+ * Process product data loaded via AJAX
+ * @param {string} productId - The product ID
+ * @param {Element} dataContainer - The container with product data
+ * @param {Element} itemElement - The original item element
+ */
+function processProductData(productId, dataContainer, itemElement) {
+    try {
+        // Try to parse JSON data
+        let productData;
+
+        try {
+            // First try to parse as JSON
+            const jsonText = dataContainer.textContent.trim();
+            productData = JSON.parse(jsonText);
+        } catch (e) {
+            // If not JSON, try to extract data from HTML
+            const nameElement = dataContainer.querySelector('.product-name');
+            const priceElement = dataContainer.querySelector('.product-price');
+            const imageElement = dataContainer.querySelector('.product-image');
+
+            productData = {
+                id: productId,
+                name: nameElement ? nameElement.textContent : 'Product',
+                price: priceElement ? parseFloat(priceElement.textContent.replace(/[^0-9.-]+/g, '')) : 0,
+                image: imageElement ? imageElement.getAttribute('src') : ''
+            };
+        }
+
+        // Create add to cart button
+        createAddToCartButton(
+            productId,
+            productData.name,
+            productData.price,
+            productData.image,
+            itemElement
+        );
+
+    } catch (error) {
+        console.error('Error processing product data:', error);
+    }
+}
+
+/**
+ * Create an add to cart button for a product
+ * @param {string} productId - The product ID
+ * @param {string} name - The product name
+ * @param {number} price - The product price
+ * @param {string} image - The product image URL
+ * @param {Element} itemElement - The item element to attach the button to
+ */
+function createAddToCartButton(productId, name, price, image, itemElement) {
+    // Create button element
+    const addButton = document.createElement('button');
+    addButton.className = 'add-to-cart-btn';
+    addButton.textContent = 'Add to Cart';
+    addButton.setAttribute('data-product-id', productId);
+    addButton.setAttribute('data-product-name', name);
+    addButton.setAttribute('data-product-price', price);
+    addButton.setAttribute('data-product-image', image);
+
+    // Add event listener
+    addButton.addEventListener('click', function () {
+        addToCart(
+            this.getAttribute('data-product-id'),
+            this.getAttribute('data-product-name'),
+            parseFloat(this.getAttribute('data-product-price')),
+            1,
+            this.getAttribute('data-product-image')
+        );
+    });
+
+    // Replace item element content with button
+    itemElement.innerHTML = '';
+    itemElement.appendChild(addButton);
+}
+
+/**
+ * Initialize cart in localStorage
+ */
+function initCart() {
+    if (!localStorage.getItem('dotPipeCart')) {
+        localStorage.setItem('dotPipeCart', JSON.stringify({
+            items: [],
+            subtotal: 0,
+            tax: 0,
+            shipping: 0,
+            total: 0
+        }));
+    }
+}
+
+/**
+ * Add item to cart
+ * @param {string} productId - The product ID
+ * @param {string} name - The product name
+ * @param {number} price - The product price
+ * @param {number} quantity - The quantity to add
+ * @param {string} image - The product image URL
+ */
+function addToCart(productId, name, price, quantity = 1, image = '') {
+    const cart = JSON.parse(localStorage.getItem('dotPipeCart'));
+
+    // Check if item already exists in cart
+    const existingItemIndex = cart.items.findIndex(item => item.productId === productId);
+
+    if (existingItemIndex > -1) {
+        // Update quantity if item exists
+        cart.items[existingItemIndex].quantity += quantity;
+    } else {
+        // Add new item
+        cart.items.push({
+            productId,
+            name,
+            price,
+            quantity,
+            image
+        });
+    }
+
+    // Update cart totals
+    updateCartTotals(cart);
+
+    // Save to localStorage
+    localStorage.setItem('dotPipeCart', JSON.stringify(cart));
+
+    // Update UI
+    updateCartDisplay();
+
+    // Show confirmation message
+    textCard("Item added to cart!", "cart-notification", "", true, true, 2000, 100);
+}
+
+/**
+ * Remove item from cart
+ * @param {string} productId - The product ID to remove
+ */
+function removeFromCart(productId) {
+    const cart = JSON.parse(localStorage.getItem('dotPipeCart'));
+
+    // Filter out the item to remove
+    cart.items = cart.items.filter(item => item.productId !== productId);
+
+    // Update cart totals
+    updateCartTotals(cart);
+
+    // Save to localStorage
+    localStorage.setItem('dotPipeCart', JSON.stringify(cart));
+
+    // Update UI
+    updateCartDisplay();
+}
+
+/**
+ * Update item quantity in cart
+ * @param {string} productId - The product ID
+ * @param {number} quantity - The new quantity
+ */
+function updateCartQuantity(productId, quantity) {
+    const cart = JSON.parse(localStorage.getItem('dotPipeCart'));
+
+    const itemIndex = cart.items.findIndex(item => item.productId === productId);
+
+    if (itemIndex > -1) {
+        if (quantity <= 0) {
+            // Remove item if quantity is zero or negative
+            removeFromCart(productId);
+            return;
+        }
+
+        cart.items[itemIndex].quantity = quantity;
+
+        // Update cart totals
+        updateCartTotals(cart);
+
+        // Save to localStorage
+        localStorage.setItem('dotPipeCart', JSON.stringify(cart));
+
+        // Update UI
+        updateCartDisplay();
+    }
+}
+
+/**
+ * Calculate cart totals
+ * @param {Object} cart - The cart object
+ */
+function updateCartTotals(cart) {
+    // Calculate subtotal
+    cart.subtotal = cart.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+    // Calculate tax (example: 8%)
+    cart.tax = cart.subtotal * 0.08;
+
+    // Calculate shipping (example: flat $5 or free for orders over $50)
+    cart.shipping = cart.subtotal > 50 ? 0 : 5;
+
+    // Calculate total
+    cart.total = cart.subtotal + cart.tax + cart.shipping;
+}
+
+/**
+ * Update cart display in the UI
+ */
+function updateCartDisplay() {
+    const cart = JSON.parse(localStorage.getItem('dotPipeCart'));
+    const cartItems = document.getElementById('cart-items');
+    const cartSubtotal = document.getElementById('cart-subtotal');
+    const cartTax = document.getElementById('cart-tax');
+    const cartShipping = document.getElementById('cart-shipping');
+    const cartTotal = document.getElementById('cart-total');
+    const cartCount = document.getElementById('cart-count');
+
+    if (cartCount) {
+        const itemCount = cart.items.reduce((count, item) => count + item.quantity, 0);
+        cartCount.textContent = itemCount;
+    }
+
+    if (cartItems) {
+        // Clear current items
+        cartItems.innerHTML = '';
+
+        if (cart.items.length === 0) {
+            cartItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
+        } else {
+            // Create HTML for each item
+            cart.items.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'cart-item';
+                itemElement.innerHTML = `
+          <div class="cart-item-image">
+            ${item.image ? `<img src="${item.image}" alt="${item.name}">` : ''}
+          </div>
+          <div class="cart-item-details">
+            <h4>${item.name}</h4>
+            <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+          </div>
+          <div class="cart-item-quantity">
+            <button class="quantity-btn decrease" data-product-id="${item.productId}">-</button>
+            <input type="number" value="${item.quantity}" min="1" data-product-id="${item.productId}">
+            <button class="quantity-btn increase" data-product-id="${item.productId}">+</button>
+          </div>
+          <div class="cart-item-subtotal">
+            $${(item.price * item.quantity).toFixed(2)}
+          </div>
+          <button class="remove-item" data-product-id="${item.productId}">×</button>
+        `;
+                cartItems.appendChild(itemElement);
+            });
+
+            // Add event listeners to the new elements
+            addCartItemEventListeners();
+        }
+    }
+
+    if (cartSubtotal) {
+        cartSubtotal.textContent = `$${cart.subtotal.toFixed(2)}`;
+    }
+
+    if (cartTax) {
+        cartTax.textContent = `$${cart.tax.toFixed(2)}`;
+    }
+
+    if (cartShipping) {
+        cartShipping.textContent = cart.shipping > 0 ? `$${cart.shipping.toFixed(2)}` : 'Free';
+    }
+
+    if (cartTotal) {
+        cartTotal.textContent = `$${cart.total.toFixed(2)}`;
+    }
+}
+
+/**
+ * Add event listeners to cart item elements
+ */
+function addCartItemEventListeners() {
+    // Quantity decrease buttons
+    document.querySelectorAll('.quantity-btn.decrease').forEach(button => {
+        button.addEventListener('click', function () {
+            const productId = this.getAttribute('data-product-id');
+            const currentQuantity = parseInt(this.nextElementSibling.value);
+            updateCartQuantity(productId, currentQuantity - 1);
+        });
+    });
+
+    // Quantity increase buttons
+    document.querySelectorAll('.quantity-btn.increase').forEach(button => {
+        button.addEventListener('click', function () {
+            const productId = this.getAttribute('data-product-id');
+            const currentQuantity = parseInt(this.previousElementSibling.value);
+            updateCartQuantity(productId, currentQuantity + 1);
+        });
+    });
+
+    // Quantity input fields
+    document.querySelectorAll('.cart-item-quantity input').forEach(input => {
+        input.addEventListener('change', function () {
+            const productId = this.getAttribute('data-product-id');
+            const quantity = parseInt(this.value);
+            updateCartQuantity(productId, quantity);
+        });
+    });
+
+    // Remove item buttons
+    document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', function () {
+            const productId = this.getAttribute('data-product-id');
+            removeFromCart(productId);
+        });
+    });
+}
+
+
+/**
+ * Process all tab tags in the document
+ * This function should be called when the document is loaded
+ */
+function processTabTags() {
+    let tabElements = document.getElementsByTagName("tabs");
+
+    Array.from(tabElements).forEach(function (element) {
+        if (element.classList.contains("processed")) {
+            return;
+        }
+
+        // Get attributes
+        const tabsData = element.getAttribute("tab")?.split(";") || [];
+        const tabClass = element.getAttribute("class") || "";
+        const tabStyle = element.getAttribute("style") || "";
+
+        if (tabsData.length === 0) {
+            console.error("Tabs tag requires tab attribute");
+            element.innerHTML = "<div class='tabs-error'>Configuration error: No tabs specified</div>";
+            element.classList.add("processed");
+            return;
+        }
+
+        // Generate the tabs HTML
+        const tabsHTML = createTabsInterface(tabsData, tabClass, tabStyle);
+
+        // Replace the tabs tag content with our generated HTML
+        element.innerHTML = tabsHTML;
+
+        // Mark as processed
+        element.classList.add("processed");
+
+        // Process the newly added elements with dotpipe.js
+        domContentLoad();
+
+        // Preload all tab content
+        preloadAllTabContent(tabsData);
+    });
+}
+
+/**
+ * Creates a tabbed interface based on provided attributes
+ * @param {Array} tabsData - Array of tab definitions in format "TabName:TabId:ContentSource"
+ * @param {string} tabClass - CSS classes to apply to tabs
+ * @param {string} tabStyle - Inline styles to apply to tabs
+ * @returns {string} HTML for the tabbed interface
+ */
+function createTabsInterface(tabsData, tabClass, tabStyle) {
+    // Parse tab data
+    const tabs = tabsData.map(tabData => {
+        const parts = tabData.split(":");
+        return {
+            name: parts[0] || "Tab",
+            id: parts[1] || `tab-${Math.random().toString(36).substring(2, 9)}`,
+            source: parts[2] || ""
+        };
+    });
+
+    // Set first tab as active by default
+    const activeTab = tabs[0];
+
+    // Create tabs HTML
+    let tabsHeaderHTML = tabs.map((tab, index) => {
+        const isActive = index === 0 ? 'active' : '';
+        return `<div class="tab-header ${isActive} ${tabClass}" id="header-${tab.id}" data-tab="${tab.id}" data-source="${tab.source}" style="${tabStyle}">${tab.name}</div>`;
+    }).join('');
+
+    // Create tab content containers - initially empty for preloading
+    let tabsContentHTML = tabs.map((tab, index) => {
+        const isActive = index === 0 ? 'active' : '';
+        return `<div class="tab-content ${isActive}" id="content-${tab.id}">
+                  <div class="tab-loading">Loading content...</div>
+                </div>`;
+    }).join('');
+
+    // Combine everything
+    const html = `
+    <div class="tabs-container">
+        <div class="tabs-header">
+            ${tabsHeaderHTML}
+        </div>
+        <div class="tabs-content">
+            ${tabsContentHTML}
+        </div>
+    </div>
+
+    <style>
+        .tabs-container {
+            width: 100%;
+            margin: 0 auto;
+            font-family: Arial, sans-serif;
+        }
+        
+        .tabs-header {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            background-color: #f8f9fa;
+        }
+        
+        .tab-header {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-header:hover {
+            background-color: #e9ecef;
+        }
+        
+        .tab-header.active {
+            background-color: #fff;
+            border-color: #ddd;
+            border-bottom-color: #fff;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        
+        .tabs-content {
+            border: 1px solid #ddd;
+            border-top: none;
+            padding: 15px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tabs-error {
+            padding: 15px;
+            background: #ffebee;
+            color: #c62828;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .tab-loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab-header').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Get the tab ID
+                const tabId = this.getAttribute('data-tab');
+                
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab-header').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                
+                // Add active class to current tab
+                this.classList.add('active');
+                document.getElementById('content-' + tabId).classList.add('active');
+            });
+        });
+    </script>
+    `;
+
+    return html;
+}
+
+/**
+ * Preloads content for all tabs
+ * @param {Array} tabsData - Array of tab definitions
+ */
+function preloadAllTabContent(tabsData) {
+    tabsData.forEach(tabData => {
+        const parts = tabData.split(":");
+        const tabId = parts[1] || `tab-${Math.random().toString(36).substring(2, 9)}`;
+        const source = parts[2] || "";
+
+        if (source) {
+            // Create a pipe element for each tab
+            let pipeElement = document.createElement('pipe');
+            pipeElement.id = `pipe-${tabId}-preload`;
+            pipeElement.setAttribute('ajax', source);
+            pipeElement.setAttribute('insert', `content-${tabId}`);
+
+            // Set appropriate class based on file extension
+            if (source.toLowerCase().endsWith('.json')) {
+                pipeElement.classList.add('modala');
+            } else if (source.toLowerCase().endsWith('.html')) {
+                pipeElement.classList.add('text-html');
+                pipeElement.classList.add('plain-html');
+            } else {
+                // Default handling for other file types
+                pipeElement.classList.add('text-html');
+            }
+
+            // Add pipe element to the document
+            document.body.appendChild(pipeElement);
+
+            // Trigger the pipe to load content
+            pipes(pipeElement);
+
+            // Remove the pipe element after use
+            setTimeout(() => {
+                if (document.body.contains(pipeElement)) {
+                    document.body.removeChild(pipeElement);
+                }
+            }, 2000);
+        }
+    });
+}
+
+/**
+ * 
  * Process all login tags in the document
  * This function should be called when the document is loaded
  */
@@ -234,7 +2511,7 @@ function processLoginTags() {
         const loginPage = element.getAttribute("login-page") || "";
         const registrationPage = element.getAttribute("registration-page") || "";
         const cssPage = element.getAttribute("css-page") || "";
-        
+
         // Check if we have at least one page to show
         if (!loginPage && !registrationPage) {
             console.error("Login tag requires at least one of login-page or registration-page attributes");
@@ -242,16 +2519,16 @@ function processLoginTags() {
             element.classList.add("processed");
             return;
         }
-        
+
         // Generate the login/registration HTML
         const loginHTML = createLoginRegistrationTabs(loginPage, registrationPage, cssPage);
-        
+
         // Replace the login tag content with our generated HTML
         element.innerHTML = loginHTML;
-        
+
         // Mark as processed
         element.classList.add("processed");
-        
+
         // Process the newly added elements with dotpipe.js
         domContentLoad();
     });
@@ -266,15 +2543,15 @@ function processLoginTags() {
  */
 function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
     const externalCss = cssPage ? `<link rel="stylesheet" href="${cssPage}">` : '';
-    
+
     // Determine which tabs to show
     const showLogin = !!loginPage;
     const showRegistration = !!registrationPage;
-    
+
     // Set default active tab
     const loginActive = showLogin ? 'active' : '';
     const registerActive = !showLogin && showRegistration ? 'active' : '';
-    
+
     // Create tabs HTML
     let tabsHtml = '';
     if (showLogin && showRegistration) {
@@ -285,7 +2562,7 @@ function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
             <div class="auth-tab ${registerActive}" id="register-tab" onclick="switchTab('register')">Register</div>
         </div>`;
     }
-    
+
     // Create login form HTML if needed
     let loginFormHtml = '';
     if (showLogin) {
@@ -322,7 +2599,7 @@ function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
             </div>
         </div>`;
     }
-    
+
     // Create registration form HTML if needed
     let registrationFormHtml = '';
     if (showRegistration) {
@@ -359,7 +2636,7 @@ function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
             </form>
         </div>`;
     }
-    
+
     const html = `
     ${externalCss}
     <div class="auth-container">
@@ -548,7 +2825,7 @@ function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
     </script>
     ` : ''}
     `;
-    
+
     return html;
 }
 /**
@@ -870,8 +3147,8 @@ function processMultipleCSVSources(sources, element, displayMode, sortAttr, page
 
                     // Dispatch event for other components
                     const event = new CustomEvent('csvLoaded', {
-                        detail: { 
-                            element: element, 
+                        detail: {
+                            element: element,
                             data: combinedData,
                             loadedSources: sourcesToLoad
                         }
@@ -1013,14 +3290,14 @@ function displayCSVData(element, data, displayMode, pageSize, originalContent) {
         const loadMoreButton = document.createElement('button');
         loadMoreButton.className = 'csv-load-more-button';
         loadMoreButton.textContent = 'Load More Data';
-        
+
         // Track which sources have been loaded
         const loadedSources = new Set([data.originalSources[0]]);
-        
+
         loadMoreButton.addEventListener('click', function () {
             // Find the next unloaded source
             const nextSource = data.originalSources.find(source => !loadedSources.has(source));
-            
+
             if (nextSource) {
                 // Show loading indicator
                 this.textContent = 'Loading...';
@@ -1037,7 +3314,7 @@ function displayCSVData(element, data, displayMode, pageSize, originalContent) {
                     .then(csvText => {
                         // Parse CSV
                         const newData = parseCSV(csvText);
-                        
+
                         // Add the source to our loaded sources set
                         loadedSources.add(nextSource);
 
@@ -1054,11 +3331,11 @@ function displayCSVData(element, data, displayMode, pageSize, originalContent) {
                         } else {
                             loadMoreContainer.remove(); // All sources loaded
                         }
-                        
+
                         // Dispatch event for other components
                         const event = new CustomEvent('csvMoreDataLoaded', {
-                            detail: { 
-                                element: element, 
+                            detail: {
+                                element: element,
                                 data: data,
                                 loadedSources: Array.from(loadedSources)
                             }
@@ -1270,26 +3547,26 @@ function updateDisplayWithData(element, data, displayMode, pageSize, originalCon
 function renderTableView(container, headers, rows, originalContent) {
     // Check if there's a template in the original content
     const templateMatch = originalContent.match(/<template[^>]*>([\s\S]*?)<\/template>/i);
-    
+
     // Create table container
     const tableContainer = document.createElement('div');
     tableContainer.className = 'csv-table-container';
-    
+
     // Create table
     const table = document.createElement('table');
     table.className = 'csv-table';
-    
+
     // Add headers
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
-    
+
     // Check if the template contains custom headers
     let hasCustomHeaders = false;
     if (templateMatch) {
         const templateContent = templateMatch[1];
         hasCustomHeaders = /<thead[^>]*>[\s\S]*?<\/thead>/i.test(templateContent);
     }
-    
+
     // If no custom headers in template, use CSV headers
     if (!hasCustomHeaders) {
         headers.forEach(header => {
@@ -1297,125 +3574,125 @@ function renderTableView(container, headers, rows, originalContent) {
             th.textContent = header;
             th.className = 'csv-header';
             th.setAttribute('data-column', header);
-            
+
             // Add click handler for sorting
             th.addEventListener('click', function () {
                 const currentDir = this.getAttribute('data-direction') || 'none';
                 let newDir = 'csv-asc';
-                
+
                 if (currentDir === 'csv-asc') {
                     newDir = 'csv-desc';
                 } else if (currentDir === 'csv-desc') {
                     newDir = 'csv-asc';
                 }
-                
+
                 // Update all headers
                 Array.from(thead.querySelectorAll('th')).forEach(h => {
                     h.removeAttribute('data-direction');
                     h.classList.remove('csv-sort-asc', 'csv-sort-desc');
                 });
-                
+
                 // Update this header
                 this.setAttribute('data-direction', newDir);
                 this.classList.add(newDir === 'csv-asc' ? 'csv-sort-asc' : 'csv-sort-desc');
-                
+
                 // Get the parent CSV element
                 const csvElement = container.closest('csv');
                 if (csvElement) {
                     // Update the sort attribute
                     csvElement.setAttribute('sort', `${header}:${newDir}`);
-                    
+
                     // Re-process the CSV tag
                     processCsvTags();
                 }
             });
-            
+
             headerRow.appendChild(th);
         });
-        
+
         thead.appendChild(headerRow);
         table.appendChild(thead);
     }
-    
+
     // Process template or create default table body
     if (templateMatch) {
         const templateContent = templateMatch[1];
-        
+
         // Check if template has both thead and tbody
         const theadMatch = templateContent.match(/<thead[^>]*>([\s\S]*?)<\/thead>/i);
         const tbodyMatch = templateContent.match(/<tbody[^>]*>([\s\S]*?)<\/tbody>/i);
-        
+
         // If template has custom thead, use it
         if (theadMatch) {
             const tempHead = document.createElement('div');
             tempHead.innerHTML = theadMatch[1];
             thead.innerHTML = tempHead.innerHTML;
             table.appendChild(thead);
-            
+
             // Add click handlers for sorting to custom headers
             Array.from(thead.querySelectorAll('th')).forEach((th, index) => {
                 const columnName = headers[index] || th.textContent;
                 th.setAttribute('data-column', columnName);
-                
-                th.addEventListener('click', function() {
+
+                th.addEventListener('click', function () {
                     const currentDir = this.getAttribute('data-direction') || 'none';
                     let newDir = 'csv-asc';
-                    
+
                     if (currentDir === 'csv-asc') {
                         newDir = 'csv-desc';
                     } else if (currentDir === 'csv-desc') {
                         newDir = 'csv-asc';
                     }
-                    
+
                     // Update all headers
                     Array.from(thead.querySelectorAll('th')).forEach(h => {
                         h.removeAttribute('data-direction');
                         h.classList.remove('csv-sort-asc', 'csv-sort-desc');
                     });
-                    
+
                     // Update this header
                     this.setAttribute('data-direction', newDir);
                     this.classList.add(newDir === 'csv-asc' ? 'csv-sort-asc' : 'csv-sort-desc');
-                    
+
                     // Get the parent CSV element
                     const csvElement = container.closest('csv');
                     if (csvElement) {
                         // Update the sort attribute
                         csvElement.setAttribute('sort', `${columnName}:${newDir}`);
-                        
+
                         // Re-process the CSV tag
                         processCsvTags();
                     }
                 });
             });
         }
-        
+
         // Create tbody
         const tbody = document.createElement('tbody');
-        
+
         // If template has custom tbody, use its structure
         if (tbodyMatch) {
             const rowTemplate = tbodyMatch[1];
-            
+
             rows.forEach(row => {
                 // Create a row object with named properties
                 const rowObj = {};
                 headers.forEach((header, i) => {
                     rowObj[header] = row[i];
                 });
-                
+
                 // Apply template to row
                 let rowHtml = rowTemplate;
-                
+
                 // Replace {{column}} placeholders
                 rowHtml = rowHtml.replace(/\{\{([^}]+)\}\}/g, (match, column) => {
                     return rowObj[column] || '';
                 });
-                
+
                 // Create a temporary container
                 const temp = document.createElement('div');
                 temp.innerHTML = rowHtml;
-                
+
                 // Append the row
                 Array.from(temp.children).forEach(child => {
                     tbody.appendChild(child);
@@ -1424,42 +3701,42 @@ function renderTableView(container, headers, rows, originalContent) {
         } else {
             // Use simple row template
             const rowTemplateContent = templateContent.replace(/<thead[^>]*>[\s\S]*?<\/thead>/i, '');
-            
+
             rows.forEach(row => {
                 // Create a row object with named properties
                 const rowObj = {};
                 headers.forEach((header, i) => {
                     rowObj[header] = row[i];
                 });
-                
+
                 // Apply template to row
                 let rowHtml = rowTemplateContent;
-                
+
                 // Replace {{column}} placeholders
                 rowHtml = rowHtml.replace(/\{\{([^}]+)\}\}/g, (match, column) => {
                     return rowObj[column] || '';
                 });
-                
+
                 // Create a temporary container
                 const temp = document.createElement('div');
                 temp.innerHTML = rowHtml;
-                
+
                 // Append the row
                 Array.from(temp.children).forEach(child => {
                     tbody.appendChild(child);
                 });
             });
         }
-        
+
         table.appendChild(tbody);
     } else {
         // Default table rendering without template
         const tbody = document.createElement('tbody');
-        
+
         rows.forEach(row => {
             const tr = document.createElement('tr');
             tr.className = 'csv-row';
-            
+
             row.forEach((cell, i) => {
                 const td = document.createElement('td');
                 td.className = 'csv-cell';
@@ -1467,13 +3744,13 @@ function renderTableView(container, headers, rows, originalContent) {
                 td.textContent = cell;
                 tr.appendChild(td);
             });
-            
+
             tbody.appendChild(tr);
         });
-        
+
         table.appendChild(tbody);
     }
-    
+
     tableContainer.appendChild(table);
     container.appendChild(tableContainer);
 }
@@ -2225,18 +4502,14 @@ function modala(value, tempTag, root, id) {
  */
 function setTimers(target) {
     var delay = target.getAttribute("delay");
-    if (target.classList.contains("time-inactive") && target.classList.contains("time-active")) {
-        target.classList.toggle("time-active")
+    if ((target.tagName == "carousel" || target.tagName == "timed") && target.classList.contains("turn-auto")) {
+        target.classList.toggle("turn-auto")
         return;
     }
-    else if (target.classList.contains("time-active")) {
+    if (delay < 500) {
+        console.error("Delay must be greater than 500ms");
+        return;
     }
-    else if (target.classList.contains("time-inactive")) {
-    }
-    else {
-        target.classList.toggle("time-inactive")
-    }
-
     setTimeout(function () {
         pipes(target);
         setTimers(target);
