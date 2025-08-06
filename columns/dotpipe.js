@@ -1,79 +1,148 @@
 /**
-  *  All tags being used must have an 'id' attribute
-  *  Usable DOM Attributes (almost all are enabled for combinations)
-  *  Attribute/Tag   |   Use Case
-  *  -------------------------------------------------------------
-  *  insert............= [Attr] return ajax call to this id
-  *  ajax..............= [Attr] * calls and returns the value file's output ex: <pipe id="id1" ajax="foo.bar:insert1:countByEvent" query="key0:value0;" insert="someID">
-  *    *  *  query.............= [Attr] default query string associated with url ex: <anyTag form-class="someClass" query="key0:value0;key1:value2;" ajax="page.foo"> (Req. form-class)
-  *  turn..............= [Attr] * turns based element routine element ex: <anyTag turn="firstelem;secondelem;" class="decrIndex" index="1"> 
-  *  callback..........= [Attr] callback function ex: <pipe id="id1" callback="foo" class="class1 class2" value="submit" callback-class="class1 class2" ajax="page.foo;insert-id1">
-  *  callback-class....= [Attr] class to be used in the callback function ex: <pipe id="id1" callback="foo" class="class1 class2" value="submit" callback-class="class1 class2" ajax="page.foo;insert-id1">
-  *     - note: names will be sorted alphabetically in the param list. Params can be infinite. just ready your function for that consolidatoin of params.
-  *  modal.............= [Modala Key] * Inserts JSON files in the insert targets for template ease of use. "modal": "json1.json:insert1.insert2.insert3;continued"
-  *  download..........= [Class] for downloading files ex: <tagName class="download" file="foo.zip" directory="/home/bar/"> (needs ending with slash)
-  *  file..............= [Attr] filename to download
-  *  set...............= [Attr] set the value of the element attribute ex: <tagName set="set-this-id:attribute-name:value">
-  *  get...............= [Attr] get the value of the element attribute and return to this element ex: <tagName get="get-this-id:attribute-name">
-  *  delete............= [Attr] delete the value of the element attribute ex: <tagName delete="delete-this-id:attribute-name">
-  *  x-toggle..........= [Attr] toggle values from class attribute that are listed in the toggle attribute "id1:class1;id1:class2;id2:class2"
-  *  directory.........= [Attr] relative or full path of 'file'
-  *  tool-tip..........= [Attr] tooltip for the element ex: <tagName tool-tip="this is a tooltip;id;class;duration;zIndex">
-  *  modal-tip..........= [Attr] tooltip for the element ex: <tagName tool-tip="filename.json;duration;zIndex">
-  *  copy..............= [Attr] copy the value of the element to the clipboard ex: <tagName copy="copy-this-id">
-  *  clear-node........= [Class] clear nodes. delimited in insert="first;second;thirdnode" by ';'
-  *  redirect..........= [Class] "follow" the ajax call in POST or GET mode ex: <pipe ajax="foo.bar" class="redirect" query="key0:value0;" insert="someID">
-  *  modala-multi-last.= [Class] to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the last
-  *  modala-multi-first= [Class] to create multi-ajax calls ex: ajax="foo.bar:insertHere:x;.." the 'x' is the max number of insertions while removing the first
-  *  time-active.......= [Class] to activate timers for things that go on continuously
-  *  time-inactive.....= [Class] to deactivate timers for things that go on continuously
-  *  disabled..........= [Class] to disable a tag (use x-toggle to toggle state of this and time-active/-inactive)
-  *  br................= [Specifically a] Modala key/value pair. "br": "x" where x is the number of breaks in succession.
-  *  js................= [Specifically a] Modala key/value pair. Allows access to outside JavaScript files in scope of top nest.
-  *  css...............= [Specifically a] Modala key/value pair. Imports a stylesheet file to the page accessing it.
-  *  modala............= [Specifically a] Modala key/value pair. Allows access to Modala files in scope of top nest.
-  *  tree-view.........= [Specifically a] Modala key/value pair or class. Allows access to Tree files in scope of top nest.
-  *  strict-json.......= [Class] returns only JSON to full page as response. Error on non-parse
-  *  <lnk>.............= [Tag] tag for clickable link <lnk ajax="goinghere.html" query="key0:value0;">
-  *  <pipe>............= [Tag] (initializes on DOMContentLoaded Event) ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  <dyn>.............= [Tag] Automatic eventListening tag for onclick="pipes(this)" ex: <dyn ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  <search>..........= [Tag] Search tag for searching in the page ex: <search use-id="id1;id2;id3;" input-width="200px" input-height="30px" placeholder="Search..." search-delay="300">
-  *  <csv>.............= [Tag] CSV tag for displaying CSV data in a table format ex: <csv ajax="data.csv" insert="tableId" headers="true">
-  *  <tabs>............= [Tag] Tabs tag for creating tabbed interfaces ex: <tabs tab="Tab1:tab1Id:source1;Tab2:tab2Id:source2" class="tab-class" style="width:100%;height:50px;">
-  *  <login>...........= [Tag] Login tag for creating login and registration forms ex: <login login-page="login.php" registration-page="register.php" css-page="styles.css">
-  *  \n................= [-] RegEx emplacement to insert <br /> in Modala contents for innerHTML
-  *  plain-text........= [Class] plain text returned to the insertion point
-  *  plain-html........= [Class] returns as true HTML
-  *  redirect..........= [Class] redirects to the ajax call in POST or GET mode ex: <tag id="someref" ajax="foo.bar" class="redirect" query="key0:value0;">
-  *  <timed>...........= [Tag] Timed result refreshing tags (Keep up-to-date handling on page) ex: <timed ajax="foo.bar" delay="3000" query="key0:value0;" insert="someID">
-  *  delay.............= [Attr] delay between <timed> tag refreshes (required for <timed> tag) ex: see <timed>
-  *  <carousel>........= [Tag] to create a carousel that moves every a timeOut() delay="x" occurs ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
-  *  carousel-step-right.= [Class] to move the carousel to the right
-  *  carousel-step-left.= [Class] to move the carousel to the left
-  *  carousel-slide-right.= [Class] to iterate the carousel to the right
-  *  carousel-slide-left.= [Class] to iterate the carousel to the left
-  *  boxes.............= [Attr] attribute to request for x boxes for carousel elementss ex: <carousel ajax="foo.bar" file-order="foo.bar;bar.foo;foobar.barfoo" delay="3000" id="thisId" insert="thisId" height="100" width="100" boxes="8" style="height:100;width:800">
-  *  file-order........= [Attr] ajax to these files, iterating [0,1,2,3]%array.length per call (delimited by ';') ex: <pipe query="key0:value0;" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  file-index........= [Attr] counter of which index to use with file-order to go with ajax ex: <pipe ajax="foo.bar" query="key0:value0;" insert="someID">
-  *  incrIndex.........= [Class] increment thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="incrIndex" interval="2" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  decrIndex.........= [Class] decrement thru index of file-order (0 moves once) (default: 1) ex: <pipe ajax="foo.bar" class="decrIndex" interval="3" file-order="foo.bar;bar.foo;foobar.barfoo" insert="someID">
-  *  interval..........= [Attr] Take this many steps when stepping through file-order default = 1
-  *  mode..............= [Attr] "POST" or "GET" (default: "POST") ex: <pipe mode="POST" set-attr="value" ajax="foo.bar" query="key0:value0;" insert="thisOrSomeID">
-  *  multiple..........= [Class] states that this object has two or more key/value pairs use: states this is a multi-select form box
-  *  remove............= [Attr] * remove element in tag ex: <anyTag remove="someID;someOtherId;">
-  *  display...........= [Attr] toggle visible and invisible of anything in the value ex: <anyTag display="someID;someOtherId;">
-  *  json..............= [Class] returns a JSON file set as value
-  *  headers...........= [Attr] headers in CSS markup-style (delimited by '&') <any ajax="foo.bar" headers="foobar:boo&barfoo:barfoo;q:9&" insert="someID">
-  *  form-class........= [Attr] class of devoted form elements
-  *  action-class......= [Class] name of devoted to-be-triggered tags (acts as listener to other certain tag(s))
-  *  mouse.............= [Class] name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
-  *  mouse-insert......= [Class] name to work thru PipesJS' other attributes on event="mouseover;mouseleave" (example)
-  *  event.............= [Attr] works with mouse/pipe class only.event="click;dblclick;etc" activates according to the event, like a normal click would
-  *  options...........= [Attr] works with <select> tagName only. Key:Value; pairs to setup and easily roll out multiple selects.
-  **** FILTERS aer go ahead code usually coded in other languages and just come back with a result. Not wholly different from AJAX. They are general purpose files.
-  **** ALL HEADERS FOR AJAX are available. They will use defaults to
-  **** go on if there is no input to replace them.
-  */
+ * dotPipe.js – Dynamic Web Components & Attribute Framework
+ * 
+ * USAGE INSTRUCTIONS:
+ * 
+ * All custom tags MUST include a unique 'id' attribute.
+ * Most attributes/classes can be combined for powerful UI behaviors.
+ * See below for supported elements, attributes, and their usage.
+ * 
+ * ──────────────────────────────────────────────────────────────
+ * CUSTOM TAGS
+ * 
+ * <pipe>               AJAX loader & DOM initializer. Triggers on DOMContentLoaded.
+ * <cart>               Shopping cart UI; supports <item> children.
+ * <item>               Product item, used inside <cart>.
+ * <dyn>                Auto event tag; triggers pipes() on click.
+ * <search>             Search/filter content or tables by IDs.
+ * <csv>                Display CSV data as table, list, or cards.
+ * <tabs>               Tabbed navigation; define tabs and sources.
+ * <login>              Login and registration forms; supports AJAX.
+ * <checkout>           Checkout flow with validation and summary.
+ * <carousel>           Content/image slider, supports auto/timed movement.
+ * <columns>            Multi-column responsive layout.
+ * <timed>              Auto-refresh content at intervals.
+ * <refresh>            Manual/auto refresh for element targets.
+ * <order-confirmation> Order confirmation details display.
+ * <lnk>                Clickable link; supports AJAX/source loading.
+ * 
+ * ──────────────────────────────────────────────────────────────
+ * UNIVERSAL ATTRIBUTES
+ * 
+ * id                   REQUIRED for all custom tags. Must be unique.
+ * ajax                 Fetch remote resource (HTML, JSON, etc.) for tag.
+ * insert               Target ID to render AJAX response.
+ * query                Key-value pairs for AJAX requests, e.g. "key:value&"
+ * callback             JS function called after completion.
+ * callback-class       CSS class grouping for callback parameters.
+ * modal                Load JSON file(s) into target(s) for templates or modals.
+ * file                 Filename to download (with class="download").
+ * directory            Path for file download (must end with slash).
+ * set                  Set attribute value: "target-id:attr:value".
+ * get                  Get attribute value: "source-id:attr:target-id".
+ * delete               Remove attribute: "target-id:attr".
+ * x-toggle             Toggle classes on elements: "id:class;id2:class2".
+ * tool-tip             Tooltip text and options: "text;id;class;duration;zIndex".
+ * modal-tip            Load tooltip from JSON: "filename.json;duration;zIndex".
+ * copy                 Copy element content to clipboard by ID.
+ * remove               Remove elements by IDs: "id1;id2".
+ * display              Show/hide elements by IDs: "id1;id2".
+ * headers              Custom HTTP headers for AJAX, e.g. "header:value&header2:value2".
+ * form-class           Class grouping for form elements in AJAX forms.
+ * action-class         Class group for triggering/listening elements.
+ * event                Supported events: "click;mouseover;..." (works with mouse/pipe classes).
+ * options              <select> tag only; defines options: "key:value;key2:value2".
+ * sources              For carousel/card tags; semicolon-delimited file list.
+ * style                Inline CSS for the tag/component.
+ * tab                  <tabs> only; defines tabs: "TabName:TabId:Source;..."
+ * login-page           <login> only; login AJAX handler/page.
+ * registration-page    <login> only; registration AJAX handler/page.
+ * css-page             <login> only; external stylesheet for auth UI.
+ * validate             <checkout> only; enables validation mode (debug).
+ * pages                <columns> only; semicolon-delimited sources for columns.
+ * count                <columns> only; number of columns.
+ * percents             <columns> only; comma-separated column percent widths.
+ * height, width        <columns> only; set column layout size.
+ * delay                For <timed>, <carousel>; refresh/slide interval (ms).
+ * interval             Number of steps for file-order/carousel.
+ * file-order           Iterates AJAX over files: "file1;file2;file3".
+ * file-index           Index for file-order.
+ * mode                 HTTP method: "POST" or "GET".
+ * turn                 Element rotation/activation: "elem1;elem2".
+ * turn-index           Current index for turn.
+ * boxes                Request/set number of carousel boxes.
+ * sort                 For <csv>; column and direction, e.g. "Name:csv-asc".
+ * page-size            For <csv>; items per page.
+ * lazy-load            For <csv>; enable/disable lazy loading (default true).
+ * 
+ * ──────────────────────────────────────────────────────────────
+ * SUPPORT CLASSES
+ * 
+ * download             Enables file download behavior.
+ * redirect             Follows AJAX URL after response.
+ * plain-text           Renders response as plain text.
+ * plain-html           Renders response as HTML.
+ * json                 Renders response as JSON.
+ * strict-json          Returns only JSON to page; errors otherwise.
+ * tree-view            Renders tree structure from JSON.
+ * incrIndex            Increment file-order index (carousel, etc.).
+ * decrIndex            Decrement file-order index.
+ * modala-multi-first   Multi-ajax; insert at start, remove last if limit.
+ * modala-multi-last    Multi-ajax; insert at end, remove first if limit.
+ * clear-node           Clears content of specified nodes.
+ * time-active          Activates timers for auto-refresh/timed elements.
+ * time-inactive        Deactivates timers for auto-refresh/timed elements.
+ * disabled             Disables the tag from interaction.
+ * multiple             Multi-select form box.
+ * action-class         Marks tags to be triggered/listened for actions.
+ * mouse                Enables tooltip and event-driven interactions.
+ * mouse-insert         Event-driven insertions for mouse events.
+ * carousel-step-right  Moves carousel one step right.
+ * carousel-step-left   Moves carousel one step left.
+ * carousel-slide-right Auto-slide carousel to right.
+ * carousel-slide-left  Auto-slide carousel to left.
+ * 
+ * ──────────────────────────────────────────────────────────────
+ * SPECIAL KEY/VALUE PAIRS (for modala templates)
+ * 
+ * br                   Insert line breaks ("br": "count").
+ * js                   Load external JS file(s).
+ * css                  Load external CSS file(s).
+ * modala               Load modala JSON file(s).
+ * tree-view            Load tree structure from JSON.
+ * 
+ * ──────────────────────────────────────────────────────────────
+ * QUICK USAGE EXAMPLES:
+ * 
+ * <!-- AJAX load into target -->
+ * <pipe id="product-list" ajax="products.json" insert="product-container"></pipe>
+ * 
+ * <!-- Shopping cart with items -->
+ * <cart id="main-cart">
+ *   <item id="widget-1" name="Widget" price="9.99"></item>
+ *   <item id="gadget-2" name="Gadget" price="14.99"></item>
+ * </cart>
+ * 
+ * <!-- Search box for filtering content -->
+ * <search id="search" use-id="product-list;order-list" placeholder="Find products..."></search>
+ * 
+ * <!-- Carousel slider -->
+ * <carousel id="image-carousel" sources="img1.jpg;img2.jpg;img3.jpg" delay="3000" boxes="1"></carousel>
+ * 
+ * <!-- Form with AJAX login -->
+ * <login id="auth-login" login-page="login.php" registration-page="register.php" css-page="auth.css"></login>
+ * 
+ * ──────────────────────────────────────────────────────────────
+ * SYSTEM FLOW:
+ * - On DOMContentLoaded, dotPipe processes all supported custom tags.
+ * - pipes() manages all custom tag logic, triggers AJAX, updates DOM, and runs callbacks.
+ * - navigate() performs AJAX requests and inserts responses.
+ * - modala() loads and renders JSON templates for modals and complex UIs.
+ * 
+ * For advanced usage, refer to the full documentation or source code.
+ * 
+ * (c) dotPipe.js – https://github.com/dotpipe/dotPipe
+ */
 
 document.addEventListener("DOMContentLoaded", function () {
     try {
