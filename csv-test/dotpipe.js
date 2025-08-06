@@ -169,11 +169,11 @@ let domContentLoad = (again = false) => {
     });
 
     let elements_mouse = document.querySelectorAll(".mouse");
-    console.log(elements_mouse.length);
+    // console.log(elements_mouse.length);
     Array.from(elements_mouse).forEach(function (elemv) {
-        console.log(elemv);
+        // console.log(elemv);
         if (elemv.hasAttribute("tool-tip")) {
-            console.log(elemv.getAttribute("modal-tip") + "...");
+            // console.log(elemv.getAttribute("modal-tip") + "...");
             var eve = elemv.getAttribute("event");
             rv = ['mouseover'];
             if (eve) {
@@ -191,7 +191,7 @@ let domContentLoad = (again = false) => {
             });
         }
         if (elemv.hasAttribute("modal-tip")) {
-            console.log(elemv.getAttribute("modal-tip") + "...");
+            // console.log(elemv.getAttribute("modal-tip") + "...");
             var eve = elemv.getAttribute("event");
             rv = ['mouseover'];
             if (eve) {
@@ -416,7 +416,7 @@ function loadJsonContent(column, jsonUrl) {
  */
 function loadHtmlContent(column, htmlUrl) {
     // Create a pipe element to fetch HTML content
-    const pipeElement = document.createElement('pipe');
+    const pipeElement = document.createElement('div');
     pipeElement.setAttribute('ajax', htmlUrl);
     pipeElement.setAttribute('insert', column.id);
     pipeElement.classList.add('column-content-loader');
@@ -885,7 +885,7 @@ function refreshJsonContent(targetElement, jsonUrl) {
  */
 function refreshHtmlContent(targetElement, htmlUrl) {
   // Create a pipe element to fetch HTML content
-  const pipeElement = document.createElement('pipe');
+  const pipeElement = document.createElement('div');
   pipeElement.setAttribute('ajax', htmlUrl);
   pipeElement.setAttribute('insert', targetElement.id);
   pipeElement.classList.add('refresh-content-loader');
@@ -1559,7 +1559,7 @@ function processOrder(validateMode) {
 
     // If in validate mode, show debug information
     if (validateMode) {
-        console.log('Validate mode enabled - Order would be processed with:', order);
+        // console.log('Validate mode enabled - Order would be processed with:', order);
         textCard("Validation mode: Order would be processed (see console for details)", "validation-notice", "validation-notice", true, true, 5000, 100);
     }
 
@@ -2495,9 +2495,7 @@ function preloadAllTabContent(tabsData) {
 }
 
 /**
- * 
  * Process all login tags in the document
- * This function should be called when the document is loaded
  */
 function processLoginTags() {
     let loginElements = document.getElementsByTagName("login");
@@ -2521,53 +2519,86 @@ function processLoginTags() {
         }
 
         // Generate the login/registration HTML
-        const loginHTML = createLoginRegistrationTabs(loginPage, registrationPage, cssPage);
+        const loginHTML = createLoginRegistrationInterface(loginPage, registrationPage, cssPage);
 
         // Replace the login tag content with our generated HTML
         element.innerHTML = loginHTML;
 
         // Mark as processed
         element.classList.add("processed");
-
-        // Process the newly added elements with dotpipe.js
-        domContentLoad();
+        
+        // Add a unique ID to this login component if it doesn't have one
+        const loginId = element.id || `login-component-${Math.random().toString(36).substring(2, 9)}`;
+        if (!element.id) {
+            element.id = loginId;
+        }
+        
+        // Add tab switching script with the unique ID to avoid conflicts
+        const script = document.createElement('script');
+        script.textContent = `
+            (function() {
+                const loginComponent = document.getElementById('${loginId}');
+                const tabHeaders = loginComponent.querySelectorAll('.auth-tab');
+                const tabContents = loginComponent.querySelectorAll('.auth-content > div');
+                
+                tabHeaders.forEach(header => {
+                    header.addEventListener('click', function() {
+                        const tabId = this.getAttribute('data-tab');
+                        
+                        // Remove active class from all tabs and hide contents
+                        tabHeaders.forEach(h => h.classList.remove('active'));
+                        tabContents.forEach(c => c.style.display = 'none');
+                        
+                        // Add active class to current tab and show content
+                        this.classList.add('active');
+                        const contentElement = loginComponent.querySelector('#' + tabId);
+                        if (contentElement) {
+                            contentElement.style.display = 'block';
+                        }
+                    });
+                });
+            })();
+        `;
+        
+        // Append the script to the document
+        document.body.appendChild(script);
     });
 }
 
 /**
- * Creates a tabbed login and registration interface based on provided attributes
- * @param {string} loginPage - The URL for the login form submission (empty if not provided)
- * @param {string} registrationPage - The URL for the registration form submission (empty if not provided)
+ * Creates a tabbed login and registration interface
+ * @param {string} loginPage - The URL for the login form submission
+ * @param {string} registrationPage - The URL for the registration form submission
  * @param {string} cssPage - Optional URL to an external CSS file
  * @returns {string} HTML for the login/registration interface
  */
-function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
+function createLoginRegistrationInterface(loginPage, registrationPage, cssPage) {
     const externalCss = cssPage ? `<link rel="stylesheet" href="${cssPage}">` : '';
-
+    
     // Determine which tabs to show
     const showLogin = !!loginPage;
     const showRegistration = !!registrationPage;
-
+    
     // Set default active tab
     const loginActive = showLogin ? 'active' : '';
     const registerActive = !showLogin && showRegistration ? 'active' : '';
-
+    const loginDisplay = showLogin ? 'block' : 'none';
+    const registerDisplay = !showLogin && showRegistration ? 'block' : 'none';
+    
     // Create tabs HTML
     let tabsHtml = '';
     if (showLogin && showRegistration) {
-        // Show both tabs with switcher
         tabsHtml = `
         <div class="auth-tabs">
-            <div class="auth-tab ${loginActive}" id="login-tab" onclick="switchTab('login')">Login</div>
-            <div class="auth-tab ${registerActive}" id="register-tab" onclick="switchTab('register')">Register</div>
+            <div class="auth-tab ${loginActive}" data-tab="login-content">Login</div>
+            <div class="auth-tab ${registerActive}" data-tab="register-content">Register</div>
         </div>`;
     }
-
-    // Create login form HTML if needed
-    let loginFormHtml = '';
-    if (showLogin) {
-        loginFormHtml = `
-        <div class="auth-form ${loginActive}" id="login-form">
+    
+    // Create login form HTML
+    const loginFormHtml = showLogin ? `
+    <div id="login-content" class="auth-form-container" style="display: ${loginDisplay}">
+        <div class="auth-form">
             <h2>Login to Your Account</h2>
             <form>
                 <div class="form-group">
@@ -2597,14 +2628,13 @@ function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
                     <button class="social-button facebook">Facebook</button>
                 </div>
             </div>
-        </div>`;
-    }
-
-    // Create registration form HTML if needed
-    let registrationFormHtml = '';
-    if (showRegistration) {
-        registrationFormHtml = `
-        <div class="auth-form ${registerActive}" id="register-form">
+        </div>
+    </div>` : '';
+    
+    // Create registration form HTML
+    const registrationFormHtml = showRegistration ? `
+    <div id="register-content" class="auth-form-container" style="display: ${registerDisplay}">
+        <div class="auth-form">
             <h2>Create an Account</h2>
             <form>
                 <div class="form-group">
@@ -2634,14 +2664,14 @@ function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
                 </div>
                 <div id="register-response" class="response-message"></div>
             </form>
-        </div>`;
-    }
-
+        </div>
+    </div>` : '';
+    
+    // Combine everything with CSS
     const html = `
     ${externalCss}
     <div class="auth-container">
         ${tabsHtml}
-        
         <div class="auth-content">
             ${loginFormHtml}
             ${registrationFormHtml}
@@ -2682,12 +2712,8 @@ function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
             padding: 20px;
         }
         
-        .auth-form {
-            display: none;
-        }
-        
-        .auth-form.active {
-            display: block;
+        .auth-form-container {
+            width: 100%;
         }
         
         .form-group {
@@ -2804,30 +2830,256 @@ function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
             text-align: center;
         }
     </style>
-
-    ${(showLogin && showRegistration) ? `
-    <script>
-        function switchTab(tab) {
-            // Hide all forms
-            document.querySelectorAll('.auth-form').forEach(form => {
-                form.classList.remove('active');
-            });
-            
-            // Deactivate all tabs
-            document.querySelectorAll('.auth-tab').forEach(tabElem => {
-                tabElem.classList.remove('active');
-            });
-            
-            // Activate selected tab and form
-            document.getElementById(tab + '-form').classList.add('active');
-            document.getElementById(tab + '-tab').classList.add('active');
-        }
-    </script>
-    ` : ''}
     `;
 
     return html;
 }
+
+
+/**
+ * Creates a tabbed login and registration interface using the <tabs> component
+ * @param {string} loginPage - The URL for the login form submission (empty if not provided)
+ * @param {string} registrationPage - The URL for the registration form submission (empty if not provided)
+ * @param {string} cssPage - Optional URL to an external CSS file
+ * @returns {string} HTML for the login/registration interface
+ */
+function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
+    const externalCss = cssPage ? `<link rel="stylesheet" href="${cssPage}">` : '';
+    
+    // Determine which tabs to show
+    const showLogin = !!loginPage;
+    const showRegistration = !!registrationPage;
+    
+    // Create tab definitions for the <tabs> component
+    let tabDefinitions = [];
+    if (showLogin) {
+        tabDefinitions.push("Login:login-tab:login-content");
+    }
+    if (showRegistration) {
+        tabDefinitions.push("Register:register-tab:register-content");
+    }
+    
+    // Create the tabs component
+    const tabsComponent = `<tabs id="auth-tabs" tab="${tabDefinitions.join(';')}" class="auth-tabs"></tabs>`;
+    
+    // Create the login form content
+    const loginFormHtml = showLogin ? `
+    <div id="login-content" style="display:none;">
+        <div class="auth-form">
+            <h2>Login to Your Account</h2>
+            <form>
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" name="email" class="login-form-class" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" class="login-form-class" required>
+                </div>
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember-me" name="remember" class="login-form-class">
+                        <label for="remember-me">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                </div>
+                <div class="form-group">
+                    <pipe id="login-button" class="auth-button" form-class="login-form-class" ajax="${loginPage}" insert="login-response">Login</pipe>
+                </div>
+                <div id="login-response" class="response-message"></div>
+            </form>
+            <div class="social-login">
+                <p>Or login with</p>
+                <div class="social-buttons">
+                    <button class="social-button google">Google</button>
+                    <button class="social-button facebook">Facebook</button>
+                </div>
+            </div>
+        </div>
+    </div>` : '';
+    
+    // Create the registration form content
+    const registrationFormHtml = showRegistration ? `
+    <div id="register-content" style="display:none;">
+        <div class="auth-form">
+            <h2>Create an Account</h2>
+            <form>
+                <div class="form-group">
+                    <label for="register-name">Full Name</label>
+                    <input type="text" id="register-name" name="name" class="register-form-class" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" name="email" class="register-form-class" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" name="password" class="register-form-class" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm-password">Confirm Password</label>
+                    <input type="password" id="register-confirm-password" name="confirm_password" class="register-form-class" required>
+                </div>
+                <div class="form-options">
+                    <div class="terms">
+                        <input type="checkbox" id="terms" name="terms" class="register-form-class" required>
+                        <label for="terms">I agree to the <a href="#">Terms and Conditions</a></label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <pipe id="register-button" class="auth-button" form-class="register-form-class" ajax="${registrationPage}" insert="register-response">Register</pipe>
+                </div>
+                <div id="register-response" class="response-message"></div>
+            </form>
+        </div>
+    </div>` : '';
+    
+    // Combine everything with CSS
+    const html = `
+    ${externalCss}
+    <div class="auth-container">
+        ${tabsComponent}
+        <div class="auth-content">
+            ${loginFormHtml}
+            ${registrationFormHtml}
+        </div>
+    </div>
+
+    <style>
+        .auth-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        .auth-content {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .remember-me, .terms {
+            display: flex;
+            align-items: center;
+        }
+        
+        .remember-me input, .terms input {
+            margin-right: 5px;
+        }
+        
+        .forgot-password {
+            color: #4a90e2;
+            text-decoration: none;
+        }
+        
+        .auth-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .auth-button:hover {
+            background: #3a80d2;
+        }
+        
+        .social-login {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .social-button {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .social-button.google {
+            color: #DB4437;
+        }
+        
+        .social-button.facebook {
+            color: #4267B2;
+        }
+        
+        .response-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .response-message.error {
+            background: #ffebee;
+            color: #c62828;
+            display: block;
+        }
+        
+        .response-message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            display: block;
+        }
+        
+        .auth-error {
+            padding: 15px;
+            background: #ffebee;
+            color: #c62828;
+            border-radius: 4px;
+            text-align: center;
+        }
+    </style>
+    `;
+
+    return html;
+}
+
+
 /**
  * Process all search tags in the document
  */
@@ -4066,7 +4318,7 @@ function renderTree(value, tempTag) {
         tempTag = document.getElementById(tempTag);
     }
     if (value == undefined) {
-        console.log(tempTag + "******");
+        // console.log(tempTag + "******");
         console.error("value of reference incorrect");
         return;
     }
@@ -4136,7 +4388,7 @@ function modalaHead(value) {
         }
     }
     catch (e) {
-        console.log(e)
+        // console.log(e)
     }
     var temp = document.createElement(value["tagname"]);
     Object.entries(value).forEach((nest) => {
@@ -4151,7 +4403,7 @@ function modalaHead(value) {
         }
         else if (k.toLowerCase() == "css") {
             var optsArray = v.split(";");
-            console.log(v)
+            // console.log(v)
             optsArray.forEach((e, f) => {
                 var cssvar = document.createElement("link");
                 cssvar.href = v;
@@ -4162,7 +4414,7 @@ function modalaHead(value) {
         }
         else if (k.toLowerCase() == "js") {
             var optsArray = v.split(";");
-            console.log(v)
+            // console.log(v)
             optsArray.forEach((e, f) => {
                 const js = document.createElement("script");
                 js.src = e;
@@ -4222,13 +4474,13 @@ function modalList(filenames) {
                 });
             }
             else {
-                console.log(f);
+                // console.log(f);
                 modal(f[0], f[1]);
             }
         });
     }
     else {
-        console.log(files)
+        // console.log(files)
         modal(files[0].split(":")[0], files[0].split(":")[1]);
     }
 }
@@ -4273,7 +4525,7 @@ function escapeHtml(html) {
     var text = document.createTextNode(html);
     var p = document.createElement('p');
     p.innerHTML = (text.innerHTML);
-    console.log(p);
+    // console.log(p);
     return p.innerHTML;
 }
 
@@ -4295,7 +4547,7 @@ function modala(value, tempTag, root, id) {
         return;
     }
     if (value == undefined) {
-        console.log(tempTag + "******");
+        // console.log(tempTag + "******");
         console.error("value of reference incorrect");
         return;
     }
@@ -4320,12 +4572,12 @@ function modala(value, tempTag, root, id) {
             var buttons = document.createElement("div");
             v.forEach(z => {
                 var button = document.createElement("input");
-                console.log(z);
+                // console.log(z);
                 button.type = "button";
                 var keys = ["text", "value", "textcontent", "innerhtml", "innerText"];
                 Object.entries(z).forEach(x => {
                     const [key, val] = x;
-                    console.log(["text", "value", "textcontent", "innerhtml", "innertext"].includes(key.toLowerCase()));
+                    // console.log(["text", "value", "textcontent", "innerhtml", "innertext"].includes(key.toLowerCase()));
                     vals = escapeHtml(val);
                     if (["text", "value", "textcontent", "innerhtml", "innertext"].includes(key.toLowerCase()))
                         button.value = val;
@@ -4355,7 +4607,7 @@ function modala(value, tempTag, root, id) {
         else if (k.toLowerCase() == "options" && temp.tagName.toLowerCase() == "select") {
             var optsArray = v.split(";");
             var options = null;
-            console.log(v)
+            // console.log(v)
             optsArray.forEach((e, f) => {
                 var g = e.split(":");
                 options = document.createElement("option");
@@ -4364,10 +4616,10 @@ function modala(value, tempTag, root, id) {
                 temp.appendChild(options);
             });
             temp.appendChild(options);
-            console.log("*")
+            // console.log("*")
         }
         else if (k.toLowerCase() == "sources" && (temp.tagName.toLowerCase() == "card" || temp.tagName.toLowerCase() == "carousel")) {
-            console.log(value);
+            // console.log(value);
             var optsArray = v.split(";");
             var options = null;
             var i = (value['index'] == undefined) ? 0 : value['index'];
@@ -4410,7 +4662,7 @@ function modala(value, tempTag, root, id) {
                     modalList(v)
                 }
                 else if (value['type'] == "html") {
-                    console.log(e);
+                    // console.log(e);
                     fetch(e)
                         .then(response => response.text())
                         .then(data => {
@@ -4420,7 +4672,7 @@ function modala(value, tempTag, root, id) {
                         });
                 }
                 else if (value['type'] == "php") {
-                    console.log(e);
+                    // console.log(e);
                     fetch(e)
                         .then(response => response.text())
                         .then(data => {
@@ -4471,7 +4723,7 @@ function modala(value, tempTag, root, id) {
                 });
         }
         else if (k.toLowerCase() == "boxes") {
-            console.log(v);
+            // console.log(v);
             temp.setAttribute("boxes", v);
         }
         else if (!Number(k) && k.toLowerCase() != "tagname" && k.toLowerCase() != "textcontent" && k.toLowerCase() != "innerhtml" && k.toLowerCase() != "innertext") {
@@ -4761,7 +5013,7 @@ function addPipe(elem = document) {
             if (target.classList.contains('mouse') || target.id !== null) {
                 if (!hasPipeListener(target))
                     pipes(target);
-                console.log(target.id);
+                // console.log(target.id);
             }
         }, true);
     });
@@ -4779,11 +5031,11 @@ function flashClickListener(elem) {
     if (elem.id) {
         elem.removeEventListener('click', () => {
             pipes(elem);
-            console.log(elem.id);
+            // console.log(elem.id);
         });
         elem.addEventListener('click', () => {
             pipes(elem);
-            console.log(elem.id);
+            // console.log(elem.id);
         });
     }
     domContentLoad(true);
@@ -4794,12 +5046,12 @@ function attachEventListeners(elem) {
         let events = (elem.getAttribute("event") || "click").split(';');
         events.forEach(event => elem.addEventListener(event, () => {
             pipes(elem);
-            console.log(elem.id);
+            // console.log(elem.id);
         }));
         if (!hasPipeListener(elem)) {
             elem.addEventListener('click', () => {
                 pipes(elem);
-                console.log(elem.id);
+                // console.log(elem.id);
             });
         }
     }
@@ -4810,7 +5062,7 @@ function hasPipeListener(elem) {
 }
 
 function test(param1, param2) {
-    console.log(param1, param2);
+    // console.log(param1, param2);
 }
 
 function sortNodesByName(selector) {
@@ -4842,7 +5094,7 @@ function pipes(elem, stop = false) {
         Object.keys(calls).forEach((key, n) => {
             params.push(calls[key].getAttribute("value"));
         });
-        console.log(params);
+        // console.log(params);
         params = params.join(", ");
         window[elem.getAttribute("callback")](params);
     }
@@ -4853,7 +5105,7 @@ function pipes(elem, stop = false) {
     if (elem.classList.contains("clear-node")) {
         var pages = elem.getAttribute("node").split(";");
         pages.forEach((e) => {
-            console.log(e);
+            // console.log(e);
             document.getElementById(e).innerHTML = "";
         });
     }
@@ -4974,7 +5226,7 @@ function pipes(elem, stop = false) {
             query = query + g[0] + "=" + g[1] + "&";
         });
         query = query.substring(0, -1);
-        // console.log(query);
+        // // console.log(query);
     }
     if (elem.hasAttribute("headers")) {
         var optsArray = elem.getAttribute("headers").split("&");
@@ -5016,7 +5268,7 @@ function pipes(elem, stop = false) {
     // This is a quick way to make a downloadable link in an href
     //     else
     if (elem.classList.contains("download")) {
-        console.log("$$$");
+        // console.log("$$$");
         var text = elem.getAttribute("file");
         var element = document.createElement('a');
         var location = (elem.hasAttribute("directory")) ? elem.getAttribute("directory") : "./";
@@ -5060,7 +5312,7 @@ function setAJAXOpts(elem, opts) {
 function formAJAX(elem, classname) {
     var elem_qstring = "";
 
-    console.log(document.getElementsByClassName(classname));
+    // console.log(document.getElementsByClassName(classname));
     // No, 'pipe' means it is generic. This means it is open season for all with this class
     for (var i = 0; i < document.getElementsByClassName(classname).length; i++) {
         var elem_value = document.getElementsByClassName(classname)[i];
@@ -5119,29 +5371,29 @@ function displayColoredJson(elementId, jsonObj) {
 
 function navigate(elem, opts = null, query = "", classname = "") {
     //formAJAX at the end of this line
-    console.log(elem);
+    // console.log(elem);
     elem_qstring = query + ((document.getElementsByClassName(classname).length > 0) ? formAJAX(elem, classname) : "");
     //    elem_qstring = elem_qstring;
     elem_qstring = encodeURI(elem_qstring);
-    console.log(elem_qstring);
+    // console.log(elem_qstring);
     opts = setAJAXOpts(elem, opts);
     var opts_req = new Request(elem_qstring);
     opts.set("mode", (opts["mode"] !== undefined) ? opts["mode"] : '"Access-Control-Allow-Origin":"*"');
 
     var rawFile = new XMLHttpRequest();
     rawFile.open(opts.get("method"), elem.getAttribute("ajax") + "?" + elem_qstring, true);
-    console.log(elem);
+    // console.log(elem);
 
     if (elem.classList.contains("strict-json")) {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
                 var allText = "";// JSON.parse(rawFile.responseText);
                 try {
-                    console.log(rawFile.responseText);
+                    // console.log(rawFile.responseText);
                     JSON.parse(rawFile.responseText);
                 }
                 catch (e) {
-                    console.log("Error: ", e, rawFile.responseText);
+                    // console.log("Error: ", e, rawFile.responseText);
                     return;
                 }
                 document.body.innerHTML = rawFile.responseText;
@@ -5153,7 +5405,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
             if (rawFile.readyState === 4) {
                 var allText = "";// JSON.parse(rawFile.responseText);
                 try {
-                    console.log(rawFile.responseText);
+                    // console.log(rawFile.responseText);
                     var allPretty = JSON.parse(rawFile.responseText);
                     // var allPretty = prettifyJsonWithColors(allText);
                     // allText = JSON.stringify(allText, null, 4);
@@ -5170,7 +5422,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     return allText;
                 }
                 catch (e) {
-                    console.log("Response not a JSON");
+                    // console.log("Response not a JSON");
                 }
             }
         }
@@ -5189,7 +5441,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     return allText;
                 }
                 catch (e) {
-                    // console.log("Error Handling Text");
+                    // // console.log("Error Handling Text");
                 }
             }
         }
@@ -5209,7 +5461,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     return allText;
                 }
                 catch (e) {
-                    // console.log("Error Handling Text");
+                    // // console.log("Error Handling Text");
                 }
             }
         }
@@ -5219,9 +5471,9 @@ function navigate(elem, opts = null, query = "", classname = "") {
             if (rawFile.readyState === 4) {
                 var allText = "";
                 try {
-                    console.log(rawFile.responseText);
+                    // console.log(rawFile.responseText);
                     allText = JSON.parse(rawFile.responseText);
-                    console.log(allText);
+                    // console.log(allText);
                     var editNode = document.getElementById(elem.id);
                     editNode.innerHTML = "";
                     // editNode.innerHTML = allText;
@@ -5231,7 +5483,7 @@ function navigate(elem, opts = null, query = "", classname = "") {
                     return;
                 }
                 catch (e) {
-                    console.log("Response: " + e);
+                    // console.log("Response: " + e);
                 }
             }
         }
@@ -5277,6 +5529,6 @@ function navigate(elem, opts = null, query = "", classname = "") {
     try {
         rawFile.send();
     } catch (e) {
-        // console.log(e);
+        // // console.log(e);
     }
 }

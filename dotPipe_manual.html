@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)file:///C:/Users/g0d77/dotpipe/dotPipe/dotpipe_docs.html#classes -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dotPipe Manual</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            color: #2c3e50;
+        }
+
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .donation {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .example {
+            background-color: #f0f8ff;
+            border-left: 4px solid #4682b4;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .toc {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .toc ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: #0366d6;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+<style id="columns-component-styles">
+    .columns-container {
+      display: flex;
+      flex-wrap: nowrap;
+      width: 100%;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .column {
+      position: relative;
+      min-height: 100px;
+      transition: all 0.3s ease;
+    }
+    
+    .column:not(:last-child) {
+      border-right: 1px solid #eee;
+    }
+    
+    .column-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #6c757d;
+      font-style: italic;
+    }
+    
+    .column-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #6c757d;
+      font-style: italic;
+      background-color: #f8f9fa;
+    }
+    
+    .column-error {
+      padding: 15px;
+      color: #dc3545;
+      background-color: #f8d7da;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .columns-container {
+        flex-direction: column;
+        height: auto !important;
+      }
+      
+      .column {
+        flex: 1 1 auto !important;
+        width: 100% !important;
+        border-right: none !important;
+      }
+      
+      .column:not(:last-child) {
+        border-bottom: 1px solid #eee;
+      }
+    }
+  </style><style id="refresh-component-styles">
+    .refresh-button {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    
+    .refresh-button:hover {
+      background-color: #0069d9;
+    }
+    
+    .refresh-button:active {
+      background-color: #0062cc;
+    }
+    
+    .refresh-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #6c757d;
+      font-style: italic;
+      position: relative;
+    }
+    
+    .refresh-loading:before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #3498db;
+      border-radius: 50%;
+      animation: refresh-spin 1s linear infinite;
+    }
+    
+    @keyframes refresh-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .refresh-error {
+      padding: 15px;
+      color: #dc3545;
+      background-color: #f8d7da;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+  </style></head>
+
+<body>
+    <div class="donation">
+        <p>Please drop me a donation at baboonxiv@gmail.com on Paypal.com.</p>
+        <p>I take Bitcoin as well!</p>
+        <p><strong>bc1qjt8je65vc245y2xq0cx8lfdq0cpvxt957ns2ac</strong></p>
+        <p>Or ETH <strong>0x12c35f0d64cBbf3Ea250daD1C82E93902Be5198e</strong></p>
+        <p>Or BTC Cash: <strong>bitcoincash:qq6qugkmnl42sm3lgymrnsdrkpgt3a24pqllt4mlsg</strong></p>
+    </div>
+
+    <h1>A Manual for dotPipe</h1>
+
+    <div class="toc">
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="file:///C:/Users/g0d77/dotpipe/dotPipe/dotpipe_docs.html#introduction">1. Introduction</a></li>
+            <li><a href="file:///C:/Users/g0d77/dotpipe/dotPipe/dotpipe_docs.html#core-concepts">2. Core Concepts</a></li>
+            <li><a href="file:///C:/Users/g0d77/dotpipe/dotPipe/dotpipe_docs.html#tags">3. Tags</a></li>
+            <li><a href="file:///C:/Users/g0d77/dotpipe/dotPipe/dotpipe_docs.html#attributes">4. Attributes</a></li>
+            <li><a href="file:///C:/Users/g0d77/dotpipe/dotPipe/dotpipe_docs.html#classes">5. Classes</a></li>
+            <li><a href="file:///C:/Users/g0d77/dotpipe/dotPipe/dotpipe_docs.html#helper-functions">6. Helper Functions</a></li>
+            <li><a href="file:///C:/Users/g0d77/dotpipe/dotPipe/dotpipe_docs.html#flow-and-recursion">7. Flow and Recursion</a></li>
+            <li><a href="file:///C:/Users/g0d77/dotpipe/dotPipe/dotpipe_docs.html#examples">8. Examples</a></li>
+            <li><a href="file:///C:/Users/g0d77/dotpipe/dotPipe/dotpipe_docs.html#api-reference">9. API Reference</a></li>
+        </ul>
+    </div>
+
+    <h2 id="introduction">Introduction</h2>
+    <p>dotPipe is a JavaScript library designed to simplify DOM manipulation, AJAX operations, and dynamic content
+        loading. It provides a set of custom HTML tags, attributes, and classes that enable developers to create
+        interactive web applications with minimal JavaScript coding.</p>
+    <p>This manual provides comprehensive documentation of all tags, attributes, classes, and helper functions available
+        in dotPipe, along with examples and explanations of the flow and recursion patterns used in the library.</p>
+
+    <h2 id="core-concepts">Core Concepts</h2>
+    <p>dotPipe operates on several key concepts:</p>
+    <ol>
+        <li><strong>Custom Tags</strong>: dotPipe introduces custom HTML tags like <code>&amp;lt;pipe class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code>,
+            <code>&amp;lt;dyn&amp;gt;&amp;lt;/dyn&amp;gt;</code>, <code>&amp;lt;lnk&amp;gt;&amp;lt;/lnk&amp;gt;</code>, etc., that provide specific functionality.
+        </li>
+        <li><strong>Attributes</strong>: Various attributes can be applied to both custom and standard HTML tags to
+            control behavior.</li>
+        <li><strong>Classes</strong>: CSS classes are used to trigger specific behaviors or modify how tags operate.
+        </li>
+        <li><strong>Event Handling</strong>: dotPipe automatically attaches event listeners to elements based on
+            attributes and classes.</li>
+        <li><strong>AJAX Operations</strong>: The library provides simple ways to make AJAX calls and handle responses.
+        </li>
+        <li><strong>Content Insertion</strong>: Results from AJAX calls can be inserted into specified elements.</li>
+        <li><strong>Component System</strong>: dotPipe includes several built-in components like tabs, columns, search,
+            CSV handling, etc.</li>
+    </ol>
+
+    <h2 id="tags">Tags</h2>
+
+    <h3><code>&amp;lt;pipe class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;pipe class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code> tag is a core element that initializes on DOMContentLoaded event. It's used for AJAX
+        operations and content insertion.</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>ajax</code>: URL to fetch content from</li>
+        <li><code>query</code>: Query string parameters</li>
+        <li><code>insert</code>: ID of the element where content should be inserted</li>
+        <li><code>mode</code>: HTTP method ("POST" or "GET", default: "POST")</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;pipe id="data-loader" ajax="data.json" query="key0:value0;" insert="content-area" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;dyn&amp;gt;&amp;lt;/dyn&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;dyn&amp;gt;&amp;lt;/dyn&amp;gt;</code> tag automatically adds event listeners for onclick events. It's similar to
+        <code>&amp;lt;pipe class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code> but designed for dynamic interactions.
+    </p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li>Same as <code>&amp;lt;pipe class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code> tag</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;dyn id="button1" ajax="action.php" query="action:click;" insert="result-area"&amp;gt;Click me&amp;lt;/dyn&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;lnk&amp;gt;&amp;lt;/lnk&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;lnk&amp;gt;&amp;lt;/lnk&amp;gt;</code> tag creates clickable links that can perform AJAX operations or navigate to URLs.</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>ajax</code>: URL to navigate to or fetch content from</li>
+        <li><code>query</code>: Query string parameters</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;lnk id="nav-link" ajax="page.html" query="section:home;"&amp;gt;Go to Home&amp;lt;/lnk&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;timed&amp;gt;&amp;lt;/timed&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;timed&amp;gt;&amp;lt;/timed&amp;gt;</code> tag refreshes content at regular intervals, keeping information up-to-date.</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+        <li><code>delay</code>: Time in milliseconds between refreshes</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>ajax</code>: URL to fetch content from</li>
+        <li><code>query</code>: Query string parameters</li>
+        <li><code>insert</code>: ID of the element where content should be inserted</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;timed id="updates" ajax="status.php" delay="3000" insert="status-area"&amp;gt;&amp;lt;/timed&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;carousel&amp;gt;&amp;lt;/carousel&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;carousel&amp;gt;&amp;lt;/carousel&amp;gt;</code> tag creates a carousel/slider that can display multiple items and rotate through
+        them.</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>ajax</code>: URL to fetch content from</li>
+        <li><code>file-order</code>: Semicolon-delimited list of files to display</li>
+        <li><code>delay</code>: Time in milliseconds between slides</li>
+        <li><code>insert</code>: ID of the element where content should be inserted</li>
+        <li><code>height</code>: Height of the carousel</li>
+        <li><code>width</code>: Width of the carousel</li>
+        <li><code>boxes</code>: Number of boxes/items to display</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;carousel id="image-slider" ajax="images.php" file-order="img1.jpg;img2.jpg;img3.jpg" delay="3000" insert="slider-container" height="300" width="500" boxes="1"&amp;gt;&amp;lt;/carousel&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;search&amp;gt;&amp;lt;/search&amp;gt;</code></h3>
+    <p>The <code></code></p><search> tag creates a search interface that can filter content in specified elements.<p></p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>use-id</code>: Semicolon-delimited list of element IDs to search within</li>
+        <li><code>input-width</code>: Width of the search input field</li>
+        <li><code>input-height</code>: Height of the search input field</li>
+        <li><code>placeholder</code>: Placeholder text for the search input</li>
+        <li><code>search-delay</code>: Delay in milliseconds before search is performed after typing</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;search id="content-search" use-id="content1;content2;content3;" input-width="200px" input-height="30px" placeholder="Search..." search-delay="300"&amp;gt;&amp;lt;/search&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;csv&amp;gt;&amp;lt;/csv&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;csv&amp;gt;&amp;lt;/csv&amp;gt;</code> tag displays CSV data in various formats (table, list, cards).</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>sources</code>: Semicolon-delimited list of CSV file URLs</li>
+        <li><code>csv-as</code>: Display mode ("table", "list", "cards")</li>
+        <li><code>sort</code>: Column and direction for sorting</li>
+        <li><code>csv-class</code>: CSS class to apply to the container</li>
+        <li><code>page-size</code>: Number of items per page</li>
+        <li><code>lazy-load</code>: Whether to load data lazily</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;csv id="data-table" sources="data1.csv;data2.csv" csv-as="table" sort="name:csv-asc" page-size="10"&amp;gt;&amp;lt;/csv&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;tabs&amp;gt;&amp;lt;/tabs&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;tabs&amp;gt;&amp;lt;/tabs&amp;gt;</code> tag creates a tabbed interface for organizing content.</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+        <li><code>tab</code>: Semicolon-delimited list of tab definitions in format "TabName:TabId:ContentSource"</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>class</code>: CSS classes to apply to tabs</li>
+        <li><code>style</code>: Inline styles to apply to tabs</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;tabs id="content-tabs" tab="Tab1:tab1:tab1.html;Tab2:tab2:tab2.html;Tab3:tab3:tab3.html" class="blue-tabs" style="width:100%;height:50px;"&amp;gt;&amp;lt;/tabs&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;login&amp;gt;&amp;lt;/login&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;login&amp;gt;&amp;lt;/login&amp;gt;</code> tag creates login and registration forms.</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>login-page</code>: URL for login form submission</li>
+        <li><code>registration-page</code>: URL for registration form submission</li>
+        <li><code>css-page</code>: URL to an external CSS file for styling</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;login id="user-auth" login-page="login.php" registration-page="register.php" css-page="auth-styles.css"&amp;gt;&amp;lt;/login&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;columns class="processed"&amp;gt;&amp;lt;div class="columns-container" style="display: flex; flex-wrap: nowrap; width: 100%;"&amp;gt;&amp;lt;div class="column column-1" id="-column-1" style="flex: 0 0 50%; overflow: auto; padding: 15px; box-sizing: border-box;"&amp;gt;&amp;lt;div class="column-empty"&amp;gt;No content specified for this column&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;div class="column column-2" id="-column-2" style="flex: 0 0 50%; overflow: auto; padding: 15px; box-sizing: border-box;"&amp;gt;&amp;lt;div class="column-empty"&amp;gt;No content specified for this column&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/columns&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;columns class="processed"&amp;gt;&amp;lt;div class="columns-container" style="display: flex; flex-wrap: nowrap; width: 100%;"&amp;gt;&amp;lt;div class="column column-1" id="-column-1" style="flex: 0 0 50%; overflow: auto; padding: 15px; box-sizing: border-box;"&amp;gt;&amp;lt;div class="column-empty"&amp;gt;No content specified for this column&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;div class="column column-2" id="-column-2" style="flex: 0 0 50%; overflow: auto; padding: 15px; box-sizing: border-box;"&amp;gt;&amp;lt;div class="column-empty"&amp;gt;No content specified for this column&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/columns&amp;gt;</code> tag creates a multi-column layout with dynamic content loading.</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>count</code>: Number of columns</li>
+        <li><code>percents</code>: Comma-separated list of column widths as percentages</li>
+        <li><code>height</code>: Height of the columns container</li>
+        <li><code>width</code>: Width of the columns container</li>
+        <li><code>pages</code>: Semicolon-delimited list of page URLs to load into columns</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;columns id="page-layout" count="3" percents="25,50,25" height="500px" width="100%" pages="sidebar.html;main.html;widgets.html" class="processed"&amp;gt;&amp;lt;div class="columns-container" style="display: flex; flex-wrap: nowrap; height: 500px; width: 100%;"&amp;gt;&amp;lt;div class="column column-1" id="page-layout-column-1" style="flex: 0 0 25%; overflow: auto; padding: 15px; box-sizing: border-box;"&amp;gt;&amp;lt;div class="column-loading"&amp;gt;Loading content...&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;div class="column column-2" id="page-layout-column-2" style="flex: 0 0 50%; overflow: auto; padding: 15px; box-sizing: border-box;"&amp;gt;&amp;lt;div class="column-loading"&amp;gt;Loading content...&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;div class="column column-3" id="page-layout-column-3" style="flex: 0 0 25%; overflow: auto; padding: 15px; box-sizing: border-box;"&amp;gt;&amp;lt;div class="column-loading"&amp;gt;Loading content...&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/columns&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;refresh class="processed"&amp;gt;&amp;lt;button class="refresh-button"&amp;gt;Refresh&amp;lt;/button&amp;gt;&amp;lt;/refresh&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;refresh class="processed"&amp;gt;&amp;lt;button class="refresh-button"&amp;gt;Refresh&amp;lt;/button&amp;gt;&amp;lt;/refresh&amp;gt;</code> tag creates a button or mechanism to refresh content in specific targets.</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+        <li><code>target</code>: Target specification string (format: "targetId:pageUrl;targetId2:pageUrl2")</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>interval</code>: Auto-refresh interval in seconds</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;refresh id="refresh-btn" target="content:data.html" class="processed"&amp;gt;&amp;lt;button class="refresh-button"&amp;gt;Refresh Content&amp;lt;/button&amp;gt;&amp;lt;/refresh&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;checkout&amp;gt;&amp;lt;/checkout&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;checkout&amp;gt;&amp;lt;/checkout&amp;gt;</code> tag creates a checkout form for e-commerce applications.</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>validate</code>: Whether to run in validation mode</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;checkout id="payment-checkout" validate="true"&amp;gt;&amp;lt;/checkout&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;order-confirmation&amp;gt;&amp;lt;/order-confirmation&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;order-confirmation&amp;gt;&amp;lt;/order-confirmation&amp;gt;</code> tag displays order confirmation details.</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+    </ul>
+    <p><strong>Common Attributes:</strong></p>
+    <ul>
+        <li><code>order-id</code>: ID of the order to display</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;order-confirmation id="order-success" order-id="ORD-12345"&amp;gt;&amp;lt;/order-confirmation&amp;gt;</code></pre>
+    </div>
+
+    <h3><code>&amp;lt;cart&amp;gt;&amp;lt;/cart&amp;gt;</code></h3>
+    <p>The <code>&amp;lt;cart&amp;gt;&amp;lt;/cart&amp;gt;</code> tag creates a shopping cart interface.</p>
+    <p><strong>Required Attributes:</strong></p>
+    <ul>
+        <li><code>id</code>: Unique identifier for the element</li>
+    </ul>
+    <div class="example">
+        <h4>Example:</h4>
+        <pre><code>&amp;lt;cart id="shopping-cart"&amp;gt;&amp;lt;/cart&amp;gt;</code></pre>
+    </div>
+
+    <h2 id="attributes">Attributes</h2>
+    <h3>Core Attributes</h3>
+
+    <h4><code>id</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Required for all tags to identify the element</li>
+        <li><strong>Example</strong>: <code>&amp;lt;pipe id="data-loader" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>ajax</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies the URL to fetch content from</li>
+        <li><strong>Example</strong>: <code>&amp;lt;pipe id="data-loader" ajax="data.json" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>query</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies query string parameters for AJAX requests</li>
+        <li><strong>Format</strong>: Key-value pairs separated by colons and semicolons</li>
+        <li><strong>Example</strong>:
+            <code>&amp;lt;pipe id="data-loader" ajax="data.json" query="key0:value0;key1:value1;" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code>
+        </li>
+    </ul>
+
+    <h4><code>insert</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies the ID of the element where content should be inserted</li>
+        <li><strong>Example</strong>: <code>&amp;lt;pipe id="data-loader" ajax="data.json" insert="content-area" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>mode</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies the HTTP method for AJAX requests</li>
+        <li><strong>Values</strong>: "POST" or "GET" (default: "POST")</li>
+        <li><strong>Example</strong>:
+            <code>&amp;lt;pipe id="data-loader" mode="GET" ajax="data.json" insert="content-area" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code>
+        </li>
+    </ul>
+
+    <h4><code>callback</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies a JavaScript function to call after AJAX request</li>
+        <li><strong>Example</strong>: <code>&amp;lt;pipe id="data-loader" callback="processData" ajax="data.json" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>callback-class</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies classes to be used in the callback function</li>
+        <li><strong>Example</strong>:
+            <code>&amp;lt;pipe id="data-loader" callback="processData" callback-class="data-processor" ajax="data.json" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code>
+        </li>
+    </ul>
+
+    <h4><code>headers</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies HTTP headers for AJAX requests</li>
+        <li><strong>Format</strong>: Key-value pairs separated by colons and ampersands</li>
+        <li><strong>Example</strong>:
+            <code>&amp;lt;pipe id="data-loader" ajax="data.json" headers="Content-Type:application/json&amp;amp;Authorization:Bearer token" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code>
+        </li>
+    </ul>
+
+    <h4><code>form-class</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies the class of form elements to include in AJAX requests</li>
+        <li><strong>Example</strong>: <code>&amp;lt;pipe id="form-submit" form-class="user-form" ajax="submit.php" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>event</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies events that trigger the element's action</li>
+        <li><strong>Format</strong>: Event names separated by semicolons</li>
+        <li><strong>Example</strong>:
+            <code>&amp;lt;dyn id="hover-element" event="mouseover;mouseleave" ajax="hover.php"&amp;gt;&amp;lt;/dyn&amp;gt;</code>
+        </li>
+    </ul>
+
+    <h4><code>delay</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies the delay in milliseconds for timed elements</li>
+        <li><strong>Example</strong>:
+            <code>&amp;lt;timed id="updates" ajax="status.php" delay="3000" insert="status-area"&amp;gt;&amp;lt;/timed&amp;gt;</code>
+        </li>
+    </ul>
+
+    <h4><code>file-order</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies a list of files to cycle through</li>
+        <li><strong>Format</strong>: File paths separated by semicolons</li>
+        <li><strong>Example</strong>:
+            <code>&amp;lt;pipe id="image-cycler" file-order="img1.jpg;img2.jpg;img3.jpg" insert="image-container" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;</code>
+        </li>
+    </ul>
+
+    <h4><code>file-index</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies the current index in the file-order list</li>
+        <li><strong>Example</strong>:
+            <code>&amp;lt;pipe id="image-cycler" file-order="img1.jpg;img2.jpg;img3.jpg" file-index="1" insert="image-container"&amp;gt;&amp;lt;/pipe&amp;gt;</code>
+        </li>
+    </ul>
+
+    <h4><code>interval</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies the number of steps to take when stepping through file-order</li>
+        <li><strong>Example</strong>:
+            <code>&amp;lt;pipe id="image-cycler" file-order="img1.jpg;img2.jpg;img3.jpg" interval="2" insert="image-container"&amp;gt;&amp;lt;/pipe&amp;gt;</code>
+        </li>
+    </ul>
+
+    <h4><code>set</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Sets the value of an element attribute</li>
+        <li><strong>Format</strong>: "element-id:attribute-name:value"</li>
+        <li><strong>Example</strong>: <code>&amp;lt;dyn id="button" set="target-element:class:active"&amp;gt;&amp;lt;/dyn&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>get</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Gets the value of an element attribute and returns it to this element</li>
+        <li><strong>Format</strong>: "element-id:attribute-name"</li>
+        <li><strong>Example</strong>: <code>&amp;lt;dyn id="copy-button" get="source-element:data-value"&amp;gt;&amp;lt;/dyn&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>delete</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Deletes the value of an element attribute</li>
+        <li><strong>Format</strong>: "element-id:attribute-name"</li>
+        <li><strong>Example</strong>: <code>&amp;lt;dyn id="clear-button" delete="target-element:data-value"&amp;gt;&amp;lt;/dyn&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>x-toggle</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Toggles CSS classes on elements</li>
+        <li><strong>Format</strong>: "element-id:class-name" pairs separated by semicolons</li>
+        <li><strong>Example</strong>: <code>&amp;lt;dyn id="toggle-button" x-toggle="panel1:visible;panel2:hidden"&amp;gt;&amp;lt;/dyn&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>display</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Toggles visibility of elements</li>
+        <li><strong>Format</strong>: Element IDs separated by semicolons</li>
+        <li><strong>Example</strong>: <code>&amp;lt;dyn id="show-hide-button" display="panel1;panel2;"&amp;gt;&amp;lt;/dyn&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>remove</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Removes elements from the DOM</li>
+        <li><strong>Format</strong>: Element IDs separated by semicolons</li>
+        <li><strong>Example</strong>: <code>&amp;lt;dyn id="delete-button" remove="temp1;temp2;"&amp;gt;&amp;lt;/dyn&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>tool-tip</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Creates a tooltip for the element</li>
+        <li><strong>Format</strong>: "tooltip-text;id;class;duration;zIndex"</li>
+        <li><strong>Example</strong>:
+            <code>&amp;lt;dyn id="help-button" tool-tip="Click for help;tooltip1;tooltip;3000;100"&amp;gt;&amp;lt;/dyn&amp;gt;</code>
+        </li>
+    </ul>
+
+    <h4><code>modal-tip</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Creates a modal tooltip from a JSON file</li>
+        <li><strong>Format</strong>: "filename.json;duration;zIndex"</li>
+        <li><strong>Example</strong>: <code>&amp;lt;dyn id="info-button" modal-tip="info.json;3000;100"&amp;gt;&amp;lt;/dyn&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>copy</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Copies the value of an element to the clipboard</li>
+        <li><strong>Example</strong>: <code>&amp;lt;dyn id="copy-button" copy="text-content"&amp;gt;&amp;lt;/dyn&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>file</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies a filename to download</li>
+        <li><strong>Example</strong>: <code>&amp;lt;dyn id="download-button" class="download" file="document.pdf"&amp;gt;&amp;lt;/dyn&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>directory</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies the directory path for the file to download</li>
+        <li><strong>Example</strong>:
+            <code>&amp;lt;dyn id="download-button" class="download" file="document.pdf" directory="/files/"&amp;gt;&amp;lt;/dyn&amp;gt;</code>
+        </li>
+    </ul>
+
+    <h4><code>turn</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Cycles through elements in sequence</li>
+        <li><strong>Format</strong>: Element IDs separated by semicolons</li>
+        <li><strong>Example</strong>: <code>&amp;lt;dyn id="cycle-button" turn="elem1;elem2;elem3;" index="0"&amp;gt;&amp;lt;/dyn&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>boxes</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies the number of boxes/items for carousel elements</li>
+        <li><strong>Example</strong>: <code>&amp;lt;carousel id="image-slider" boxes="3"&amp;gt;&amp;lt;/carousel&amp;gt;</code></li>
+    </ul>
+
+    <h4><code>options</code></h4>
+    <ul>
+        <li><strong>Use Case</strong>: Specifies options for select elements</li>
+        <li><strong>Format</strong>: "label:value" pairs separated by semicolons</li>
+        <li><strong>Example</strong>: <code>&amp;lt;select id="dropdown" options="Option 1:value1;Option 2:value2;"&amp;gt;
+        
+    
+
+    &amp;lt;h2 id="classes"&amp;gt;Classes&amp;lt;/h2&amp;gt;
+    &amp;lt;h3&amp;gt;Action Classes&amp;lt;/h3&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;pipe-active&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Indicates that a pipe element has been activated&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;pipe id="active-pipe" class="pipe-active"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;disabled&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Disables an element from being triggered&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;dyn id="disabled-button" class="disabled"&amp;gt;&amp;lt;/dyn&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;time-active&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Activates timers for continuous operations&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;timed id="active-updates" class="time-active" delay="3000"&amp;gt;&amp;lt;/timed&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;time-inactive&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Deactivates timers for continuous operations&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;timed id="paused-updates" class="time-inactive" delay="3000"&amp;gt;&amp;lt;/timed&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;redirect&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Follows the AJAX call in POST or GET mode&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;pipe id="redirect-link" class="redirect" ajax="page.html"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;download&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Triggers file download&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;dyn id="download-button" class="download" file="document.pdf"&amp;gt;&amp;lt;/dyn&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;clear-node&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Clears the content of specified nodes&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;dyn id="clear-button" class="clear-node" insert="panel1;panel2;"&amp;gt;&amp;lt;/dyn&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;incrIndex&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Increments through index of file-order&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;:
+            &amp;lt;code&amp;gt;&amp;lt;pipe id="next-image" class="incrIndex" file-order="img1.jpg;img2.jpg;img3.jpg"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;decrIndex&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Decrements through index of file-order&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;:
+            &amp;lt;code&amp;gt;&amp;lt;pipe id="prev-image" class="decrIndex" file-order="img1.jpg;img2.jpg;img3.jpg"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;carousel-step-right&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Moves the carousel one step to the right&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;dyn id="next-button" class="carousel-step-right" insert="carousel1"&amp;gt;&amp;lt;/dyn&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;carousel-step-left&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Moves the carousel one step to the left&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;dyn id="prev-button" class="carousel-step-left" insert="carousel1"&amp;gt;&amp;lt;/dyn&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;carousel-slide-right&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Continuously slides the carousel to the right&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;dyn id="auto-right" class="carousel-slide-right" insert="carousel1"&amp;gt;&amp;lt;/dyn&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;carousel-slide-left&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Continuously slides the carousel to the left&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;dyn id="auto-left" class="carousel-slide-left" insert="carousel1"&amp;gt;&amp;lt;/dyn&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;turn-auto&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Automatically cycles through carousel items&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;carousel id="auto-carousel" class="turn-auto"&amp;gt;&amp;lt;/carousel&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;mouse&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Enables mouse event handling for the element&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;div id="hover-area" class="mouse" event="mouseover;mouseleave"&amp;gt;&amp;lt;code&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;mouse-insert&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Inserts content on mouse events&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;div id="hover-content" class="mouse-insert" event="mouseover"&amp;gt;&amp;lt;code&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;action-class&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Designates elements that listen to other tags' actions&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;div id="listener" class="action-class"&amp;gt;&amp;lt;code&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;multiple&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Indicates that an element has multiple key/value pairs&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/li&amp;gt;&amp;lt;/ul&amp;gt;&amp;lt;/select&amp;gt;</code></li><code>
+    </code></ul><code>
+
+    &amp;lt;h3&amp;gt;Content Display Classes&amp;lt;/h3&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;plain-text&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Returns plain text to the insertion point&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;:
+            &amp;lt;code&amp;gt;&amp;lt;pipe id="text-loader" class="plain-text" ajax="content.txt" insert="text-area"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;plain-html&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Returns content as true HTML&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;:
+            &amp;lt;code&amp;gt;&amp;lt;pipe id="html-loader" class="plain-html" ajax="content.html" insert="html-area"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;json&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Processes and displays JSON data&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;:
+            &amp;lt;code&amp;gt;&amp;lt;pipe id="json-loader" class="json" ajax="data.json" insert="json-display"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;strict-json&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Returns only JSON to full page as response&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;: &amp;lt;code&amp;gt;&amp;lt;pipe id="api-call" class="strict-json" ajax="api.php"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;modala&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Processes JSON data using the modala function&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;:
+            &amp;lt;code&amp;gt;&amp;lt;pipe id="modal-loader" class="modala" ajax="modal.json" insert="modal-container"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;modala-multi-last&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Creates multi-ajax calls, removing the last item when limit is reached&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;:
+            &amp;lt;code&amp;gt;&amp;lt;pipe id="feed-loader" class="modala modala-multi-last" ajax="feed.json:feed-container:10" insert="feed-container"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;modala-multi-first&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Creates multi-ajax calls, removing the first item when limit is reached&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;:
+            &amp;lt;code&amp;gt;&amp;lt;pipe id="feed-loader" class="modala modala-multi-first" ajax="feed.json:feed-container:10" insert="feed-container"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;tree-view&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Use Case&amp;lt;/strong&amp;gt;: Displays hierarchical data as a tree&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Example&amp;lt;/strong&amp;gt;:
+            &amp;lt;code&amp;gt;&amp;lt;pipe id="tree-loader" class="tree-view" ajax="tree.json" insert="tree-container"&amp;gt;&amp;lt;/pipe&amp;gt;&amp;lt;/code&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h2 id="helper-functions"&amp;gt;Helper Functions&amp;lt;/h2&amp;gt;
+    &amp;lt;h3&amp;gt;Core Functions&amp;lt;/h3&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;domContentLoad(again = false)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Initializes all dotPipe elements when the DOM is loaded&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;again&amp;lt;/code&amp;gt;: Boolean indicating whether to re-initialize elements&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;addPipe(elem = document)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Attaches global event listeners to the document&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;elem&amp;lt;/code&amp;gt;: The element to attach listeners to (default: document)&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;pipes(elem, stop = false)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Core function that processes elements and their attributes&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;elem&amp;lt;/code&amp;gt;: The element to process&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;stop&amp;lt;/code&amp;gt;: Boolean to stop processing&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;navigate(elem, opts = null, query = "", classname = "")&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Handles AJAX navigation and content loading&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;elem&amp;lt;/code&amp;gt;: The element triggering navigation&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;opts&amp;lt;/code&amp;gt;: AJAX options&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;query&amp;lt;/code&amp;gt;: Query string&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;classname&amp;lt;/code&amp;gt;: Form class name&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h3&amp;gt;Modal and Content Functions&amp;lt;/h3&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;modal(filename, tagId)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Displays a modal dialog with content from a JSON file&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;filename&amp;lt;/code&amp;gt;: URL or path to the JSON file&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;tagId&amp;lt;/code&amp;gt;: ID of the element to insert the modal into&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: Promise&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;modalList(filenames)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Displays multiple modals from JSON files&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;filenames&amp;lt;/code&amp;gt;: Semicolon-separated list of filenames and targets&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;modala(value, tempTag, root, id)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Recursively creates HTML elements from a JSON object&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;value&amp;lt;/code&amp;gt;: JSON object with element definitions&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;tempTag&amp;lt;/code&amp;gt;: Target element to append to&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;root&amp;lt;/code&amp;gt;: Root element&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;id&amp;lt;/code&amp;gt;: Element ID&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: Element&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;modalaHead(value)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Creates HTML elements in the document head from a JSON object&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;value&amp;lt;/code&amp;gt;: JSON object with element definitions&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;textCard(text, id = "", classes = "", x_center = false, y_center = false, duration = -1, zindex = 100)&amp;lt;/code&amp;gt;
+    &amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Creates a text card overlay&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;text&amp;lt;/code&amp;gt;: Text content&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;id&amp;lt;/code&amp;gt;: Element ID&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;classes&amp;lt;/code&amp;gt;: CSS classes&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;x_center&amp;lt;/code&amp;gt;: X position or centering&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;y_center&amp;lt;/code&amp;gt;: Y position or centering&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;duration&amp;lt;/code&amp;gt;: Display duration in milliseconds&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;zindex&amp;lt;/code&amp;gt;: Z-index value&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;modalCard(filename, x_center = false, y_center = false, duration = -1, zindex = 100)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Creates a modal card overlay from a JSON file&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;filename&amp;lt;/code&amp;gt;: JSON file path&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;x_center&amp;lt;/code&amp;gt;: X position or centering&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;y_center&amp;lt;/code&amp;gt;: Y position or centering&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;duration&amp;lt;/code&amp;gt;: Display duration in milliseconds&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;zindex&amp;lt;/code&amp;gt;: Z-index value&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h3&amp;gt;Data Functions&amp;lt;/h3&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;getJSONFile(filename)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Fetches and parses a JSON file&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;filename&amp;lt;/code&amp;gt;: URL or path to the JSON file&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: Promise with parsed JSON&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;getTextFile(filename)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Fetches a text file&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;filename&amp;lt;/code&amp;gt;: URL or path to the text file&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: Promise with text content&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;formAJAX(elem, classname)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Collects form data for AJAX requests&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;elem&amp;lt;/code&amp;gt;: Form element&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;classname&amp;lt;/code&amp;gt;: Class of form elements to include&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: Query string&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;setAJAXOpts(elem, opts)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Sets AJAX request options&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;elem&amp;lt;/code&amp;gt;: Element with AJAX attributes&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;opts&amp;lt;/code&amp;gt;: Options map&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: Updated options map&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h3&amp;gt;UI and Display Functions&amp;lt;/h3&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;renderTree(value, tempTag)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Renders a tree view from a JSON object&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;value&amp;lt;/code&amp;gt;: JSON object with tree structure&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;tempTag&amp;lt;/code&amp;gt;: Target element or ID&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: Rendered element&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;setTimers(target)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Sets up timers for elements that need periodic updates&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;target&amp;lt;/code&amp;gt;: Element to refresh&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;carousel(elem, auto = false)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Initializes a carousel element&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;elem&amp;lt;/code&amp;gt;: Carousel element&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;auto&amp;lt;/code&amp;gt;: Whether to auto-rotate&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;shiftFilesLeft(elem, auto = false, delay = 1000)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Shifts carousel items to the left&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;elem&amp;lt;/code&amp;gt;: Carousel element&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;auto&amp;lt;/code&amp;gt;: Whether to continue automatically&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;delay&amp;lt;/code&amp;gt;: Delay between shifts&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;shiftFilesRight(elem, auto = false, delay = 1000)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Shifts carousel items to the right&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;elem&amp;lt;/code&amp;gt;: Carousel element&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;auto&amp;lt;/code&amp;gt;: Whether to continue automatically&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;delay&amp;lt;/code&amp;gt;: Delay between shifts&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;fileOrder(elem)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Manages file ordering for elements with file-order attribute&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;elem&amp;lt;/code&amp;gt;: Element with file-order attribute&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;copyContentById(id)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Copies content of an element to clipboard&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;id&amp;lt;/code&amp;gt;: ID of element to copy&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: Boolean success indicator&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;prettifyJsonWithColors(jsonObj)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Formats JSON with syntax highlighting&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;jsonObj&amp;lt;/code&amp;gt;: JSON object to format&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: HTML string with colored JSON&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h4&amp;gt;&amp;lt;code&amp;gt;displayColoredJson(elementId, jsonObj)&amp;lt;/code&amp;gt;&amp;lt;/h4&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Purpose&amp;lt;/strong&amp;gt;: Displays colored JSON in an element&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Parameters&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;elementId&amp;lt;/code&amp;gt;: Target element ID&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;jsonObj&amp;lt;/code&amp;gt;: JSON object to display&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Returns&amp;lt;/strong&amp;gt;: void&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h2 id="flow-and-recursion"&amp;gt;Flow and Recursion&amp;lt;/h2&amp;gt;
+    &amp;lt;p&amp;gt;dotPipe uses several flow and recursion patterns to handle dynamic content and nested structures:&amp;lt;/p&amp;gt;
+
+    &amp;lt;h3&amp;gt;Event Flow&amp;lt;/h3&amp;gt;
+    &amp;lt;ol&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Initialization Flow&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;The library initializes when the DOM content is loaded&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;DOMContentLoaded&amp;lt;/code&amp;gt; event triggers &amp;lt;code&amp;gt;domContentLoad()&amp;lt;/code&amp;gt;&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;domContentLoad()&amp;lt;/code&amp;gt; processes all custom tags&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Event listeners are attached to elements&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Interaction Flow&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;User interactions trigger event listeners&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Event listeners call the &amp;lt;code&amp;gt;pipes()&amp;lt;/code&amp;gt; function&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;pipes()&amp;lt;/code&amp;gt; processes the element's attributes and classes&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Actions are performed based on attributes and classes&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;AJAX Flow&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;AJAX requests are initiated by &amp;lt;code&amp;gt;navigate()&amp;lt;/code&amp;gt;&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Responses are processed based on element classes&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Content is inserted into target elements&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Additional processing may occur based on content type&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ol&amp;gt;
+
+    &amp;lt;h3&amp;gt;Recursion Patterns&amp;lt;/h3&amp;gt;
+    &amp;lt;ol&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;DOM Traversal Recursion&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;addPipe()&amp;lt;/code&amp;gt; recursively traverses the DOM to find elements&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Event listeners are attached to elements during traversal&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;JSON to DOM Recursion&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;modala()&amp;lt;/code&amp;gt; recursively processes JSON objects&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Each object property may represent a nested element&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Elements are created and appended to the DOM&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Tree View Recursion&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;renderTree()&amp;lt;/code&amp;gt; recursively builds tree structures&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Each node may contain child nodes&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Event listeners are attached to tree nodes&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;strong&amp;gt;Component Initialization Recursion&amp;lt;/strong&amp;gt;:
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;Component initialization functions recursively process their elements&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Child elements are initialized after parent elements&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;Event listeners are attached to component elements&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ol&amp;gt;
+
+    &amp;lt;h2 id="examples"&amp;gt;Examples&amp;lt;/h2&amp;gt;
+
+    &amp;lt;h3&amp;gt;Basic AJAX Example&amp;lt;/h3&amp;gt;
+    &amp;lt;div class="example"&amp;gt;
+        &amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;&amp;lt;!-- Load content from data.json into the content-area element --&amp;gt;
+&amp;lt;pipe id="data-loader" ajax="data.json" insert="content-area"&amp;gt;&amp;lt;/pipe&amp;gt;
+
+&amp;lt;!-- Display the loaded content --&amp;gt;
+&amp;lt;div id="content-area"&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;h3&amp;gt;Form Submission Example&amp;lt;/h3&amp;gt;
+    &amp;lt;div class="example"&amp;gt;
+        &amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;&amp;lt;!-- Form with AJAX submission --&amp;gt;
+&amp;lt;form id="user-form"&amp;gt;
+  &amp;lt;input type="text" name="username" class="user-form-class" placeholder="Username"&amp;gt;
+  &amp;lt;input type="password" name="password" class="user-form-class" placeholder="Password"&amp;gt;
+  
+  &amp;lt;!-- Submit button using pipe --&amp;gt;
+  &amp;lt;pipe id="submit-button" form-class="user-form-class" ajax="login.php" insert="result" class="button"&amp;gt;
+    Login
+  &amp;lt;/pipe&amp;gt;
+  
+  &amp;lt;!-- Result area --&amp;gt;
+  &amp;lt;div id="result"&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;/form&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;h3&amp;gt;Tabbed Interface Example&amp;lt;/h3&amp;gt;
+    &amp;lt;div class="example"&amp;gt;
+        &amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;&amp;lt;!-- Create a tabbed interface --&amp;gt;
+&amp;lt;tabs id="content-tabs" tab="Home:tab1:home.html;Products:tab2:products.html;Contact:tab3:contact.html" class="blue-tabs" style="width:100%;height:50px;"&amp;gt;&amp;lt;/tabs&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;h3&amp;gt;Carousel Example&amp;lt;/h3&amp;gt;
+    &amp;lt;div class="example"&amp;gt;
+        &amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;&amp;lt;!-- Create an image carousel --&amp;gt;
+&amp;lt;carousel id="image-slider" ajax="images.php" file-order="img1.jpg;img2.jpg;img3.jpg" delay="3000" insert="slider-container" height="300" width="500" boxes="1"&amp;gt;&amp;lt;/carousel&amp;gt;
+
+&amp;lt;!-- Carousel navigation buttons --&amp;gt;
+&amp;lt;div class="carousel-controls"&amp;gt;
+  &amp;lt;dyn id="prev-button" class="carousel-step-left" insert="image-slider"&amp;gt;Previous&amp;lt;/dyn&amp;gt;
+  &amp;lt;dyn id="next-button" class="carousel-step-right" insert="image-slider"&amp;gt;Next&amp;lt;/dyn&amp;gt;
+  &amp;lt;dyn id="play-button" class="carousel-slide-right" insert="image-slider"&amp;gt;Play&amp;lt;/dyn&amp;gt;
+&amp;lt;/div&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;h3&amp;gt;Search Example&amp;lt;/h3&amp;gt;
+    &amp;lt;div class="example"&amp;gt;
+        &amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;&amp;lt;!-- Create a search interface --&amp;gt;
+&amp;lt;search id="content-search" use-id="content1;content2;content3;" input-width="200px" input-height="30px" placeholder="Search..." search-delay="300"&amp;gt;&amp;lt;/search&amp;gt;
+
+&amp;lt;!-- Content areas to search --&amp;gt;
+&amp;lt;div id="content1"&amp;gt;Content 1&amp;lt;/div&amp;gt;
+&amp;lt;div id="content2"&amp;gt;Content 2&amp;lt;/div&amp;gt;
+&amp;lt;div id="content3"&amp;gt;Content 3&amp;lt;/div&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;h3&amp;gt;CSV Data Example&amp;lt;/h3&amp;gt;
+    &amp;lt;div class="example"&amp;gt;
+        &amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;&amp;lt;!-- Display CSV data as a table --&amp;gt;
+&amp;lt;csv id="data-table" sources="data.csv" csv-as="table" sort="name:csv-asc" page-size="10"&amp;gt;
+  &amp;lt;template&amp;gt;
+    &amp;lt;thead&amp;gt;
+      &amp;lt;tr&amp;gt;
+        &amp;lt;th&amp;gt;Name&amp;lt;/th&amp;gt;
+        &amp;lt;th&amp;gt;Email&amp;lt;/th&amp;gt;
+        &amp;lt;th&amp;gt;Phone&amp;lt;/th&amp;gt;
+      &amp;lt;/tr&amp;gt;
+    &amp;lt;/thead&amp;gt;
+    &amp;lt;tbody&amp;gt;
+      &amp;lt;tr&amp;gt;
+        &amp;lt;td&amp;gt;{{name}}&amp;lt;/td&amp;gt;
+        &amp;lt;td&amp;gt;{{email}}&amp;lt;/td&amp;gt;
+        &amp;lt;td&amp;gt;{{phone}}&amp;lt;/td&amp;gt;
+      &amp;lt;/tr&amp;gt;
+    &amp;lt;/tbody&amp;gt;
+  &amp;lt;/template&amp;gt;
+&amp;lt;/csv&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;h3&amp;gt;Modal Example&amp;lt;/h3&amp;gt;
+    &amp;lt;div class="example"&amp;gt;
+        &amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;&amp;lt;!-- Button to show modal --&amp;gt;
+&amp;lt;dyn id="show-modal" modal="modal.json:modal-container"&amp;gt;Show Modal&amp;lt;/dyn&amp;gt;
+
+&amp;lt;!-- Modal container --&amp;gt;
+&amp;lt;div id="modal-container"&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;h3&amp;gt;Tree View Example&amp;lt;/h3&amp;gt;
+    &amp;lt;div class="example"&amp;gt;
+        &amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;&amp;lt;!-- Load and display a tree view --&amp;gt;
+&amp;lt;pipe id="tree-loader" class="tree-view" ajax="tree.json" insert="tree-container"&amp;gt;&amp;lt;/pipe&amp;gt;
+
+&amp;lt;!-- Tree container --&amp;gt;
+&amp;lt;div id="tree-container"&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;h2 id="api-reference"&amp;gt;API Reference&amp;lt;/h2&amp;gt;
+
+    &amp;lt;h3&amp;gt;Global Variables&amp;lt;/h3&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;PAGE_NONCE&amp;lt;/code&amp;gt;: Security nonce for Content Security Policy&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h3&amp;gt;Event Handlers&amp;lt;/h3&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;document.addEventListener("DOMContentLoaded", function () {...})&amp;lt;/code&amp;gt;: Initializes dotPipe when the
+            DOM is loaded&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h3&amp;gt;Component APIs&amp;lt;/h3&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;window.columnsComponent&amp;lt;/code&amp;gt;: API for columns component
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;refreshColumn(columnsId, columnIndex)&amp;lt;/code&amp;gt;: Refreshes a specific column&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;updateColumnContent(columnsId, columnIndex, newContent)&amp;lt;/code&amp;gt;: Updates content in a column
+                &amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;loadColumnPage(columnsId, columnIndex, pageUrl)&amp;lt;/code&amp;gt;: Loads a new page into a column&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;window.refreshComponent&amp;lt;/code&amp;gt;: API for refresh component
+            &amp;lt;ul&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;refreshTarget(targetId, pageUrl)&amp;lt;/code&amp;gt;: Refreshes content in a target element&amp;lt;/li&amp;gt;
+                &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;refreshTargets(targetSpec)&amp;lt;/code&amp;gt;: Refreshes multiple targets&amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h3&amp;gt;Custom Events&amp;lt;/h3&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;columnContentLoaded&amp;lt;/code&amp;gt;: Fired when column content is loaded&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;refreshStarted&amp;lt;/code&amp;gt;: Fired when content refresh starts&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;refreshCompleted&amp;lt;/code&amp;gt;: Fired when content refresh completes&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;refreshFailed&amp;lt;/code&amp;gt;: Fired when content refresh fails&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;csvLoaded&amp;lt;/code&amp;gt;: Fired when CSV data is loaded&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;csvMoreDataLoaded&amp;lt;/code&amp;gt;: Fired when more CSV data is loaded&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;searchPerformed&amp;lt;/code&amp;gt;: Fired when search is performed&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;h3&amp;gt;Security Functions&amp;lt;/h3&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;generateNonce()&amp;lt;/code&amp;gt;: Generates a security nonce for Content Security Policy&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;&amp;lt;code&amp;gt;sha256(message)&amp;lt;/code&amp;gt;: Computes SHA-256 hash of a message&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+
+    &amp;lt;footer&amp;gt;
+        &amp;lt;p&amp;gt;This manual provides a comprehensive reference for dotPipe.js, covering all tags, attributes, classes, helper
+            functions, flow patterns, and examples. Use it as a guide to leverage the full capabilities of the dotPipe
+            library in your web applications.&amp;lt;/p&amp;gt;
+    &amp;lt;/footer&amp;gt;
+    &amp;lt;script src="dotpipe.js"&amp;gt;&amp;lt;/script&amp;gt;
+    &amp;lt;script&amp;gt;
+        document.addEventListener("DOMContentLoaded", () =&amp;gt; {
+            document.querySelectorAll("code").forEach(el =&amp;gt; {
+                el.textContent = el.innerHTML
+                    .replace(/&amp;lt;/g, "&amp;lt;")
+                    .replace(/&amp;gt;/g, "&amp;gt;");
+            });
+        });
+    &amp;lt;/script&amp;gt;
+
+
+
+</code></search><pipe ajax="sidebar.html" insert="page-layout-column-1" class="column-content-loader plain-html"></pipe><pipe ajax="main.html" insert="page-layout-column-2" class="column-content-loader plain-html"></pipe><pipe ajax="widgets.html" insert="page-layout-column-3" class="column-content-loader plain-html"></pipe></body></html>
