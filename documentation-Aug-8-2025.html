@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +13,14 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            word-wrap: break-word;
+            /* Legacy, still useful for some older browsers */
+            word-break: break-word;
+            /* Modern, recommended */
+            overflow-wrap: break-word;
+            /* Standard-compliant version of word-wrap */
         }
-        
+
         header {
             background-color: #2c3e50;
             color: white;
@@ -21,24 +28,24 @@
             border-radius: 5px;
             margin-bottom: 30px;
         }
-        
+
         h1 {
             margin: 0;
             font-size: 2.5em;
         }
-        
+
         h2 {
             color: #2c3e50;
             border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
             margin-top: 40px;
         }
-        
+
         h3 {
             color: #3498db;
             margin-top: 30px;
         }
-        
+
         .attribute-section {
             background-color: #f9f9f9;
             border-left: 4px solid #3498db;
@@ -46,7 +53,7 @@
             margin: 20px 0;
             border-radius: 0 5px 5px 0;
         }
-        
+
         .example-container {
             background-color: #f5f5f5;
             border: 1px solid #ddd;
@@ -54,14 +61,14 @@
             margin: 15px 0;
             overflow: hidden;
         }
-        
+
         .example-title {
             background-color: #e0e0e0;
             padding: 10px 15px;
             font-weight: bold;
             border-bottom: 1px solid #ddd;
         }
-        
+
         .example-code {
             padding: 15px;
             background-color: #f8f8f8;
@@ -70,77 +77,80 @@
             font-family: monospace;
             white-space: pre-wrap;
         }
-        
+
         .example-output {
             padding: 15px;
             background-color: white;
             border: 1px dashed #ccc;
             margin: 15px;
         }
-        
+
         .tag-name {
             color: #e74c3c;
             font-weight: bold;
         }
-        
+
         .attribute-name {
             color: #9b59b6;
             font-weight: bold;
         }
-        
+
         .class-name {
             color: #2980b9;
             font-weight: bold;
         }
-        
+
         .note {
             background-color: #fef9e7;
             border-left: 4px solid #f1c40f;
             padding: 10px 15px;
             margin: 15px 0;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
         }
-        
-        table, th, td {
+
+        table,
+        th,
+        td {
             border: 1px solid #ddd;
         }
-        
-        th, td {
+
+        th,
+        td {
             padding: 12px 15px;
             text-align: left;
         }
-        
+
         th {
             background-color: #f2f2f2;
         }
-        
+
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
-        
+
         .nav-container {
             background-color: #f8f9fa;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 30px;
         }
-        
+
         .nav-title {
             font-weight: bold;
             margin-bottom: 10px;
         }
-        
+
         .nav-links {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
         }
-        
+
         .nav-link {
             background-color: #e9ecef;
             padding: 5px 10px;
@@ -148,11 +158,11 @@
             text-decoration: none;
             color: #495057;
         }
-        
+
         .nav-link:hover {
             background-color: #dee2e6;
         }
-        
+
         dotp {
             display: block;
             border: 1px solid #ddd;
@@ -160,7 +170,7 @@
             margin: 15px 0;
             background-color: #f8f8f8;
         }
-        
+
         .button {
             display: inline-block;
             padding: 8px 16px;
@@ -171,20 +181,20 @@
             font-weight: bold;
             text-align: center;
         }
-        
+
         .button:hover {
             background-color: #2980b9;
         }
-        
+
         .mock-modal {
             border: 2px solid #3498db;
             border-radius: 5px;
             padding: 15px;
             margin: 15px 0;
             background-color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        
+
         .mock-tooltip {
             position: relative;
             display: inline-block;
@@ -194,7 +204,7 @@
             border-radius: 4px;
             margin-left: 10px;
         }
-        
+
         .mock-tooltip::before {
             content: "";
             position: absolute;
@@ -205,53 +215,53 @@
             border-style: solid;
             border-color: transparent #333 transparent transparent;
         }
-        
+
         .mock-tabs {
             border: 1px solid #ddd;
             border-radius: 5px;
             overflow: hidden;
         }
-        
+
         .mock-tab-header {
             display: flex;
             background-color: #f5f5f5;
             border-bottom: 1px solid #ddd;
         }
-        
+
         .mock-tab {
             padding: 10px 15px;
             cursor: pointer;
         }
-        
+
         .mock-tab.active {
             background-color: white;
             border-bottom: 2px solid #3498db;
         }
-        
+
         .mock-tab-content {
             padding: 15px;
             background-color: white;
         }
-        
+
         .mock-carousel {
             display: flex;
             overflow: hidden;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
-        
+
         .mock-carousel-item {
             flex: 0 0 100%;
             padding: 20px;
             text-align: center;
         }
-        
+
         .mock-carousel-controls {
             display: flex;
             justify-content: center;
             margin-top: 10px;
         }
-        
+
         .mock-carousel-control {
             margin: 0 5px;
             padding: 5px 10px;
@@ -262,12 +272,13 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <h1>DotPipe.js Documentation</h1>
         <p>A comprehensive guide to DotPipe.js attributes, tags, and classes</p>
     </header>
-    
+
     <div class="nav-container">
         <div class="nav-title">Quick Navigation</div>
         <div class="nav-links">
@@ -277,36 +288,41 @@
             <a href="#components" class="nav-link">Components</a>
         </div>
     </div>
-    
+
     <section>
         <h2>Introduction to DotPipe.js</h2>
-        <p>DotPipe.js is a lightweight JavaScript library that enhances HTML with dynamic functionality through custom attributes, tags, and classes. It simplifies AJAX calls, content loading, and UI interactions without requiring complex JavaScript code.</p>
-        
+        <p>DotPipe.js is a lightweight JavaScript library that enhances HTML with dynamic functionality through custom
+            attributes, tags, and classes. It simplifies AJAX calls, content loading, and UI interactions without
+            requiring complex JavaScript code.</p>
+
         <div class="note">
-            <strong>Note:</strong> DotPipe.js automatically initializes when the DOM content is loaded. All tags with the <span class="tag-name">pipe</span> tag are processed automatically.
+            <strong>Note:</strong> DotPipe.js automatically initializes when the DOM content is loaded. All tags with
+            the <span class="tag-name">pipe</span> tag are processed automatically.
         </div>
     </section>
-    
+
     <section id="attributes">
         <h2>Attributes</h2>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">id</span></h3>
             <p>All tags being used with DotPipe.js must have an 'id' attribute for proper functionality.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="myPipe" ajax="data.json" insert="resultDiv"&gt;&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="myPipe" ajax="data.json" insert="resultDiv"&gt;&lt;/pipe&gt;
+                </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">insert</span></h3>
             <p>Specifies the target element ID where the AJAX response will be inserted.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="dataPipe" ajax="data.json" insert="resultContainer"&gt;&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="dataPipe" ajax="data.json"
+                    insert="resultContainer"&gt;&lt;/pipe&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <div id="resultContainer">Content from data.json will be inserted here</div>
@@ -315,43 +331,47 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">ajax</span></h3>
             <p>Specifies the URL to call. Can include optional parameters separated by colons.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Basic Usage</div>
-                <div class="example-code">&lt;pipe id="simplePipe" ajax="data.json" insert="resultDiv"&gt;&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="simplePipe" ajax="data.json" insert="resultDiv"&gt;&lt;/pipe&gt;
+                </div>
             </div>
-            
+
             <div class="example-container">
                 <div class="example-title">With Parameters</div>
-                <div class="example-code">&lt;pipe id="paramPipe" ajax="data.php:resultDiv:countByEvent" query="event:click;" insert="resultDiv"&gt;&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="paramPipe" ajax="data.php:resultDiv:countByEvent"
+                    query="event:click;" insert="resultDiv"&gt;&lt;/pipe&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">query</span></h3>
             <p>Defines query parameters to be sent with the AJAX request. Format is "key:value;" pairs.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="queryPipe" ajax="search.php" query="term:javascript;limit:10;" insert="searchResults"&gt;&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="queryPipe" ajax="search.php" query="term:javascript;limit:10;"
+                    insert="searchResults"&gt;&lt;/pipe&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">turn</span></h3>
             <p>Creates a turn-based element routine. Cycles through elements with the specified class.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;div id="turnExample" turn="slide-item" class="decrIndex" index="1"&gt;Next Slide&lt;/div&gt;
+                <div class="example-code">&lt;div id="turnExample" turn="slide-item" class="decrIndex" index="1"&gt;Next
+                    Slide&lt;/div&gt;
 
-&lt;div class="slide-item"&gt;Slide 1 Content&lt;/div&gt;
-&lt;div class="slide-item"&gt;Slide 2 Content&lt;/div&gt;
-&lt;div class="slide-item"&gt;Slide 3 Content&lt;/div&gt;</div>
+                    &lt;div class="slide-item"&gt;Slide 1 Content&lt;/div&gt;
+                    &lt;div class="slide-item"&gt;Slide 2 Content&lt;/div&gt;
+                    &lt;div class="slide-item"&gt;Slide 3 Content&lt;/div&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <div id="turnExample" class="button">Next Slide</div>
@@ -362,34 +382,37 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">callback</span> and <span class="attribute-name">callback-class</span></h3>
-            <p>Specifies a JavaScript function to call after the AJAX request completes. The callback-class identifies elements whose values will be passed to the callback function.</p>
-            
+            <p>Specifies a JavaScript function to call after the AJAX request completes. The callback-class identifies
+                elements whose values will be passed to the callback function.</p>
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="callbackPipe" callback="processData" callback-class="form-field" ajax="process.php" insert="resultDiv"&gt;Submit&lt;/pipe&gt;
+                <div class="example-code">&lt;pipe id="callbackPipe" callback="processData" callback-class="form-field"
+                    ajax="process.php" insert="resultDiv"&gt;Submit&lt;/pipe&gt;
 
-&lt;input type="text" name="name" class="form-field" value="John"&gt;
-&lt;input type="text" name="age" class="form-field" value="30"&gt;
+                    &lt;input type="text" name="name" class="form-field" value="John"&gt;
+                    &lt;input type="text" name="age" class="form-field" value="30"&gt;
 
-&lt;script&gt;
-function processData(params) {
-    console.log("Processing data:", params);
-    // params will contain "John, 30"
-}
-&lt;/script&gt;</div>
+                    &lt;script&gt;
+                    function processData(params) {
+                    console.log("Processing data:", params);
+                    // params will contain "John, 30"
+                    }
+                    &lt;/script&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">modal</span></h3>
             <p>Loads JSON files and inserts their content into specified target elements.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="modalPipe" modal="template.json:header.main.footer"&gt;Load Template&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="modalPipe" modal="template.json:header.main.footer"&gt;Load
+                    Template&lt;/pipe&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <div id="modalPipe" class="button">Load Template</div>
@@ -400,14 +423,15 @@ function processData(params) {
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">file</span> and <span class="attribute-name">directory</span></h3>
             <p>Used with the "download" class to specify a file to download and its directory.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;button id="downloadBtn" class="download" file="report.pdf" directory="/documents/"&gt;Download Report&lt;/button&gt;</div>
+                <div class="example-code">&lt;button id="downloadBtn" class="download" file="report.pdf"
+                    directory="/documents/"&gt;Download Report&lt;/button&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <button id="downloadBtn" class="button">Download Report</button>
@@ -415,15 +439,17 @@ function processData(params) {
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
-            <h3><span class="attribute-name">set</span>, <span class="attribute-name">get</span>, and <span class="attribute-name">delete</span></h3>
+            <h3><span class="attribute-name">set</span>, <span class="attribute-name">get</span>, and <span
+                    class="attribute-name">delete</span></h3>
             <p>Manipulate attributes of other elements.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Set Example</div>
-                <div class="example-code">&lt;button id="setBtn" set="targetDiv:style:color:red"&gt;Set Text Color&lt;/button&gt;
-&lt;div id="targetDiv"&gt;This text will change color&lt;/div&gt;</div>
+                <div class="example-code">&lt;button id="setBtn" set="targetDiv:style:color:red"&gt;Set Text
+                    Color&lt;/button&gt;
+                    &lt;div id="targetDiv"&gt;This text will change color&lt;/div&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <button id="setBtn" class="button">Set Text Color</button>
@@ -431,47 +457,52 @@ function processData(params) {
                     </dotp>
                 </div>
             </div>
-            
+
             <div class="example-container">
                 <div class="example-title">Get Example</div>
-                <div class="example-code">&lt;div id="sourceDiv" data-value="Important information"&gt;Source&lt;/div&gt;
-&lt;button id="getBtn" get="sourceDiv:data-value:targetDiv"&gt;Get Value&lt;/button&gt;
-&lt;div id="targetDiv"&gt;Value will appear here&lt;/div&gt;</div>
+                <div class="example-code">&lt;div id="sourceDiv" data-value="Important
+                    information"&gt;Source&lt;/div&gt;
+                    &lt;button id="getBtn" get="sourceDiv:data-value:targetDiv"&gt;Get Value&lt;/button&gt;
+                    &lt;div id="targetDiv"&gt;Value will appear here&lt;/div&gt;</div>
             </div>
-            
+
             <div class="example-container">
                 <div class="example-title">Delete Example</div>
                 <div class="example-code">&lt;div id="deleteTarget" style="color: red;"&gt;This has red text&lt;/div&gt;
-&lt;button id="deleteBtn" delete="deleteTarget:style"&gt;Remove Style&lt;/button&gt;</div>
+                    &lt;button id="deleteBtn" delete="deleteTarget:style"&gt;Remove Style&lt;/button&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">x-toggle</span></h3>
             <p>Toggles CSS classes on specified elements.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;button id="toggleBtn" x-toggle="panel:visible;indicator:active"&gt;Toggle Panel&lt;/button&gt;
-&lt;div id="panel" class="panel"&gt;This panel will toggle visibility&lt;/div&gt;
-&lt;div id="indicator"&gt;Status indicator&lt;/div&gt;</div>
+                <div class="example-code">&lt;button id="toggleBtn" x-toggle="panel:visible;indicator:active"&gt;Toggle
+                    Panel&lt;/button&gt;
+                    &lt;div id="panel" class="panel"&gt;This panel will toggle visibility&lt;/div&gt;
+                    &lt;div id="indicator"&gt;Status indicator&lt;/div&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <button id="toggleBtn" class="button">Toggle Panel</button>
-                        <div id="panel" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">This panel will toggle visibility</div>
+                        <div id="panel" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">This panel will
+                            toggle visibility</div>
                         <div id="indicator" style="margin-top: 5px;">Status indicator</div>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">tool-tip</span> and <span class="attribute-name">modal-tip</span></h3>
-            <p>Creates tooltips that appear on hover. tool-tip shows text, while modal-tip loads content from a file.</p>
-            
+            <p>Creates tooltips that appear on hover. tool-tip shows text, while modal-tip loads content from a file.
+            </p>
+
             <div class="example-container">
                 <div class="example-title">Tool-tip Example</div>
-                <div class="example-code">&lt;span id="helpText" class="mouse" tool-tip="This is helpful information;tooltip-1;tooltip;3000;100"&gt;Hover for help&lt;/span&gt;</div>
+                <div class="example-code">&lt;span id="helpText" class="mouse" tool-tip="This is helpful
+                    information;tooltip-1;tooltip;3000;100"&gt;Hover for help&lt;/span&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <span id="helpText" style="text-decoration: underline; cursor: help;">Hover for help</span>
@@ -479,94 +510,103 @@ function processData(params) {
                     </dotp>
                 </div>
             </div>
-            
+
             <div class="example-container">
                 <div class="example-title">Modal-tip Example</div>
-                <div class="example-code">&lt;span id="advancedHelp" class="mouse" modal-tip="help.json;3000;100"&gt;Hover for advanced help&lt;/span&gt;</div>
+                <div class="example-code">&lt;span id="advancedHelp" class="mouse"
+                    modal-tip="help.json;3000;100"&gt;Hover for advanced help&lt;/span&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">copy</span></h3>
             <p>Copies the content of a specified element to the clipboard.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
                 <div class="example-code">&lt;div id="codeSnippet"&gt;console.log("Hello World");&lt;/div&gt;
-&lt;button id="copyBtn" copy="codeSnippet"&gt;Copy Code&lt;/button&gt;</div>
+                    &lt;button id="copyBtn" copy="codeSnippet"&gt;Copy Code&lt;/button&gt;</div>
                 <div class="example-output">
                     <dotp>
-                        <div id="codeSnippet" style="background: #f5f5f5; padding: 10px; font-family: monospace;">console.log("Hello World");</div>
+                        <div id="codeSnippet" style="background: #f5f5f5; padding: 10px; font-family: monospace;">
+                            console.log("Hello World");</div>
                         <button id="copyBtn" class="button" style="margin-top: 10px;">Copy Code</button>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">remove</span></h3>
             <p>Removes specified elements from the DOM.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
                 <div class="example-code">&lt;div id="notification"&gt;This is a notification&lt;/div&gt;
-&lt;button id="closeBtn" remove="notification"&gt;Close Notification&lt;/button&gt;</div>
+                    &lt;button id="closeBtn" remove="notification"&gt;Close Notification&lt;/button&gt;</div>
                 <div class="example-output">
                     <dotp>
-                        <div id="notification" style="background: #f8d7da; padding: 10px; border-radius: 4px;">This is a notification</div>
+                        <div id="notification" style="background: #f8d7da; padding: 10px; border-radius: 4px;">This is a
+                            notification</div>
                         <button id="closeBtn" class="button" style="margin-top: 10px;">Close Notification</button>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">display</span></h3>
             <p>Toggles the visibility of specified elements.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;button id="toggleVisibility" display="hiddenContent"&gt;Toggle Content&lt;/button&gt;
-&lt;div id="hiddenContent" style="display: none;"&gt;This content is initially hidden&lt;/div&gt;</div>
+                <div class="example-code">&lt;button id="toggleVisibility" display="hiddenContent"&gt;Toggle
+                    Content&lt;/button&gt;
+                    &lt;div id="hiddenContent" style="display: none;"&gt;This content is initially hidden&lt;/div&gt;
+                </div>
                 <div class="example-output">
                     <dotp>
                         <button id="toggleVisibility" class="button">Toggle Content</button>
-                        <div id="hiddenContent" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">This content is initially hidden</div>
+                        <div id="hiddenContent" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">This
+                            content is initially hidden</div>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">headers</span></h3>
             <p>Sets HTTP headers for AJAX requests.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="apiPipe" ajax="api/data" headers="Authorization:Bearer token123&amp;Content-Type:application/json" insert="apiResult"&gt;&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="apiPipe" ajax="api/data" headers="Authorization:Bearer
+                    token123&amp;Content-Type:application/json" insert="apiResult"&gt;&lt;/pipe&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">mode</span></h3>
             <p>Sets the HTTP method for AJAX requests (GET or POST).</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="postPipe" mode="POST" ajax="submit.php" query="name:John;age:30;" insert="resultDiv"&gt;Submit&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="postPipe" mode="POST" ajax="submit.php" query="name:John;age:30;"
+                    insert="resultDiv"&gt;Submit&lt;/pipe&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">form-class</span></h3>
             <p>Specifies a class name for form elements whose values should be included in the AJAX request.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
                 <div class="example-code">&lt;input type="text" name="username" class="user-form" value="john"&gt;
-&lt;input type="password" name="password" class="user-form" value="secret"&gt;
+                    &lt;input type="password" name="password" class="user-form" value="secret"&gt;
 
-&lt;pipe id="loginPipe" form-class="user-form" ajax="login.php" insert="loginResult"&gt;Login&lt;/pipe&gt;</div>
+                    &lt;pipe id="loginPipe" form-class="user-form" ajax="login.php"
+                    insert="loginResult"&gt;Login&lt;/pipe&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <div style="margin-bottom: 10px;">
@@ -583,30 +623,34 @@ function processData(params) {
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">event</span></h3>
             <p>Specifies which events should trigger the element's action. Used with the "mouse" class.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;div id="hoverDiv" class="mouse" event="mouseover;mouseleave" ajax="hover-data.json" insert="hoverResult"&gt;Hover over me&lt;/div&gt;</div>
+                <div class="example-code">&lt;div id="hoverDiv" class="mouse" event="mouseover;mouseleave"
+                    ajax="hover-data.json" insert="hoverResult"&gt;Hover over me&lt;/div&gt;</div>
                 <div class="example-output">
                     <dotp>
-                        <div id="hoverDiv" style="padding: 10px; background: #e9ecef; display: inline-block; cursor: pointer;">Hover over me</div>
+                        <div id="hoverDiv"
+                            style="padding: 10px; background: #e9ecef; display: inline-block; cursor: pointer;">Hover
+                            over me</div>
                         <div id="hoverResult" style="margin-top: 10px;"></div>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">options</span></h3>
             <p>Creates options for a select element using key:value pairs.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;select id="countrySelect" options="USA:us;Canada:ca;Mexico:mx"&gt;&lt;/select&gt;</div>
+                <div class="example-code">&lt;select id="countrySelect"
+                    options="USA:us;Canada:ca;Mexico:mx"&gt;&lt;/select&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <select id="countrySelect">
@@ -618,371 +662,427 @@ function processData(params) {
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">file-order</span> and <span class="attribute-name">file-index</span></h3>
             <p>Cycles through a list of files for AJAX requests.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="cyclePipe" class="incrIndex" file-order="data1.json;data2.json;data3.json" insert="cycleResult"&gt;Next File&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="cyclePipe" class="incrIndex"
+                    file-order="data1.json;data2.json;data3.json" insert="cycleResult"&gt;Next File&lt;/pipe&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <div id="cyclePipe" class="button">Next File</div>
-                        <div id="cycleResult" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">Content from current file</div>
+                        <div id="cycleResult" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">Content
+                            from current file</div>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="attribute-name">delay</span></h3>
             <p>Sets the delay in milliseconds for timed elements.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;timed id="autoRefresh" ajax="status.json" delay="5000" insert="statusDiv"&gt;&lt;/timed&gt;</div>
+                <div class="example-code">&lt;timed id="autoRefresh" ajax="status.json" delay="5000"
+                    insert="statusDiv"&gt;&lt;/timed&gt;</div>
             </div>
         </div>
     </section>
-    
+
     <section id="tags">
         <h2>Custom Tags</h2>
-        
+
         <div class="attribute-section">
             <h3><span class="tag-name">&lt;pipe&gt;</span></h3>
             <p>The core tag of DotPipe.js. Initializes automatically on page load and performs AJAX requests.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
                 <div class="example-code">&lt;pipe id="dataPipe" ajax="data.json" insert="resultDiv"&gt;&lt;/pipe&gt;
-&lt;div id="resultDiv"&gt;&lt;/div&gt;</div>
+                    &lt;div id="resultDiv"&gt;&lt;/div&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="tag-name">&lt;dyn&gt;</span></h3>
             <p>Similar to pipe but requires a click to activate.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;dyn id="loadButton" ajax="data.json" insert="dynResult"&gt;Load Data&lt;/dyn&gt;
-&lt;div id="dynResult"&gt;&lt;/div&gt;</div>
+                <div class="example-code">&lt;dyn id="loadButton" ajax="data.json" insert="dynResult"&gt;Load
+                    Data&lt;/dyn&gt;
+                    &lt;div id="dynResult"&gt;&lt;/div&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <div id="loadButton" class="button">Load Data</div>
-                        <div id="dynResult" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">Data will be loaded here</div>
+                        <div id="dynResult" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">Data will
+                            be loaded here</div>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="tag-name">&lt;lnk&gt;</span></h3>
             <p>Creates a clickable link that can perform AJAX operations.</p>
-            
-            <div class="example-container">
-                <div class="example-title">Example</div>
-                <div class="example-code">&lt;lnk id="ajaxLink" ajax="page.html" query="section:intro;"&gt;Go to Introduction&lt;/lnk&gt;</div>
-                <div class="example-output">
-                    <dotp>
-                        <a id="ajaxLink" href="#" style="color: #3498db; text-decoration: underline; cursor: pointer;">Go to Introduction</a>
-                    </dotp>
-                </div>
-            </div>
-        <div class="attribute-section">
-            <h3><span class="tag-name">&lt;timed&gt;</span></h3>
-            <p>Automatically refreshes content at specified intervals.</p>
-            
-            <div class="example-container">
-                <div class="example-title">Example</div>
-                <div class="example-code">&lt;timed id="stockTicker" ajax="stocks.json" delay="5000" insert="tickerDisplay"&gt;&lt;/timed&gt;
-&lt;div id="tickerDisplay"&gt;Stock data will update every 5 seconds&lt;/div&gt;</div>
-                <div class="example-output">
-                    <dotp>
-                        <div id="tickerDisplay" style="padding: 10px; border: 1px solid #ddd;">
-                            Stock data: AAPL: $145.86 (+1.2%) | MSFT: $290.73 (-0.5%) | GOOG: $2,680.21 (+0.8%)
-                        </div>
-                        <div style="margin-top: 5px; font-size: 0.8em; color: #666;">Auto-refreshes every 5 seconds</div>
-                    </dotp>
-                </div>
-            </div>
-        </div>
-        
-        <div class="attribute-section">
-            <h3><span class="tag-name">&lt;carousel&gt;</span></h3>
-            <p>Creates a content carousel that can automatically rotate through items.</p>
-            
-            <div class="example-container">
-                <div class="example-title">Example</div>
-                <div class="example-code">&lt;carousel id="imageSlider" ajax="slides.json" file-order="slide1.jpg;slide2.jpg;slide3.jpg" 
-         delay="3000" insert="sliderContainer" height="200" width="400" boxes="1"&gt;&lt;/carousel&gt;</div>
-                <div class="example-output">
-                    <dotp>
-                        <div class="mock-carousel">
-                            <div class="mock-carousel-item">Slide Content</div>
-                        </div>
-                        <div class="mock-carousel-controls">
-                            <span class="mock-carousel-control">◀ Prev</span>
-                            <span class="mock-carousel-control">Next ▶</span>
-                        </div>
-                    </dotp>
-                </div>
-            </div>
-        </div>
-        
-        <div class="attribute-section">
-            <h3><span class="tag-name">&lt;search&gt;</span></h3>
-            <p>Creates a search input that filters content in specified elements.</p>
-            
-            <div class="example-container">
-                <div class="example-title">Example</div>
-                <div class="example-code">&lt;search id="pageSearch" use-id="contentSection;sidebarSection" 
-       input-width="300px" input-height="40px" placeholder="Search content..." search-delay="300"&gt;&lt;/search&gt;
 
-&lt;div id="contentSection"&gt;
-  &lt;p&gt;This is the main content that can be searched.&lt;/p&gt;
-  &lt;p&gt;More searchable content here.&lt;/p&gt;
-&lt;/div&gt;</div>
+            <div class="example-container">
+                <div class="example-title">Example</div>
+                <div class="example-code">&lt;lnk id="ajaxLink" ajax="page.html" query="section:intro;"&gt;Go to
+                    Introduction&lt;/lnk&gt;</div>
                 <div class="example-output">
                     <dotp>
-                        <div style="display: flex; margin-bottom: 15px;">
-                            <input type="text" placeholder="Search content..." style="width: 300px; height: 40px; padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px 0 0 4px;">
-                            <button style="height: 40px; background: #f5f5f5; border: 1px solid #ddd; border-left: none; border-radius: 0 4px 4px 0; padding: 0 10px;">🔍</button>
-                        </div>
-                        <div style="padding: 10px; border: 1px solid #ddd;">
-                            <p>This is the main content that can be searched.</p>
-                            <p>More searchable content here.</p>
-                        </div>
+                        <a id="ajaxLink" href="#"
+                            style="color: #3498db; text-decoration: underline; cursor: pointer;">Go to Introduction</a>
                     </dotp>
                 </div>
             </div>
-        </div>
-        
-        <div class="attribute-section">
-            <h3><span class="tag-name">&lt;csv&gt;</span></h3>
-            <p>Displays CSV data in a formatted table.</p>
-            
-            <div class="example-container">
-                <div class="example-title">Example</div>
-                <div class="example-code">&lt;csv id="userData" ajax="users.csv" insert="userTable" headers="true"&gt;&lt;/csv&gt;</div>
-                <div class="example-output">
-                    <dotp>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Name</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Email</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Role</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="border: 1px solid #ddd; padding: 8px;">John Smith</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px;">john@example.com</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px;">Admin</td>
-                                </tr>
-                                <tr>
-                                    <td style="border: 1px solid #ddd; padding: 8px;">Jane Doe</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px;">jane@example.com</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px;">Editor</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </dotp>
+            <div class="attribute-section">
+                <h3><span class="tag-name">&lt;timed&gt;</span></h3>
+                <p>Automatically refreshes content at specified intervals.</p>
+
+                <div class="example-container">
+                    <div class="example-title">Example</div>
+                    <div class="example-code">&lt;timed id="stockTicker" ajax="stocks.json" delay="5000"
+                        insert="tickerDisplay"&gt;&lt;/timed&gt;
+                        &lt;div id="tickerDisplay"&gt;Stock data will update every 5 seconds&lt;/div&gt;</div>
+                    <div class="example-output">
+                        <dotp>
+                            <div id="tickerDisplay" style="padding: 10px; border: 1px solid #ddd;">
+                                Stock data: AAPL: $145.86 (+1.2%) | MSFT: $290.73 (-0.5%) | GOOG: $2,680.21 (+0.8%)
+                            </div>
+                            <div style="margin-top: 5px; font-size: 0.8em; color: #666;">Auto-refreshes every 5 seconds
+                            </div>
+                        </dotp>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="attribute-section">
-            <h3><span class="tag-name">&lt;tabs&gt;</span></h3>
-            <p>Creates a tabbed interface for organizing content.</p>
-            
-            <div class="example-container">
-                <div class="example-title">Example</div>
-                <div class="example-code">&lt;tabs id="contentTabs" tab="Home:tab1:home.html;Products:tab2:products.html;Contact:tab3:contact.html" 
-     class="blue-tabs" style="width:100%;height:50px;"&gt;&lt;/tabs&gt;</div>
-                <div class="example-output">
-                    <dotp>
-                        <div class="mock-tabs">
-                            <div class="mock-tab-header">
-                                <div class="mock-tab active">Home</div>
-                                <div class="mock-tab">Products</div>
-                                <div class="mock-tab">Contact</div>
+
+            <div class="attribute-section">
+                <h3><span class="tag-name">&lt;carousel&gt;</span></h3>
+                <p>Creates a content carousel that can automatically rotate through items.</p>
+
+                <div class="example-container">
+                    <div class="example-title">Example</div>
+                    <div class="example-code">&lt;carousel id="imageSlider" ajax="slides.json"
+                        file-order="slide1.jpg;slide2.jpg;slide3.jpg"
+                        delay="3000" insert="sliderContainer" height="200" width="400" boxes="1"&gt;&lt;/carousel&gt;
+                    </div>
+                    <div class="example-output">
+                        <dotp>
+                            <div class="mock-carousel">
+                                <div class="mock-carousel-item">Slide Content</div>
                             </div>
-                            <div class="mock-tab-content">
-                                Home tab content would be loaded here
+                            <div class="mock-carousel-controls">
+                                <span class="mock-carousel-control">◀ Prev</span>
+                                <span class="mock-carousel-control">Next ▶</span>
                             </div>
-                        </div>
-                    </dotp>
+                        </dotp>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="attribute-section">
-            <h3><span class="tag-name">&lt;login&gt;</span></h3>
-            <p>Creates login and registration forms.</p>
-            
-            <div class="example-container">
-                <div class="example-title">Example</div>
-                <div class="example-code">&lt;login id="userAuth" login-page="login.php" registration-page="register.php" css-page="auth-styles.css"&gt;&lt;/login&gt;</div>
-                <div class="example-output">
-                    <dotp>
-                        <div style="max-width: 400px; border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
-                            <div style="display: flex; background-color: #f5f5f5; border-bottom: 1px solid #ddd;">
-                                <div style="flex: 1; text-align: center; padding: 10px; font-weight: bold; border-bottom: 2px solid #3498db; background-color: white;">Login</div>
-                                <div style="flex: 1; text-align: center; padding: 10px;">Register</div>
+
+            <div class="attribute-section">
+                <h3><span class="tag-name">&lt;search&gt;</span></h3>
+                <p>Creates a search input that filters content in specified elements.</p>
+
+                <div class="example-container">
+                    <div class="example-title">Example</div>
+                    <div class="example-code">&lt;search id="pageSearch" use-id="contentSection;sidebarSection"
+                        input-width="300px" input-height="40px" placeholder="Search content..."
+                        search-delay="300"&gt;&lt;/search&gt;
+
+                        &lt;div id="contentSection"&gt;
+                        &lt;p&gt;This is the main content that can be searched.&lt;/p&gt;
+                        &lt;p&gt;More searchable content here.&lt;/p&gt;
+                        &lt;/div&gt;</div>
+                    <div class="example-output">
+                        <dotp>
+                            <div style="display: flex; margin-bottom: 15px;">
+                                <input type="text" placeholder="Search content..."
+                                    style="width: 300px; height: 40px; padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px 0 0 4px;">
+                                <button
+                                    style="height: 40px; background: #f5f5f5; border: 1px solid #ddd; border-left: none; border-radius: 0 4px 4px 0; padding: 0 10px;">🔍</button>
                             </div>
-                            <div style="padding: 20px;">
-                                <h3 style="margin-top: 0;">Login to Your Account</h3>
-                                <div style="margin-bottom: 15px;">
-                                    <label style="display: block; margin-bottom: 5px;">Email</label>
-                                    <input type="email" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <div style="padding: 10px; border: 1px solid #ddd;">
+                                <p>This is the main content that can be searched.</p>
+                                <p>More searchable content here.</p>
+                            </div>
+                        </dotp>
+                    </div>
+                </div>
+            </div>
+
+            <div class="attribute-section">
+                <h3><span class="tag-name">&lt;csv&gt;</span></h3>
+                <p>Displays CSV data in a formatted table.</p>
+
+                <div class="example-container">
+                    <div class="example-title">Example</div>
+                    <div class="example-code">&lt;csv id="userData" ajax="users.csv" insert="userTable"
+                        headers="true"&gt;&lt;/csv&gt;</div>
+                    <div class="example-output">
+                        <dotp>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">
+                                            Name</th>
+                                        <th
+                                            style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">
+                                            Email</th>
+                                        <th
+                                            style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">
+                                            Role</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">John Smith</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">john@example.com</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">Admin</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">Jane Doe</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">jane@example.com</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">Editor</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </dotp>
+                    </div>
+                </div>
+            </div>
+
+            <div class="attribute-section">
+                <h3><span class="tag-name">&lt;tabs&gt;</span></h3>
+                <p>Creates a tabbed interface for organizing content.</p>
+
+                <div class="example-container">
+                    <div class="example-title">Example</div>
+                    <div class="example-code">&lt;tabs id="contentTabs"
+                        tab="Home:tab1:home.html;Products:tab2:products.html;Contact:tab3:contact.html"
+                        class="blue-tabs" style="width:100%;height:50px;"&gt;&lt;/tabs&gt;</div>
+                    <div class="example-output">
+                        <dotp>
+                            <div class="mock-tabs">
+                                <div class="mock-tab-header">
+                                    <div class="mock-tab active">Home</div>
+                                    <div class="mock-tab">Products</div>
+                                    <div class="mock-tab">Contact</div>
                                 </div>
-                                <div style="margin-bottom: 15px;">
-                                    <label style="display: block; margin-bottom: 5px;">Password</label>
-                                    <input type="password" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <div class="mock-tab-content">
+                                    Home tab content would be loaded here
                                 </div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                                    <div>
-                                        <input type="checkbox" id="remember">
-                                        <label for="remember">Remember me</label>
+                            </div>
+                        </dotp>
+                    </div>
+                </div>
+            </div>
+
+            <div class="attribute-section">
+                <h3><span class="tag-name">&lt;login&gt;</span></h3>
+                <p>Creates login and registration forms.</p>
+
+                <div class="example-container">
+                    <div class="example-title">Example</div>
+                    <div class="example-code">&lt;login id="userAuth" login-page="login.php"
+                        registration-page="register.php" css-page="auth-styles.css"&gt;&lt;/login&gt;</div>
+                    <div class="example-output">
+                        <dotp>
+                            <div
+                                style="max-width: 400px; border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
+                                <div style="display: flex; background-color: #f5f5f5; border-bottom: 1px solid #ddd;">
+                                    <div
+                                        style="flex: 1; text-align: center; padding: 10px; font-weight: bold; border-bottom: 2px solid #3498db; background-color: white;">
+                                        Login</div>
+                                    <div style="flex: 1; text-align: center; padding: 10px;">Register</div>
+                                </div>
+                                <div style="padding: 20px;">
+                                    <h3 style="margin-top: 0;">Login to Your Account</h3>
+                                    <div style="margin-bottom: 15px;">
+                                        <label style="display: block; margin-bottom: 5px;">Email</label>
+                                        <input type="email"
+                                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                                     </div>
-                                    <a href="#" style="color: #3498db;">Forgot Password?</a>
+                                    <div style="margin-bottom: 15px;">
+                                        <label style="display: block; margin-bottom: 5px;">Password</label>
+                                        <input type="password"
+                                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                                        <div>
+                                            <input type="checkbox" id="remember">
+                                            <label for="remember">Remember me</label>
+                                        </div>
+                                        <a href="#" style="color: #3498db;">Forgot Password?</a>
+                                    </div>
+                                    <button
+                                        style="width: 100%; padding: 10px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Login</button>
                                 </div>
-                                <button style="width: 100%; padding: 10px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Login</button>
                             </div>
-                        </div>
-                    </dotp>
+                        </dotp>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="attribute-section">
-            <h3><span class="tag-name">&lt;columns&gt;</span></h3>
-            <p>Creates a multi-column layout with dynamic content loading.</p>
-            
-            <div class="example-container">
-                <div class="example-title">Example</div>
-                <div class="example-code">&lt;columns id="pageLayout" count="3" percents="25,50,25" height="500px" 
-        pages="sidebar.html;main.html;widgets.html"&gt;&lt;/columns&gt;</div>
-                <div class="example-output">
-                    <dotp>
-                        <div style="display: flex; height: 200px; border: 1px solid #ddd; margin-bottom: 10px;">
-                            <div style="flex: 0 0 25%; padding: 10px; border-right: 1px solid #ddd; background-color: #f9f9f9;">
-                                <h4>Sidebar</h4>
-                                <ul style="padding-left: 20px; margin: 0;">
-                                    <li>Navigation Item 1</li>
-                                    <li>Navigation Item 2</li>
-                                    <li>Navigation Item 3</li>
-                                </ul>
-                            </div>
-                            <div style="flex: 0 0 50%; padding: 10px; border-right: 1px solid #ddd;">
-                                <h4>Main Content</h4>
-                                <p>This is the main content area that takes up 50% of the available width.</p>
-                            </div>
-                            <div style="flex: 0 0 25%; padding: 10px; background-color: #f9f9f9;">
-                                <h4>Widgets</h4>
-                                <div style="border: 1px solid #ddd; padding: 5px; margin-bottom: 5px; background-color: white;">Widget 1</div>
-                                <div style="border: 1px solid #ddd; padding: 5px; background-color: white;">Widget 2</div>
-                            </div>
-                        </div>
-                    </dotp>
-                </div>
-            </div>
-        </div>
-        
-        <div class="attribute-section">
-            <h3><span class="tag-name">&lt;refresh&gt;</span></h3>
-            <p>Creates a button or automatic mechanism to refresh content.</p>
-            
-            <div class="example-container">
-                <div class="example-title">Example</div>
-                <div class="example-code">&lt;refresh id="dataRefresher" target="dataContainer:data.json" interval="30"&gt;Refresh Data&lt;/refresh&gt;
-&lt;div id="dataContainer"&gt;Data will be refreshed here&lt;/div&gt;</div>
-                <div class="example-output">
-                    <dotp>
-                        <button style="padding: 8px 16px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Refresh Data</button>
-                        <div style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">Data content here</div>
-                    </dotp>
-                </div>
-            </div>
-        </div>
-        
-        <div class="attribute-section">
-            <h3><span class="tag-name">&lt;cart&gt;</span> and <span class="tag-name">&lt;item&gt;</span></h3>
-            <p>Creates a shopping cart system with items that can be added to the cart.</p>
-            
-            <div class="example-container">
-                <div class="example-title">Example</div>
-                <div class="example-code">&lt;item id="product1" name="Wireless Headphones" price="99.99" image="headphones.jpg"&gt;&lt;/item&gt;
-&lt;item id="product2" name="Smart Watch" price="149.99" image="watch.jpg"&gt;&lt;/item&gt;
 
-&lt;cart id="shoppingCart"&gt;&lt;/cart&gt;</div>
-                <div class="example-output">
-                    <dotp>
-                        <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-                            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; width: 200px;">
-                                <div style="height: 100px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">Product Image</div>
-                                <h4 style="margin: 0 0 5px 0;">Wireless Headphones</h4>
-                                <div style="color: #e74c3c; font-weight: bold; margin-bottom: 10px;">$99.99</div>
-                                <button style="width: 100%; padding: 8px 0; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Add to Cart</button>
-                            </div>
-                            
-                            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; width: 200px;">
-                                <div style="height: 100px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">Product Image</div>
-                                <h4 style="margin: 0 0 5px 0;">Smart Watch</h4>
-                                <div style="color: #e74c3c; font-weight: bold; margin-bottom: 10px;">$149.99</div>
-                                <button style="width: 100%; padding: 8px 0; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Add to Cart</button>
-                            </div>
-                        </div>
-                        
-                        <div style="border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
-                            <div style="background-color: #f5f5f5; padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Shopping Cart</div>
-                            <div style="padding: 15px;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-                                    <div>Wireless Headphones x 1</div>
-                                    <div>$99.99</div>
+            <div class="attribute-section">
+                <h3><span class="tag-name">&lt;columns&gt;</span></h3>
+                <p>Creates a multi-column layout with dynamic content loading.</p>
+
+                <div class="example-container">
+                    <div class="example-title">Example</div>
+                    <div class="example-code">&lt;columns id="pageLayout" count="3" percents="25,50,25" height="500px"
+                        pages="sidebar.html;main.html;widgets.html"&gt;&lt;/columns&gt;</div>
+                    <div class="example-output">
+                        <dotp>
+                            <div style="display: flex; height: 200px; border: 1px solid #ddd; margin-bottom: 10px;">
+                                <div
+                                    style="flex: 0 0 25%; padding: 10px; border-right: 1px solid #ddd; background-color: #f9f9f9;">
+                                    <h4>Sidebar</h4>
+                                    <ul style="padding-left: 20px; margin: 0;">
+                                        <li>Navigation Item 1</li>
+                                        <li>Navigation Item 2</li>
+                                        <li>Navigation Item 3</li>
+                                    </ul>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 15px;">
-                                    <div>Total:</div>
-                                    <div>$99.99</div>
+                                <div style="flex: 0 0 50%; padding: 10px; border-right: 1px solid #ddd;">
+                                    <h4>Main Content</h4>
+                                    <p>This is the main content area that takes up 50% of the available width.</p>
                                 </div>
-                                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                    <button style="flex: 1; padding: 8px 0; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear Cart</button>
-                                    <button style="flex: 1; padding: 8px 0; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer;">Checkout</button>
+                                <div style="flex: 0 0 25%; padding: 10px; background-color: #f9f9f9;">
+                                    <h4>Widgets</h4>
+                                    <div
+                                        style="border: 1px solid #ddd; padding: 5px; margin-bottom: 5px; background-color: white;">
+                                        Widget 1</div>
+                                    <div style="border: 1px solid #ddd; padding: 5px; background-color: white;">Widget 2
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </dotp>
+                        </dotp>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="attribute-section">
-            <h3><span class="tag-name">&lt;checkout&gt;</span> and <span class="tag-name">&lt;order-confirmation&gt;</span></h3>
-            <p>Creates checkout forms and order confirmation pages for e-commerce.</p>
-            
-            <div class="example-container">
-                <div class="example-title">Example</div>
-                <div class="example-code">&lt;checkout id="paymentForm" validate="true"&gt;&lt;/checkout&gt;
 
-&lt;!-- After successful checkout: --&gt;
-&lt;order-confirmation id="orderComplete" order-id="ORD-12345"&gt;&lt;/order-confirmation&gt;</div>
+            <div class="attribute-section">
+                <h3><span class="tag-name">&lt;refresh&gt;</span></h3>
+                <p>Creates a button or automatic mechanism to refresh content.</p>
+
+                <div class="example-container">
+                    <div class="example-title">Example</div>
+                    <div class="example-code">&lt;refresh id="dataRefresher" target="dataContainer:data.json"
+                        interval="30"&gt;Refresh Data&lt;/refresh&gt;
+                        &lt;div id="dataContainer"&gt;Data will be refreshed here&lt;/div&gt;</div>
+                    <div class="example-output">
+                        <dotp>
+                            <button
+                                style="padding: 8px 16px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Refresh
+                                Data</button>
+                            <div style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">Data content here
+                            </div>
+                        </dotp>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <div class="attribute-section">
+                <h3><span class="tag-name">&lt;cart&gt;</span> and <span class="tag-name">&lt;item&gt;</span></h3>
+                <p>Creates a shopping cart system with items that can be added to the cart.</p>
+
+                <div class="example-container">
+                    <div class="example-title">Example</div>
+                    <div class="example-code">&lt;item id="product1" name="Wireless Headphones" price="99.99"
+                        image="headphones.jpg"&gt;&lt;/item&gt;
+                        &lt;item id="product2" name="Smart Watch" price="149.99" image="watch.jpg"&gt;&lt;/item&gt;
+
+                        &lt;cart id="shoppingCart"&gt;&lt;/cart&gt;</div>
+                    <div class="example-output">
+                        <dotp>
+                            <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; width: 200px;">
+                                    <div
+                                        style="height: 100px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                                        Product Image</div>
+                                    <h4 style="margin: 0 0 5px 0;">Wireless Headphones</h4>
+                                    <div style="color: #e74c3c; font-weight: bold; margin-bottom: 10px;">$99.99</div>
+                                    <button
+                                        style="width: 100%; padding: 8px 0; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Add
+                                        to Cart</button>
+                                </div>
+
+                                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; width: 200px;">
+                                    <div
+                                        style="height: 100px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                                        Product Image</div>
+                                    <h4 style="margin: 0 0 5px 0;">Smart Watch</h4>
+                                    <div style="color: #e74c3c; font-weight: bold; margin-bottom: 10px;">$149.99</div>
+                                    <button
+                                        style="width: 100%; padding: 8px 0; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Add
+                                        to Cart</button>
+                                </div>
+                            </div>
+
+                            <div style="border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
+                                <div
+                                    style="background-color: #f5f5f5; padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">
+                                    Shopping Cart</div>
+                                <div style="padding: 15px;">
+                                    <div
+                                        style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+                                        <div>Wireless Headphones x 1</div>
+                                        <div>$99.99</div>
+                                    </div>
+                                    <div
+                                        style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 15px;">
+                                        <div>Total:</div>
+                                        <div>$99.99</div>
+                                    </div>
+                                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                        <button
+                                            style="flex: 1; padding: 8px 0; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear
+                                            Cart</button>
+                                        <button
+                                            style="flex: 1; padding: 8px 0; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer;">Checkout</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </dotp>
+                    </div>
+                </div>
+            </div>
+
+            <div class="attribute-section">
+                <h3><span class="tag-name">&lt;checkout&gt;</span> and <span
+                        class="tag-name">&lt;order-confirmation&gt;</span></h3>
+                <p>Creates checkout forms and order confirmation pages for e-commerce.</p>
+
+                <div class="example-container">
+                    <div class="example-title">Example</div>
+                    <div class="example-code">&lt;checkout id="paymentForm" validate="true"&gt;&lt;/checkout&gt;
+
+                        &lt;!-- After successful checkout: --&gt;
+                        &lt;order-confirmation id="orderComplete" order-id="ORD-12345"&gt;&lt;/order-confirmation&gt;
+                    </div>
+                </div>
+            </div>
     </section>
-    
+
     <section id="classes">
         <h2>Classes</h2>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">download</span></h3>
             <p>Enables file downloading when clicked.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;button id="downloadReport" class="download" file="report.pdf" directory="/reports/"&gt;Download Report&lt;/button&gt;</div>
+                <div class="example-code">&lt;button id="downloadReport" class="download" file="report.pdf"
+                    directory="/reports/"&gt;Download Report&lt;/button&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <button id="downloadReport" class="button">Download Report</button>
@@ -990,14 +1090,15 @@ function processData(params) {
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">redirect</span></h3>
             <p>Redirects to the URL specified in the ajax attribute.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="goToPage" ajax="products.html" class="redirect" query="category:electronics;"&gt;View Electronics&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="goToPage" ajax="products.html" class="redirect"
+                    query="category:electronics;"&gt;View Electronics&lt;/pipe&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <div id="goToPage" class="button">View Electronics</div>
@@ -1005,158 +1106,190 @@ function processData(params) {
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
-            <h3><span class="class-name">modala-multi-last</span> and <span class="class-name">modala-multi-first</span></h3>
-            <p>Creates multi-ajax calls that insert content while removing either the last or first existing content.</p>
-            
+            <h3><span class="class-name">modala-multi-last</span> and <span class="class-name">modala-multi-first</span>
+            </h3>
+            <p>Creates multi-ajax calls that insert content while removing either the last or first existing content.
+            </p>
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="addMessage" ajax="message.json:chatBox:5" class="modala-multi-last"&gt;Add Message&lt;/pipe&gt;
-&lt;div id="chatBox"&gt;&lt;/div&gt;</div>
+                <div class="example-code">&lt;pipe id="addMessage" ajax="message.json:chatBox:5"
+                    class="modala-multi-last"&gt;Add Message&lt;/pipe&gt;
+                    &lt;div id="chatBox"&gt;&lt;/div&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <button id="addMessage" class="button">Add Message</button>
-                        <div id="chatBox" style="margin-top: 10px; border: 1px solid #ddd; padding: 10px; height: 150px; overflow-y: auto;">
-                            <div style="margin-bottom: 10px; padding: 8px; background-color: #f5f5f5; border-radius: 4px;">Message 1: Hello there!</div>
-                            <div style="margin-bottom: 10px; padding: 8px; background-color: #f5f5f5; border-radius: 4px;">Message 2: How are you?</div>
-                            <div style="padding: 8px; background-color: #f5f5f5; border-radius: 4px;">Message 3: What's new?</div>
+                        <div id="chatBox"
+                            style="margin-top: 10px; border: 1px solid #ddd; padding: 10px; height: 150px; overflow-y: auto;">
+                            <div
+                                style="margin-bottom: 10px; padding: 8px; background-color: #f5f5f5; border-radius: 4px;">
+                                Message 1: Hello there!</div>
+                            <div
+                                style="margin-bottom: 10px; padding: 8px; background-color: #f5f5f5; border-radius: 4px;">
+                                Message 2: How are you?</div>
+                            <div style="padding: 8px; background-color: #f5f5f5; border-radius: 4px;">Message 3: What's
+                                new?</div>
                         </div>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">time-active</span> and <span class="class-name">time-inactive</span></h3>
             <p>Controls whether timed elements are active or inactive.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;timed id="activeUpdater" ajax="status.json" delay="5000" insert="statusDiv" class="time-active"&gt;&lt;/timed&gt;
-&lt;button id="toggleTimer" x-toggle="activeUpdater:time-active;activeUpdater:time-inactive"&gt;Pause Updates&lt;/button&gt;</div>
+                <div class="example-code">&lt;timed id="activeUpdater" ajax="status.json" delay="5000"
+                    insert="statusDiv" class="time-active"&gt;&lt;/timed&gt;
+                    &lt;button id="toggleTimer"
+                    x-toggle="activeUpdater:time-active;activeUpdater:time-inactive"&gt;Pause Updates&lt;/button&gt;
+                </div>
                 <div class="example-output">
                     <dotp>
-                        <div id="statusDiv" style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px;">Status: Online (Last updated: 10:45:32)</div>
+                        <div id="statusDiv" style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px;">Status:
+                            Online (Last updated: 10:45:32)</div>
                         <button id="toggleTimer" class="button">Pause Updates</button>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">disabled</span></h3>
             <p>Disables a tag from functioning.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="disabledPipe" ajax="data.json" insert="resultDiv" class="disabled"&gt;This won't work&lt;/pipe&gt;
-&lt;button id="enableBtn" x-toggle="disabledPipe:disabled"&gt;Enable&lt;/button&gt;</div>
+                <div class="example-code">&lt;pipe id="disabledPipe" ajax="data.json" insert="resultDiv"
+                    class="disabled"&gt;This won't work&lt;/pipe&gt;
+                    &lt;button id="enableBtn" x-toggle="disabledPipe:disabled"&gt;Enable&lt;/button&gt;</div>
                 <div class="example-output">
                     <dotp>
-                        <div id="disabledPipe" class="button" style="opacity: 0.5; cursor: not-allowed;">This won't work</div>
+                        <div id="disabledPipe" class="button" style="opacity: 0.5; cursor: not-allowed;">This won't work
+                        </div>
                         <button id="enableBtn" class="button" style="margin-top: 10px;">Enable</button>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">json</span></h3>
             <p>Indicates that the response should be treated as JSON.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="jsonPipe" ajax="data.json" insert="jsonResult" class="json"&gt;Load JSON&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="jsonPipe" ajax="data.json" insert="jsonResult"
+                    class="json"&gt;Load JSON&lt;/pipe&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">strict-json</span></h3>
             <p>Returns only JSON to the full page as response. Errors if the response cannot be parsed as JSON.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="apiCall" ajax="api/data" class="strict-json"&gt;Load API Data&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="apiCall" ajax="api/data" class="strict-json"&gt;Load API
+                    Data&lt;/pipe&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">plain-text</span></h3>
             <p>Returns plain text to the insertion point.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="textPipe" ajax="message.txt" insert="textResult" class="plain-text"&gt;Load Text&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="textPipe" ajax="message.txt" insert="textResult"
+                    class="plain-text"&gt;Load Text&lt;/pipe&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">plain-html</span></h3>
             <p>Returns content as true HTML.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="htmlPipe" ajax="content.html" insert="htmlResult" class="plain-html"&gt;Load HTML&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="htmlPipe" ajax="content.html" insert="htmlResult"
+                    class="plain-html"&gt;Load HTML&lt;/pipe&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
-            <h3><span class="class-name">carousel-step-right</span> and <span class="class-name">carousel-step-left</span></h3>
+            <h3><span class="class-name">carousel-step-right</span> and <span
+                    class="class-name">carousel-step-left</span></h3>
             <p>Moves a carousel one step to the right or left.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;button id="prevSlide" class="carousel-step-left" insert="imageCarousel"&gt;Previous&lt;/button&gt;
-&lt;carousel id="imageCarousel" file-order="img1.jpg;img2.jpg;img3.jpg" boxes="1"&gt;&lt;/carousel&gt;
-&lt;button id="nextSlide" class="carousel-step-right" insert="imageCarousel"&gt;Next&lt;/button&gt;</div>
+                <div class="example-code">&lt;button id="prevSlide" class="carousel-step-left"
+                    insert="imageCarousel"&gt;Previous&lt;/button&gt;
+                    &lt;carousel id="imageCarousel" file-order="img1.jpg;img2.jpg;img3.jpg"
+                    boxes="1"&gt;&lt;/carousel&gt;
+                    &lt;button id="nextSlide" class="carousel-step-right" insert="imageCarousel"&gt;Next&lt;/button&gt;
+                </div>
                 <div class="example-output">
                     <dotp>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <button id="prevSlide" class="button">Previous</button>
-                            <div style="width: 300px; height: 200px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd;">Carousel Image</div>
+                            <div
+                                style="width: 300px; height: 200px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd;">
+                                Carousel Image</div>
                             <button id="nextSlide" class="button">Next</button>
                         </div>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
-            <h3><span class="class-name">carousel-slide-right</span> and <span class="class-name">carousel-slide-left</span></h3>
+            <h3><span class="class-name">carousel-slide-right</span> and <span
+                    class="class-name">carousel-slide-left</span></h3>
             <p>Continuously slides a carousel to the right or left.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;button id="autoSlideLeft" class="carousel-slide-left" insert="imageCarousel"&gt;Auto Slide Left&lt;/button&gt;
-&lt;button id="autoSlideRight" class="carousel-slide-right" insert="imageCarousel"&gt;Auto Slide Right&lt;/button&gt;</div>
+                <div class="example-code">&lt;button id="autoSlideLeft" class="carousel-slide-left"
+                    insert="imageCarousel"&gt;Auto Slide Left&lt;/button&gt;
+                    &lt;button id="autoSlideRight" class="carousel-slide-right" insert="imageCarousel"&gt;Auto Slide
+                    Right&lt;/button&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">incrIndex</span> and <span class="class-name">decrIndex</span></h3>
             <p>Increments or decrements through the index of file-order.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="nextFile" class="incrIndex" interval="1" file-order="file1.json;file2.json;file3.json" insert="fileContent"&gt;Next File&lt;/pipe&gt;
-&lt;pipe id="prevFile" class="decrIndex" interval="1" file-order="file1.json;file2.json;file3.json" insert="fileContent"&gt;Previous File&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="nextFile" class="incrIndex" interval="1"
+                    file-order="file1.json;file2.json;file3.json" insert="fileContent"&gt;Next File&lt;/pipe&gt;
+                    &lt;pipe id="prevFile" class="decrIndex" interval="1" file-order="file1.json;file2.json;file3.json"
+                    insert="fileContent"&gt;Previous File&lt;/pipe&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">multiple</span></h3>
             <p>Indicates that an element has multiple key/value pairs or is a multi-select form element.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;select id="fruitSelect" name="fruits" class="form-field multiple" multiple&gt;
-  &lt;option value="apple"&gt;Apple&lt;/option&gt;
-  &lt;option value="banana"&gt;Banana&lt;/option&gt;
-  &lt;option value="orange"&gt;Orange&lt;/option&gt;
-&lt;/select&gt;
+                <div class="example-code">&lt;select id="fruitSelect" name="fruits" class="form-field multiple"
+                    multiple&gt;
+                    &lt;option value="apple"&gt;Apple&lt;/option&gt;
+                    &lt;option value="banana"&gt;Banana&lt;/option&gt;
+                    &lt;option value="orange"&gt;Orange&lt;/option&gt;
+                    &lt;/select&gt;
 
-&lt;pipe id="fruitPipe" form-class="form-field" ajax="process.php" insert="resultDiv"&gt;Submit&lt;/pipe&gt;</div>
+                    &lt;pipe id="fruitPipe" form-class="form-field" ajax="process.php"
+                    insert="resultDiv"&gt;Submit&lt;/pipe&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <select id="fruitSelect" name="fruits" multiple style="width: 200px; height: 100px;">
@@ -1171,74 +1304,86 @@ function processData(params) {
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">mouse</span></h3>
             <p>Enables an element to work with DotPipe.js attributes on specified events.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;div id="hoverElement" class="mouse" event="mouseover;mouseleave" ajax="hover-data.json" insert="hoverResult"&gt;Hover over me&lt;/div&gt;</div>
+                <div class="example-code">&lt;div id="hoverElement" class="mouse" event="mouseover;mouseleave"
+                    ajax="hover-data.json" insert="hoverResult"&gt;Hover over me&lt;/div&gt;</div>
                 <div class="example-output">
                     <dotp>
-                        <div id="hoverElement" style="padding: 10px; background-color: #f5f5f5; display: inline-block; cursor: pointer;">Hover over me</div>
-                        <div id="hoverResult" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">Hover data will appear here</div>
+                        <div id="hoverElement"
+                            style="padding: 10px; background-color: #f5f5f5; display: inline-block; cursor: pointer;">
+                            Hover over me</div>
+                        <div id="hoverResult" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd;">Hover
+                            data will appear here</div>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">mouse-insert</span></h3>
             <p>Similar to mouse class but specifically for inserting content on mouse events.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;div id="productInfo" class="mouse-insert" event="mouseover" ajax="product-details.json" insert="detailsPanel"&gt;View Product Details&lt;/div&gt;</div>
+                <div class="example-code">&lt;div id="productInfo" class="mouse-insert" event="mouseover"
+                    ajax="product-details.json" insert="detailsPanel"&gt;View Product Details&lt;/div&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">action-class</span></h3>
             <p>Identifies elements that should be triggered by other tags.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;pipe id="triggerAction" class="action-trigger"&gt;Trigger Action&lt;/pipe&gt;
-&lt;pipe id="actionTarget" class="action-class" ajax="action.php" insert="actionResult"&gt;&lt;/pipe&gt;</div>
+                <div class="example-code">&lt;pipe id="triggerAction" class="action-trigger"&gt;Trigger
+                    Action&lt;/pipe&gt;
+                    &lt;pipe id="actionTarget" class="action-class" ajax="action.php"
+                    insert="actionResult"&gt;&lt;/pipe&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">clear-node</span></h3>
             <p>Clears the content of specified nodes.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;button id="clearBtn" class="clear-node" node="panel1;panel2;panel3"&gt;Clear Panels&lt;/button&gt;
-&lt;div id="panel1"&gt;Content in panel 1&lt;/div&gt;
-&lt;div id="panel2"&gt;Content in panel 2&lt;/div&gt;
-&lt;div id="panel3"&gt;Content in panel 3&lt;/div&gt;</div>
+                <div class="example-code">&lt;button id="clearBtn" class="clear-node"
+                    node="panel1;panel2;panel3"&gt;Clear Panels&lt;/button&gt;
+                    &lt;div id="panel1"&gt;Content in panel 1&lt;/div&gt;
+                    &lt;div id="panel2"&gt;Content in panel 2&lt;/div&gt;
+                    &lt;div id="panel3"&gt;Content in panel 3&lt;/div&gt;</div>
                 <div class="example-output">
                     <dotp>
                         <button id="clearBtn" class="button">Clear Panels</button>
                         <div style="display: flex; gap: 10px; margin-top: 10px;">
-                            <div id="panel1" style="flex: 1; padding: 10px; border: 1px solid #ddd;">Content in panel 1</div>
-                            <div id="panel2" style="flex: 1; padding: 10px; border: 1px solid #ddd;">Content in panel 2</div>
-                            <div id="panel3" style="flex: 1; padding: 10px; border: 1px solid #ddd;">Content in panel 3</div>
+                            <div id="panel1" style="flex: 1; padding: 10px; border: 1px solid #ddd;">Content in panel 1
+                            </div>
+                            <div id="panel2" style="flex: 1; padding: 10px; border: 1px solid #ddd;">Content in panel 2
+                            </div>
+                            <div id="panel3" style="flex: 1; padding: 10px; border: 1px solid #ddd;">Content in panel 3
+                            </div>
                         </div>
                     </dotp>
                 </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3><span class="class-name">tree-view</span></h3>
             <p>Creates a hierarchical tree view from JSON data.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Example</div>
-                <div class="example-code">&lt;div id="fileTree" class="tree-view" ajax="directory.json"&gt;&lt;/div&gt;</div>
+                <div class="example-code">&lt;div id="fileTree" class="tree-view" ajax="directory.json"&gt;&lt;/div&gt;
+                </div>
                 <div class="example-output">
                     <dotp>
                         <div style="border: 1px solid #ddd; padding: 10px;">
@@ -1258,246 +1403,270 @@ function processData(params) {
             </div>
         </div>
     </section>
-    
+
     <section id="components">
         <h2>Advanced Components</h2>
-        
+
         <div class="attribute-section">
             <h3>Columns Component</h3>
             <p>The columns component creates responsive multi-column layouts with dynamic content loading.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Basic Usage</div>
-                <div class="example-code">&lt;columns id="threeColLayout" count="3" percents="25,50,25" height="500px" 
-        pages="sidebar.html;main.html;widgets.html"&gt;&lt;/columns&gt;</div>
+                <div class="example-code">&lt;columns id="threeColLayout" count="3" percents="25,50,25" height="500px"
+                    pages="sidebar.html;main.html;widgets.html"&gt;&lt;/columns&gt;</div>
             </div>
-            
+
             <div class="example-container">
                 <div class="example-title">API Usage</div>
                 <div class="example-code">// Refresh a specific column
-window.columnsComponent.refreshColumn('threeColLayout', 1);
+                    window.columnsComponent.refreshColumn('threeColLayout', 1);
 
-// Update column content directly
-window.columnsComponent.updateColumnContent('threeColLayout', 0, '&lt;h2&gt;New Content&lt;/h2&gt;&lt;p&gt;Updated sidebar content&lt;/p&gt;');
+                    // Update column content directly
+                    window.columnsComponent.updateColumnContent('threeColLayout', 0, '&lt;h2&gt;New
+                    Content&lt;/h2&gt;&lt;p&gt;Updated sidebar content&lt;/p&gt;');
 
-// Load a new page into a column
-window.columnsComponent.loadColumnPage('threeColLayout', 2, 'new-widgets.html');</div>
+                    // Load a new page into a column
+                    window.columnsComponent.loadColumnPage('threeColLayout', 2, 'new-widgets.html');</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3>Refresh Component</h3>
-            <p>The refresh component provides functionality to refresh content in specific targets or reload the entire page.</p>
-            
+            <p>The refresh component provides functionality to refresh content in specific targets or reload the entire
+                page.</p>
+
             <div class="example-container">
                 <div class="example-title">Basic Usage</div>
                 <div class="example-code">&lt;!-- Basic refresh button --&gt;
-&lt;refresh id="refreshBtn" target="dataContainer:data.json"&gt;Refresh Data&lt;/refresh&gt;
+                    &lt;refresh id="refreshBtn" target="dataContainer:data.json"&gt;Refresh Data&lt;/refresh&gt;
 
-&lt;!-- Auto-refresh with interval (in seconds) --&gt;
-&lt;refresh id="autoRefresh" target="liveData:api/live.json" interval="30"&gt;Auto Refresh (30s)&lt;/refresh&gt;
+                    &lt;!-- Auto-refresh with interval (in seconds) --&gt;
+                    &lt;refresh id="autoRefresh" target="liveData:api/live.json" interval="30"&gt;Auto Refresh
+                    (30s)&lt;/refresh&gt;
 
-&lt;!-- Refresh multiple targets --&gt;
-&lt;refresh id="refreshAll" target="header:header.html;content:content.json;footer:footer.html"&gt;Refresh All&lt;/refresh&gt;
+                    &lt;!-- Refresh multiple targets --&gt;
+                    &lt;refresh id="refreshAll"
+                    target="header:header.html;content:content.json;footer:footer.html"&gt;Refresh All&lt;/refresh&gt;
 
-&lt;!-- Refresh the entire page --&gt;
-&lt;refresh id="reloadPage" target="_page"&gt;Reload Page&lt;/refresh&gt;</div>
+                    &lt;!-- Refresh the entire page --&gt;
+                    &lt;refresh id="reloadPage" target="_page"&gt;Reload Page&lt;/refresh&gt;</div>
             </div>
-            
+
             <div class="example-container">
                 <div class="example-title">API Usage</div>
                 <div class="example-code">// Refresh a specific target
-window.refreshComponent.refreshTarget('dataContainer', 'data.json');
+                    window.refreshComponent.refreshTarget('dataContainer', 'data.json');
 
-// Refresh multiple targets
-window.refreshComponent.refreshTargets('header:header.html;content:content.json');</div>
+                    // Refresh multiple targets
+                    window.refreshComponent.refreshTargets('header:header.html;content:content.json');</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3>E-commerce Components</h3>
             <p>DotPipe.js includes a complete set of e-commerce components for building shopping experiences.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Shopping Cart Flow</div>
                 <div class="example-code">&lt;!-- Product display with add to cart functionality --&gt;
-&lt;item id="product1" name="Wireless Headphones" price="99.99" image="headphones.jpg"&gt;&lt;/item&gt;
-&lt;item id="product2" name="Smart Watch" price="149.99" image="watch.jpg"&gt;&lt;/item&gt;
+                    &lt;item id="product1" name="Wireless Headphones" price="99.99"
+                    image="headphones.jpg"&gt;&lt;/item&gt;
+                    &lt;item id="product2" name="Smart Watch" price="149.99" image="watch.jpg"&gt;&lt;/item&gt;
 
-&lt;!-- Shopping cart display --&gt;
-&lt;cart id="shoppingCart"&gt;&lt;/cart&gt;
+                    &lt;!-- Shopping cart display --&gt;
+                    &lt;cart id="shoppingCart"&gt;&lt;/cart&gt;
 
-&lt;!-- Checkout process --&gt;
-&lt;checkout id="paymentForm" validate="true"&gt;&lt;/checkout&gt;
+                    &lt;!-- Checkout process --&gt;
+                    &lt;checkout id="paymentForm" validate="true"&gt;&lt;/checkout&gt;
 
-&lt;!-- Order confirmation --&gt;
-&lt;order-confirmation id="orderComplete" order-id="ORD-12345"&gt;&lt;/order-confirmation&gt;</div>
+                    &lt;!-- Order confirmation --&gt;
+                    &lt;order-confirmation id="orderComplete" order-id="ORD-12345"&gt;&lt;/order-confirmation&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3>CSV Data Handling</h3>
             <p>DotPipe.js provides powerful CSV data handling capabilities with multiple display options.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Basic CSV Table</div>
                 <div class="example-code">&lt;csv id="userData" sources="users.csv" csv-as="table"&gt;&lt;/csv&gt;</div>
             </div>
-            
+
             <div class="example-container">
                 <div class="example-title">CSV with Custom Template</div>
-                <div class="example-code">&lt;csv id="productList" sources="products.csv" csv-as="cards" page-size="10"&gt;
-  &lt;template&gt;
-    &lt;div class="product-card"&gt;
-      &lt;h3&gt;{{name}}&lt;/h3&gt;
-      &lt;div class="price"&gt;{{price}}&lt;/div&gt;
-      &lt;div class="description"&gt;{{description}}&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/template&gt;
-&lt;/csv&gt;</div>
+                <div class="example-code">&lt;csv id="productList" sources="products.csv" csv-as="cards"
+                    page-size="10"&gt;
+                    &lt;template&gt;
+                    &lt;div class="product-card"&gt;
+                    &lt;h3&gt;{{name}}&lt;/h3&gt;
+                    &lt;div class="price"&gt;{{price}}&lt;/div&gt;
+                    &lt;div class="description"&gt;{{description}}&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;/template&gt;
+                    &lt;/csv&gt;</div>
             </div>
-            
+
             <div class="example-container">
                 <div class="example-title">Multiple CSV Sources</div>
-                <div class="example-code">&lt;csv id="combinedData" sources="data1.csv;data2.csv;data3.csv" csv-as="table" sort="name:csv-asc"&gt;&lt;/csv&gt;</div>
+                <div class="example-code">&lt;csv id="combinedData" sources="data1.csv;data2.csv;data3.csv"
+                    csv-as="table" sort="name:csv-asc"&gt;&lt;/csv&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3>Authentication Components</h3>
             <p>DotPipe.js includes components for handling user authentication.</p>
-            
+
             <div class="example-container">
                 <div class="example-title">Login and Registration</div>
-                <div class="example-code">&lt;login id="userAuth" login-page="login.php" registration-page="register.php" css-page="auth-styles.css"&gt;&lt;/login&gt;</div>
+                <div class="example-code">&lt;login id="userAuth" login-page="login.php"
+                    registration-page="register.php" css-page="auth-styles.css"&gt;&lt;/login&gt;</div>
             </div>
         </div>
     </section>
-    
+
     <section>
         <h2>Best Practices</h2>
-        
+
         <div class="attribute-section">
             <h3>Performance Optimization</h3>
             <p>Follow these guidelines to ensure optimal performance with DotPipe.js:</p>
             <ul>
-                <li>Use <span class="class-name">time-inactive</span> for timed elements that aren't currently visible</li>
+                <li>Use <span class="class-name">time-inactive</span> for timed elements that aren't currently visible
+                </li>
                 <li>Avoid excessive nesting of AJAX calls</li>
                 <li>Use <span class="attribute-name">delay</span> values of at least 500ms for timed elements</li>
-                <li>Consider using <span class="class-name">lazy-load</span> with CSV components when dealing with large datasets</li>
+                <li>Consider using <span class="class-name">lazy-load</span> with CSV components when dealing with large
+                    datasets</li>
             </ul>
         </div>
-        
+
         <div class="attribute-section">
             <h3>Security Considerations</h3>
             <p>Keep these security practices in mind:</p>
             <ul>
                 <li>DotPipe.js automatically generates a Content Security Policy with nonces for scripts and styles</li>
                 <li>Always validate and sanitize data on the server side</li>
-                <li>Use <span class="class-name">plain-text</span> instead of <span class="class-name">plain-html</span> when displaying user-generated content</li>
+                <li>Use <span class="class-name">plain-text</span> instead of <span class="class-name">plain-html</span>
+                    when displaying user-generated content</li>
             </ul>
         </div>
-        
+
         <div class="attribute-section">
             <h3>Debugging Tips</h3>
             <p>When troubleshooting DotPipe.js:</p>
             <ul>
                 <li>Check that all elements have unique <span class="attribute-name">id</span> attributes</li>
                 <li>Use <span class="class-name">strict-json</span> to ensure proper JSON formatting in responses</li>
-                <li>For checkout components, use <span class="attribute-name">validate="true"</span> to test without processing actual orders</li>
+                <li>For checkout components, use <span class="attribute-name">validate="true"</span> to test without
+                    processing actual orders</li>
                 <li>Check the browser console for any error messages</li>
             </ul>
         </div>
     </section>
-    
+
     <section>
         <h2>Examples</h2>
-        
+
         <div class="attribute-section">
             <h3>Dynamic Content Loading</h3>
             <div class="example-container">
                 <div class="example-title">Code</div>
                 <div class="example-code">&lt;!-- Button to load content --&gt;
-&lt;dyn id="loadContent" ajax="content.html" insert="contentArea"&gt;Load Content&lt;/dyn&gt;
+                    &lt;dyn id="loadContent" ajax="content.html" insert="contentArea"&gt;Load Content&lt;/dyn&gt;
 
-&lt;!-- Content area --&gt;
-&lt;div id="contentArea"&gt;Content will be loaded here&lt;/div&gt;</div>
+                    &lt;!-- Content area --&gt;
+                    &lt;div id="contentArea"&gt;Content will be loaded here&lt;/div&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3>Tabbed Interface</h3>
             <div class="example-container">
                 <div class="example-title">Code</div>
-                <div class="example-code">&lt;tabs id="mainTabs" tab="Home:tab1:home.html;Products:tab2:products.html;Contact:tab3:contact.html"&gt;&lt;/tabs&gt;</div>
+                <div class="example-code">&lt;tabs id="mainTabs"
+                    tab="Home:tab1:home.html;Products:tab2:products.html;Contact:tab3:contact.html"&gt;&lt;/tabs&gt;
+                </div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3>Auto-updating Dashboard</h3>
             <div class="example-container">
                 <div class="example-title">Code</div>
                 <div class="example-code">&lt;div class="dashboard"&gt;
-  &lt;timed id="statsUpdater" ajax="stats.json" delay="5000" insert="statsPanel" class="time-active"&gt;&lt;/timed&gt;
-  &lt;div id="statsPanel"&gt;Loading statistics...&lt;/div&gt;
-  
-  &lt;timed id="alertsUpdater" ajax="alerts.json" delay="10000" insert="alertsPanel" class="time-active"&gt;&lt;/timed&gt;
-  &lt;div id="alertsPanel"&gt;Loading alerts...&lt;/div&gt;
-  
-  &lt;button id="pauseUpdates" x-toggle="statsUpdater:time-active;statsUpdater:time-inactive;alertsUpdater:time-active;alertsUpdater:time-inactive"&gt;Pause Updates&lt;/button&gt;
-&lt;/div&gt;</div>
+                    &lt;timed id="statsUpdater" ajax="stats.json" delay="5000" insert="statsPanel"
+                    class="time-active"&gt;&lt;/timed&gt;
+                    &lt;div id="statsPanel"&gt;Loading statistics...&lt;/div&gt;
+
+                    &lt;timed id="alertsUpdater" ajax="alerts.json" delay="10000" insert="alertsPanel"
+                    class="time-active"&gt;&lt;/timed&gt;
+                    &lt;div id="alertsPanel"&gt;Loading alerts...&lt;/div&gt;
+
+                    &lt;button id="pauseUpdates"
+                    x-toggle="statsUpdater:time-active;statsUpdater:time-inactive;alertsUpdater:time-active;alertsUpdater:time-inactive"&gt;Pause
+                    Updates&lt;/button&gt;
+                    &lt;/div&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3>Form Submission with Validation</h3>
             <div class="example-container">
                 <div class="example-title">Code</div>
                 <div class="example-code">&lt;form id="contactForm"&gt;
-  &lt;div class="form-group"&gt;
-    &lt;label for="name"&gt;Name&lt;/label&gt;
-    &lt;input type="text" id="name" name="name" class="contact-field" required&gt;
-  &lt;/div&gt;
-  
-  &lt;div class="form-group"&gt;
-    &lt;label for="email"&gt;Email&lt;/label&gt;
-    &lt;input type="email" id="email" name="email" class="contact-field" required&gt;
-  &lt;/div&gt;
-  
-  &lt;div class="form-group"&gt;
-    &lt;label for="message"&gt;Message&lt;/label&gt;
-    &lt;textarea id="message" name="message" class="contact-field" required&gt;&lt;/textarea&gt;
-  &lt;/div&gt;
-  
-  &lt;pipe id="submitForm" form-class="contact-field" ajax="submit-contact.php" insert="formResult"&gt;Submit&lt;/pipe&gt;
-  &lt;div id="formResult"&gt;&lt;/div&gt;
-&lt;/form&gt;</div>
+                    &lt;div class="form-group"&gt;
+                    &lt;label for="name"&gt;Name&lt;/label&gt;
+                    &lt;input type="text" id="name" name="name" class="contact-field" required&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class="form-group"&gt;
+                    &lt;label for="email"&gt;Email&lt;/label&gt;
+                    &lt;input type="email" id="email" name="email" class="contact-field" required&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class="form-group"&gt;
+                    &lt;label for="message"&gt;Message&lt;/label&gt;
+                    &lt;textarea id="message" name="message" class="contact-field" required&gt;&lt;/textarea&gt;
+                    &lt;/div&gt;
+
+                    &lt;pipe id="submitForm" form-class="contact-field" ajax="submit-contact.php"
+                    insert="formResult"&gt;Submit&lt;/pipe&gt;
+                    &lt;div id="formResult"&gt;&lt;/div&gt;
+                    &lt;/form&gt;</div>
             </div>
         </div>
-        
+
         <div class="attribute-section">
             <h3>Image Gallery with Carousel</h3>
             <div class="example-container">
                 <div class="example-title">Code</div>
                 <div class="example-code">&lt;div class="gallery-container"&gt;
-  &lt;button id="prevImage" class="carousel-step-left" insert="imageGallery"&gt;Previous&lt;/button&gt;
-  
-  &lt;carousel id="imageGallery" type="img" sources="image1.jpg;image2.jpg;image3.jpg;image4.jpg" 
-           height="300" width="500" boxes="1"&gt;&lt;/carousel&gt;
-           
-  &lt;button id="nextImage" class="carousel-step-right" insert="imageGallery"&gt;Next&lt;/button&gt;
-  
-  &lt;div class="controls"&gt;
-    &lt;button id="autoPlay" x-toggle="imageGallery:time-inactive;imageGallery:time-active"&gt;Auto Play&lt;/button&gt;
-    &lt;button id="stopPlay" x-toggle="imageGallery:time-active;imageGallery:time-inactive"&gt;Stop&lt;/button&gt;
-  &lt;/div&gt;
-&lt;/div&gt;</div>
+                    &lt;button id="prevImage" class="carousel-step-left"
+                    insert="imageGallery"&gt;Previous&lt;/button&gt;
+
+                    &lt;carousel id="imageGallery" type="img" sources="image1.jpg;image2.jpg;image3.jpg;image4.jpg"
+                    height="300" width="500" boxes="1"&gt;&lt;/carousel&gt;
+
+                    &lt;button id="nextImage" class="carousel-step-right" insert="imageGallery"&gt;Next&lt;/button&gt;
+
+                    &lt;div class="controls"&gt;
+                    &lt;button id="autoPlay" x-toggle="imageGallery:time-inactive;imageGallery:time-active"&gt;Auto
+                    Play&lt;/button&gt;
+                    &lt;button id="stopPlay"
+                    x-toggle="imageGallery:time-active;imageGallery:time-inactive"&gt;Stop&lt;/button&gt;
+                    &lt;/div&gt;
+                    &lt;/div&gt;</div>
             </div>
         </div>
     </section>
-    
-    <footer style="margin-top: 50px; padding: 20px; background-color: #f5f5f5; text-align: center; border-top: 1px solid #ddd;">
+
+    <footer
+        style="margin-top: 50px; padding: 20px; background-color: #f5f5f5; text-align: center; border-top: 1px solid #ddd;">
         <p>DotPipe.js Documentation - A comprehensive guide to attributes, tags, and classes</p>
     </footer>
 </body>
+
 </html>

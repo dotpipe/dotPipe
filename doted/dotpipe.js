@@ -191,6 +191,8 @@ let domContentLoad = (again = false) => {
 
     let elementsArray_time = document.getElementsByTagName("timed");
     Array.from(elementsArray_time).forEach(function (elem) {
+        
+            setTimers(elem);
         if (elem.classList.contains("time-inactive"))
             return;
         if (elem.classList.contains("time-active")) {
@@ -199,7 +201,7 @@ let domContentLoad = (again = false) => {
         }
         else if (elem.classList.contains("time-inactive")) {
             auto = false;
-        }
+        } 
     });
 
     let elementsArray_dyn = document.getElementsByTagName("dyn");
@@ -218,6 +220,8 @@ let domContentLoad = (again = false) => {
     processCartTags();
     processOrderConfirmationTags();
     processColumnsTags();
+
+
     let elements_Carousel = document.getElementsByTagName("carousel");
     Array.from(elements_Carousel).forEach(function (elem) {
         if (!elem.classList.contains("turn-auto"))
@@ -279,30 +283,19 @@ let domContentLoad = (again = false) => {
         var ev = elemv.getAttribute("event");
         if (!ev) {
             elemv.addEventListener("click", function () {
-                pipes(elemv, auto);
+                pipes(elemv, false);
             });
             return;
         }
         var rv = ev.split(";");
         Array.from(rv).forEach((v) => {
             elemv.addEventListener(v, function () {
-                pipes(elemv, auto);
+                pipes(elemv, false);
             });
         });
     });
 }
 
-/**
- * columns-component.js - Multi-column layout component for dotPipe.js
- * This handles the <columns> custom element for creating responsive multi-column layouts
- * with dynamic content loading
- */
-
-// Initialize columns component functionality when DOM is loaded
-document.addEventListener("DOMContentLoaded", function () {
-    // Process all columns tags
-    processColumnsTags();
-});
 
 /**
  * Process all columns tags in the document
@@ -4281,8 +4274,30 @@ function parseCSVLine(line) {
     });
 }
 
-// Usage example to generate a nonce
-function generateNonce() {
+/**
+ * Calculates the SHA-256 hash of a string
+ * @param {string} message - The input string
+ * @returns {Promise<string>} - The SHA-256 hash as a hex string
+ */
+async function sha256(message) {
+    // Convert the message string to an array of bytes
+    const msgBuffer = new TextEncoder().encode(message);
+    
+    // Hash the message using the SubtleCrypto API
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    
+    // Convert the hash buffer to a hex string
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    return hashHex;
+}
+
+/**
+ * Generates a secure nonce using SHA-256
+ * @returns {Promise<string>} - A 16-character nonce
+ */
+async function generateNonce() {
     const randomBytes = new Uint8Array(16);
     crypto.getRandomValues(randomBytes);
     return sha256(randomBytes.join('')).then(hash => hash.slice(0, 16));

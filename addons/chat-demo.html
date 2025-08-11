@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DotPipe Chat - No Server Required</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #4fc3f7;
+            --text-color: #333;
+            --bg-color: #f5f8fa;
+            --card-bg: #ffffff;
+            --border-color: #e1e8ed;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --warning-color: #ff9800;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-theme {
+            --primary-color: #375a7f;
+            --secondary-color: #2c3e50;
+            --accent-color: #3498db;
+            --text-color: #ecf0f1;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --border-color: #2c2c2c;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .app-title h1 {
+            margin: 0;
+            font-size: 2.2rem;
+        }
+
+        .app-title i {
+            font-size: 2rem;
+        }
+
+        .tagline {
+            margin-top: 0.5rem;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        .user-panel {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .user-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-join {
+            background-color: var(--success-color);
+        }
+
+        .btn-join:hover {
+            background-color: #388e3c;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .theme-toggle label {
+            margin-right: 10px;
+            color: white;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .chat-container {
+            height: 600px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .features {
+            margin-top: 3rem;
+        }
+
+        .features h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .feature-card i {
+            font-size: 2rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            padding: 1.5rem;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .social-links {
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0 10px;
+            transition: color 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .user-form {
+                flex-direction: column;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .chat-container {
+                height: 500px;
+            }
+        }
+    </style>
+    <script src="dotpipe.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="app-title">
+                <i class="fas fa-comments"></i>
+                <h1>DotPipe Chat</h1>
+                <div class="theme-toggle">
+                    <label for="theme-toggle">Dark Mode</label>
+                    <label class="switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <p class="tagline">Simple, powerful web chat - no server required!</p>
+        </header>
+
+        <div class="user-panel" id="user-panel">
+            <h2>Join the Conversation</h2>
+            <p>Enter your details to start chatting</p>
+            <div class="user-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Choose a username" value="User_">
+                </div>
+                <div class="form-group">
+                    <label for="display-name">Display Name</label>
+                    <input type="text" id="display-name" placeholder="Your display name">
+                </div>
+                <div class="form-group">
+                    <label for="channel">Channel</label>
+                    <input type="text" id="channel" placeholder="Channel name" value="General">
+                </div>
+                <div class="form-group">
+                    <label> </label>
+                    <button id="join-chat" class="btn btn-join">Join Chat</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="chat-area" class="chat-container hidden">
+            <!-- The chat component will be inserted here -->
+        </div>
+
+        <div class="features">
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-server-slash"></i>
+                    <h3>No Server Required</h3>
+                    <p>Works completely client-side using browser storage - no backend needed!</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Multiple Channels</h3>
+                    <p>Create and join different chat channels for various topics or groups.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-user-shield"></i>
+                    <h3>User Management</h3>
+                    <p>See who's in the current channel with the built-in user list.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-crown"></i>
+                    <h3>Admin Controls</h3>
+                    <p>Channel creators have admin privileges and can transfer ownership.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Real-time Updates</h3>
+                    <p>Messages appear in real-time with automatic polling.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-paint-brush"></i>
+                    <h3>Theming Support</h3>
+                    <p>Choose between light and dark themes to match your preference.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>DotPipe Chat - Powered by DotPipe.js | © 2025</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Include the dotpipe.js script -->
+    <script src="dotpipe.js"></script>
+    
+    <script>
+        // DOM Elements
+        const themeToggle = document.getElementById('theme-toggle');
+        const userPanel = document.getElementById('user-panel');
+        const chatArea = document.getElementById('chat-area');
+        const joinChatBtn = document.getElementById('join-chat');
+        const usernameInput = document.getElementById('username');
+        const displayNameInput = document.getElementById('display-name');
+        const channelInput = document.getElementById('channel');
+
+        // Generate a random user ID if not set
+        if (usernameInput.value === 'User_') {
+            usernameInput.value += Math.floor(Math.random() * 1000);
+        }
+
+        // Set display name to match username by default
+        if (!displayNameInput.value) {
+            displayNameInput.value = usernameInput.value;
+        }
+
+        // Theme toggle functionality
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('dotchat-theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('dotchat-theme', 'light');
+            }
+            
+            // Update chat theme if it exists
+            updateChatTheme();
+        });
+
+        // Load saved theme preference
+        if (localStorage.getItem('dotchat-theme') === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeToggle.checked = true;
+        }
+
+        // Join chat button click handler
+        joinChatBtn.addEventListener('click', function() {
+            const username = usernameInput.value.trim();
+            const displayName = displayNameInput.value.trim() || username;
+            const channel = channelInput.value.trim() || 'General';
+            
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            // Save user preferences
+            localStorage.setItem('dotchat-username', username);
+            localStorage.setItem('dotchat-displayname', displayName);
+            localStorage.setItem('dotchat-channel', channel);
+            
+            // Create chat component
+            createChatComponent(username, displayName, channel);
+            
+            // Hide user panel, show chat area
+            userPanel.classList.add('hidden');
+            chatArea.classList.remove('hidden');
+        });
+
+        // Create chat component
+        function createChatComponent(username, displayName, channel) {
+            // Clear previous chat if any
+            chatArea.innerHTML = '';
+            
+            // Create chat element
+            const chatElement = document.createElement('chat');
+            chatElement.setAttribute('id', 'main-chat');
+            chatElement.setAttribute('user-handle', username);
+            chatElement.setAttribute('display-name', displayName);
+            chatElement.setAttribute('channel-name', channel);
+            chatElement.setAttribute('theme', themeToggle.checked ? 'dark' : 'light');
+            chatElement.setAttribute('height', '100%');
+            chatElement.setAttribute('width', '100%');
+            chatElement.setAttribute('poll-interval', '1500');
+            
+            // Add to chat area
+            chatArea.appendChild(chatElement);
+            
+            // Process the chat tag
+            processChatTags();
+        }
+
+        // Update chat theme
+        function updateChatTheme() {
+            const chatElement = document.getElementById('main-chat');
+            if (chatElement) {
+                chatElement.setAttribute('theme', themeToggle.checked ? 'dark' : 'light');
+                processChatTags();
+            }
+        }
+
+        // Check if user was previously logged in
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedUsername = localStorage.getItem('dotchat-username');
+            const savedDisplayName = localStorage.getItem('dotchat-displayname');
+            const savedChannel = localStorage.getItem('dotchat-channel');
+            
+            if (savedUsername) {
+                usernameInput.value = savedUsername;
+                displayNameInput.value = savedDisplayName || savedUsername;
+                channelInput.value = savedChannel || 'General';
+                
+                // Auto-join if "remember me" was enabled
+                if (localStorage.getItem('dotchat-autojoin') === 'true') {
+                    joinChatBtn.click();
+                }
+            }
+        });
+
+        // Add a logout function
+        window.logoutChat = function() {
+            // Hide chat area, show user panel
+            chatArea.classList.add('hidden');
+            userPanel.classList.remove('hidden');
+            
+            // Clear auto-join preference
+            localStorage.removeItem('dotchat-autojoin');
+        };
+    </script>
+</body>
+</html>
