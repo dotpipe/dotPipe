@@ -5348,6 +5348,7 @@ function pipes(elem, stop = false) {
             }
             navigate(clone, headers, query, formclass);
         });
+        return;
     }
     // This is a quick way to make a downloadable link in an href
     //     else
