@@ -5,9 +5,9 @@
 "></div>
 <div id="outputDiv"></div>
 
-<button id="run">Show Greeting</button>
+<button id="run" turn="example">Show Greeting</button>
 
-<script src="dotpipe.js"></script>
+<script src="./inline/dotpipe.js"></script>
 
 <script>
 function shout(text) {
@@ -15,14 +15,4 @@ function shout(text) {
     return text;
 }
 
-// Initialize dotPipe
-dotPipe.register();
-
-// Only runs when button is clicked
-document.getElementById('run').addEventListener('click', () => {
-    dotPipe.runInline('example');
-});
-
-// You can update dpVars anytime — does not auto-trigger
-dotPipe.matrix['example'].dpVars.greeting = "Goodbye!";
 </script>
