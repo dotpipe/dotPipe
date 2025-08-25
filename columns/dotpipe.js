@@ -5,7 +5,8 @@
  * 
  * All custom tags MUST include a unique 'id' attribute.
  * Most attributes/classes can be combined for powerful UI behaviors.
- * See below for supported elements, attributes, and their usage.
+ * Inline macros can be used via the 'inline' attribute for dynamic, per-element logic.
+ * See below for supported elements, attributes, and inline macro usage.
  * 
  * ──────────────────────────────────────────────────────────────
  * CUSTOM TAGS
@@ -30,6 +31,8 @@
  * UNIVERSAL ATTRIBUTES
  * 
  * id                   REQUIRED for all custom tags. Must be unique.
+ * inline               Optional inline macro string to define dynamic logic per element.
+ *                      Supports operators: |, |!, |$, |$id:varName, nop:varName, |@id.prop:varName, |#varName:id.prop, |%funcName:[args]
  * ajax                 Fetch remote resource (HTML, JSON, etc.) for tag.
  * insert               Target ID to render AJAX response.
  * query                Key-value pairs for AJAX requests, e.g. "key:value&"
@@ -74,6 +77,31 @@
  * sort                 For <csv>; column and direction, e.g. "Name:csv-asc".
  * page-size            For <csv>; items per page.
  * lazy-load            For <csv>; enable/disable lazy loading (default true).
+ * 
+ * ──────────────────────────────────────────────────────────────
+ * INLINE MACROS
+ * 
+ * The 'inline' attribute allows per-element dynamic logic using dotPipe pipe operators:
+ * 
+ * Operators:
+ *   |               Self-retained (current element context passes forward)
+ *   |!              Pass previous return value forward
+ *   |$id            Inject current value into element by ID
+ *   |$id:varName    Inject stored variable into element by ID
+ *   nop:varName     Store current value in dpVars for later use
+ *   |@id.prop:varName Write stored variable into target element property
+ *   |#varName:id.prop Read element property into variable
+ *   |%funcName:[args] Execute function with arguments (supports #varName and @id.prop)
+ * 
+ * Example usage:
+ * <div id="fa" inline="ajax:/api/new:GET|!nop:newData|$resultsDiv:newData"></div>
+ * <div id="fb" inline="ajax:/api/list:GET|!nop:list|%processData:[#list,@outputDiv.innerText]|@outputDiv.innerText:list"></div>
+ * 
+ * Inline macros can be automatically executed on DOMContentLoaded or triggered manually via:
+ * dotPipe.runInline('fa');
+ * 
+ * Variables used in inline macros are scoped per element in a dpVars object.
+ * Functions called with |% can be native, plugin-registered, or globally available.
  * 
  * ──────────────────────────────────────────────────────────────
  * SUPPORT CLASSES
@@ -123,8 +151,9 @@
  *   <item id="gadget-2" name="Gadget" price="14.99"></item>
  * </cart>
  * 
- * <!-- Search box for filtering content -->
- * <search id="search" use-id="product-list;order-list" placeholder="Find products..."></search>
+ * <!-- Inline macros -->
+ * <div id="fa" inline="ajax:/api/new:GET|!nop:newData|$resultsDiv:newData"></div>
+ * <div id="fb" inline="ajax:/api/list:GET|!nop:list|%processData:[#list,@outputDiv.innerText]|@outputDiv.innerText:list"></div>
  * 
  * <!-- Carousel slider -->
  * <carousel id="image-carousel" sources="img1.jpg;img2.jpg;img3.jpg" delay="3000" boxes="1"></carousel>
@@ -135,14 +164,14 @@
  * ──────────────────────────────────────────────────────────────
  * SYSTEM FLOW:
  * - On DOMContentLoaded, dotPipe processes all supported custom tags.
- * - pipes() manages all custom tag logic, triggers AJAX, updates DOM, and runs callbacks.
+ * - pipes() manages all custom tag logic, triggers AJAX, updates DOM, runs callbacks, and executes inline macros.
+ * - Inline macros are parsed via regex, support all pipe operators, and store variables per element in dpVars.
  * - navigate() performs AJAX requests and inserts responses.
  * - modala() loads and renders JSON templates for modals and complex UIs.
  * 
- * For advanced usage, refer to the full documentation or source code.
- * 
  * (c) dotPipe.js – https://github.com/dotpipe/dotPipe
  */
+
 
 document.addEventListener("DOMContentLoaded", function () {
     try {
@@ -177,6 +206,136 @@ document.addEventListener("DOMContentLoaded", function () {
         document.head.appendChild(meta);
     });
 });
+
+const dotPipe = {
+    matrix: {},
+
+    // Register all elements with inline macros
+    register: function(selector = '[inline]') {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+            const key = el.id || el.getAttribute('pipe') || Symbol();
+            this.matrix[key] = {
+                element: el,
+                inlineMacro: el.getAttribute('inline'),
+                dpVars: {} // plain storage; no auto-run
+            };
+        });
+    },
+
+    // Run inline macro for a given element manually
+    runInline: async function(key) {
+        const entry = this.matrix[key];
+        if (!entry || !entry.inlineMacro) return;
+
+        let currentValue = null;
+        const segments = entry.inlineMacro.split('|').filter(s => s.trim() !== '');
+
+        for (let seg of segments) {
+            seg = seg.trim();
+            let m;
+
+            // |&varName:value → store literal
+            if (m = /^\&([a-zA-Z0-9_]+):(.+)$/.exec(seg)) {
+                const varName = m[1];
+                const value = m[2];
+                entry.dpVars[varName] = value;
+                currentValue = value;
+                continue;
+            }
+
+            // nop:varName → store current value
+            if (m = /^nop:([a-zA-Z0-9_]+)$/.exec(seg)) {
+                const varName = m[1];
+                entry.dpVars[varName] = currentValue;
+                continue;
+            }
+
+            // $id or $id:varName → inject value into element
+            if (m = /^\$([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_!]+))?$/.exec(seg)) {
+                const targetId = m[1];
+                const varName = m[2];
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    let value;
+                    if (!varName) value = currentValue;
+                    else if (varName.startsWith('!')) value = entry.dpVars[varName.slice(1)];
+                    else value = entry.dpVars[varName];
+                    targetEl.innerHTML = value;
+                }
+                continue;
+            }
+
+            // @id.prop:varName → set element property
+            if (m = /^@([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_]+):([a-zA-Z0-9_!]+)$/.exec(seg)) {
+                const targetEl = document.getElementById(m[1]);
+                const prop = m[2];
+                const varName = m[3];
+                if (targetEl) {
+                    let value = varName.startsWith('!') ? entry.dpVars[varName.slice(1)] : entry.dpVars[varName];
+                    targetEl[prop] = value;
+                }
+                continue;
+            }
+
+            // #varName:id.prop → read element property
+            if (m = /^#([a-zA-Z0-9_]+):([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_]+)$/.exec(seg)) {
+                const varName = m[1];
+                const targetEl = document.getElementById(m[2]);
+                const prop = m[3];
+                if (targetEl) {
+                    entry.dpVars[varName] = targetEl[prop];
+                    currentValue = entry.dpVars[varName];
+                }
+                continue;
+            }
+
+            // %funcName:[args] → call function
+            if (m = /^\%([a-zA-Z0-9_]+):\[(.+)\]$/.exec(seg)) {
+                const funcName = m[1];
+                let args = m[2].split(',').map(a => a.trim()).map(arg => {
+                    if (arg.startsWith('!')) return entry.dpVars[arg.slice(1)];
+                    if (arg.startsWith('#')) return entry.dpVars[arg.slice(1)];
+                    if (arg.startsWith('@')) {
+                        const [elId, prop] = arg.slice(1).split('.');
+                        const targetEl = document.getElementById(elId);
+                        return targetEl ? targetEl[prop] : undefined;
+                    }
+                    return arg;
+                });
+                if (typeof window[funcName] === 'function') {
+                    currentValue = await window[funcName](...args);
+                }
+                continue;
+            }
+
+            // Standard verb: e.g., ajax:url:GET
+            if (m = /^([a-zA-Z0-9_]+):?(.*)$/.exec(seg)) {
+                const verb = m[1];
+                const params = m[2] ? m[2].split(':') : [];
+                if (typeof this.verbs[verb] === 'function') {
+                    currentValue = await this.verbs[verb](...params);
+                }
+                continue;
+            }
+
+            console.warn('Unknown pipe segment:', seg);
+        }
+    },
+
+    // Built-in verbs (AJAX, log, etc.)
+    verbs: {
+        async ajax(url, method = 'GET') {
+            const res = await fetch(url, { method });
+            const text = await res.text();
+            return text;
+        },
+        log(value) {
+            console.log(value);
+            return value;
+        }
+    }
+};
 
 let domContentLoad = (again = false) => {
     doc_set = document.getElementsByTagName("pipe");
@@ -220,7 +379,7 @@ let domContentLoad = (again = false) => {
     processCartTags();
     processOrderConfirmationTags();
     processColumnsTags();
-
+    dotPipe.register();
 
     let elements_Carousel = document.getElementsByTagName("carousel");
     Array.from(elements_Carousel).forEach(function (elem) {
@@ -5171,6 +5330,9 @@ function pipes(elem, stop = false) {
     //
     if (elem.id === null)
         return;
+
+    if (elem.hasAttribute("inline"))
+        dotPipe.runInline(elem.id);
 
     if (elem.hasAttribute("callback") && typeof window[elem.getAttribute("callback")] === "function") {
         var params = [];

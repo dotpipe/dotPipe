@@ -1,0 +1,28 @@
+<div id="example" inline="
+    |&greeting:Hello World
+    |$outputDiv:!greeting
+    |%shout:[!greeting]
+"></div>
+<div id="outputDiv"></div>
+
+<button id="run">Show Greeting</button>
+
+<script src="dotpipe.js"></script>
+
+<script>
+function shout(text) {
+    console.log('Shout:', text.toUpperCase());
+    return text;
+}
+
+// Initialize dotPipe
+dotPipe.register();
+
+// Only runs when button is clicked
+document.getElementById('run').addEventListener('click', () => {
+    dotPipe.runInline('example');
+});
+
+// You can update dpVars anytime — does not auto-trigger
+dotPipe.matrix['example'].dpVars.greeting = "Goodbye!";
+</script>
