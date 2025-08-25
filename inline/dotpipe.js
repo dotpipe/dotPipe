@@ -79,30 +79,106 @@
  * lazy-load            For <csv>; enable/disable lazy loading (default true).
  * 
  * ──────────────────────────────────────────────────────────────
- * INLINE MACROS
+ * INLINE MACRO OPERATORS
  * 
- * The 'inline' attribute allows per-element dynamic logic using dotPipe pipe operators:
+ * |&varName:value           → Store literal value in dpVars.varName
+ * !varName                  → Reference stored variable in function arguments
+ * |%funcName:[arg1,arg2]    → Call function funcName with arguments; supports !varName, #varName, @id.prop
+ * |$id:varName              → Inject variable value into element innerHTML
+ * |@id.prop:varName         → Set DOM element property to variable value
+ * |#varName:id.prop         → Read DOM element property into dpVars.varName
+ * |nop:varName              → Store the last computed value in dpVars.varName
  * 
- * Operators:
- *   |               Self-retained (current element context passes forward)
- *   |!              Pass previous return value forward
- *   |$id            Inject current value into element by ID
- *   |$id:varName    Inject stored variable into element by ID
- *   nop:varName     Store current value in dpVars for later use
- *   |@id.prop:varName Write stored variable into target element property
- *   |#varName:id.prop Read element property into variable
- *   |%funcName:[args] Execute function with arguments (supports #varName and @id.prop)
+ * ──────────────────────────────────────────────────────────────
+ * BUILT-IN VERBS
  * 
- * Example usage:
- * <div id="fa" inline="ajax:/api/new:GET|!nop:newData|$resultsDiv:newData"></div>
- * <div id="fb" inline="ajax:/api/list:GET|!nop:list|%processData:[#list,@outputDiv.innerText]|@outputDiv.innerText:list"></div>
+ * ajax:url:GET              → Fetch URL via AJAX (returns text)
+ * log:value                 → Log value to console
  * 
- * Inline macros can be automatically executed on DOMContentLoaded or triggered manually via:
- * dotPipe.runInline('fa');
+ * ──────────────────────────────────────────────────────────────
+ * EXAMPLES
  * 
- * Variables used in inline macros are scoped per element in a dpVars object.
- * Functions called with |% can be native, plugin-registered, or globally available.
+ * <!-- Basic variable and DOM injection -->
+ * <div id="example" inline="
+ *     |&greeting:Hello World
+ *     |$outputDiv:!greeting
+ * "></div>
+ * <div id="outputDiv"></div>
+ * <button id="run">Show Greeting</button>
+ * <script>
+ * dotPipe.register();
+ * document.getElementById('run').addEventListener('click', () => {
+ *     dotPipe.runInline('example');
+ * });
+ * </script>
  * 
+ * <!-- Function call with variable reference -->
+ * <div id="example2" inline="
+ *     |&greeting:Hello World
+ *     |%shout:[!greeting]
+ * "></div>
+ * <script>
+ * function shout(text) { alert(text.toUpperCase()); }
+ * dotPipe.register();
+ * document.getElementById('example2').addEventListener('click', () => {
+ *     dotPipe.runInline('example2');
+ * });
+ * </script>
+ * 
+ * <!-- Read and update element properties -->
+ * <input id="input1" value="initial">
+ * <div id="display"></div>
+ * <div id="example3" inline="
+ *     |#currentValue:input1.value
+ *     |$display:!currentValue
+ * "></div>
+ * <script>
+ * dotPipe.register();
+ * document.getElementById('example3').addEventListener('click', () => {
+ *     dotPipe.runInline('example3');
+ * });
+ * </script>
+ * 
+ * <!-- Store current value for later reuse -->
+ * <div id="example4" inline="
+ *     |&greeting:Hello World
+ *     |nop:latest
+ *     |$outputDiv:!latest
+ * "></div>
+ * <div id="outputDiv"></div>
+ * <script>
+ * dotPipe.register();
+ * document.getElementById('example4').addEventListener('click', () => {
+ *     dotPipe.runInline('example4');
+ * });
+ * </script>
+ * 
+ * ──────────────────────────────────────────────────────────────
+ * SYSTEM FLOW:
+ * 
+ * 1. dotPipe.register(selector) scans for elements with 'inline' attributes.
+ * 2. Each element gets a dpVars object for variable storage.
+ * 3. Inline macros are executed manually with dotPipe.runInline(id).
+ * 4. Inline operators allow:
+ *    - Variable storage and referencing
+ *    - Function calls with arguments
+ *    - DOM insertion or property manipulation
+ *    - Value reading and storage
+ * 5. Async/await supported for AJAX or custom async functions.
+ * 6. No recursion occurs; macros only execute when triggered.
+ * 
+ * ──────────────────────────────────────────────────────────────
+ * BEST PRACTICES:
+ * 
+ * - Use unique IDs for all elements involved in inline macros.
+ * - Chain multiple operators using '|' in inline attribute.
+ * - Update dpVars at runtime as needed; macros only fire when runInline() is called.
+ * - Use !varName inside %funcName:[...] to reference current runtime values.
+ * - For DOM manipulation:
+ *     - Use |$id:!varName for innerHTML
+ *     - Use |@id.prop:!varName for element properties
+ * - For property reads: |#varName:id.prop
+ * - For temporary storage: |nop:varName
  * ──────────────────────────────────────────────────────────────
  * SUPPORT CLASSES
  * 
@@ -205,16 +281,39 @@ document.addEventListener("DOMContentLoaded", function () {
         meta.httpEquiv = "Content-Security-Policy";
         document.head.appendChild(meta);
     });
+
+    // Automatically register all inline elements
+    dotPipe.register();
+
+    // Optionally, auto-bind clicks or other events if desired
+    for (const key in dotPipe.matrix) {
+        const entry = dotPipe.matrix[key];
+        const el = entry.element;
+
+        // Auto-click binding if element has inline and is clickable
+        if (el.tagName === 'BUTTON' || el.hasAttribute('data-auto-click')) {
+            el.addEventListener('click', () => dotPipe.runInline(key));
+        }
+
+        // Optionally, you can parse a 'data-event' attribute for any event
+        const events = el.getAttribute('data-event');
+        if (events) {
+            events.split(';').forEach(ev => {
+                el.addEventListener(ev.trim(), () => dotPipe.runInline(key));
+            });
+        }
+    }
+
 });
 
 const dotPipe = {
     matrix: {},
 
     // Register all elements with inline macros
-    register: function(selector = '[inline]') {
+    register: function (selector = '[inline]') {
         const elements = document.querySelectorAll(selector);
         elements.forEach(el => {
-            const key = el.id || el.getAttribute('pipe') || Symbol();
+            const key = el.id || el.getAttribute('inline') || Symbol();
             this.matrix[key] = {
                 element: el,
                 inlineMacro: el.getAttribute('inline'),
@@ -224,7 +323,7 @@ const dotPipe = {
     },
 
     // Run inline macro for a given element manually
-    runInline: async function(key) {
+    runInline: async function (key) {
         const entry = this.matrix[key];
         if (!entry || !entry.inlineMacro) return;
 
@@ -350,8 +449,8 @@ let domContentLoad = (again = false) => {
 
     let elementsArray_time = document.getElementsByTagName("timed");
     Array.from(elementsArray_time).forEach(function (elem) {
-        
-            setTimers(elem);
+
+        setTimers(elem);
         if (elem.classList.contains("time-inactive"))
             return;
         if (elem.classList.contains("time-active")) {
@@ -360,7 +459,7 @@ let domContentLoad = (again = false) => {
         }
         else if (elem.classList.contains("time-inactive")) {
             auto = false;
-        } 
+        }
     });
 
     let elementsArray_dyn = document.getElementsByTagName("dyn");
@@ -379,7 +478,6 @@ let domContentLoad = (again = false) => {
     processCartTags();
     processOrderConfirmationTags();
     processColumnsTags();
-    dotPipe.register();
 
     let elements_Carousel = document.getElementsByTagName("carousel");
     Array.from(elements_Carousel).forEach(function (elem) {
@@ -884,31 +982,31 @@ window.columnsComponent = {
  */
 
 // Initialize refresh component functionality when DOM is loaded
-document.addEventListener("DOMContentLoaded", function() {
-  // Process all refresh tags
-  processRefreshTags();
+document.addEventListener("DOMContentLoaded", function () {
+    // Process all refresh tags
+    processRefreshTags();
 });
 
 /**
  * Process all refresh tags in the document
  */
 function processRefreshTags() {
-  const refreshElements = document.getElementsByTagName("refresh");
-  
-  Array.from(refreshElements).forEach(function(refreshElement) {
-    if (refreshElement.classList.contains("processed")) {
-      return;
-    }
-    
-    // Get attributes
-    const target = refreshElement.getAttribute("target") || "";
-    
-    // Set up refresh element
-    setupRefreshElement(refreshElement, target);
-    
-    // Mark as processed
-    refreshElement.classList.add("processed");
-  });
+    const refreshElements = document.getElementsByTagName("refresh");
+
+    Array.from(refreshElements).forEach(function (refreshElement) {
+        if (refreshElement.classList.contains("processed")) {
+            return;
+        }
+
+        // Get attributes
+        const target = refreshElement.getAttribute("target") || "";
+
+        // Set up refresh element
+        setupRefreshElement(refreshElement, target);
+
+        // Mark as processed
+        refreshElement.classList.add("processed");
+    });
 }
 
 /**
@@ -917,40 +1015,40 @@ function processRefreshTags() {
  * @param {string} target - The target specification string
  */
 function setupRefreshElement(refreshElement, target) {
-  // Create refresh button
-  const refreshButton = document.createElement('button');
-  refreshButton.className = 'refresh-button';
-  
-  // Get button text from element content or use default
-  const buttonText = refreshElement.textContent.trim() || 'Refresh';
-  refreshButton.textContent = buttonText;
-  
-  // Get button attributes from the refresh element
-  for (let i = 0; i < refreshElement.attributes.length; i++) {
-    const attr = refreshElement.attributes[i];
-    if (attr.name !== 'target' && attr.name !== 'id' && attr.name !== 'class') {
-      refreshButton.setAttribute(attr.name, attr.value);
+    // Create refresh button
+    const refreshButton = document.createElement('button');
+    refreshButton.className = 'refresh-button';
+
+    // Get button text from element content or use default
+    const buttonText = refreshElement.textContent.trim() || 'Refresh';
+    refreshButton.textContent = buttonText;
+
+    // Get button attributes from the refresh element
+    for (let i = 0; i < refreshElement.attributes.length; i++) {
+        const attr = refreshElement.attributes[i];
+        if (attr.name !== 'target' && attr.name !== 'id' && attr.name !== 'class') {
+            refreshButton.setAttribute(attr.name, attr.value);
+        }
     }
-  }
-  
-  // Add click event listener
-  refreshButton.addEventListener('click', function() {
-    handleRefresh(target);
-  });
-  
-  // Replace refresh tag content with our button
-  refreshElement.innerHTML = '';
-  refreshElement.appendChild(refreshButton);
-  
-  // Add auto-refresh functionality if interval is specified
-  if (refreshElement.hasAttribute('interval')) {
-    const interval = parseInt(refreshElement.getAttribute('interval'));
-    if (!isNaN(interval) && interval > 0) {
-      setInterval(() => {
+
+    // Add click event listener
+    refreshButton.addEventListener('click', function () {
         handleRefresh(target);
-      }, interval * 1000); // Convert to milliseconds
+    });
+
+    // Replace refresh tag content with our button
+    refreshElement.innerHTML = '';
+    refreshElement.appendChild(refreshButton);
+
+    // Add auto-refresh functionality if interval is specified
+    if (refreshElement.hasAttribute('interval')) {
+        const interval = parseInt(refreshElement.getAttribute('interval'));
+        if (!isNaN(interval) && interval > 0) {
+            setInterval(() => {
+                handleRefresh(target);
+            }, interval * 1000); // Convert to milliseconds
+        }
     }
-  }
 }
 
 /**
@@ -958,37 +1056,37 @@ function setupRefreshElement(refreshElement, target) {
  * @param {string} target - The target specification string
  */
 function handleRefresh(target) {
-  if (!target) {
-    console.error('No target specified for refresh');
-    return;
-  }
-  
-  // Check if target is to refresh the whole page
-  if (target === '_page') {
-    window.location.reload();
-    return;
-  }
-  
-  // Parse target specifications (format: "targetId:pageUrl;targetId2:pageUrl2")
-  const targetSpecs = target.split(';');
-  
-  targetSpecs.forEach(spec => {
-    const [targetId, pageUrl] = spec.split(':');
-    
-    if (!targetId || !pageUrl) {
-      console.error(`Invalid target specification: ${spec}`);
-      return;
+    if (!target) {
+        console.error('No target specified for refresh');
+        return;
     }
-    
-    // Handle different target types
-    if (targetId.startsWith('cols-')) {
-      // Target is a column in a columns component
-      refreshColumnTarget(targetId, pageUrl);
-    } else {
-      // Standard target refresh
-      refreshStandardTarget(targetId, pageUrl);
+
+    // Check if target is to refresh the whole page
+    if (target === '_page') {
+        window.location.reload();
+        return;
     }
-  });
+
+    // Parse target specifications (format: "targetId:pageUrl;targetId2:pageUrl2")
+    const targetSpecs = target.split(';');
+
+    targetSpecs.forEach(spec => {
+        const [targetId, pageUrl] = spec.split(':');
+
+        if (!targetId || !pageUrl) {
+            console.error(`Invalid target specification: ${spec}`);
+            return;
+        }
+
+        // Handle different target types
+        if (targetId.startsWith('cols-')) {
+            // Target is a column in a columns component
+            refreshColumnTarget(targetId, pageUrl);
+        } else {
+            // Standard target refresh
+            refreshStandardTarget(targetId, pageUrl);
+        }
+    });
 }
 
 /**
@@ -997,37 +1095,37 @@ function handleRefresh(target) {
  * @param {string} pageUrl - The URL of the content to load
  */
 function refreshStandardTarget(targetId, pageUrl) {
-  const targetElement = document.getElementById(targetId);
-  
-  if (!targetElement) {
-    console.error(`Target element with ID '${targetId}' not found`);
-    return;
-  }
-  
-  // Show loading indicator
-  const originalContent = targetElement.innerHTML;
-  targetElement.innerHTML = '<div class="refresh-loading">Loading content...</div>';
-  
-  // Determine content type based on file extension
-  const fileExtension = pageUrl.split('.').pop().toLowerCase();
-  
-  if (fileExtension === 'json') {
-    // Load JSON content using modala
-    refreshJsonContent(targetElement, pageUrl);
-  } else if (fileExtension === 'html' || fileExtension === 'htm') {
-    // Load HTML content
-    refreshHtmlContent(targetElement, pageUrl);
-  } else {
-    // Load other content types as text/html
-    refreshGenericContent(targetElement, pageUrl);
-  }
-  
-  // Dispatch refresh started event
-  dispatchRefreshEvent(targetElement, 'refreshStarted', {
-    targetId: targetId,
-    pageUrl: pageUrl,
-    originalContent: originalContent
-  });
+    const targetElement = document.getElementById(targetId);
+
+    if (!targetElement) {
+        console.error(`Target element with ID '${targetId}' not found`);
+        return;
+    }
+
+    // Show loading indicator
+    const originalContent = targetElement.innerHTML;
+    targetElement.innerHTML = '<div class="refresh-loading">Loading content...</div>';
+
+    // Determine content type based on file extension
+    const fileExtension = pageUrl.split('.').pop().toLowerCase();
+
+    if (fileExtension === 'json') {
+        // Load JSON content using modala
+        refreshJsonContent(targetElement, pageUrl);
+    } else if (fileExtension === 'html' || fileExtension === 'htm') {
+        // Load HTML content
+        refreshHtmlContent(targetElement, pageUrl);
+    } else {
+        // Load other content types as text/html
+        refreshGenericContent(targetElement, pageUrl);
+    }
+
+    // Dispatch refresh started event
+    dispatchRefreshEvent(targetElement, 'refreshStarted', {
+        targetId: targetId,
+        pageUrl: pageUrl,
+        originalContent: originalContent
+    });
 }
 
 /**
@@ -1036,24 +1134,24 @@ function refreshStandardTarget(targetId, pageUrl) {
  * @param {string} pageUrl - The URL of the content to load
  */
 function refreshColumnTarget(targetId, pageUrl) {
-  // Parse column specification (format: "cols-columnIndex")
-  const parts = targetId.split('-');
-  if (parts.length !== 2) {
-    console.error(`Invalid column target specification: ${targetId}`);
-    return;
-  }
-  
-  const columnsId = parts[0];
-  const columnIndex = parseInt(parts[1]) - 1; // Convert to 0-based index
-  
-  // Check if columns component API is available
-  if (typeof window.columnsComponent === 'undefined') {
-    console.error('Columns component not loaded');
-    return;
-  }
-  
-  // Use columns component API to refresh the column
-  window.columnsComponent.loadColumnPage(columnsId, columnIndex, pageUrl);
+    // Parse column specification (format: "cols-columnIndex")
+    const parts = targetId.split('-');
+    if (parts.length !== 2) {
+        console.error(`Invalid column target specification: ${targetId}`);
+        return;
+    }
+
+    const columnsId = parts[0];
+    const columnIndex = parseInt(parts[1]) - 1; // Convert to 0-based index
+
+    // Check if columns component API is available
+    if (typeof window.columnsComponent === 'undefined') {
+        console.error('Columns component not loaded');
+        return;
+    }
+
+    // Use columns component API to refresh the column
+    window.columnsComponent.loadColumnPage(columnsId, columnIndex, pageUrl);
 }
 
 /**
@@ -1062,41 +1160,41 @@ function refreshColumnTarget(targetId, pageUrl) {
  * @param {string} jsonUrl - The URL of the JSON file
  */
 function refreshJsonContent(targetElement, jsonUrl) {
-  // Create a temporary container for the JSON content
-  const tempContainer = document.createElement('div');
-  tempContainer.style.display = 'none';
-  document.body.appendChild(tempContainer);
-  
-  // Use modal function from dotPipe.js to load JSON
-  modal(jsonUrl, tempContainer)
-    .then(() => {
-      // Move content from temp container to target element
-      targetElement.innerHTML = '';
-      while (tempContainer.firstChild) {
-        targetElement.appendChild(tempContainer.firstChild);
-      }
-      
-      // Remove temp container
-      document.body.removeChild(tempContainer);
-      
-      // Dispatch refresh completed event
-      dispatchRefreshEvent(targetElement, 'refreshCompleted', {
-        targetId: targetElement.id,
-        pageUrl: jsonUrl,
-        success: true
-      });
-    })
-    .catch(error => {
-      targetElement.innerHTML = `<div class="refresh-error">Error loading content: ${error.message}</div>`;
-      console.error('Error loading JSON content:', error);
-      
-      // Dispatch refresh failed event
-      dispatchRefreshEvent(targetElement, 'refreshFailed', {
-        targetId: targetElement.id,
-        pageUrl: jsonUrl,
-        error: error.message
-      });
-    });
+    // Create a temporary container for the JSON content
+    const tempContainer = document.createElement('div');
+    tempContainer.style.display = 'none';
+    document.body.appendChild(tempContainer);
+
+    // Use modal function from dotPipe.js to load JSON
+    modal(jsonUrl, tempContainer)
+        .then(() => {
+            // Move content from temp container to target element
+            targetElement.innerHTML = '';
+            while (tempContainer.firstChild) {
+                targetElement.appendChild(tempContainer.firstChild);
+            }
+
+            // Remove temp container
+            document.body.removeChild(tempContainer);
+
+            // Dispatch refresh completed event
+            dispatchRefreshEvent(targetElement, 'refreshCompleted', {
+                targetId: targetElement.id,
+                pageUrl: jsonUrl,
+                success: true
+            });
+        })
+        .catch(error => {
+            targetElement.innerHTML = `<div class="refresh-error">Error loading content: ${error.message}</div>`;
+            console.error('Error loading JSON content:', error);
+
+            // Dispatch refresh failed event
+            dispatchRefreshEvent(targetElement, 'refreshFailed', {
+                targetId: targetElement.id,
+                pageUrl: jsonUrl,
+                error: error.message
+            });
+        });
 }
 
 /**
@@ -1105,67 +1203,67 @@ function refreshJsonContent(targetElement, jsonUrl) {
  * @param {string} htmlUrl - The URL of the HTML file
  */
 function refreshHtmlContent(targetElement, htmlUrl) {
-  // Create a pipe element to fetch HTML content
-  const pipeElement = document.createElement('div');
-  pipeElement.setAttribute('ajax', htmlUrl);
-  pipeElement.setAttribute('insert', targetElement.id);
-  pipeElement.classList.add('refresh-content-loader');
-  pipeElement.classList.add('plain-html');
-  
-  // Add to document
-  document.body.appendChild(pipeElement);
-  
-  // Trigger the pipe to load content
-  pipes(pipeElement);
-  
-  // Set up event listener to handle when content is loaded
-  document.addEventListener('DOMNodeInserted', function handler(event) {
-    if (event.target.parentNode && event.target.parentNode.id === targetElement.id) {
-      // Content has been inserted into the target element
-      setTimeout(() => {
-        // Remove loading indicator if it exists
-        const loadingIndicator = targetElement.querySelector('.refresh-loading');
-        if (loadingIndicator) {
-          loadingIndicator.remove();
+    // Create a pipe element to fetch HTML content
+    const pipeElement = document.createElement('div');
+    pipeElement.setAttribute('ajax', htmlUrl);
+    pipeElement.setAttribute('insert', targetElement.id);
+    pipeElement.classList.add('refresh-content-loader');
+    pipeElement.classList.add('plain-html');
+
+    // Add to document
+    document.body.appendChild(pipeElement);
+
+    // Trigger the pipe to load content
+    pipes(pipeElement);
+
+    // Set up event listener to handle when content is loaded
+    document.addEventListener('DOMNodeInserted', function handler(event) {
+        if (event.target.parentNode && event.target.parentNode.id === targetElement.id) {
+            // Content has been inserted into the target element
+            setTimeout(() => {
+                // Remove loading indicator if it exists
+                const loadingIndicator = targetElement.querySelector('.refresh-loading');
+                if (loadingIndicator) {
+                    loadingIndicator.remove();
+                }
+
+                // Dispatch refresh completed event
+                dispatchRefreshEvent(targetElement, 'refreshCompleted', {
+                    targetId: targetElement.id,
+                    pageUrl: htmlUrl,
+                    success: true
+                });
+
+                // Remove event listener
+                document.removeEventListener('DOMNodeInserted', handler);
+
+                // Remove the pipe element
+                if (document.body.contains(pipeElement)) {
+                    document.body.removeChild(pipeElement);
+                }
+            }, 100);
         }
-        
-        // Dispatch refresh completed event
-        dispatchRefreshEvent(targetElement, 'refreshCompleted', {
-          targetId: targetElement.id,
-          pageUrl: htmlUrl,
-          success: true
-        });
-        
-        // Remove event listener
-        document.removeEventListener('DOMNodeInserted', handler);
-        
-        // Remove the pipe element
-        if (document.body.contains(pipeElement)) {
-          document.body.removeChild(pipeElement);
+    });
+
+    // Set up error handling
+    setTimeout(() => {
+        if (targetElement.querySelector('.refresh-loading')) {
+            // Content hasn't loaded within timeout period
+            targetElement.innerHTML = `<div class="refresh-error">Error loading content: Timeout</div>`;
+
+            // Dispatch refresh failed event
+            dispatchRefreshEvent(targetElement, 'refreshFailed', {
+                targetId: targetElement.id,
+                pageUrl: htmlUrl,
+                error: 'Timeout'
+            });
+
+            // Remove the pipe element
+            if (document.body.contains(pipeElement)) {
+                document.body.removeChild(pipeElement);
+            }
         }
-      }, 100);
-    }
-  });
-  
-  // Set up error handling
-  setTimeout(() => {
-    if (targetElement.querySelector('.refresh-loading')) {
-      // Content hasn't loaded within timeout period
-      targetElement.innerHTML = `<div class="refresh-error">Error loading content: Timeout</div>`;
-      
-      // Dispatch refresh failed event
-      dispatchRefreshEvent(targetElement, 'refreshFailed', {
-        targetId: targetElement.id,
-        pageUrl: htmlUrl,
-        error: 'Timeout'
-      });
-      
-      // Remove the pipe element
-      if (document.body.contains(pipeElement)) {
-        document.body.removeChild(pipeElement);
-      }
-    }
-  }, 10000); // 10 second timeout
+    }, 10000); // 10 second timeout
 }
 
 /**
@@ -1174,37 +1272,37 @@ function refreshHtmlContent(targetElement, htmlUrl) {
  * @param {string} contentUrl - The URL of the content file
  */
 function refreshGenericContent(targetElement, contentUrl) {
-  fetch(contentUrl)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.text();
-    })
-    .then(content => {
-      targetElement.innerHTML = content;
-      
-      // Process any dotPipe elements in the loaded content
-      domContentLoad();
-      
-      // Dispatch refresh completed event
-      dispatchRefreshEvent(targetElement, 'refreshCompleted', {
-        targetId: targetElement.id,
-        pageUrl: contentUrl,
-        success: true
-      });
-    })
-    .catch(error => {
-      targetElement.innerHTML = `<div class="refresh-error">Error loading content: ${error.message}</div>`;
-      console.error('Error loading content:', error);
-      
-      // Dispatch refresh failed event
-      dispatchRefreshEvent(targetElement, 'refreshFailed', {
-        targetId: targetElement.id,
-        pageUrl: contentUrl,
-        error: error.message
-      });
-    });
+    fetch(contentUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(content => {
+            targetElement.innerHTML = content;
+
+            // Process any dotPipe elements in the loaded content
+            domContentLoad();
+
+            // Dispatch refresh completed event
+            dispatchRefreshEvent(targetElement, 'refreshCompleted', {
+                targetId: targetElement.id,
+                pageUrl: contentUrl,
+                success: true
+            });
+        })
+        .catch(error => {
+            targetElement.innerHTML = `<div class="refresh-error">Error loading content: ${error.message}</div>`;
+            console.error('Error loading content:', error);
+
+            // Dispatch refresh failed event
+            dispatchRefreshEvent(targetElement, 'refreshFailed', {
+                targetId: targetElement.id,
+                pageUrl: contentUrl,
+                error: error.message
+            });
+        });
 }
 
 /**
@@ -1214,28 +1312,28 @@ function refreshGenericContent(targetElement, contentUrl) {
  * @param {Object} detail - Event details
  */
 function dispatchRefreshEvent(element, eventName, detail) {
-  const event = new CustomEvent(eventName, {
-    detail: detail,
-    bubbles: true
-  });
-  element.dispatchEvent(event);
+    const event = new CustomEvent(eventName, {
+        detail: detail,
+        bubbles: true
+    });
+    element.dispatchEvent(event);
 }
 
 /**
  * Add CSS styles for refresh component
  */
 function addRefreshStyles() {
-  // Check if styles already exist
-  if (document.getElementById('refresh-component-styles')) {
-    return;
-  }
-  
-  // Create style element
-  const style = document.createElement('style');
-  style.id = 'refresh-component-styles';
-  
-  // Add CSS rules
-  style.textContent = `
+    // Check if styles already exist
+    if (document.getElementById('refresh-component-styles')) {
+        return;
+    }
+
+    // Create style element
+    const style = document.createElement('style');
+    style.id = 'refresh-component-styles';
+
+    // Add CSS rules
+    style.textContent = `
     .refresh-button {
       display: inline-block;
       padding: 8px 16px;
@@ -1290,9 +1388,9 @@ function addRefreshStyles() {
       margin: 10px 0;
     }
   `;
-  
-  // Add to document head
-  document.head.appendChild(style);
+
+    // Add to document head
+    document.head.appendChild(style);
 }
 
 // Add styles when the script loads
@@ -1302,31 +1400,31 @@ addRefreshStyles();
  * Public API for refresh component
  */
 window.refreshComponent = {
-  /**
-   * Refresh content in a target element
-   * @param {string} targetId - ID of the target element
-   * @param {string} pageUrl - URL of the content to load
-   */
-  refreshTarget: function(targetId, pageUrl) {
-    if (targetId === '_page') {
-      window.location.reload();
-      return;
+    /**
+     * Refresh content in a target element
+     * @param {string} targetId - ID of the target element
+     * @param {string} pageUrl - URL of the content to load
+     */
+    refreshTarget: function (targetId, pageUrl) {
+        if (targetId === '_page') {
+            window.location.reload();
+            return;
+        }
+
+        if (targetId.startsWith('cols-')) {
+            refreshColumnTarget(targetId, pageUrl);
+        } else {
+            refreshStandardTarget(targetId, pageUrl);
+        }
+    },
+
+    /**
+     * Refresh multiple targets
+     * @param {string} targetSpec - Target specification string (format: "targetId:pageUrl;targetId2:pageUrl2")
+     */
+    refreshTargets: function (targetSpec) {
+        handleRefresh(targetSpec);
     }
-    
-    if (targetId.startsWith('cols-')) {
-      refreshColumnTarget(targetId, pageUrl);
-    } else {
-      refreshStandardTarget(targetId, pageUrl);
-    }
-  },
-  
-  /**
-   * Refresh multiple targets
-   * @param {string} targetSpec - Target specification string (format: "targetId:pageUrl;targetId2:pageUrl2")
-   */
-  refreshTargets: function(targetSpec) {
-    handleRefresh(targetSpec);
-  }
 };
 
 /**
@@ -2747,13 +2845,13 @@ function processLoginTags() {
 
         // Mark as processed
         element.classList.add("processed");
-        
+
         // Add a unique ID to this login component if it doesn't have one
         const loginId = element.id || `login-component-${Math.random().toString(36).substring(2, 9)}`;
         if (!element.id) {
             element.id = loginId;
         }
-        
+
         // Add tab switching script with the unique ID to avoid conflicts
         const script = document.createElement('script');
         script.textContent = `
@@ -2780,7 +2878,7 @@ function processLoginTags() {
                 });
             })();
         `;
-        
+
         // Append the script to the document
         document.body.appendChild(script);
     });
@@ -2795,17 +2893,17 @@ function processLoginTags() {
  */
 function createLoginRegistrationInterface(loginPage, registrationPage, cssPage) {
     const externalCss = cssPage ? `<link rel="stylesheet" href="${cssPage}">` : '';
-    
+
     // Determine which tabs to show
     const showLogin = !!loginPage;
     const showRegistration = !!registrationPage;
-    
+
     // Set default active tab
     const loginActive = showLogin ? 'active' : '';
     const registerActive = !showLogin && showRegistration ? 'active' : '';
     const loginDisplay = showLogin ? 'block' : 'none';
     const registerDisplay = !showLogin && showRegistration ? 'block' : 'none';
-    
+
     // Create tabs HTML
     let tabsHtml = '';
     if (showLogin && showRegistration) {
@@ -2815,7 +2913,7 @@ function createLoginRegistrationInterface(loginPage, registrationPage, cssPage) 
             <div class="auth-tab ${registerActive}" data-tab="register-content">Register</div>
         </div>`;
     }
-    
+
     // Create login form HTML
     const loginFormHtml = showLogin ? `
     <div id="login-content" class="auth-form-container" style="display: ${loginDisplay}">
@@ -2851,7 +2949,7 @@ function createLoginRegistrationInterface(loginPage, registrationPage, cssPage) 
             </div>
         </div>
     </div>` : '';
-    
+
     // Create registration form HTML
     const registrationFormHtml = showRegistration ? `
     <div id="register-content" class="auth-form-container" style="display: ${registerDisplay}">
@@ -2887,7 +2985,7 @@ function createLoginRegistrationInterface(loginPage, registrationPage, cssPage) 
             </form>
         </div>
     </div>` : '';
-    
+
     // Combine everything with CSS
     const html = `
     ${externalCss}
@@ -3066,11 +3164,11 @@ function createLoginRegistrationInterface(loginPage, registrationPage, cssPage) 
  */
 function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
     const externalCss = cssPage ? `<link rel="stylesheet" href="${cssPage}">` : '';
-    
+
     // Determine which tabs to show
     const showLogin = !!loginPage;
     const showRegistration = !!registrationPage;
-    
+
     // Create tab definitions for the <tabs> component
     let tabDefinitions = [];
     if (showLogin) {
@@ -3079,10 +3177,10 @@ function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
     if (showRegistration) {
         tabDefinitions.push("Register:register-tab:register-content");
     }
-    
+
     // Create the tabs component
     const tabsComponent = `<tabs id="auth-tabs" tab="${tabDefinitions.join(';')}" class="auth-tabs"></tabs>`;
-    
+
     // Create the login form content
     const loginFormHtml = showLogin ? `
     <div id="login-content" style="display:none;">
@@ -3118,7 +3216,7 @@ function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
             </div>
         </div>
     </div>` : '';
-    
+
     // Create the registration form content
     const registrationFormHtml = showRegistration ? `
     <div id="register-content" style="display:none;">
@@ -3154,7 +3252,7 @@ function createLoginRegistrationTabs(loginPage, registrationPage, cssPage) {
             </form>
         </div>
     </div>` : '';
-    
+
     // Combine everything with CSS
     const html = `
     ${externalCss}
@@ -4441,14 +4539,14 @@ function parseCSVLine(line) {
 async function sha256(message) {
     // Convert the message string to an array of bytes
     const msgBuffer = new TextEncoder().encode(message);
-    
+
     // Hash the message using the SubtleCrypto API
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    
+
     // Convert the hash buffer to a hex string
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
+
     return hashHex;
 }
 
@@ -5331,9 +5429,6 @@ function pipes(elem, stop = false) {
     if (elem.id === null)
         return;
 
-    if (elem.hasAttribute("inline"))
-        dotPipe.runInline(elem.id);
-
     if (elem.hasAttribute("callback") && typeof window[elem.getAttribute("callback")] === "function") {
         var params = [];
         const calls = sortNodesByName("." + elem.getAttribute("callback-class"));
@@ -5370,29 +5465,23 @@ function pipes(elem, stop = false) {
         });
     }
     if (elem.hasAttribute("turn")) {
-        var optsArray = elem.getAttribute("turn");
-        var index = 0;
-        if (elem.hasAttribute("turn-index")) {
-            index = parseInt(elem.getAttribute("turn-index"));
-            var interv = elem.getAttribute("interval");
-            if (elem.classList.contains("decrIndex"))
-                index = Math.abs(parseInt(elem.getAttribute("turn-index").toString())) - interv;
-            else
-                index = Math.abs(parseInt(elem.getAttribute("turn-index").toString())) + interv;
-            if (index < 0)
-                index = optsArray.length - 1;
-            index = index % optsArray.length;
-            elem.setAttribute("turn-index", index.toString());
-        }
-        else
-            elem.setAttribute("turn-index", "0");
-
-        const classLists = document.querySelectorAll("." + elem.getAttribute("turn"));
-        classLists.forEach((e, f) => {
-            if (f == index) {
-                pipes(e);
+        var optsArray = elem.getAttribute("turn").split(";");
+        console.log(optsArray);
+        var index = optsArray.length;
+        if (index == 0) {
+            // Handle case where no elements are present
+        } else if (index >= 1 && optsArray[0] !== '' | undefined) {
+            console.log(optsArray[0])
+            // Handle case where only one element is present
+            if (document.getElementById(optsArray[0]).hasAttribute("inline")) {
+                dotPipe.register();
+                dotPipe.runInline(document.getElementById(optsArray[0]).id);
             }
-        });
+            const opt = optsArray.shift();                 // take first element
+            optsArray.push(opt);                           // push it to the end
+            elem.setAttribute("turn", optsArray.join(";")); // re-assign rotated list
+            console.log("Next turn:", optsArray[0]);
+        }
     }
     if (elem.hasAttribute("x-toggle")) {
         var optsArray = elem.getAttribute("x-toggle").split(";");
