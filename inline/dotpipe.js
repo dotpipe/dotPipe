@@ -5470,17 +5470,17 @@ function pipes(elem, stop = false) {
         var index = optsArray.length;
         if (index == 0) {
             // Handle case where no elements are present
-        } else if (index >= 1) {
+        } else if (index >= 1 && optsArray[0] !== '' | undefined) {
             console.log(optsArray[0])
             // Handle case where only one element is present
             if (document.getElementById(optsArray[0]).hasAttribute("inline")) {
                 dotPipe.register();
                 dotPipe.runInline(document.getElementById(optsArray[0]).id);
             }
-            if (optsArray.length == 1) { }
-            else {
-                elem.setAttribute("turn", optsArray.slice(0, -1).join(";") + ";" + optsArray[0]);
-            }
+            const opt = optsArray.shift();                 // take first element
+            optsArray.push(opt);                           // push it to the end
+            elem.setAttribute("turn", optsArray.join(";")); // re-assign rotated list
+            console.log("Next turn:", optsArray[0]);
         }
     }
     if (elem.hasAttribute("x-toggle")) {

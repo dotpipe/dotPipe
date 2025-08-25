@@ -5,13 +5,19 @@
 "></div>
 <div id="outputDiv"></div>
 
-<button id="run" turn="example">Show Greeting</button>
+<button id="run" turn="example;example1">Show Greeting</button>
+<div id="example1" inline="
+    |&greeting:Is this necessary?
+    |$outputDiv1:!greeting
+    |%shout:[!greeting]
+"></div>
+<div id="outputDiv1"></div>
 
 <script src="./inline/dotpipe.js"></script>
 
 <script>
 function shout(text) {
-    console.log('Shout:', text.toUpperCase());
+    console.log('Shout:', text);
     return text;
 }
 
