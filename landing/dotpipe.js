@@ -79,23 +79,95 @@
  * lazy-load            For <csv>; enable/disable lazy loading (default true).
  * 
  * ──────────────────────────────────────────────────────────────
- * INLINE MACRO OPERATORS
- * 
- * |&varName:value           → Store literal value in dpVars.varName
- * !varName                  → Reference stored variable in function arguments
- * |%funcName:[arg1,arg2]    → Call function funcName with arguments; supports !varName, #varName, @id.prop
- * |$id:varName              → Inject variable value into element innerHTML
- * |@id.prop:varName         → Set DOM element property to variable value
- * |#varName:id.prop         → Read DOM element property into dpVars.varName
- * |nop:varName              → Store the last computed value in dpVars.varName
- * 
- * ──────────────────────────────────────────────────────────────
- * BUILT-IN VERBS
- * 
- * ajax:url:GET              → Fetch URL via AJAX (returns text)
- * log:value                 → Log value to console
- * 
- * ──────────────────────────────────────────────────────────────
+ *  Core Syntax
+ *   |verb:param1:param2   → call a verb with parameters
+ *   !varName              → resolve a pipeline variable
+ *   &varName:value        → assign a pipeline variable
+ *   |$id.prop:value       → set a DOM property/attribute
+ *
+ *  Shells (scoped pipelines)
+ *   |+targetId:shellName  → start a new shell, scoped to element with id=targetId
+ *                          - shell variables are isolated until closed
+ *                          - shellName is a label for managing
+ *   |-shellName           → close shell, merge variables back into parent, discard shell
+ *
+ *   Example:
+ *     |+crazyStrawOutput:timer1
+ *     |&n:testing
+ *     |log:!n
+ *     |-timer1
+ *
+ *  Variable Handling
+ *   &x:123                → define variable x = "123"
+ *   log:!x                → logs "123" in console
+ *   !x.prop               → deep resolve object property (if object/JSON)
+ *
+ *   Example:
+ *     |&user:John
+ *     |log:!user
+ *
+ *  DOM Binding
+ *   |$id.innerHTML:!var   → set innerHTML of element #id
+ *   |$id.value:42         → set form input value
+ *
+ *   Example:
+ *     |&msg:Hello
+ *     |$status.innerHTML:!msg
+ *
+ *  Standard Verbs
+ *   log:x                 → console.log the parameter(s)
+ *   modala:url:targetId   → fetch JSON and render into DOM via modala()
+ *   exc:this              → send the current clicked element into the pipeline
+ *   exc:someVar           → send variable into the pipeline
+ *   nop:x                 → no-op, passes value through
+ *
+ *  AJAX & Modala
+ *   <tag ajax="file.json:targetId" class="modala">  → load JSON via modala()
+ *   Or inline:
+ *     |modala:./inline/data.json:crazyStrawOutput
+ *
+ *  Example Pipeline
+ *   <div id="crazyStrawOutput"></div>
+ *
+ *   <button inline="
+ *     |+crazyStrawOutput:timer1
+ *     |modala:./inline/data.json:crazyStrawOutput
+ *     |&n:testing
+ *     |log:!n
+ *     |$crazyStrawOutput.innerHTML:!n
+ *     |-timer1
+ *   ">Run Modala</button>
+ *
+ * -------------------------------------------------------
+ *  |call: Function Invoker
+ * -------------------------------------------------------
+ * Usage:
+ *   |call:fnName:param1:param2:...
+ *
+ * Behavior:
+ *   - Looks up a function by name in global scope (window).
+ *   - Resolves each param:
+ *       - "this" → the current clicked/triggered element
+ *       - "!varName" → value from dpVars
+ *       - any other string → literal
+ *   - Calls fnName(...resolvedParams)
+ *
+ * Examples:
+ *   |call:highlight:this
+ *       → highlight(elem) with the clicked element.
+ *
+ *   |&n:42 |call:processValue:!n
+ *       → stores 42 in dpVars.n, then calls processValue(42).
+ *
+ *   |call:saveData:crazyStrawOutput:Done!
+ *       → saveData("crazyStrawOutput", "Done!")
+ *
+ * Notes:
+ *   - Functions must be globally accessible (on window).
+ *   - Works with loose functions, modules (if exported globally),
+ *     or inline <script> functions.
+ *   - This allows extending dotPipe with ANY custom JS logic.
+ * ============================================================
  * EXAMPLES
  * 
  * <!-- Basic variable and DOM injection -->
@@ -283,7 +355,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Automatically register all inline elements
-    dotPipe.register();
+    // dotPipe.register();
 
     // Optionally, auto-bind clicks or other events if desired
     for (const key in dotPipe.matrix) {
@@ -316,104 +388,190 @@ const dotPipe = {
             const key = el.id || el.getAttribute('inline') || Symbol();
             this.matrix[key] = {
                 element: el,
+                tag: el,
                 inlineMacro: el.getAttribute('inline'),
                 dpVars: {} // plain storage; no auto-run
             };
         });
     },
 
-    // Run inline macro for a given element manually
+    // ======================
+    // Shell Management
+    // ======================
+    runShellOpen: function (targetId, shellName, entry) {
+        if (!entry.shells) entry.shells = {};
+        entry.shells[shellName] = {
+            targetId,
+            vars: {},
+            buffer: []
+        };
+        console.log(`[dotPipe] Opened shell "${shellName}" on target "${targetId}"`);
+        return entry.shells[shellName];
+    },
+
+    runShellClose: function (shellName, entry) {
+        if (entry.shells && entry.shells[shellName]) {
+            console.log(`[dotPipe] Closed shell "${shellName}"`);
+            delete entry.shells[shellName];
+            return true;
+        } else {
+            console.warn(`[dotPipe] Tried to close unknown shell: "${shellName}"`);
+            return false;
+        }
+    },
+
+    // --- runInline updated with shell support ---
     runInline: async function (key) {
         const entry = this.matrix[key];
         if (!entry || !entry.inlineMacro) return;
-
+        this.currentElem = entry.element;
         let currentValue = null;
+        let currentShell = null;
         const segments = entry.inlineMacro.split('|').filter(s => s.trim() !== '');
 
-        for (let seg of segments) {
-            seg = seg.trim();
+        for (let i = 0; i < segments.length; i++) {
+            let seg = segments[i].trim();
             let m;
 
-            // |&varName:value → store literal
+            // --- Start shell: |+targetId:timerName
+            if (m = /^\+\s*([a-zA-Z0-9_\-]+):([a-zA-Z0-9_]+)/.exec(seg)) {
+                const targetId = m[1];
+                const timerName = m[2];
+                const shellKey = `${targetId}:${timerName}`;
+
+                entry.shells = entry.shells || {};
+                if (!entry.shells[shellKey]) {
+                    entry.shells[shellKey] = {
+                        dpVars: {},
+                        matrix: [],
+                        element: document.getElementById(targetId) || entry.element,
+                        segments: segments.slice(i + 1) // remaining segments go to shell
+                    };
+                }
+
+                currentShell = entry.shells[shellKey];
+
+                // Run shell async
+                (async () => {
+                    await this.runShell(entry.shells[shellKey]);
+                    currentShell = null;
+                })();
+
+                break; // stop parent processing until shell finishes
+            }
+
+            // --- Close shell: |-timerName
+            if (m = /^\-\s*([a-zA-Z0-9_]+)/.exec(seg)) {
+                const timerName = m[1];
+                const shellKey = Object.keys(entry.shells || {}).find(k => k.endsWith(`:${timerName}`));
+                if (shellKey && entry.shells[shellKey]) {
+                    // merge shell vars back to parent
+                    Object.assign(entry.dpVars, entry.shells[shellKey].dpVars);
+                    delete entry.shells[shellKey];
+                    currentShell = null;
+                }
+                continue;
+            }
+
+            // --- Literal assignment: |&var:value
             if (m = /^\&([a-zA-Z0-9_]+):(.+)$/.exec(seg)) {
                 const varName = m[1];
                 const value = m[2];
-                entry.dpVars[varName] = value;
+                (currentShell || entry).dpVars[varName] = value;
                 currentValue = value;
                 continue;
             }
 
-            // nop:varName → store current value
+            // --- Store current value: nop:varName
             if (m = /^nop:([a-zA-Z0-9_]+)$/.exec(seg)) {
                 const varName = m[1];
-                entry.dpVars[varName] = currentValue;
+                (currentShell || entry).dpVars[varName] = currentValue;
                 continue;
             }
 
-            // $id or $id:varName → inject value into element
+            // --- Set element content: $id or $id:!var
             if (m = /^\$([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_!]+))?$/.exec(seg)) {
-                const targetId = m[1];
-                const varName = m[2];
-                const targetEl = document.getElementById(targetId);
+                const targetEl = document.getElementById(m[1]);
                 if (targetEl) {
                     let value;
-                    if (!varName) value = currentValue;
-                    else if (varName.startsWith('!')) value = entry.dpVars[varName.slice(1)];
-                    else value = entry.dpVars[varName];
+                    if (!m[2]) value = currentValue;
+                    else if (m[2].startsWith('!')) value = (currentShell || entry).dpVars[m[2].slice(1)];
+                    else value = (currentShell || entry).dpVars[m[2]];
                     targetEl.innerHTML = value;
                 }
                 continue;
             }
 
-            // @id.prop:varName → set element property
-            if (m = /^@([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_]+):([a-zA-Z0-9_!]+)$/.exec(seg)) {
-                const targetEl = document.getElementById(m[1]);
-                const prop = m[2];
-                const varName = m[3];
-                if (targetEl) {
-                    let value = varName.startsWith('!') ? entry.dpVars[varName.slice(1)] : entry.dpVars[varName];
-                    targetEl[prop] = value;
-                }
-                continue;
-            }
-
-            // #varName:id.prop → read element property
-            if (m = /^#([a-zA-Z0-9_]+):([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_]+)$/.exec(seg)) {
-                const varName = m[1];
-                const targetEl = document.getElementById(m[2]);
-                const prop = m[3];
-                if (targetEl) {
-                    entry.dpVars[varName] = targetEl[prop];
-                    currentValue = entry.dpVars[varName];
-                }
-                continue;
-            }
-
-            // %funcName:[args] → call function
-            if (m = /^\%([a-zA-Z0-9_]+):\[(.+)\]$/.exec(seg)) {
-                const funcName = m[1];
-                let args = m[2].split(',').map(a => a.trim()).map(arg => {
-                    if (arg.startsWith('!')) return entry.dpVars[arg.slice(1)];
-                    if (arg.startsWith('#')) return entry.dpVars[arg.slice(1)];
-                    if (arg.startsWith('@')) {
-                        const [elId, prop] = arg.slice(1).split('.');
-                        const targetEl = document.getElementById(elId);
-                        return targetEl ? targetEl[prop] : undefined;
+            // --- Modala JSON fetch
+            if (seg.toLowerCase().startsWith("modala:")) {
+                const parts = seg.split(":").map(s => s.trim());
+                const [_, url, targetId, method = "GET"] = parts;
+                try {
+                    const resp = await fetch(url, { method: method.toUpperCase() });
+                    const json = await resp.json();
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) {
+                        modala(json, targetEl); // call existing modala function
                     }
-                    return arg;
-                });
-                if (typeof window[funcName] === 'function') {
-                    currentValue = await window[funcName](...args);
+                    (currentShell || entry).matrix.push(json);
+                    currentValue = json;
+                } catch (err) {
+                    console.error("dotPipe modala error:", err);
                 }
                 continue;
             }
 
-            // Standard verb: e.g., ajax:url:GET
-            if (m = /^([a-zA-Z0-9_]+):?(.*)$/.exec(seg)) {
+            if (m = /^([a-zA-Z0-9_+\-]+):?(.*)$/.exec(seg)) {
                 const verb = m[1];
                 const params = m[2] ? m[2].split(':') : [];
-                if (typeof this.verbs[verb] === 'function') {
-                    currentValue = await this.verbs[verb](...params);
+
+                const resolvedParams = params.map(p => {
+                    if (p.startsWith('!')) return entry.dpVars[p.slice(1)];
+                    return p;
+                });
+
+                switch (verb) {
+                    case "+":
+                        currentValue = this.runShellOpen(resolvedParams[0], resolvedParams[1], entry);
+                        break;
+                    case "-":
+                        currentValue = this.runShellClose(resolvedParams[0], entry);
+                        break;
+                    case "call":
+                        currentValue = await this.runCall(resolvedParams[0], ...resolvedParams.slice(1));
+                        break;
+                    default:
+                        if (typeof this.verbs[verb] === 'function') {
+                            currentValue = await this.verbs[verb](...resolvedParams, entry);
+                        } else {
+                            console.warn("Unknown verb:", verb);
+                        }
+                }
+                continue;
+            }
+
+            if (m = /^([a-zA-Z0-9_+\-]+):?(.*)$/.exec(seg)) {
+                const verb = m[1];
+                const params = m[2] ? m[2].split(':') : [];
+
+                const resolvedParams = params.map(p => {
+                    if (p.startsWith('!')) return entry.dpVars[p.slice(1)];
+                    return p;
+                });
+
+                switch (verb) {
+                    case "+":
+                        currentValue = this.runShellOpen(resolvedParams[0], resolvedParams[1], entry);
+                        break;
+                    case "-":
+                        currentValue = this.runShellClose(resolvedParams[0], entry);
+                        break;
+                    default:
+                        if (typeof this.verbs[verb] === 'function') {
+                            currentValue = await this.verbs[verb](...resolvedParams, entry);
+                        } else {
+                            console.warn("Unknown verb:", verb);
+                        }
                 }
                 continue;
             }
@@ -421,7 +579,333 @@ const dotPipe = {
             console.warn('Unknown pipe segment:', seg);
         }
     },
+    // ======================
+    // Custom Function Caller
+    // ======================
+    runCall: async function (fnName, ...args) {
+        // resolve the function
+        let fn = null;
 
+        // 1. Check registered verbs first
+        if (this.verbs[fnName]) {
+            fn = this.verbs[fnName];
+        }
+        // 2. Check globals (functions defined on window)
+        else if (typeof window[fnName] === "function") {
+            fn = window[fnName];
+        }
+        // 3. Check in modules namespace (if attached)
+        else if (this.modules && typeof this.modules[fnName] === "function") {
+            fn = this.modules[fnName];
+        }
+
+        if (!fn) {
+            console.error(`[dotPipe] runCall: function "${fnName}" not found`);
+            return;
+        }
+
+        // resolve `this` references to the current element
+        args = args.map(a => a === "this" ? this.currentElem : a);
+
+        try {
+            const result = await fn(...args);
+            console.log(`[dotPipe] runCall executed "${fnName}" with`, args, "→", result);
+            return result;
+        } catch (err) {
+            console.error(`[dotPipe] runCall error in "${fnName}"`, err);
+            return;
+        }
+    },
+    // --- runShell executes segments inside a shell ---
+    runShell: async function (shell) {
+        if (!shell || !shell.segments) return;
+
+        let currentValue = null;
+
+        for (let seg of shell.segments) {
+            seg = seg.trim();
+            let m;
+
+            // reuse the same logic as runInline for literals, nop, modala, $id, and verbs
+            // literal: &var:value
+            if (m = /^\&([a-zA-Z0-9_]+):(.+)$/.exec(seg)) {
+                shell.dpVars[m[1]] = m[2];
+                currentValue = m[2];
+                continue;
+            }
+
+            // nop:var
+            if (m = /^nop:([a-zA-Z0-9_]+)$/.exec(seg)) {
+                shell.dpVars[m[1]] = currentValue;
+                continue;
+            }
+
+            // $id or $id:!var
+            if (m = /^\$([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_!]+))?$/.exec(seg)) {
+                const targetEl = document.getElementById(m[1]);
+                if (targetEl) {
+                    let value;
+                    if (!m[2]) value = currentValue;
+                    else if (m[2].startsWith('!')) value = shell.dpVars[m[2].slice(1)];
+                    else value = shell.dpVars[m[2]];
+                    targetEl.innerHTML = value;
+                }
+                continue;
+            }
+
+            // modala call inside shell
+            if (seg.toLowerCase().startsWith("modala:")) {
+                const parts = seg.split(":").map(s => s.trim());
+                const [_, url, targetId, method = "GET"] = parts;
+                try {
+                    const resp = await fetch(url, { method: method.toUpperCase() });
+                    const json = await resp.json();
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) modala(json, targetEl);
+                    shell.matrix.push(json);
+                    currentValue = json;
+                } catch (err) {
+                    console.error("dotPipe shell modala error:", err);
+                }
+                continue;
+            }
+
+            // standard verbs
+            if (m = /^([a-zA-Z0-9_]+):?(.*)$/.exec(seg)) {
+                const verb = m[1];
+                const params = m[2] ? m[2].split(':').map(p => p.trim()) : [];
+                const resolvedParams = params.map(p => p.startsWith('!') ? shell.dpVars[p.slice(1)] : p);
+
+                if (typeof dotPipe.verbs[verb] === "function") {
+                    currentValue = await dotPipe.verbs[verb](...resolvedParams);
+                }
+                continue;
+            }
+
+            console.warn('Unknown segment in shell:', seg);
+        }
+    },
+
+    // runInline: async function (key) {
+    //     const entry = this.matrix[key];
+    //     if (!entry || !entry.inlineMacro) return;
+
+    //     if (!Array.isArray(entry.matrix)) entry.matrix = [];
+    //     if (!entry.dpVars) entry.dpVars = {};
+
+    //     let currentValue = null;
+    //     const segments = entry.inlineMacro.split('|').filter(s => s.trim() !== '');
+
+    //     for (let seg of segments) {
+    //         seg = seg.trim();
+    //         let m;
+
+    //         if (seg.startsWith('exc:')) {
+    //             const arg = seg.slice(4).trim(); // 'this' or a variable name
+
+    //             // Determine what to push into the pipeline
+    //             const tag = arg === "this" ? entry.element : entry.dpVars[arg];
+
+    //             if (!tag) {
+    //                 console.warn(`exc: could not find element for "${arg}"`);
+    //                 continue;
+    //             }
+
+    //             // Store in dpVars and matrix so pipes can access it
+    //             entry.dpVars = entry.dpVars || {};
+    //             entry.dpVars[arg] = tag;
+    //             entry.matrix = entry.matrix || [];
+    //             entry.matrix.push(tag);
+
+    //             // Push into the pipeline
+    //             currentValue = await pipes(tag); // assuming pipes() is async
+    //             continue;
+    //         }
+
+    //         if (m = /^\+\s*([a-zA-Z0-9_\-]+):([a-zA-Z0-9_]+)/.exec(seg)) {
+    //             const targetId = m[1];
+    //             const shellName = m[2];
+    //             const shellKey = `${targetId}:${shellName}`;
+
+    //             entry.shells = entry.shells || {};
+    //             if (!entry.shells[shellKey]) {
+    //                 entry.shells[shellKey] = { dpVars: {}, matrix: [], element: document.getElementById(targetId) || entry.element };
+    //             }
+
+    //             // Run shell async in its own promise
+    //             (async () => {
+    //                 currentShell = entry.shells[shellKey];
+    //                 await runShell(entry.shells[shellKey]); // function that executes segments inside shell
+    //                 currentShell = null; // return to parent
+    //             })();
+    //             continue;
+    //         }
+
+
+    //         // Stop/close a shell
+    //         if (m = /^\-\s*([a-zA-Z0-9_]+)/.exec(seg)) {
+    //             const shellName = m[1];
+    //             // find shellKey that matches this element + shellName
+    //             const shellKey = Object.keys(entry.shells || {}).find(k => k.endsWith(`:${shellName}`));
+    //             if (shellKey && entry.shells[shellKey]) {
+    //                 // Optionally merge vars back
+    //                 Object.assign(entry.dpVars, entry.shells[shellKey].dpVars);
+    //                 delete entry.shells[shellKey];
+    //                 currentShell = null; // back to parent
+    //             }
+    //             continue;
+    //         }
+
+    //         // --- Literal assignment &varName:value
+    //         if (m = /^\&([a-zA-Z0-9_]+):(.+)$/.exec(seg)) {
+    //             const varName = m[1];
+    //             const value = m[2];
+    //             entry.dpVars[varName] = value;
+    //             currentValue = value;
+    //             continue;
+    //         }
+
+    //         // --- NOP assignment nop:varName
+    //         if (m = /^nop:([a-zA-Z0-9_]+)$/.exec(seg)) {
+    //             const varName = m[1];
+    //             entry.dpVars[varName] = currentValue;
+    //             continue;
+    //         }
+
+    //         if (seg.startsWith("$")) {
+    //             const m = /^\$([a-zA-Z0-9_\-]+)(?:\.([a-zA-Z0-9_.]+))?:(.+)$/.exec(seg);
+    //             if (m) {
+    //                 const targetId = m[1];
+    //                 const propPath = m[2] || "innerHTML";
+    //                 let val = m[3];
+
+    //                 // Resolve !varName references
+    //                 if (val != null && val.startsWith("!")) {
+    //                     const parts = val.slice(1).split('.');
+    //                     val = entry.dpVars;
+    //                     for (let part of parts) {
+    //                         if (val == null) break;
+    //                         val = val[part];
+    //                     }
+    //                 }
+
+    //                 const targetEl = document.getElementById(targetId);
+    //                 if (targetEl) {
+    //                     const props = propPath.split(".");
+    //                     let obj = targetEl;
+    //                     for (let i = 0; i < props.length - 1; i++) {
+    //                         if (!obj[props[i]]) { obj = null; break; }
+    //                         obj = obj[props[i]];
+    //                     }
+    //                     if (obj) {
+    //                         const lastProp = props[props.length - 1];
+    //                         obj[lastProp] = val;
+
+    //                         // Ensure entry.matrix exists
+    //                         if (!Array.isArray(entry.matrix)) entry.matrix = [];
+    //                         entry.matrix.push(val); // push value, not element
+    //                     }
+    //                 }
+    //             }
+    //             continue;
+    //         }
+
+    //         // --- DOM property read #varName:id.prop
+    //         if (m = /^#([a-zA-Z0-9_]+):([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_]+)$/.exec(seg)) {
+    //             const varName = m[1];
+    //             const targetEl = document.getElementById(m[2]);
+    //             const prop = m[3];
+    //             if (targetEl) {
+    //                 entry.dpVars[varName] = targetEl[prop];
+    //                 currentValue = entry.dpVars[varName];
+    //             }
+    //             continue;
+    //         }
+
+    //         // --- Function call %funcName:[args]
+    //         if (m = /^\%([a-zA-Z0-9_]+):\[(.+)\]$/.exec(seg)) {
+    //             const funcName = m[1];
+    //             let args = m[2].split(',').map(a => a.trim()).map(arg => {
+    //                 if (arg.startsWith('!')) return entry.dpVars[arg.slice(1)];
+    //                 if (arg.startsWith('#')) return entry.dpVars[arg.slice(1)];
+    //                 if (arg.startsWith('@')) {
+    //                     const [elId, prop] = arg.slice(1).split('.');
+    //                     const targetEl = document.getElementById(elId);
+    //                     return targetEl ? targetEl[prop] : undefined;
+    //                 }
+    //                 return arg;
+    //             });
+    //             if (typeof window[funcName] === 'function') {
+    //                 currentValue = await window[funcName](...args);
+    //             }
+    //             continue;
+    //         }
+
+    //         // --- modala: url:targetId[:method]
+    //         if (seg.toLowerCase().startsWith("modala:")) {
+    //             const parts = seg.split(":").map(s => s.trim());
+    //             const [_, url, targetId, method = "GET"] = parts;
+
+    //             try {
+    //                 const res = await fetch(url, { method });
+    //                 const json = await res.json();
+    //                 const container = document.getElementById(targetId);
+    //                 modala(json, container); // render children
+    //                 // return HTML string instead of element
+    //             } catch (err) {
+    //                 console.error("dotPipe modala error:", err);
+    //             }
+    //             continue;
+    //         }
+
+    //         if (m = /^\+\s*([a-zA-Z0-9_]+)/.exec(seg)) {
+    //             const shellName = m[1];
+    //             // create a new shell object
+    //             entry.shells = entry.shells || {};
+    //             entry.shells[shellName] = {
+    //                 dpVars: {},
+    //                 matrix: [],
+    //                 parent: currentShell // optional reference to parent
+    //             };
+    //             currentShell = entry.shells[shellName]; // now all !var references go here
+    //             continue;
+    //         }
+
+    //         if (m = /^\-\s*(timer[0-9]+)/.exec(seg)) {
+    //             const timerId = m[1];
+    //             // stop the shell/timer
+    //             if (entry.timers && entry.timers[timerId]) {
+    //                 clearTimeout(entry.timers[timerId]);
+    //                 delete entry.timers[timerId];
+    //             }
+
+    //             // Optional: pop shell scope
+    //             if (currentShell && currentShell.name === timerId) {
+    //                 currentShell = currentShell.parent || null;
+    //             }
+
+    //             continue;
+    //         }
+
+    //         // --- Standard verb verbName:param1:param2
+    //         if (m = /^([a-zA-Z0-9_]+):?(.*)$/.exec(seg)) {
+    //             const verb = m[1];
+    //             const params = m[2] ? m[2].split(':') : [];
+
+    //             const resolvedParams = params.map(p => {
+    //                 if (p.startsWith('!')) return entry.dpVars[p.slice(1)];
+    //                 return p;
+    //             });
+
+    //             if (typeof this.verbs[verb] === 'function') {
+    //                 currentValue = await this.verbs[verb](...resolvedParams);
+    //             }
+    //             continue;
+    //         }
+
+    //         console.warn("Unknown pipe segment:", seg);
+    //     }
+    // },
     // Built-in verbs (AJAX, log, etc.)
     verbs: {
         async ajax(url, method = 'GET') {
@@ -429,6 +913,7 @@ const dotPipe = {
             const text = await res.text();
             return text;
         },
+
         log(value) {
             console.log(value);
             return value;
@@ -4894,12 +5379,15 @@ function modala(value, tempTag, root, id) {
     }
 
     var temp = document.createElement(value["tagname"]);
-    if (value["tagname"] == "undefined") {
+    if (value["tagname"] === null | "undefined") {
         temp.tagName = "div";
         temp = document.createElement("div");
     }
+    else if (value["tagName"]) {
+        temp.tagName = value["tagName"];
+        temp = document.createElement(value["tagName"]);
+    }
     if (value["header"] !== undefined && value["header"] instanceof Object) {
-
         modalaHead(value["header"], "head", root, null);
         var meta = document.createElement("meta");
         meta.content = "script-src-elem 'self'; img-src 'self'; style-src 'self'; child-src 'none'; object-src 'none'";
@@ -5343,30 +5831,74 @@ function htmlToJson(htmlString) {
 
     return elementToJson(doc.body.firstChild);
 }
+// Helpers to track which elements have pipe listeners
+const pipeListenersSet = new WeakSet();
+function hasPipeListener(elem) { return pipeListenersSet.has(elem); }
+function markPipeListener(elem) { pipeListenersSet.add(elem); }
 
-const processedElements = new WeakSet();
-
-function addPipe(elem = document) {
-    // Attach global listeners to document
-    ['click'].forEach(eventType => {
-        document.addEventListener(eventType, function (event) {
+function addPipe(rootElem = document) {
+    // Global listeners for clicks or custom 'inline' events
+    ['click', 'inline'].forEach(eventType => {
+        rootElem.addEventListener(eventType, async function (event) {
             let target = event.target;
-            if (target.classList.contains('mouse') || target.id !== null) {
-                if (!hasPipeListener(target))
-                    pipes(target);
-                // console.log(target.id);
+
+            // Only process elements that need it
+            if ((target.classList.contains('mouse') || target.id !== null) && !hasPipeListener(target)) {
+
+                // Mark the element as processed for the listener
+                markPipeListener(target);
+
+                // 1️⃣ Run the standard pipe processing
+                await pipes(target);
+
+                // 2️⃣ If element has inline macro, run it
+                if (target.getAttribute('inline')) {
+                    const key = target.id || Symbol(); // use ID or a unique key
+                    // Ensure matrix entry exists
+                    dotPipe.matrix[key] = dotPipe.matrix[key] || {
+                        inlineMacro: target.getAttribute('inline'),
+                        dpVars: {},
+                        element: target,
+                        matrix: []
+                    };
+                    await dotPipe.runInline(key, target);
+                }
             }
         }, true);
     });
-    // Add this inside your existing addPipe function
-    const csvForEachElements = document.getElementsByTagName("csv-foreach");
+
+    // Process <csv-foreach> elements inside the root
+    const csvForEachElements = rootElem.getElementsByTagName("csv-foreach");
     Array.from(csvForEachElements).forEach(function (elem) {
         if (!elem.classList.contains("processed")) {
-            processCsvForeach();
+            processCsvForeach(elem); // pass elem so the function knows the target
+            elem.classList.add("processed");
         }
     });
-
 }
+
+
+// function addPipe(elem = document) {
+//     // Attach global listeners to document
+//     ['click', 'inline'].forEach(eventType => {
+//         document.addEventListener(eventType, function (event) {
+//             let target = event.target;
+//             if (target.classList.contains('mouse') || target.id !== null) {
+//                 if (!hasPipeListener(target))
+//                     pipes(target);
+//                 // console.log(target.id);
+//             }
+//         }, true);
+//     });
+//     // Add this inside your existing addPipe function
+//     const csvForEachElements = document.getElementsByTagName("csv-foreach");
+//     Array.from(csvForEachElements).forEach(function (elem) {
+//         if (!elem.classList.contains("processed")) {
+//             processCsvForeach();
+//         }
+//     });
+
+// }
 
 function flashClickListener(elem) {
     if (elem.id) {
@@ -5426,7 +5958,7 @@ function pipes(elem, stop = false) {
     var headers = new Map();
     var formclass = "";
     //
-    if (elem.id === null)
+    if (elem.inline == null && elem.id === null)
         return;
 
     if (elem.hasAttribute("callback") && typeof window[elem.getAttribute("callback")] === "function") {
@@ -5470,17 +6002,17 @@ function pipes(elem, stop = false) {
         var index = optsArray.length;
         if (index == 0) {
             // Handle case where no elements are present
-        } else if (index >= 1) {
+        } else if (index >= 1 && optsArray[0] !== '' | undefined) {
             console.log(optsArray[0])
             // Handle case where only one element is present
             if (document.getElementById(optsArray[0]).hasAttribute("inline")) {
                 dotPipe.register();
                 dotPipe.runInline(document.getElementById(optsArray[0]).id);
             }
-            if (optsArray.length == 1) { }
-            else {
-                elem.setAttribute("turn", optsArray.slice(0, -1).join(";") + ";" + optsArray[0]);
-            }
+            const opt = optsArray.shift();                 // take first element
+            optsArray.push(opt);                           // push it to the end
+            elem.setAttribute("turn", optsArray.join(";")); // re-assign rotated list
+            console.log("Next turn:", optsArray[0]);
         }
     }
     if (elem.hasAttribute("x-toggle")) {
@@ -5828,9 +6360,18 @@ function navigate(elem, opts = null, query = "", classname = "") {
         rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4) {
                 var allText = JSON.parse(rawFile.responseText);
-                var insertElement = document.getElementById(elem.getAttribute("insert"));
+                var insertId = elem.getAttribute("insert");
+                if (!insertId) {
+                    console.warn("modala element missing 'insert' attribute", elem);
+                    return;
+                }
+                var insertElement = document.getElementById(insertId);
+                if (!insertElement) {
+                    console.warn("modala insert target not found for id:", insertId);
+                    return;
+                }
                 var boxLimit = elem.getAttribute("boxes") ? parseInt(elem.getAttribute("boxes")) : Infinity;
-
+                console.log(insertElement + elem.getAttribute("insert"));
                 if (!elem.classList.contains("modala-multi-first") && !elem.classList.contains("modala-multi-last")) {
                     insertElement.innerHTML = "";
                 } else if (insertElement.children.length >= boxLimit) {

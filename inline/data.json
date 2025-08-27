@@ -1,0 +1,86 @@
+[
+    {
+        "page": 2,
+        "elements": [
+            {
+                "tagName": "h2",
+                "id": "mainHeader2",
+                "textContent": "Pipeline Stage 2"
+            },
+            {
+                "tagName": "p",
+                "id": "intro2",
+                "textContent": "Demonstrating |+ shell timers and global vars."
+            },
+            {
+                "tagName": "div",
+                "id": "status2",
+                "textContent": "Status: Processing..."
+            },
+            {
+                "tagName": "div",
+                "id": "data2",
+                "textContent": "Pipeline data ready: !collected"
+            },
+            {
+                "tagName": "span",
+                "id": "note2",
+                "textContent": "Will insert dynamically into DOM with |$"
+            }
+        ]
+    },
+    {
+        "page": 5,
+        "elements": [
+            {
+                "tagName": "h1",
+                "id": "mainHeader5",
+                "textContent": "Final Page: Crazy Straw Ends"
+            },
+            {
+                "tagName": "p",
+                "id": "intro5",
+                "textContent": "Combine |modala:, AJAX, |$, shells, and globals to see the full effect."
+            },
+            {
+                "tagName": "div",
+                "id": "status5",
+                "textContent": "Status: Complete!"
+            },
+            {
+                "tagName": "span",
+                "id": "counter5",
+                "textContent": "Counter: 10"
+            },
+            {
+                "tagName": "div",
+                "id": "note5",
+                "textContent": "End of crazy straw demo pipeline."
+            },
+            {
+                "tagName": "div",
+                "id": "footer5",
+                "textContent": "Pipeline fully exercised, everything connected!"
+            }
+        ]
+    },
+    {
+        "stage1": [
+            {
+                "tagName": "h2",
+                "id": "mainHeader",
+                "textContent": "Pipeline Stage 1"
+            },
+            {
+                "tagName": "p",
+                "id": "intro",
+                "textContent": "This is a test for |+shell and modala inline JSON."
+            },
+            {
+                "tagName": "div",
+                "id": "crazyStrawOutput",
+                "textContent": "Initial content from JSON."
+            }
+        ]
+    }
+]
