@@ -5356,12 +5356,21 @@ function escapeHtml(html) {
 }
 
 /**
- * 
- * @param {JSON Object} value 
- * @param {string} tempTag 
- * @param {} root 
- * @param {*} id 
- * @returns HTML Object
+ * Render a JSON-like descriptor into DOM nodes and append the result into a target container.
+ *
+ * This function interprets a structured `value` object (commonly produced by `modala`-style JSON)
+ * to create elements, attributes, nested content, and external resources (CSS/JS/html/php).
+ * It supports special keys: `tagname`/`tagName`, `header` (processed via modalaHead and injects a CSP meta),
+ * `buttons`, `sources`, `css`, `js`, `html`, `php`, `select`/`options`, `br`, `style`, and text/HTML content
+ * via `textcontent` / `innerhtml` / `innertext`. Created elements are appended to `tempTag`; after insertion
+ * the function calls domContentLoad() to process any new dotPipe tags.
+ *
+ * @param {Object} value - JSON-like descriptor describing element(s) to create. Keys control tags, attributes,
+ *                         nested objects, and supported special behaviors (see above).
+ * @param {HTMLElement|string} tempTag - Container element or its id string where the generated content will be appended.
+ * @param {HTMLElement} [root] - Optional root element used when processing headers; defaults to the resolved tempTag.
+ * @param {*} [id] - Optional identifier (currently passed through but not required by the renderer).
+ * @returns {HTMLElement|undefined} The container (`tempTag`) after content has been appended, or undefined on error.
  */
 function modala(value, tempTag, root, id) {
     if (typeof (tempTag) == "string") {
@@ -5798,6 +5807,17 @@ function fileOrder(elem) {
 }
 
 
+/**
+ * Parse an HTML string and produce a JSON-like representation of the first top-level element.
+ *
+ * The returned object represents an element with fields:
+ * - `tagName` (lowercased tag name),
+ * - `attributes` (map of attribute name → value),
+ * - `children` (array of child nodes where element nodes are the same shape and text nodes are `{ type: 'text', content: '...' }`).
+ *
+ * @param {string} htmlString - HTML source to parse (may contain a fragment or full document); the function converts the first element under the parsed document body.
+ * @return {Object} JSON-like representation of the first body child element (see description).
+ */
 function htmlToJson(htmlString) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlString, 'text/html');
@@ -5833,9 +5853,32 @@ function htmlToJson(htmlString) {
 }
 // Helpers to track which elements have pipe listeners
 const pipeListenersSet = new WeakSet();
+/**
+ * Check whether a given DOM element is currently tracked as having a pipe listener.
+ *
+ * @param {Element} elem - The DOM element to test.
+ * @returns {boolean} True if the element is present in the internal pipe listener set, otherwise false.
+ */
 function hasPipeListener(elem) { return pipeListenersSet.has(elem); }
+/**
+ * Mark a DOM element as already hooked for pipe/listener handling so it won't be processed again.
+ * @param {Element} elem - The element to mark as processed. */
 function markPipeListener(elem) { pipeListenersSet.add(elem); }
 
+/**
+ * Attach global event handlers and initialize inline/csv-foreach processing within a root element.
+ *
+ * Adds delegated listeners for 'click' and custom 'inline' events on the given root (default: document).
+ * When an event target is eligible (has class "mouse" or an id and hasn't been processed), the handler:
+ *  - marks the element so it won't be re-bound,
+ *  - runs the pipe processor for that element (pipes),
+ *  - if the element has an `inline` attribute, ensures a dotPipe.matrix entry and invokes dotPipe.runInline for it.
+ *
+ * The function also finds any <csv-foreach> elements under the root and calls processCsvForeach on each
+ * unprocessed instance, marking them with the "processed" class.
+ *
+ * @param {Document|Element} [rootElem=document] - Root node to attach listeners and scan for <csv-foreach> elements.
+ */
 function addPipe(rootElem = document) {
     // Global listeners for clicks or custom 'inline' events
     ['click', 'inline'].forEach(eventType => {
@@ -5898,7 +5941,15 @@ function addPipe(rootElem = document) {
 //         }
 //     });
 
-// }
+/**
+ * Attach a click handler to an element that triggers the dotPipe pipeline and refreshes tag processing.
+ *
+ * If the element has an id, any existing click listener added by this function is removed and a new one is added;
+ * the click listener calls `pipes(elem)` when fired. After rebinding (or immediately if no id), `domContentLoad(true)` is invoked
+ * to re-scan/process custom tags.
+ *
+ * @param {Element} elem - The DOM element to bind the click handler to (only processed if it has an `id`).
+ */
 
 function flashClickListener(elem) {
     if (elem.id) {
@@ -5952,6 +6003,24 @@ function sortNodesByName(selector) {
 }
 
 
+/**
+ * Process a dotPipe "pipe" element: perform DOM actions, navigation, AJAX/modals, carousel controls, downloads, and attribute manipulations driven by the element's attributes/classes.
+ *
+ * This inspects the provided element for supported attributes and classes (e.g., `ajax`, `modal`, `query`, `headers`, `turn`, `x-toggle`, `set`, `get`, `remove`, `download`, carousel classes, `callback`, `display`, `clear-node`, etc.) and executes the corresponding side effects:
+ * - triggers navigation/AJAX loads via navigate() or modalList()
+ * - opens links or performs window.location redirects
+ * - calls a global callback function when `callback` is present
+ * - manipulates other DOM nodes (show/hide, set/remove attributes, remove nodes, clear content)
+ * - controls carousel behavior (shift/slide/turn)
+ * - starts downloads by creating a temporary anchor and clicking it
+ * - rotates `turn` lists and re-invokes inline pipes when appropriate
+ *
+ * Side effects: performs network requests, opens new windows/tabs, mutates the DOM, and may call globally-scoped functions.
+ *
+ * @param {Element} elem - The element whose pipe behavior should be executed.
+ * @param {boolean} [stop=false] - Optional flag (currently unused) reserved for halting/short-circuiting processing.
+ * @returns {void}
+ */
 function pipes(elem, stop = false) {
 
     var query = "";
@@ -6237,6 +6306,31 @@ function displayColoredJson(elementId, jsonObj) {
     document.getElementById(elementId).innerHTML = `<pre>${prettyHtml}</pre>`;
 }
 
+/**
+ * Send an AJAX GET request built from the provided element and inject the response into the DOM.
+ *
+ * Builds a request URL by combining `query` with form data (when elements with `classname` exist),
+ * encodes it, applies AJAX options via `setAJAXOpts`, then issues an XMLHttpRequest to the URL
+ * taken from the element's `ajax` attribute. Response handling varies by element classes:
+ * - `strict-json`: replaces document.body with raw JSON text only if it parses.
+ * - `json`: parses JSON and renders it via `displayColoredJson`, optionally inserting into `insert` target.
+ * - `text-html`: inserts raw HTML into the element referenced by `insert`.
+ * - `plain-text`: inserts response text into the `insert` target as textContent.
+ * - `tree-view`: parses JSON and renders a tree via `renderTree`.
+ * - `modala`: parses JSON and renders modal content via `modala` into the element referenced by `insert`.
+ * - default: inserts raw response HTML into the `insert` target (when present).
+ *
+ * Side effects:
+ * - Updates DOM nodes specified by the element's `insert` attribute.
+ * - Calls `domContentLoad()` after inserting content to re-process dotPipe tags.
+ * - Calls `flashClickListener(elem)` after successful loads for UI feedback.
+ * - May call `renderTree`, `modala`, or `displayColoredJson` depending on element classes.
+ *
+ * @param {Element} elem - The source element that provides attributes (`ajax`, `insert`, classes) guiding the request and insertion.
+ * @param {Map|Object|null} [opts=null] - Optional AJAX options; passed through `setAJAXOpts` for normalization.
+ * @param {string} [query=""] - Initial query string to append to the request URL; form data may be appended.
+ * @param {string} [classname=""] - If elements with this CSS class exist on the page, `formAJAX(elem, classname)` is appended to the query string.
+ */
 function navigate(elem, opts = null, query = "", classname = "") {
     //formAJAX at the end of this line
     // console.log(elem);
