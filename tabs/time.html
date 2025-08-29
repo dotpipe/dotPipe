@@ -59,17 +59,16 @@
 
 <body>
 
-  <h2>Typing Simulation</h2>
-  <div id="typing"></div>
+  <div id="typing" style="white-space: pre-wrap; border-radius: 6px; padding: 12px; background-color: #131622; color: beige; min-height: auto; min-width: 100%;"></div>
 
   <h2>dotPipe Rendered Output</h2>
   <div id="rendered1">
-    <tabs tab="First Tab:rendered:slide2.html;Second Tab:rendered:slide3.html;Third Tab:rendered:slide1.html"></tabs>
+    <tabs id="tab" style="display: none;" tab="First Tab:rendered:slide2.html;Second Tab:rendered:slide3.html;Third Tab:rendered:slide1.html"></tabs>
   </div>
 
   <script>
     const htmlText = `
-<tabs tab="First Tab:rendered:slide2.html;Second Tab:rendered:slide3.html;Third Tab:rendered:slide1.html"></tabs>
+<tabs id="tab" tab="First Tab:rendered:slide2.html;Second Tab:rendered:slide3.html;Third Tab:rendered:slide1.html"></tabs>
 `;
 
     let i = 0;
@@ -85,7 +84,7 @@
         // fetch("slide2.html")
         //   .then(response => response.text())
         //   .then(data => {
-        document.getElementById("rendered1").style.display = "block";
+        document.getElementById("tab").style.display = "block";
         //     domContentLoad();
         //   })
         //   .catch(error => console.error("Error:", error));
