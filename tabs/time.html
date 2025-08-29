@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dotPipe Typing Demo</title>
+  <script src="./dotpipe.js"></script>
+  <style>
+    tabs.dp-tabs {
+      display: block;
+    }
+
+    .tabs-header {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .tab-header {
+      background: #131622;
+      color: #cfd8dc;
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      border: 0;
+    }
+
+    .tab-header.active {
+      background: #274a9a;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 12px;
+      background: #c5c7ca;
+      border-radius: 6px;
+      min-height: 120px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-loading {
+      color: #9aa7c7;
+      text-align: center;
+    }
+
+    .tab-error {
+      color: #ff6b6b;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Typing Simulation</h2>
+  <div id="typing"></div>
+
+  <h2>dotPipe Rendered Output</h2>
+  <div id="rendered1">
+    <tabs tab="First Tab:rendered:slide2.html;Second Tab:rendered:slide3.html;Third Tab:rendered:slide1.html"></tabs>
+  </div>
+
+  <script>
+    const htmlText = `
+<tabs tab="First Tab:rendered:slide2.html;Second Tab:rendered:slide3.html;Third Tab:rendered:slide1.html"></tabs>
+`;
+
+    let i = 0;
+    const typingEl = document.getElementById("typing");
+
+    function typeNext() {
+      if (i < htmlText.length) {
+        typingEl.textContent += htmlText.charAt(i);
+        i++;
+        setTimeout(typeNext, 2400 / 60); // ~25 words/min
+      } else {
+        // Once typing is finished, render through dotPipe into the rendered div
+        // fetch("slide2.html")
+        //   .then(response => response.text())
+        //   .then(data => {
+        document.getElementById("rendered1").style.display = "block";
+        //     domContentLoad();
+        //   })
+        //   .catch(error => console.error("Error:", error));
+        domContentLoad();
+      }
+    }
+
+    typeNext();
+  </script>
+</body>
+
+</html>

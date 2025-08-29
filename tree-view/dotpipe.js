@@ -685,227 +685,7 @@ const dotPipe = {
             console.warn('Unknown segment in shell:', seg);
         }
     },
-
-    // runInline: async function (key) {
-    //     const entry = this.matrix[key];
-    //     if (!entry || !entry.inlineMacro) return;
-
-    //     if (!Array.isArray(entry.matrix)) entry.matrix = [];
-    //     if (!entry.dpVars) entry.dpVars = {};
-
-    //     let currentValue = null;
-    //     const segments = entry.inlineMacro.split('|').filter(s => s.trim() !== '');
-
-    //     for (let seg of segments) {
-    //         seg = seg.trim();
-    //         let m;
-
-    //         if (seg.startsWith('exc:')) {
-    //             const arg = seg.slice(4).trim(); // 'this' or a variable name
-
-    //             // Determine what to push into the pipeline
-    //             const tag = arg === "this" ? entry.element : entry.dpVars[arg];
-
-    //             if (!tag) {
-    //                 console.warn(`exc: could not find element for "${arg}"`);
-    //                 continue;
-    //             }
-
-    //             // Store in dpVars and matrix so pipes can access it
-    //             entry.dpVars = entry.dpVars || {};
-    //             entry.dpVars[arg] = tag;
-    //             entry.matrix = entry.matrix || [];
-    //             entry.matrix.push(tag);
-
-    //             // Push into the pipeline
-    //             currentValue = await pipes(tag); // assuming pipes() is async
-    //             continue;
-    //         }
-
-    //         if (m = /^\+\s*([a-zA-Z0-9_\-]+):([a-zA-Z0-9_]+)/.exec(seg)) {
-    //             const targetId = m[1];
-    //             const shellName = m[2];
-    //             const shellKey = `${targetId}:${shellName}`;
-
-    //             entry.shells = entry.shells || {};
-    //             if (!entry.shells[shellKey]) {
-    //                 entry.shells[shellKey] = { dpVars: {}, matrix: [], element: document.getElementById(targetId) || entry.element };
-    //             }
-
-    //             // Run shell async in its own promise
-    //             (async () => {
-    //                 currentShell = entry.shells[shellKey];
-    //                 await runShell(entry.shells[shellKey]); // function that executes segments inside shell
-    //                 currentShell = null; // return to parent
-    //             })();
-    //             continue;
-    //         }
-
-
-    //         // Stop/close a shell
-    //         if (m = /^\-\s*([a-zA-Z0-9_]+)/.exec(seg)) {
-    //             const shellName = m[1];
-    //             // find shellKey that matches this element + shellName
-    //             const shellKey = Object.keys(entry.shells || {}).find(k => k.endsWith(`:${shellName}`));
-    //             if (shellKey && entry.shells[shellKey]) {
-    //                 // Optionally merge vars back
-    //                 Object.assign(entry.dpVars, entry.shells[shellKey].dpVars);
-    //                 delete entry.shells[shellKey];
-    //                 currentShell = null; // back to parent
-    //             }
-    //             continue;
-    //         }
-
-    //         // --- Literal assignment &varName:value
-    //         if (m = /^\&([a-zA-Z0-9_]+):(.+)$/.exec(seg)) {
-    //             const varName = m[1];
-    //             const value = m[2];
-    //             entry.dpVars[varName] = value;
-    //             currentValue = value;
-    //             continue;
-    //         }
-
-    //         // --- NOP assignment nop:varName
-    //         if (m = /^nop:([a-zA-Z0-9_]+)$/.exec(seg)) {
-    //             const varName = m[1];
-    //             entry.dpVars[varName] = currentValue;
-    //             continue;
-    //         }
-
-    //         if (seg.startsWith("$")) {
-    //             const m = /^\$([a-zA-Z0-9_\-]+)(?:\.([a-zA-Z0-9_.]+))?:(.+)$/.exec(seg);
-    //             if (m) {
-    //                 const targetId = m[1];
-    //                 const propPath = m[2] || "innerHTML";
-    //                 let val = m[3];
-
-    //                 // Resolve !varName references
-    //                 if (val != null && val.startsWith("!")) {
-    //                     const parts = val.slice(1).split('.');
-    //                     val = entry.dpVars;
-    //                     for (let part of parts) {
-    //                         if (val == null) break;
-    //                         val = val[part];
-    //                     }
-    //                 }
-
-    //                 const targetEl = document.getElementById(targetId);
-    //                 if (targetEl) {
-    //                     const props = propPath.split(".");
-    //                     let obj = targetEl;
-    //                     for (let i = 0; i < props.length - 1; i++) {
-    //                         if (!obj[props[i]]) { obj = null; break; }
-    //                         obj = obj[props[i]];
-    //                     }
-    //                     if (obj) {
-    //                         const lastProp = props[props.length - 1];
-    //                         obj[lastProp] = val;
-
-    //                         // Ensure entry.matrix exists
-    //                         if (!Array.isArray(entry.matrix)) entry.matrix = [];
-    //                         entry.matrix.push(val); // push value, not element
-    //                     }
-    //                 }
-    //             }
-    //             continue;
-    //         }
-
-    //         // --- DOM property read #varName:id.prop
-    //         if (m = /^#([a-zA-Z0-9_]+):([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_]+)$/.exec(seg)) {
-    //             const varName = m[1];
-    //             const targetEl = document.getElementById(m[2]);
-    //             const prop = m[3];
-    //             if (targetEl) {
-    //                 entry.dpVars[varName] = targetEl[prop];
-    //                 currentValue = entry.dpVars[varName];
-    //             }
-    //             continue;
-    //         }
-
-    //         // --- Function call %funcName:[args]
-    //         if (m = /^\%([a-zA-Z0-9_]+):\[(.+)\]$/.exec(seg)) {
-    //             const funcName = m[1];
-    //             let args = m[2].split(',').map(a => a.trim()).map(arg => {
-    //                 if (arg.startsWith('!')) return entry.dpVars[arg.slice(1)];
-    //                 if (arg.startsWith('#')) return entry.dpVars[arg.slice(1)];
-    //                 if (arg.startsWith('@')) {
-    //                     const [elId, prop] = arg.slice(1).split('.');
-    //                     const targetEl = document.getElementById(elId);
-    //                     return targetEl ? targetEl[prop] : undefined;
-    //                 }
-    //                 return arg;
-    //             });
-    //             if (typeof window[funcName] === 'function') {
-    //                 currentValue = await window[funcName](...args);
-    //             }
-    //             continue;
-    //         }
-
-    //         // --- modala: url:targetId[:method]
-    //         if (seg.toLowerCase().startsWith("modala:")) {
-    //             const parts = seg.split(":").map(s => s.trim());
-    //             const [_, url, targetId, method = "GET"] = parts;
-
-    //             try {
-    //                 const res = await fetch(url, { method });
-    //                 const json = await res.json();
-    //                 const container = document.getElementById(targetId);
-    //                 modala(json, container); // render children
-    //                 // return HTML string instead of element
-    //             } catch (err) {
-    //                 console.error("dotPipe modala error:", err);
-    //             }
-    //             continue;
-    //         }
-
-    //         if (m = /^\+\s*([a-zA-Z0-9_]+)/.exec(seg)) {
-    //             const shellName = m[1];
-    //             // create a new shell object
-    //             entry.shells = entry.shells || {};
-    //             entry.shells[shellName] = {
-    //                 dpVars: {},
-    //                 matrix: [],
-    //                 parent: currentShell // optional reference to parent
-    //             };
-    //             currentShell = entry.shells[shellName]; // now all !var references go here
-    //             continue;
-    //         }
-
-    //         if (m = /^\-\s*(timer[0-9]+)/.exec(seg)) {
-    //             const timerId = m[1];
-    //             // stop the shell/timer
-    //             if (entry.timers && entry.timers[timerId]) {
-    //                 clearTimeout(entry.timers[timerId]);
-    //                 delete entry.timers[timerId];
-    //             }
-
-    //             // Optional: pop shell scope
-    //             if (currentShell && currentShell.name === timerId) {
-    //                 currentShell = currentShell.parent || null;
-    //             }
-
-    //             continue;
-    //         }
-
-    //         // --- Standard verb verbName:param1:param2
-    //         if (m = /^([a-zA-Z0-9_]+):?(.*)$/.exec(seg)) {
-    //             const verb = m[1];
-    //             const params = m[2] ? m[2].split(':') : [];
-
-    //             const resolvedParams = params.map(p => {
-    //                 if (p.startsWith('!')) return entry.dpVars[p.slice(1)];
-    //                 return p;
-    //             });
-
-    //             if (typeof this.verbs[verb] === 'function') {
-    //                 currentValue = await this.verbs[verb](...resolvedParams);
-    //             }
-    //             continue;
-    //         }
-
-    //         console.warn("Unknown pipe segment:", seg);
-    //     }
-    // },
+    
     // Built-in verbs (AJAX, log, etc.)
     verbs: {
         async ajax(url, method = 'GET') {
@@ -959,7 +739,8 @@ let domContentLoad = (again = false) => {
     // Process CSV tags
     processCsvTags();
     processLoginTags();
-    processTabTags();
+    // processTabTags();
+    document.querySelectorAll("tabs").forEach(tabsEl => handleTabs(tabsEl));
     processCartTags();
     processOrderConfirmationTags();
     processColumnsTags();
@@ -1038,7 +819,92 @@ let domContentLoad = (again = false) => {
     });
 }
 
+function handleTabs(tabsEl) {
+  const spec = (tabsEl.getAttribute('tab') || '').trim();
+  if (!spec) return;
 
+  const tabsData = spec.split(';').map(s => s.trim()).filter(Boolean);
+
+  function makeId(raw) {
+    let id = (raw || '').trim();
+    if (!id) id = 'tab-' + Math.random().toString(36).slice(2, 8);
+    id = id.replace(/\s+/g, '-').replace(/[^A-Za-z0-9\-_]/g, '');
+    let base = id, i = 1;
+    while (tabsEl.querySelector(`#${id}`)) { id = base + '-' + (i++); }
+    return id;
+  }
+
+  tabsEl.classList.add('dp-tabs');
+  tabsEl.innerHTML = '';
+
+  // header and content wrappers
+  const headerWrapper = document.createElement('div');
+  headerWrapper.className = 'tabs-header';
+  tabsEl.appendChild(headerWrapper);
+
+  const contentWrapper = document.createElement('div');
+  contentWrapper.className = 'tabs-content';
+  tabsEl.appendChild(contentWrapper);
+
+  const tabMap = [];
+
+  // create each tab
+  tabsData.forEach((tabSpec, idx) => {
+    const parts = tabSpec.split(':').map(p => p.trim());
+    const label = parts[0] || `Tab ${idx+1}`;
+    const rawId = parts[1] || label;
+    const src = parts[2] || '';
+
+    const id = makeId(rawId);
+    tabMap.push({ id, src });
+
+    // header
+    const header = document.createElement('button');
+    header.type = 'button';
+    header.className = 'tab-header' + (idx === 0 ? ' active' : '');
+    header.textContent = label;
+    header.dataset.tab = id;
+    headerWrapper.appendChild(header);
+
+    // content
+    const content = document.createElement('div');
+    content.className = 'tab-content' + (idx === 0 ? ' active' : '');
+    content.id = id;
+    content.dataset.srcLoaded = ''; // track if we loaded content yet
+    contentWrapper.appendChild(content);
+
+    // optionally pre-load first tab
+    if (idx === 0 && src) {
+      content.innerHTML = '<div class="tab-loading">Loading…</div>';
+      fetch(src).then(r => r.text())
+        .then(html => { content.innerHTML = html; content.dataset.srcLoaded = src; })
+        .catch(err => { content.innerHTML = `<div class="tab-error">Error: ${err.message}</div>`; });
+    }
+  });
+
+  // click handler
+  headerWrapper.addEventListener('click', (ev) => {
+    const clicked = ev.target.closest('.tab-header');
+    if (!clicked) return;
+    const id = clicked.dataset.tab;
+
+    headerWrapper.querySelectorAll('.tab-header').forEach(h => h.classList.remove('active'));
+    contentWrapper.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+    clicked.classList.add('active');
+    const target = contentWrapper.querySelector(`#${CSS.escape(id)}`);
+    if (target) {
+      target.classList.add('active');
+      const tabInfo = tabMap.find(t => t.id === id);
+      if (tabInfo && tabInfo.src && target.dataset.srcLoaded !== tabInfo.src) {
+        target.innerHTML = '<div class="tab-loading">Loading…</div>';
+        fetch(tabInfo.src).then(r => r.text())
+          .then(html => { target.innerHTML = html; target.dataset.srcLoaded = tabInfo.src; })
+          .catch(err => { target.innerHTML = `<div class="tab-error">Error: ${err.message}</div>`; });
+      }
+    }
+  });
+}
 /**
  * Process all columns tags in the document
  */
