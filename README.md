@@ -324,3 +324,192 @@ Classes that modify behavior of tags.
 function process(val){ alert(val); }
 </script>
 ```
+
+# DotPipe inline macro system
+
+## Overview
+DotPipe supports inline macros that let you declaratively manipulate DOM elements, assign variables, and chain multiple operations in a single inline attribute. Macros use prefixes (# for IDs, . for classes) and index expressions ([n], [], [x,y], [start:end], [start:end:step]) to target elements precisely.
+
+---
+
+## Syntax
+
+### Variable declaration
+- **Form:** `|&varname:value|`
+- **Effect:** Declares a variable varname with the given value, scoped to the current inline processor (or shell if inside one).
+- **Example:**
+```html
+<div inline="|&msg:Rustic ain't it?|"></div>
+```
+
+### Variable substitution
+- **Form:** `!varname`
+- **Effect:** Substitutes the value of a previously declared variable.
+- **Example:**
+```html
+<div inline="|&msg:Hello|.title[0].innerText:!msg"></div>
+```
+The first .title element’s text becomes “Hello”.
+
+### Element targeting and property assignment
+- **By ID:** `#id.property:value`
+- **By class (single index):** `.class[n].property:value`
+- **All elements of a class:** `.class[].property:value`
+- **Explicit indices:** `.class[x,y].property:value`
+- **Slice with count:** `.class[start:count].property:value`
+- **Slice with step:** `.class[start:end:step].property:value`
+- **Negative indices:** `.class[-n].property:value` (relative to end)
+
+- **Examples:**
+```html
+<div inline="#status.innerText:Ready"></div>
+<div inline=".title[2].innerText:Hello"></div>
+<div inline=".title[].style.color:blue"></div>
+<div inline=".title[0,2].classList.add:highlight"></div>
+<div inline=".title[0:2].innerText:Hello"></div>         <!-- indices 0 and 1 -->
+<div inline=".title[0:6:2].style.color:green"></div>     <!-- indices 0,2,4 -->
+<div inline=".title[-2].style.color:red"></div>          <!-- last two -->
+<div inline=".title[-2:1].style.fontWeight:bold"></div>  <!-- next-to-last one -->
+<div inline=".title[-6:-1:2].classList.add:alt"></div>   <!-- every second from 6th-from-last to last-but-one -->
+```
+
+---
+
+## Index expressions
+
+| **Form**        | **Meaning**                                                                 |
+|-----------------|------------------------------------------------------------------------------|
+| **[0]**         | First element                                                                |
+| **[1]**         | Second element                                                               |
+| **[]**          | All elements                                                                 |
+| **[0,2]**       | Elements at indices 0 and 2                                                  |
+| **[0:2]**       | Start at 0, yield 2 total → indices 0 and 1                                  |
+| **[-2]**        | Last 2 elements                                                              |
+| **[-2:1]**      | Start 2 from end, yield 1 → next-to-last element                             |
+| **[0:6:2]**     | Indices 0, 2, 4 (step of 2)                                                  |
+| **[-6:-1:2]**   | Every second element from 6th-from-last up to last-but-one                   |
+| **[-3:-5]**     | From n-4 to n-9 (negative range relative to end, clamped to bounds)          |
+
+Notes:
+- Negative start/end are interpreted relative to the end: −1 is last, −2 is next-to-last, etc.
+- For [start:count], count is the number of elements to yield (end = start + count).
+- Step defaults to 1 when omitted.
+- Indices are clamped to [0, length] to avoid out-of-range access.
+
+---
+
+## Supported properties
+
+- **Content:**
+  - `.class[n].innerText:value`
+  - `.class[n].innerHTML:value`
+
+- **Classes:**
+  - `.class[n].classList.add:value`
+  - `.class[n].classList.remove:value`
+  - `.class[n].classList.toggle:value`
+
+- **Styles:**
+  - `.class[n].style.color:red`
+  - `.class[n].style.fontWeight:bold`
+  - Any CSS property via `.style.<prop>:<value>`
+
+- **Generic element properties:**
+  - `.class[n].value:some text`
+  - `.class[n].checked:true`
+
+---
+
+## Chaining operations
+- **Form:** Separate operations with `;`
+- **Example:**
+```html
+<div inline="|&msg:Hello World|.title[0].innerText:!msg;.title[].style.color:blue;.title[2].classList.add:highlight"></div>
+```
+- **Effect:**
+  - Declares msg = “Hello World”
+  - Sets first .title text to “Hello World”
+  - Colors all .title elements blue
+  - Adds highlight class to the third .title
+
+---
+
+## Shell support (scoped operations)
+- **Start shell:** `|+targetId:timerName`
+- **Close shell:** `|-timerName`
+- Variables and operations inside a shell are scoped to that shell until it’s closed.
+
+- **Example:**
+```html
+<div inline="|+sidebar:tick|&msg:Scoped|.note[].innerText:!msg|-tick|.note[0].innerText:Global"></div>
+```
+
+---
+
+## Complete examples
+
+```html
+<!-- Basic variable and single target -->
+<div inline="|&msg:Rustic ain't it?|.title[1].innerText:!msg"></div>
+
+<!-- Apply to all elements -->
+<div inline=".title[].classList.add:highlight"></div>
+
+<!-- Multiple precise indices -->
+<div inline=".item[0,3,5].style.color:purple"></div>
+
+<!-- Slices and steps -->
+<div inline=".card[0:4].classList.add:featured"></div>     <!-- first four -->
+<div inline=".card[1:5:2].style.border:1px solid #333"></div> <!-- indices 1,3 -->
+<div inline=".card[-2].style.opacity:0.8"></div>           <!-- last two -->
+
+<!-- Mixed chain -->
+<div inline="|&color:#0af|.badge[0].style.background:!color;.badge[2].classList.add:active;.badge[].style.color:white"></div>
+```
+
+---
+
+## Quick reference
+
+```text
+Variables
+  |&name:value|           Declare variable
+  !name                   Substitute variable
+
+Targets
+  #id.property:value      ID-based target and property assignment
+  .class[n].property:value
+  .class[].property:value
+  .class[x,y].property:value
+  .class[start:count].property:value
+  .class[start:end:step].property:value
+  .class[-n].property:value
+
+Properties
+  innerText, innerHTML
+  classList.add/remove/toggle
+  style.<prop>
+  any element property (value, checked, etc.)
+
+Chaining
+  op1;op2;op3
+
+Shells
+  |+targetId:timerName    Open shell (scoped)
+  |-timerName             Close shell
+```
+
+---
+
+## Implementation notes
+- Inline macros are parsed in your dotPipe.runInline loop:
+  - Variables are collected and substituted.
+  - Macro operations match `([#.][\w-]+)(?:\[(.*?)\])?\.(.+?):(.+)`.
+  - Index expressions support single, all, explicit lists, slices, negative indices, and steps.
+  - Property setting supports classList operations, style properties, content, and generic element properties.
+- Operations are executed in order; later ops can overwrite earlier ones.
+- When using shells, variables defined within are merged back to parent when the shell is closed.
+
+---
+
+If you want a condensed cheat sheet as a standalone file, I can generate that too.
