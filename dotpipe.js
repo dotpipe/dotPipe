@@ -433,10 +433,46 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+// Macro resolver: #id.member or .class.member
+function resolveMacro(expr) {
+    if (!expr || typeof expr !== "string") return expr;
+
+    // Only process if starts with # or .
+    if (!(expr.startsWith("#") || expr.startsWith("."))) return expr;
+
+    let parts = expr.split(".");
+    let base = parts[0]; // "#id" or ".class"
+    let member = parts.slice(1).join("."); // optional member chain
+
+    let elems = [];
+    if (base.startsWith("#")) {
+        let id = base.slice(1);
+        let el = document.getElementById(id);
+        if (el) elems.push(el);
+    } else if (base.startsWith(".")) {
+        let cls = base.slice(1);
+        elems = Array.from(document.getElementsByClassName(cls));
+    }
+
+    if (!member) return elems.length === 1 ? elems[0] : elems;
+
+    // If member is present, return values or functions
+    return elems.map(el => {
+        if (member in el) {
+            return (typeof el[member] === "function") ? el[member].bind(el) : el[member];
+        }
+        return null;
+    });
+}
+
 const dotPipe = {
     matrix: {},
+    vars: {},
+    currentElem: null,
 
-    // Register all elements with inline macros
+    // ======================
+    // Register inline macros and attach click handlers
+    // ======================
     register: function (selector = '[inline]') {
         const elements = document.querySelectorAll(selector);
         elements.forEach(el => {
@@ -445,90 +481,65 @@ const dotPipe = {
                 element: el,
                 tag: el,
                 inlineMacro: el.getAttribute('inline'),
-                dpVars: {} // plain storage; no auto-run
+                dpVars: {},
+                shells: {}
             };
+
+            // Internal click handling
+            el.addEventListener('click', async () => {
+                this.currentElem = el;
+                await this.runInline(key);
+            });
         });
     },
 
     // ======================
-    // Shell Management
+    // Run inline macro
     // ======================
-    runShellOpen: function (targetId, shellName, entry) {
-        if (!entry.shells) entry.shells = {};
-        entry.shells[shellName] = {
-            targetId,
-            vars: {},
-            buffer: []
-        };
-        console.log(`[dotPipe] Opened shell "${shellName}" on target "${targetId}"`);
-        return entry.shells[shellName];
-    },
-
-    runShellClose: function (shellName, entry) {
-        if (entry.shells && entry.shells[shellName]) {
-            console.log(`[dotPipe] Closed shell "${shellName}"`);
-            delete entry.shells[shellName];
-            return true;
-        } else {
-            console.warn(`[dotPipe] Tried to close unknown shell: "${shellName}"`);
-            return false;
-        }
-    },
-
-    // --- runInline updated with shell support ---
     runInline: async function (key) {
         const entry = this.matrix[key];
         if (!entry || !entry.inlineMacro) return;
         this.currentElem = entry.element;
+
         let currentValue = null;
         let currentShell = null;
+
         const segments = entry.inlineMacro.split('|').filter(s => s.trim() !== '');
 
         for (let i = 0; i < segments.length; i++) {
             let seg = segments[i].trim();
             let m;
 
-            // --- Start shell: |+targetId:timerName
+            // --- Shell start: |+targetId:shellName
             if (m = /^\+\s*([a-zA-Z0-9_\-]+):([a-zA-Z0-9_]+)/.exec(seg)) {
                 const targetId = m[1];
-                const timerName = m[2];
-                const shellKey = `${targetId}:${timerName}`;
-
+                const shellName = m[2];
                 entry.shells = entry.shells || {};
-                if (!entry.shells[shellKey]) {
-                    entry.shells[shellKey] = {
+                if (!entry.shells[shellName]) {
+                    entry.shells[shellName] = {
                         dpVars: {},
                         matrix: [],
                         element: document.getElementById(targetId) || entry.element,
-                        segments: segments.slice(i + 1) // remaining segments go to shell
+                        segments: segments.slice(i + 1)
                     };
                 }
-
-                currentShell = entry.shells[shellKey];
-
-                // Run shell async
-                (async () => {
-                    await this.runShell(entry.shells[shellKey]);
-                    currentShell = null;
-                })();
-
-                break; // stop parent processing until shell finishes
+                currentShell = entry.shells[shellName];
+                (async () => { await this.runShell(currentShell); currentShell = null; })();
+                break;
             }
 
-            // --- Close shell: |-timerName
+            // --- Shell close: |-shellName
             if (m = /^\-\s*([a-zA-Z0-9_]+)/.exec(seg)) {
-                const timerName = m[1];
-                const shellKey = Object.keys(entry.shells || {}).find(k => k.endsWith(`:${timerName}`));
-                if (shellKey && entry.shells[shellKey]) {
-                    // merge shell vars back to parent
-                    Object.assign(entry.dpVars, entry.shells[shellKey].dpVars);
-                    delete entry.shells[shellKey];
+                const shellName = m[1];
+                if (entry.shells[shellName]) {
+                    Object.assign(entry.dpVars, entry.shells[shellName].dpVars);
+                    delete entry.shells[shellName];
                     currentShell = null;
                 }
                 continue;
             }
 
-            // --- Literal assignment: |&var:value
+            // --- Literal assignment &var:value
             if (m = /^\&([a-zA-Z0-9_]+):(.+)$/.exec(seg)) {
                 const varName = m[1];
                 const value = m[2];
@@ -537,14 +548,14 @@ const dotPipe = {
                 continue;
             }
 
-            // --- Store current value: nop:varName
+            // --- nop:varName
             if (m = /^nop:([a-zA-Z0-9_]+)$/.exec(seg)) {
                 const varName = m[1];
                 (currentShell || entry).dpVars[varName] = currentValue;
                 continue;
             }
 
-            // --- Set element content: $id or $id:!var
+            // --- $id or $id:!var
             if (m = /^\$([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_!]+))?$/.exec(seg)) {
                 const targetEl = document.getElementById(m[1]);
                 if (targetEl) {
@@ -557,422 +568,119 @@ const dotPipe = {
                 continue;
             }
 
-            // --- Modala JSON fetch
-            if (seg.toLowerCase().startsWith("modala:")) {
-                const parts = seg.split(":").map(s => s.trim());
-                const [_, url, targetId, method = "GET"] = parts;
-                try {
-                    const resp = await fetch(url, { method: method.toUpperCase() });
-                    const json = await resp.json();
-                    const targetEl = document.getElementById(targetId);
-                    if (targetEl) {
-                        modala(json, targetEl); // call existing modala function
-                    }
-                    (currentShell || entry).matrix.push(json);
-                    currentValue = json;
-                } catch (err) {
-                    console.error("dotPipe modala error:", err);
+            // --- Macro operations: #id or .class
+            if (m = /^([#.][\w-]+)(?:\[(.*?)\])?\.(.+?):(.+)$/.exec(seg)) {
+                const [, selector, indexExprRaw, property, rawVal] = m;
+                const value = rawVal.startsWith('!') ? (currentShell || entry).dpVars[rawVal.slice(1)] : rawVal;
+
+                let elems = [];
+                if (selector.startsWith("#")) {
+                    const el = document.getElementById(selector.slice(1));
+                    if (el) elems.push(el);
+                } else if (selector.startsWith(".")) {
+                    elems = Array.from(document.getElementsByClassName(selector.slice(1)));
+                }
+                if (elems.length === 0) continue;
+
+                const len = elems.length;
+
+                let indexExpr = indexExprRaw;
+                if (selector.startsWith("#")) indexExpr = null; // ignore index for IDs
+
+                // --- Apply elements
+                if (!indexExpr) {
+                    elems.forEach(el => this.setProperty(el, property, value));
+                } else if (indexExpr.includes(",")) {
+                    const indices = indexExpr.split(",").map(n => parseInt(n.trim(), 10)).filter(n => !isNaN(n));
+                    indices.forEach(idx => { if (idx<0) idx=len+idx; if(elems[idx]) this.setProperty(elems[idx], property, value); });
+                } else if (indexExpr.includes(":")) {
+                    let [start,end,step] = indexExpr.split(":").map(s=>s.trim());
+                    start = parseInt(start,10) || 0;
+                    end = end!==undefined ? parseInt(end,10) : len;
+                    step = step ? parseInt(step,10) : 1;
+                    if (start<0) start=len+start;
+                    if (end<0) end=len+end;
+                    for(let idx=start;idx<end;idx+=step){ if(elems[idx]) this.setProperty(elems[idx], property, value); }
+                } else {
+                    let idx = parseInt(indexExpr,10);
+                    if(idx<0) idx=len+idx;
+                    if(elems[idx]) this.setProperty(elems[idx], property, value);
                 }
                 continue;
             }
 
+            // --- Verb handlers
             if (m = /^([a-zA-Z0-9_+\-]+):?(.*)$/.exec(seg)) {
                 const verb = m[1];
                 const params = m[2] ? m[2].split(':') : [];
+                const resolvedParams = params.map(p => p.startsWith('!') ? (currentShell || entry).dpVars[p.slice(1)] : p);
 
-                const resolvedParams = params.map(p => {
-                    if (p.startsWith('!')) return entry.dpVars[p.slice(1)];
-                    return p;
-                });
-
-                switch (verb) {
-                    case "+":
-                        currentValue = this.runShellOpen(resolvedParams[0], resolvedParams[1], entry);
-                        break;
-                    case "-":
-                        currentValue = this.runShellClose(resolvedParams[0], entry);
-                        break;
-                    case "call":
-                        currentValue = await this.runCall(resolvedParams[0], ...resolvedParams.slice(1));
-                        break;
-                    default:
-                        if (typeof this.verbs[verb] === 'function') {
-                            currentValue = await this.verbs[verb](...resolvedParams, entry);
-                        } else {
-                            console.warn("Unknown verb:", verb);
-                        }
-                }
+                if (verb === "+") currentValue = this.runShellOpen(resolvedParams[0], resolvedParams[1], entry);
+                else if (verb === "-") currentValue = this.runShellClose(resolvedParams[0], entry);
+                else if (verb === "call") currentValue = await this.runCall(resolvedParams[0], ...resolvedParams.slice(1));
+                else if (typeof this.verbs[verb]==='function') currentValue = await this.verbs[verb](...resolvedParams, entry);
                 continue;
             }
-
-            if (m = /^([a-zA-Z0-9_+\-]+):?(.*)$/.exec(seg)) {
-                const verb = m[1];
-                const params = m[2] ? m[2].split(':') : [];
-
-                const resolvedParams = params.map(p => {
-                    if (p.startsWith('!')) return entry.dpVars[p.slice(1)];
-                    return p;
-                });
-
-                switch (verb) {
-                    case "+":
-                        currentValue = this.runShellOpen(resolvedParams[0], resolvedParams[1], entry);
-                        break;
-                    case "-":
-                        currentValue = this.runShellClose(resolvedParams[0], entry);
-                        break;
-                    default:
-                        if (typeof this.verbs[verb] === 'function') {
-                            currentValue = await this.verbs[verb](...resolvedParams, entry);
-                        } else {
-                            console.warn("Unknown verb:", verb);
-                        }
-                }
-                continue;
-            }
-
-            console.warn('Unknown pipe segment:', seg);
         }
     },
+
     // ======================
-    // Custom Function Caller
+    // Helper for properties
     // ======================
-    runCall: async function (fnName, ...args) {
-        // resolve the function
-        let fn = null;
-
-        // 1. Check registered verbs first
-        if (this.verbs[fnName]) {
-            fn = this.verbs[fnName];
-        }
-        // 2. Check globals (functions defined on window)
-        else if (typeof window[fnName] === "function") {
-            fn = window[fnName];
-        }
-        // 3. Check in modules namespace (if attached)
-        else if (this.modules && typeof this.modules[fnName] === "function") {
-            fn = this.modules[fnName];
-        }
-
-        if (!fn) {
-            console.error(`[dotPipe] runCall: function "${fnName}" not found`);
-            return;
-        }
-
-        // resolve `this` references to the current element
-        args = args.map(a => a === "this" ? this.currentElem : a);
-
-        try {
-            const result = await fn(...args);
-            console.log(`[dotPipe] runCall executed "${fnName}" with`, args, "→", result);
-            return result;
-        } catch (err) {
-            console.error(`[dotPipe] runCall error in "${fnName}"`, err);
-            return;
-        }
+    setProperty: function(el, property, value){
+        if(property==="classList.add") el.classList.add(value);
+        else if(property==="classList.remove") el.classList.remove(value);
+        else if(property==="classList.toggle") el.classList.toggle(value);
+        else if(property.startsWith("style.")){
+            const styleProp = property.split(".")[1];
+            if(styleProp) el.style[styleProp] = value;
+        } else if(property in el) el[property] = value;
     },
-    // --- runShell executes segments inside a shell ---
-    runShell: async function (shell) {
-        if (!shell || !shell.segments) return;
 
-        let currentValue = null;
+    // ======================
+    // Shell support
+    // ======================
+    runShellOpen: function(targetId, shellName, entry){
+        if(!entry.shells) entry.shells={};
+        entry.shells[shellName]={ targetId, dpVars:{}, matrix:[], element:document.getElementById(targetId) || entry.element };
+        return entry.shells[shellName];
+    },
 
-        for (let seg of shell.segments) {
+    runShellClose: function(shellName, entry){
+        if(entry.shells && entry.shells[shellName]){
+            delete entry.shells[shellName];
+            return true;
+        }
+        return false;
+    },
+
+    runShell: async function(shell){
+        if(!shell || !shell.segments) return;
+        for(let seg of shell.segments){
             seg = seg.trim();
             let m;
-
-            // reuse the same logic as runInline for literals, nop, modala, $id, and verbs
-            // literal: &var:value
-            if (m = /^\&([a-zA-Z0-9_]+):(.+)$/.exec(seg)) {
-                shell.dpVars[m[1]] = m[2];
-                currentValue = m[2];
-                continue;
+            if(m=/^\&([a-zA-Z0-9_]+):(.+)$/.exec(seg)){
+                shell.dpVars[m[1]]=m[2]; continue;
             }
-
-            // nop:var
-            if (m = /^nop:([a-zA-Z0-9_]+)$/.exec(seg)) {
-                shell.dpVars[m[1]] = currentValue;
-                continue;
+            if(m=/^nop:([a-zA-Z0-9_]+)$/.exec(seg)){
+                shell.dpVars[m[1]] = null; continue;
             }
-
-            // $id or $id:!var
-            if (m = /^\$([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_!]+))?$/.exec(seg)) {
-                const targetEl = document.getElementById(m[1]);
-                if (targetEl) {
-                    let value;
-                    if (!m[2]) value = currentValue;
-                    else if (m[2].startsWith('!')) value = shell.dpVars[m[2].slice(1)];
-                    else value = shell.dpVars[m[2]];
-                    targetEl.innerHTML = value;
-                }
-                continue;
-            }
-
-            // modala call inside shell
-            if (seg.toLowerCase().startsWith("modala:")) {
-                const parts = seg.split(":").map(s => s.trim());
-                const [_, url, targetId, method = "GET"] = parts;
-                try {
-                    const resp = await fetch(url, { method: method.toUpperCase() });
-                    const json = await resp.json();
-                    const targetEl = document.getElementById(targetId);
-                    if (targetEl) modala(json, targetEl);
-                    shell.matrix.push(json);
-                    currentValue = json;
-                } catch (err) {
-                    console.error("dotPipe shell modala error:", err);
-                }
-                continue;
-            }
-
-            // standard verbs
-            if (m = /^([a-zA-Z0-9_]+):?(.*)$/.exec(seg)) {
-                const verb = m[1];
-                const params = m[2] ? m[2].split(':').map(p => p.trim()) : [];
-                const resolvedParams = params.map(p => p.startsWith('!') ? shell.dpVars[p.slice(1)] : p);
-
-                if (typeof dotPipe.verbs[verb] === "function") {
-                    currentValue = await dotPipe.verbs[verb](...resolvedParams);
-                }
-                continue;
-            }
-
-            console.warn('Unknown segment in shell:', seg);
         }
     },
 
-    // runInline: async function (key) {
-    //     const entry = this.matrix[key];
-    //     if (!entry || !entry.inlineMacro) return;
+    // ======================
+    // Custom calls / verbs
+    // ======================
+    runCall: async function(fnName, ...args){
+        let fn = this.verbs[fnName] || window[fnName] || (this.modules && this.modules[fnName]);
+        if(!fn) return;
+        args = args.map(a => a==="this"?this.currentElem:a);
+        return await fn(...args);
+    },
 
-    //     if (!Array.isArray(entry.matrix)) entry.matrix = [];
-    //     if (!entry.dpVars) entry.dpVars = {};
-
-    //     let currentValue = null;
-    //     const segments = entry.inlineMacro.split('|').filter(s => s.trim() !== '');
-
-    //     for (let seg of segments) {
-    //         seg = seg.trim();
-    //         let m;
-
-    //         if (seg.startsWith('exc:')) {
-    //             const arg = seg.slice(4).trim(); // 'this' or a variable name
-
-    //             // Determine what to push into the pipeline
-    //             const tag = arg === "this" ? entry.element : entry.dpVars[arg];
-
-    //             if (!tag) {
-    //                 console.warn(`exc: could not find element for "${arg}"`);
-    //                 continue;
-    //             }
-
-    //             // Store in dpVars and matrix so pipes can access it
-    //             entry.dpVars = entry.dpVars || {};
-    //             entry.dpVars[arg] = tag;
-    //             entry.matrix = entry.matrix || [];
-    //             entry.matrix.push(tag);
-
-    //             // Push into the pipeline
-    //             currentValue = await pipes(tag); // assuming pipes() is async
-    //             continue;
-    //         }
-
-    //         if (m = /^\+\s*([a-zA-Z0-9_\-]+):([a-zA-Z0-9_]+)/.exec(seg)) {
-    //             const targetId = m[1];
-    //             const shellName = m[2];
-    //             const shellKey = `${targetId}:${shellName}`;
-
-    //             entry.shells = entry.shells || {};
-    //             if (!entry.shells[shellKey]) {
-    //                 entry.shells[shellKey] = { dpVars: {}, matrix: [], element: document.getElementById(targetId) || entry.element };
-    //             }
-
-    //             // Run shell async in its own promise
-    //             (async () => {
-    //                 currentShell = entry.shells[shellKey];
-    //                 await runShell(entry.shells[shellKey]); // function that executes segments inside shell
-    //                 currentShell = null; // return to parent
-    //             })();
-    //             continue;
-    //         }
-
-
-    //         // Stop/close a shell
-    //         if (m = /^\-\s*([a-zA-Z0-9_]+)/.exec(seg)) {
-    //             const shellName = m[1];
-    //             // find shellKey that matches this element + shellName
-    //             const shellKey = Object.keys(entry.shells || {}).find(k => k.endsWith(`:${shellName}`));
-    //             if (shellKey && entry.shells[shellKey]) {
-    //                 // Optionally merge vars back
-    //                 Object.assign(entry.dpVars, entry.shells[shellKey].dpVars);
-    //                 delete entry.shells[shellKey];
-    //                 currentShell = null; // back to parent
-    //             }
-    //             continue;
-    //         }
-
-    //         // --- Literal assignment &varName:value
-    //         if (m = /^\&([a-zA-Z0-9_]+):(.+)$/.exec(seg)) {
-    //             const varName = m[1];
-    //             const value = m[2];
-    //             entry.dpVars[varName] = value;
-    //             currentValue = value;
-    //             continue;
-    //         }
-
-    //         // --- NOP assignment nop:varName
-    //         if (m = /^nop:([a-zA-Z0-9_]+)$/.exec(seg)) {
-    //             const varName = m[1];
-    //             entry.dpVars[varName] = currentValue;
-    //             continue;
-    //         }
-
-    //         if (seg.startsWith("$")) {
-    //             const m = /^\$([a-zA-Z0-9_\-]+)(?:\.([a-zA-Z0-9_.]+))?:(.+)$/.exec(seg);
-    //             if (m) {
-    //                 const targetId = m[1];
-    //                 const propPath = m[2] || "innerHTML";
-    //                 let val = m[3];
-
-    //                 // Resolve !varName references
-    //                 if (val != null && val.startsWith("!")) {
-    //                     const parts = val.slice(1).split('.');
-    //                     val = entry.dpVars;
-    //                     for (let part of parts) {
-    //                         if (val == null) break;
-    //                         val = val[part];
-    //                     }
-    //                 }
-
-    //                 const targetEl = document.getElementById(targetId);
-    //                 if (targetEl) {
-    //                     const props = propPath.split(".");
-    //                     let obj = targetEl;
-    //                     for (let i = 0; i < props.length - 1; i++) {
-    //                         if (!obj[props[i]]) { obj = null; break; }
-    //                         obj = obj[props[i]];
-    //                     }
-    //                     if (obj) {
-    //                         const lastProp = props[props.length - 1];
-    //                         obj[lastProp] = val;
-
-    //                         // Ensure entry.matrix exists
-    //                         if (!Array.isArray(entry.matrix)) entry.matrix = [];
-    //                         entry.matrix.push(val); // push value, not element
-    //                     }
-    //                 }
-    //             }
-    //             continue;
-    //         }
-
-    //         // --- DOM property read #varName:id.prop
-    //         if (m = /^#([a-zA-Z0-9_]+):([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_]+)$/.exec(seg)) {
-    //             const varName = m[1];
-    //             const targetEl = document.getElementById(m[2]);
-    //             const prop = m[3];
-    //             if (targetEl) {
-    //                 entry.dpVars[varName] = targetEl[prop];
-    //                 currentValue = entry.dpVars[varName];
-    //             }
-    //             continue;
-    //         }
-
-    //         // --- Function call %funcName:[args]
-    //         if (m = /^\%([a-zA-Z0-9_]+):\[(.+)\]$/.exec(seg)) {
-    //             const funcName = m[1];
-    //             let args = m[2].split(',').map(a => a.trim()).map(arg => {
-    //                 if (arg.startsWith('!')) return entry.dpVars[arg.slice(1)];
-    //                 if (arg.startsWith('#')) return entry.dpVars[arg.slice(1)];
-    //                 if (arg.startsWith('@')) {
-    //                     const [elId, prop] = arg.slice(1).split('.');
-    //                     const targetEl = document.getElementById(elId);
-    //                     return targetEl ? targetEl[prop] : undefined;
-    //                 }
-    //                 return arg;
-    //             });
-    //             if (typeof window[funcName] === 'function') {
-    //                 currentValue = await window[funcName](...args);
-    //             }
-    //             continue;
-    //         }
-
-    //         // --- modala: url:targetId[:method]
-    //         if (seg.toLowerCase().startsWith("modala:")) {
-    //             const parts = seg.split(":").map(s => s.trim());
-    //             const [_, url, targetId, method = "GET"] = parts;
-
-    //             try {
-    //                 const res = await fetch(url, { method });
-    //                 const json = await res.json();
-    //                 const container = document.getElementById(targetId);
-    //                 modala(json, container); // render children
-    //                 // return HTML string instead of element
-    //             } catch (err) {
-    //                 console.error("dotPipe modala error:", err);
-    //             }
-    //             continue;
-    //         }
-
-    //         if (m = /^\+\s*([a-zA-Z0-9_]+)/.exec(seg)) {
-    //             const shellName = m[1];
-    //             // create a new shell object
-    //             entry.shells = entry.shells || {};
-    //             entry.shells[shellName] = {
-    //                 dpVars: {},
-    //                 matrix: [],
-    //                 parent: currentShell // optional reference to parent
-    //             };
-    //             currentShell = entry.shells[shellName]; // now all !var references go here
-    //             continue;
-    //         }
-
-    //         if (m = /^\-\s*(timer[0-9]+)/.exec(seg)) {
-    //             const timerId = m[1];
-    //             // stop the shell/timer
-    //             if (entry.timers && entry.timers[timerId]) {
-    //                 clearTimeout(entry.timers[timerId]);
-    //                 delete entry.timers[timerId];
-    //             }
-
-    //             // Optional: pop shell scope
-    //             if (currentShell && currentShell.name === timerId) {
-    //                 currentShell = currentShell.parent || null;
-    //             }
-
-    //             continue;
-    //         }
-
-    //         // --- Standard verb verbName:param1:param2
-    //         if (m = /^([a-zA-Z0-9_]+):?(.*)$/.exec(seg)) {
-    //             const verb = m[1];
-    //             const params = m[2] ? m[2].split(':') : [];
-
-    //             const resolvedParams = params.map(p => {
-    //                 if (p.startsWith('!')) return entry.dpVars[p.slice(1)];
-    //                 return p;
-    //             });
-
-    //             if (typeof this.verbs[verb] === 'function') {
-    //                 currentValue = await this.verbs[verb](...resolvedParams);
-    //             }
-    //             continue;
-    //         }
-
-    //         console.warn("Unknown pipe segment:", seg);
-    //     }
-    // },
-    // Built-in verbs (AJAX, log, etc.)
-    verbs: {
-        async ajax(url, method = 'GET') {
-            const res = await fetch(url, { method });
-            const text = await res.text();
-            return text;
-        },
-
-        log(value) {
-            console.log(value);
-            return value;
-        }
+    verbs:{
+        async ajax(url, method='GET'){ const res=await fetch(url,{method}); return await res.text(); },
+        log(value){ console.log(value); return value; }
     }
 };
 
