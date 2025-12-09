@@ -6,7 +6,7 @@
 <title>dotPipe Interactive Demo</title>
 <style>
     body { font-family: sans-serif; margin: 20px; }
-    .demo-box { padding: 10px; border: 1px solid #ccc; margin-bottom: 10px; cursor: pointer; }
+    .demo-box { padding: 10px; border: 1px solid #ccc; margin-bottom: 10px; cursor: pointer; background: #f9f9f9; }
     .output { padding: 10px; margin: 5px 0; border: 1px dashed #999; min-height: 20px; }
     .item { display: inline-block; margin: 2px; padding: 5px 10px; border: 1px solid #333; }
 </style>
@@ -47,19 +47,19 @@
 
 <h2>4. AJAX & Fetch (mock example)</h2>
 <div id="ajaxOutput" class="output"></div>
-<div id="macro7" class="demo-box" inline="call:mockAjax:!ajaxOutput|$ajaxOutput">
+<div id="macro7" class="demo-box" inline="call:mockAjax:ajaxOutput|$ajaxOutput:!ajaxOutput">
     Click me to fetch data (mock)
 </div>
 
 <h2>5. Nested Shells</h2>
 <div id="shellOutput" class="output"></div>
-<div id="macro8" class="demo-box" inline="|+shellOutput:timerShell&counter:0|nop:count|-timerShell">
-    Click me to create a shell and store counter
+<div id="macro8" class="demo-box" inline="|+shellOutput:myShell|&counter:5|$shellOutput:!counter|-myShell">
+    Click me to run a shell storing counter
 </div>
 
 <h2>6. Custom Verb / Call</h2>
 <div id="callOutput" class="output"></div>
-<div id="macro9" class="demo-box" inline="call:customVerb:Hello from call|$callOutput">
+<div id="macro9" class="demo-box" inline="call:customVerb:Hello from call|$callOutput:!custom">
     Click me to call a custom verb
 </div>
 
@@ -70,7 +70,13 @@ dotPipe.register();
 
 /* --- Custom verb example --- */
 dotPipe.verbs.customVerb = async function(msg) {
-    return "Custom verb says: " + msg;
+    const result = "Custom verb says: " + msg;
+    // store result in dpVars.custom so it can be accessed via !custom
+    if(dotPipe.currentElem) {
+        const key = dotPipe.currentElem.id || Symbol();
+        dotPipe.matrix[key].dpVars.custom = result;
+    }
+    return result;
 };
 
 /* --- Mock AJAX function --- */
@@ -78,6 +84,11 @@ window.mockAjax = async function(outputElId) {
     const outputEl = document.getElementById(outputElId);
     const fakeData = "Fetched data: " + Math.random().toFixed(3);
     if(outputEl) outputEl.innerHTML = fakeData;
+    // store in dpVars so dotPipe $id:!var works
+    if(dotPipe.currentElem) {
+        const key = dotPipe.currentElem.id || Symbol();
+        dotPipe.matrix[key].dpVars[outputElId] = fakeData;
+    }
     return fakeData;
 };
 </script>

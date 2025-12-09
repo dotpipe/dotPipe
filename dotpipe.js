@@ -388,11 +388,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     domContentLoad();
     addPipe(document.body);
-    
+
     var binder = new DotPipeBinder();
     binder.init();
     binder.observe();
-    
+
     generateNonce().then(nonce => {
         const script_tags = document.getElementsByTagName("script");
         const style_tags = document.getElementsByTagName("style");
@@ -511,31 +511,34 @@ const dotPipe = {
             let seg = segments[i].trim();
             let m;
 
-            // --- Shell start: |+targetId:shellName
+            // runInline segment for starting a shell
             if (m = /^\+\s*([a-zA-Z0-9_\-]+):([a-zA-Z0-9_]+)/.exec(seg)) {
                 const targetId = m[1];
                 const shellName = m[2];
+
                 entry.shells = entry.shells || {};
-                if (!entry.shells[shellName]) {
-                    entry.shells[shellName] = {
-                        dpVars: {},
-                        matrix: [],
-                        element: document.getElementById(targetId) || entry.element,
-                        segments: segments.slice(i + 1)
-                    };
-                }
-                currentShell = entry.shells[shellName];
-                (async () => { await this.runShell(currentShell); currentShell = null; })();
+                // Slice remaining segments for the shell
+                const shellSegments = segments.slice(i + 1);
+
+                entry.shells[shellName] = {
+                    dpVars: {},
+                    element: document.getElementById(targetId) || entry.element,
+                    segments: shellSegments
+                };
+
+                // Run shell immediately
+                await this.runShell(entry.shells[shellName]);
+
+                // Skip remaining parent segments (they are handled in the shell)
                 break;
             }
 
-            // --- Shell close: |-shellName
+            // Close shell
             if (m = /^\-\s*([a-zA-Z0-9_]+)/.exec(seg)) {
                 const shellName = m[1];
-                if (entry.shells[shellName]) {
-                    Object.assign(entry.dpVars, entry.shells[shellName].dpVars);
+                if (entry.shells && entry.shells[shellName]) {
+                    Object.assign(entry.dpVars, entry.shells[shellName].dpVars); // merge vars
                     delete entry.shells[shellName];
-                    currentShell = null;
                 }
                 continue;
             }
@@ -593,19 +596,19 @@ const dotPipe = {
                     elems.forEach(el => this.setProperty(el, property, value));
                 } else if (indexExpr.includes(",")) {
                     const indices = indexExpr.split(",").map(n => parseInt(n.trim(), 10)).filter(n => !isNaN(n));
-                    indices.forEach(idx => { if (idx<0) idx=len+idx; if(elems[idx]) this.setProperty(elems[idx], property, value); });
+                    indices.forEach(idx => { if (idx < 0) idx = len + idx; if (elems[idx]) this.setProperty(elems[idx], property, value); });
                 } else if (indexExpr.includes(":")) {
-                    let [start,end,step] = indexExpr.split(":").map(s=>s.trim());
-                    start = parseInt(start,10) || 0;
-                    end = end!==undefined ? parseInt(end,10) : len;
-                    step = step ? parseInt(step,10) : 1;
-                    if (start<0) start=len+start;
-                    if (end<0) end=len+end;
-                    for(let idx=start;idx<end;idx+=step){ if(elems[idx]) this.setProperty(elems[idx], property, value); }
+                    let [start, end, step] = indexExpr.split(":").map(s => s.trim());
+                    start = parseInt(start, 10) || 0;
+                    end = end !== undefined ? parseInt(end, 10) : len;
+                    step = step ? parseInt(step, 10) : 1;
+                    if (start < 0) start = len + start;
+                    if (end < 0) end = len + end;
+                    for (let idx = start; idx < end; idx += step) { if (elems[idx]) this.setProperty(elems[idx], property, value); }
                 } else {
-                    let idx = parseInt(indexExpr,10);
-                    if(idx<0) idx=len+idx;
-                    if(elems[idx]) this.setProperty(elems[idx], property, value);
+                    let idx = parseInt(indexExpr, 10);
+                    if (idx < 0) idx = len + idx;
+                    if (elems[idx]) this.setProperty(elems[idx], property, value);
                 }
                 continue;
             }
@@ -619,7 +622,7 @@ const dotPipe = {
                 if (verb === "+") currentValue = this.runShellOpen(resolvedParams[0], resolvedParams[1], entry);
                 else if (verb === "-") currentValue = this.runShellClose(resolvedParams[0], entry);
                 else if (verb === "call") currentValue = await this.runCall(resolvedParams[0], ...resolvedParams.slice(1));
-                else if (typeof this.verbs[verb]==='function') currentValue = await this.verbs[verb](...resolvedParams, entry);
+                else if (typeof this.verbs[verb] === 'function') currentValue = await this.verbs[verb](...resolvedParams, entry);
                 continue;
             }
         }
@@ -628,43 +631,66 @@ const dotPipe = {
     // ======================
     // Helper for properties
     // ======================
-    setProperty: function(el, property, value){
-        if(property==="classList.add") el.classList.add(value);
-        else if(property==="classList.remove") el.classList.remove(value);
-        else if(property==="classList.toggle") el.classList.toggle(value);
-        else if(property.startsWith("style.")){
+    setProperty: function (el, property, value) {
+        if (property === "classList.add") el.classList.add(value);
+        else if (property === "classList.remove") el.classList.remove(value);
+        else if (property === "classList.toggle") el.classList.toggle(value);
+        else if (property.startsWith("style.")) {
             const styleProp = property.split(".")[1];
-            if(styleProp) el.style[styleProp] = value;
-        } else if(property in el) el[property] = value;
+            if (styleProp) el.style[styleProp] = value;
+        } else if (property in el) el[property] = value;
     },
 
     // ======================
     // Shell support
     // ======================
-    runShellOpen: function(targetId, shellName, entry){
-        if(!entry.shells) entry.shells={};
-        entry.shells[shellName]={ targetId, dpVars:{}, matrix:[], element:document.getElementById(targetId) || entry.element };
+    runShellOpen: function (targetId, shellName, entry) {
+        if (!entry.shells) entry.shells = {};
+        entry.shells[shellName] = { targetId, dpVars: {}, matrix: [], element: document.getElementById(targetId) || entry.element };
         return entry.shells[shellName];
     },
 
-    runShellClose: function(shellName, entry){
-        if(entry.shells && entry.shells[shellName]){
+    runShellClose: function (shellName, entry) {
+        if (entry.shells && entry.shells[shellName]) {
             delete entry.shells[shellName];
             return true;
         }
         return false;
     },
 
-    runShell: async function(shell){
-        if(!shell || !shell.segments) return;
-        for(let seg of shell.segments){
+    runShell: async function (shell) {
+        if (!shell || !shell.segments) return;
+
+        let currentValue = null;
+
+        for (let seg of shell.segments) {
             seg = seg.trim();
             let m;
-            if(m=/^\&([a-zA-Z0-9_]+):(.+)$/.exec(seg)){
-                shell.dpVars[m[1]]=m[2]; continue;
+
+            // Literal assignment &var:value
+            if (m = /^\&([a-zA-Z0-9_]+):(.+)$/.exec(seg)) {
+                shell.dpVars[m[1]] = m[2];
+                currentValue = m[2];
+                continue;
             }
-            if(m=/^nop:([a-zA-Z0-9_]+)$/.exec(seg)){
-                shell.dpVars[m[1]] = null; continue;
+
+            // nop:varName
+            if (m = /^nop:([a-zA-Z0-9_]+)$/.exec(seg)) {
+                shell.dpVars[m[1]] = currentValue;
+                continue;
+            }
+
+            // $id:!varName updates DOM
+            if (m = /^\$([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_!]+))?$/.exec(seg)) {
+                const targetEl = document.getElementById(m[1]);
+                if (targetEl) {
+                    let value;
+                    if (!m[2]) value = currentValue;
+                    else if (m[2].startsWith('!')) value = shell.dpVars[m[2].slice(1)];
+                    else value = shell.dpVars[m[2]];
+                    targetEl.innerHTML = value;
+                }
+                continue;
             }
         }
     },
@@ -672,16 +698,16 @@ const dotPipe = {
     // ======================
     // Custom calls / verbs
     // ======================
-    runCall: async function(fnName, ...args){
+    runCall: async function (fnName, ...args) {
         let fn = this.verbs[fnName] || window[fnName] || (this.modules && this.modules[fnName]);
-        if(!fn) return;
-        args = args.map(a => a==="this"?this.currentElem:a);
+        if (!fn) return;
+        args = args.map(a => a === "this" ? this.currentElem : a);
         return await fn(...args);
     },
 
-    verbs:{
-        async ajax(url, method='GET'){ const res=await fetch(url,{method}); return await res.text(); },
-        log(value){ console.log(value); return value; }
+    verbs: {
+        async ajax(url, method = 'GET') { const res = await fetch(url, { method }); return await res.text(); },
+        log(value) { console.log(value); return value; }
     }
 };
 
