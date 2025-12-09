@@ -1,0 +1,58 @@
+{
+  "modal": {
+    "id": "productListModal",
+    "title": "Available Products",
+    "cart": {
+      "id": "mainCart",
+      "bind": "CartController",
+      "items": [
+        {
+          "tag": "item",
+          "name": "Electric Guitar",
+          "sku": "GTR-001",
+          "price": 499.99,
+          "quantity": 1,
+          "bind": "ItemController",
+          "seller": "UserA"
+        },
+        {
+          "tag": "item",
+          "name": "Amplifier",
+          "sku": "AMP-002",
+          "price": 299.99,
+          "quantity": 1,
+          "bind": "ItemController",
+          "seller": "UserB"
+        },
+        {
+          "tag": "item",
+          "name": "Effects Pedal",
+          "sku": "PED-003",
+          "price": 89.99,
+          "quantity": 1,
+          "bind": "ItemController",
+          "seller": "UserA"
+        },
+        {
+          "tag": "item",
+          "name": "Speaker Cabinet",
+          "sku": "CAB-004",
+          "price": 249.00,
+          "quantity": 1,
+          "bind": "ItemController",
+          "seller": "UserC"
+        }
+      ]
+    },
+    "checkout": {
+      "tag": "checkout",
+      "target": "mainCart",
+      "bind": "CheckoutController",
+      "actions": {
+        "validate": true,
+        "submitOrder": true,
+        "clearCartOnSuccess": true
+      }
+    }
+  }
+}

@@ -9,4 +9,4 @@ echo ($modala);
 
 ?>
 
-    <script src="dotpipe.js"></script>
+    <script src="../dotpipe.js"></script>

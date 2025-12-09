@@ -320,6 +320,58 @@
  * (c) dotPipe.js – https://github.com/dotpipe/dotPipe
  */
 
+class DotPipeBinder {
+    constructor() {
+        this.controllers = {};
+    }
+
+    register(name, controller) {
+        this.controllers[name] = controller;
+    }
+
+    bindElement(el) {
+        const controllerName = el.getAttribute("bind");
+        if (controllerName && this.controllers[controllerName]) {
+            const controller = this.controllers[controllerName];
+
+            if (typeof controller.init === "function") {
+                controller.init(el);
+            }
+
+            // Auto-bind methods like onAdd, onRemove, onCheckout
+            Object.keys(controller).forEach(key => {
+                if (key.startsWith("on")) {
+                    const eventName = key.slice(2).toLowerCase();
+                    el.addEventListener(eventName, e => controller[key](el, e));
+                }
+            });
+        }
+    }
+
+    init(root = document) {
+        root.querySelectorAll("[bind]").forEach(el => this.bindElement(el));
+    }
+
+    // NEW: Observe DOM changes (e.g. after AJAX injection)
+    observe() {
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) {
+                        // If the new node itself has a bind attribute
+                        if (node.hasAttribute && node.hasAttribute("bind")) {
+                            this.bindElement(node);
+                        }
+                        // Or if it contains children with bind attributes
+                        this.init(node);
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+}
 
 document.addEventListener("DOMContentLoaded", function () {
     try {
@@ -337,6 +389,9 @@ document.addEventListener("DOMContentLoaded", function () {
     domContentLoad();
     addPipe(document.body);
 
+    binder.init();
+    binder.observe();
+    
     generateNonce().then(nonce => {
         const script_tags = document.getElementsByTagName("script");
         const style_tags = document.getElementsByTagName("style");
@@ -923,6 +978,7 @@ const dotPipe = {
 
 let domContentLoad = (again = false) => {
     doc_set = document.getElementsByTagName("pipe");
+    const binder = new DotPipeBinder();
     if (again == false) {
         Array.from(doc_set).forEach(function (elem) {
             if (elem.classList.contains("pipe-active"))

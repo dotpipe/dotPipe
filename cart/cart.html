@@ -1,74 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shopping Cart Example</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="dotpipe.js"></script>
-  <script src="cart-component.js"></script>
-  <script src="checkout-component.js"></script>
-  <script src="order-confirmation-component.js"></script>
+  <title>Cart</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 2em;
+      background: #f9f9f9;
+      color: #222;
+    }
+
+    h1 {
+      font-size: 1.8em;
+      margin-bottom: 0.5em;
+    }
+
+    a {
+      color: #0078d7;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    button {
+      background: #0078d7;
+      color: white;
+      border: none;
+      padding: 0.5em 1em;
+      margin: 0.3em 0;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 1em;
+    }
+
+    button:hover {
+      background: #005fa3;
+    }
+
+    .cart,
+    cart {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+    }
+
+    .cart-card {
+      background: #fff;
+      border: 1px solid #000;
+      border-radius: 4px;
+      padding: 1em;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-card h2 {
+      font-size: 1.2em;
+      margin: 0 0 0.5em;
+      border-bottom: 1px solid #000;
+      padding-bottom: 0.3em;
+    }
+
+    .cart-card p {
+      margin: 0.3em 0;
+      line-height: 1.4;
+    }
+
+    .cart-card button {
+      align-self: flex-start;
+      margin-top: 0.5em;
+      background: #0078d7;
+      color: #fff;
+      border: none;
+      padding: 0.4em 0.8em;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .cart-card button:hover {
+      background: #005fa3;
+    }
+
+    .checkout-card {
+      background: #fff;
+      border: 1px solid #000;
+      border-radius: 4px;
+      padding: 1em;
+      margin-top: 1em;
+    }
+
+    .checkout-card h2 {
+      font-size: 1.2em;
+      margin: 0 0 0.5em;
+      border-bottom: 1px solid #000;
+      padding-bottom: 0.3em;
+    }
+
+    .checkout-card label {
+      display: block;
+      margin: 0.5em 0;
+    }
+
+    .checkout-card input {
+      width: 100%;
+      padding: 0.4em;
+      border: 1px solid #000;
+      border-radius: 3px;
+    }
+
+    item {
+      display: block;
+      margin: 0.5em 0;
+      padding: 0.5em;
+      border-bottom: 1px solid #eee;
+    }
+
+    item:last-child {
+      border-bottom: none;
+    }
+
+    .checkout,
+    checkout {
+      display: inline-block;
+      margin-top: 1em;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="password"] {
+      padding: 0.5em;
+      margin: 0.3em 0;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+    }
+
+    form label {
+      display: block;
+      margin-top: 1em;
+    }
+
+    svg {
+      display: block;
+      margin: 1em 0;
+      border: 1px solid #ccc;
+      background: #fff;
+    }
+  </style>
 </head>
+
 <body>
-  <header>
-    <div class="container">
-      <h1>Your Online Store</h1>
-      <nav>
-        <a href="index.html">Home</a>
-        <a href="products.html">Products</a>
-        <a href="cart.html">Cart <span id="cart-count">0</span></a>
-      </nav>
-    </div>
-  </header>
-  
-  <main class="container">
-    <!-- Product listing example -->
-    <div class="products-container">
-      <h2>Featured Products</h2>
-      <div class="product-grid">
-        <!-- Product 1 -->
-        <div class="product-card">
-          <img src="product1.jpg" alt="Product 1">
-          <h3>Product 1</h3>
-          <p class="price">$19.99</p>
-          <item id="product1" name="Product 1" price="19.99" image="product1.jpg"></item>
-        </div>
-        
-        <!-- Product 2 -->
-        <div class="product-card">
-          <img src="product2.jpg" alt="Product 2">
-          <h3>Product 2</h3>
-          <p class="price">$29.99</p>
-          <item id="product2" name="Product 2" price="29.99" image="product2.jpg"></item>
-        </div>
-        
-        <!-- Product 3 with AJAX loading -->
-        <div class="product-card">
-          <img src="product3.jpg" alt="Product 3">
-          <h3>Product 3</h3>
-          <p class="price">$39.99</p>
-          <item id="product3" ajax="items.php:_self:1;"></item>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Shopping cart example -->
-    <cart id="siteCart">
-      <!-- Items will be dynamically added here -->
-    </cart>
-    
-    <!-- Checkout example (on checkout page) -->
-    <!-- <checkout validate="true"></checkout> -->
-    
-    <!-- Order confirmation example (on confirmation page) -->
-    <!-- <order-confirmation></order-confirmation> -->
-  </main>
-  
-  <footer>
-    <div class="container">
-      <p>© 2025 Your Store. All rights reserved.</p>
-    </div>
-  </footer>
+
+  <h1>Your Cart</h1>
+
+  <cart id="mainCart" bind="CartController"></cart>
+
+  <p>Total: $<span id="total">0.00</span></p>
+
+  <button id="checkoutBtn">Go to checkout</button>
+  <button id="clearBtn">Clear cart</button>
+<script src="../dotpipe.js"></script>
+  <script>
+    // class DotPipeBinder {
+    //   constructor() { this.controllers = {}; }
+    //   register(n, c) { this.controllers[n] = c; }
+    //   bindElement(el) {
+    //     const n = el.getAttribute("bind"); const c = this.controllers[n];
+    //     if (!n || !c) return;
+    //     if (typeof c.init === "function") c.init(el);
+    //     Object.keys(c).forEach(k => {
+    //       if (k.startsWith("on")) {
+    //         const ev = k.slice(2).toLowerCase();
+    //         el.addEventListener(ev, e => c[k](el, e));
+    //       }
+    //     });
+    //   }
+    //   init(root = document) { root.querySelectorAll("[bind]").forEach(el => this.bindElement(el)); }
+    //   observe() {
+    //     const obs = new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(n => {
+    //       if (n.nodeType === 1) { if (n.hasAttribute && n.hasAttribute("bind")) this.bindElement(n); this.init(n); }
+    //     })));
+    //     obs.observe(document.body, { childList: true, subtree: true });
+    //   }
+    // }
+
+    const CART_KEY = "../dotpipe.cart";
+
+    const CartController = {
+      init(cartEl) {
+        const saved = JSON.parse(localStorage.getItem(CART_KEY) || "{}");
+        (saved.items || []).forEach(it => {
+          const itemEl = document.createElement("item");
+          itemEl.setAttribute("name", it.name);
+          itemEl.setAttribute("price", String(it.price));
+          itemEl.setAttribute("quantity", String(it.quantity));
+          cartEl.appendChild(itemEl);
+        });
+        updateCartTotal(cartEl);
+        render(cartEl);
+      },
+      onRemove(cartEl, e) {
+        const targetName = e.detail && e.detail.name;
+        if (!targetName) return;
+        cartEl.querySelectorAll("item").forEach(it => {
+          if (it.getAttribute("name") === targetName) it.remove();
+        });
+        updateCartTotal(cartEl); persist(cartEl); render(cartEl);
+      }
+    };
+
+    function updateCartTotal(cartEl) {
+      let total = 0;
+      cartEl.querySelectorAll("item").forEach(it => {
+        const p = parseFloat(it.getAttribute("price") || "0");
+        const q = parseInt(it.getAttribute("quantity") || "0", 10);
+        total += p * q;
+      });
+      cartEl.dataset.total = total.toFixed(2);
+      document.getElementById("total").textContent = cartEl.dataset.total;
+    }
+
+    function persist(cartEl) {
+      const items = Array.from(cartEl.querySelectorAll("item")).map(it => ({
+        name: it.getAttribute("name"),
+        price: parseFloat(it.getAttribute("price") || "0"),
+        quantity: parseInt(it.getAttribute("quantity") || "0", 10)
+      }));
+      localStorage.setItem(CART_KEY, JSON.stringify({ items, total: cartEl.dataset.total }));
+    }
+
+    function render(cartEl) {
+      // Render simple list with remove buttons
+      const container = document.getElementById("list") || document.body.appendChild(Object.assign(document.createElement("div"), { id: "list" }));
+      container.innerHTML = "";
+      cartEl.querySelectorAll("item").forEach(it => {
+        const row = document.createElement("div");
+        row.textContent = `${it.getAttribute("name")} — $${parseFloat(it.getAttribute("price")).toFixed(2)} x ${it.getAttribute("quantity")} `;
+        const btn = document.createElement("button");
+        btn.textContent = "Remove";
+        btn.addEventListener("click", () => {
+          cartEl.dispatchEvent(new CustomEvent("remove", { detail: { name: it.getAttribute("name") } }));
+        });
+        row.appendChild(btn);
+        container.appendChild(row);
+      });
+    }
+
+    const binder = new DotPipeBinder();
+    binder.register("CartController", CartController);
+    document.addEventListener("DOMContentLoaded", () => { binder.init(); binder.observe(); });
+
+    document.getElementById("checkoutBtn").addEventListener("click", () => location.href = "checkout.html");
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      localStorage.removeItem(CART_KEY);
+      const cartEl = document.getElementById("mainCart");
+      cartEl.innerHTML = "";
+      updateCartTotal(cartEl);
+      render(cartEl);
+    });
+  </script>
+
 </body>
+
 </html>

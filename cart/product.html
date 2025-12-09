@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product</title>
+      <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 2em;
+            background: #f9f9f9;
+            color: #222;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 0.5em;
+        }
+
+        a {
+            color: #0078d7;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        button {
+            background: #0078d7;
+            color: white;
+            border: none;
+            padding: 0.5em 1em;
+            margin: 0.3em 0;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        button:hover {
+            background: #005fa3;
+        }
+
+        .cart,
+        cart {
+            display: block;
+            border: 1px solid #ccc;
+            background: #fff;
+            padding: 1em;
+            margin-bottom: 1em;
+            border-radius: 6px;
+        }
+
+        item {
+            display: block;
+            margin: 0.5em 0;
+            padding: 0.5em;
+            border-bottom: 1px solid #eee;
+        }
+
+        item:last-child {
+            border-bottom: none;
+        }
+
+        .checkout,
+        checkout {
+            display: inline-block;
+            margin-top: 1em;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="password"] {
+            padding: 0.5em;
+            margin: 0.3em 0;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        form label {
+            display: block;
+            margin-top: 1em;
+        }
+
+        svg {
+            display: block;
+            margin: 1em 0;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+
+  <h1 id="product-name">Product</h1>
+
+  <!-- SVG placeholder -->
+  <svg id="product-svg" width="240" height="180" viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg" aria-label="Product image">
+    <rect x="1" y="1" width="238" height="178" fill="none" stroke="black"/>
+    <polygon points="30,150 90,60 150,140 210,70" fill="none" stroke="black"/>
+    <circle cx="190" cy="40" r="15" fill="none" stroke="black"/>
+    <text x="10" y="20" font-size="12" fill="black">Product image</text>
+  </svg>
+
+  <p id="product-price"></p>
+  <p id="product-desc">This is a great product. Add it to your cart to continue.</p>
+
+  <!-- DotPipe tags -->
+  <cart id="productCart" bind="CartController">
+    <item id="productItem" name="" price="0" quantity="1" bind="ItemController"></item>
+  </cart>
+
+  <button id="add">Add to cart</button>
+  <a href="cart.html">Go to cart</a>
+<script src="../dotpipe.js"></script>
+  <script>
+    // Lightweight binder (from earlier)
+    // class DotPipeBinder {
+    //   constructor(){ this.controllers = {}; }
+    //   register(name, controller){ this.controllers[name] = controller; }
+    //   bindElement(el){
+    //     const name = el.getAttribute("bind");
+    //     const c = this.controllers[name];
+    //     if(!name || !c) return;
+    //     if(typeof c.init === "function") c.init(el);
+    //     Object.keys(c).forEach(k => {
+    //       if(k.startsWith("on")){
+    //         const ev = k.slice(2).toLowerCase();
+    //         el.addEventListener(ev, e => c[k](el, e));
+    //       }
+    //     });
+    //   }
+    //   init(root=document){ root.querySelectorAll("[bind]").forEach(el => this.bindElement(el)); }
+    //   observe(){
+    //     const obs = new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(n => {
+    //       if(n.nodeType===1){
+    //         if(n.hasAttribute && n.hasAttribute("bind")) this.bindElement(n);
+    //         this.init(n);
+    //       }
+    //     })));
+    //     obs.observe(document.body, {childList:true, subtree:true});
+    //   }
+    // }
+
+    // Controllers
+    const CartController = {
+      init(cartEl){ updateCartTotal(cartEl); }
+    };
+    const ItemController = { init(itemEl){} };
+
+    function updateCartTotal(cartEl){
+      let total = 0;
+      cartEl.querySelectorAll("item").forEach(it => {
+        const price = parseFloat(it.getAttribute("price")||"0");
+        const qty = parseInt(it.getAttribute("quantity")||"0",10);
+        total += price*qty;
+      });
+      cartEl.dataset.total = total.toFixed(2);
+    }
+
+    // Product data
+    const PRODUCTS = {
+      "gtr-001": { name: "Electric Guitar", price: 499.99 },
+      "amp-002": { name: "Amplifier", price: 299.99 },
+      "ped-003": { name: "Effects Pedal", price: 89.99 },
+      "cab-004": { name: "Speaker Cabinet", price: 249.00 }
+    };
+
+    function qs(key){ return new URLSearchParams(location.search).get(key); }
+    const id = qs("id");
+    const product = PRODUCTS[id] || { name: "Unknown", price: 0 };
+
+    // Fill UI and item tag
+    document.getElementById("product-name").textContent = product.name;
+    document.getElementById("product-price").textContent = `$${product.price.toFixed(2)}`;
+    const itemEl = document.getElementById("productItem");
+    itemEl.setAttribute("name", product.name);
+    itemEl.setAttribute("price", String(product.price));
+    itemEl.setAttribute("quantity", "1");
+
+    const binder = new DotPipeBinder();
+    binder.register("CartController", CartController);
+    binder.register("ItemController", ItemController);
+    binder.init(); binder.observe();
+
+    // Persist cart to localStorage
+    const CART_KEY = "../dotpipe.cart";
+    function saveCart(cartEl){
+      const items = Array.from(cartEl.querySelectorAll("item")).map(it => ({
+        name: it.getAttribute("name"),
+        price: parseFloat(it.getAttribute("price")||"0"),
+        quantity: parseInt(it.getAttribute("quantity")||"0",10)
+      }));
+      localStorage.setItem(CART_KEY, JSON.stringify({ items, total: cartEl.dataset.total }));
+    }
+
+    document.getElementById("add").addEventListener("click", () => {
+      const cartEl = document.getElementById("productCart");
+      const copy = itemEl.cloneNode(true);
+      cartEl.appendChild(copy);
+      updateCartTotal(cartEl);
+      saveCart(cartEl);
+      alert("Added to cart.");
+    });
+  </script>
+</body>
+</html>

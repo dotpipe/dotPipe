@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout</title>
+      <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 2em;
+            background: #f9f9f9;
+            color: #222;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 0.5em;
+        }
+
+        a {
+            color: #0078d7;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        button {
+            background: #0078d7;
+            color: white;
+            border: none;
+            padding: 0.5em 1em;
+            margin: 0.3em 0;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        button:hover {
+            background: #005fa3;
+        }
+
+        .cart,
+        cart {
+            display: block;
+            border: 1px solid #ccc;
+            background: #fff;
+            padding: 1em;
+            margin-bottom: 1em;
+            border-radius: 6px;
+        }
+
+        item {
+            display: block;
+            margin: 0.5em 0;
+            padding: 0.5em;
+            border-bottom: 1px solid #eee;
+        }
+
+        item:last-child {
+            border-bottom: none;
+        }
+
+        .checkout,
+        checkout {
+            display: inline-block;
+            margin-top: 1em;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="password"] {
+            padding: 0.5em;
+            margin: 0.3em 0;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        form label {
+            display: block;
+            margin-top: 1em;
+        }
+
+        svg {
+            display: block;
+            margin: 1em 0;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+
+  <h1>Checkout</h1>
+
+  <cart id="checkoutCart" bind="CartController"></cart>
+  <p>Total: $<span id="total">0.00</span></p>
+
+  <form id="checkoutForm">
+    <label>Name <input name="name" required></label><br>
+    <label>Email <input type="email" name="email" required></label><br>
+    <label>Address <input name="address" required></label><br>
+    <label>Card <input name="card" required></label><br>
+    <button type="submit">Place order</button>
+  </form>
+
+  <script src="../dotpipe.js"></script>
+  <script>
+    // class DotPipeBinder {
+    //   constructor(){ this.controllers = {}; }
+    //   register(n,c){ this.controllers[n]=c; }
+    //   bindElement(el){
+    //     const n=el.getAttribute("bind"); const c=this.controllers[n];
+    //     if(!n||!c) return;
+    //     if(typeof c.init==="function") c.init(el);
+    //     Object.keys(c).forEach(k=>{
+    //       if(k.startsWith("on")){
+    //         const ev=k.slice(2).toLowerCase();
+    //         el.addEventListener(ev,e=>c[k](el,e));
+    //       }
+    //     });
+    //   }
+    //   init(root=document){ root.querySelectorAll("[bind]").forEach(el=>this.bindElement(el)); }
+    //   observe(){
+    //     const obs=new MutationObserver(muts=>muts.forEach(m=>m.addedNodes.forEach(n=>{
+    //       if(n.nodeType===1){ if(n.hasAttribute&&n.hasAttribute("bind")) this.bindElement(n); this.init(n); }
+    //     })));
+    //     obs.observe(document.body,{childList:true,subtree:true});
+    //   }
+    // }
+
+    const CART_KEY="../dotpipe.cart";
+
+    const CartController = {
+      init(cartEl){
+        const saved=JSON.parse(localStorage.getItem(CART_KEY)||"{}");
+        (saved.items||[]).forEach(it=>{
+          const itemEl=document.createElement("item");
+          itemEl.setAttribute("name", it.name);
+          itemEl.setAttribute("price", String(it.price));
+          itemEl.setAttribute("quantity", String(it.quantity));
+          cartEl.appendChild(itemEl);
+        });
+        updateCartTotal(cartEl);
+      }
+    };
+
+    function updateCartTotal(cartEl){
+      let total=0;
+      cartEl.querySelectorAll("item").forEach(it=>{
+        const p=parseFloat(it.getAttribute("price")||"0");
+        const q=parseInt(it.getAttribute("quantity")||"0",10);
+        total+=p*q;
+      });
+      cartEl.dataset.total=total.toFixed(2);
+      document.getElementById("total").textContent = cartEl.dataset.total;
+    }
+
+    const binder=new DotPipeBinder();
+    binder.register("CartController", CartController);
+    document.addEventListener("DOMContentLoaded", ()=>{ binder.init(); binder.observe(); });
+
+    document.getElementById("checkoutForm").addEventListener("submit", (e)=>{
+      e.preventDefault();
+      const data=Object.fromEntries(new FormData(e.target).entries());
+      const order = {
+        cart: JSON.parse(localStorage.getItem(CART_KEY)||"{}"),
+        customer: data,
+        timestamp: new Date().toISOString()
+      };
+      // Simulate success
+      alert("Order placed. Thank you!");
+      localStorage.removeItem(CART_KEY);
+      location.href = "products.html";
+    });
+  </script>
+
+</body>
+</html>
