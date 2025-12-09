@@ -388,7 +388,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     domContentLoad();
     addPipe(document.body);
-
+    
+    var binder = new DotPipeBinder();
     binder.init();
     binder.observe();
     

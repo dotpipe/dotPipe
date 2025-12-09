@@ -1,48 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>dotPipe Call Demo</title>
-  <script src="./inline/dotpipe.js"></script>
-  <script>
-    // ========================
-    // Custom page functions
-    // ========================
-    function highlight(elem) {
-      elem.style.background = "yellow";
-      elem.textContent = "✨ Highlighted!";
-    }
-
-    function saveData(id, value) {
-      const target = document.getElementById(id);
-      if (target) {
-        target.textContent = "Saved value: " + value;
-      }
-    }
-
-    function processValue(v) {
-      alert("Processed value → " + v);
-    }
-  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dotPipe Interactive Demo</title>
+<style>
+    body { font-family: sans-serif; margin: 20px; }
+    .demo-box { padding: 10px; border: 1px solid #ccc; margin-bottom: 10px; cursor: pointer; }
+    .output { padding: 10px; margin: 5px 0; border: 1px dashed #999; min-height: 20px; }
+    .item { display: inline-block; margin: 2px; padding: 5px 10px; border: 1px solid #333; }
+</style>
 </head>
 <body>
-<div id="crazyStrawOutput"></div>
-<button inline="
-  |+crazyStrawOutput:timer1
-  |modala:./inline/data.json:crazyStrawOutput
-  |&n:testing
-  |log:!n
-  |-timer1
-">Run Modala</button>
 
-  <!-- Call a global fn with the element itself -->
-  <button inline="|call:highlight:this">Highlight Me</button>
+<h1>dotPipe Interactive Macro Demo</h1>
 
-  <!-- Store into var, then pass into a function -->
-  <button inline="|&n:42 |call:processValue:!n">Process 42</button>
+<h2>1. Basic Variable & Output</h2>
+<div id="varOutput" class="output"></div>
+<div id="macro1" class="demo-box" inline="&msg:Hello World|nop:copyMsg|$varOutput:!copyMsg">
+    Click me to assign a variable and output it
+</div>
 
-  <!-- Save text into #crazyStrawOutput -->
-  <button inline="|call:saveData:crazyStrawOutput:Done!">Save Output</button>
+<h2>2. ID Selector #id</h2>
+<div id="uniqueItem" class="output">Unique Item</div>
+<div id="macro2" class="demo-box" inline="#uniqueItem.style.backgroundColor:yellow">
+    Click me to color the unique item yellow
+</div>
 
+<h2>3. Class Selector .class[n] and .class[]</h2>
+<div class="item">1</div>
+<div class="item">2</div>
+<div class="item">3</div>
+<div class="item">4</div>
+<div id="macro3" class="demo-box" inline=".item[].style.color:red">
+    Click me to color all .item red
+</div>
+<div id="macro4" class="demo-box" inline=".item[0].style.fontWeight:bold">
+    Click me to bold the first .item
+</div>
+<div id="macro5" class="demo-box" inline=".item[-1].style.textDecoration:underline">
+    Click me to underline the last .item
+</div>
+<div id="macro6" class="demo-box" inline=".item[0:4:2].style.backgroundColor:lightblue">
+    Click me to highlight every 2nd item
+</div>
+
+<h2>4. AJAX & Fetch (mock example)</h2>
+<div id="ajaxOutput" class="output"></div>
+<div id="macro7" class="demo-box" inline="call:mockAjax:!ajaxOutput|$ajaxOutput">
+    Click me to fetch data (mock)
+</div>
+
+<h2>5. Nested Shells</h2>
+<div id="shellOutput" class="output"></div>
+<div id="macro8" class="demo-box" inline="|+shellOutput:timerShell&counter:0|nop:count|-timerShell">
+    Click me to create a shell and store counter
+</div>
+
+<h2>6. Custom Verb / Call</h2>
+<div id="callOutput" class="output"></div>
+<div id="macro9" class="demo-box" inline="call:customVerb:Hello from call|$callOutput">
+    Click me to call a custom verb
+</div>
+
+<script src="dotpipe.js"></script>
+<script>
+/* --- Register all inline macros --- */
+dotPipe.register();
+
+/* --- Custom verb example --- */
+dotPipe.verbs.customVerb = async function(msg) {
+    return "Custom verb says: " + msg;
+};
+
+/* --- Mock AJAX function --- */
+window.mockAjax = async function(outputElId) {
+    const outputEl = document.getElementById(outputElId);
+    const fakeData = "Fetched data: " + Math.random().toFixed(3);
+    if(outputEl) outputEl.innerHTML = fakeData;
+    return fakeData;
+};
+</script>
 </body>
 </html>
