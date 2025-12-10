@@ -530,6 +530,54 @@ const dotPipe = {
             let seg = segments[i].trim();
             let m;
 
+            // Operator property / text setter supporting [indexExpr]
+            if (m = /^([#\.\$]?[\w\-]+)(?:\[(.*?)\])?\.(text|style|[a-zA-Z\-]+)\:(.+)$/.exec(seg)) {
+                const selector = m[1];          // e.g. ".item" or "#id" or "$id" or "bareId"
+                const indexExpr = m[2] || "";   // e.g. "0", "1,3", "1:4:2", ""
+                const propOrKind = m[3];        // "text" or "style" or "color" etc.
+                let rawValue = m[4];            // could be "!var" or literal
+
+                const s = currentShell || entry;
+
+                // resolve variable references like !var
+                if (typeof rawValue === 'string' && rawValue.startsWith('!')) {
+                    rawValue = s.dpVars[rawValue.slice(1)];
+                } else {
+                    rawValue = dotPipe.parseValue(rawValue);
+                }
+
+                // get matching elements (handles class slices)
+                const elems = dotPipe.getElementsForSelector(selector, indexExpr);
+                if (!elems || elems.length === 0) {
+                    // nothing to apply to; warn optionally
+                    // console.warn("[dotPipe] operator: selector matched no elements:", selector, indexExpr);
+                    currentValue = undefined;
+                    continue;
+                }
+
+                // apply to all matched elements
+                elems.forEach(el => {
+                    if (propOrKind === 'text') {
+                        el.innerHTML = (rawValue === undefined || rawValue === null) ? '' : String(rawValue);
+                    } else if (propOrKind === 'style') {
+                        // expected usage: "#id.style:color:red" but here we captured only "style" as prop; handle "style:prop:val" pattern elsewhere.
+                        // if using "#id.styleProp:value" user should send "#id.styleProp:value" - here treat 'style' as setting innerText
+                        el.innerHTML = (rawValue === undefined || rawValue === null) ? '' : String(rawValue);
+                    } else {
+                        // treat propOrKind as CSS/property
+                        try {
+                            el.style[propOrKind] = rawValue;
+                        } catch (e) {
+                            // if property not a style, set attribute/property fallback
+                            try { el[propOrKind] = rawValue; } catch (e2) { el.setAttribute(propOrKind, rawValue); }
+                        }
+                    }
+                });
+
+                currentValue = rawValue;
+                continue;
+            }
+
             // --- Start shell: |+targetId:shellName
             if (m = /^\+\s*([a-zA-Z0-9_\-]+):([a-zA-Z0-9_]+)/.exec(seg)) {
                 const targetId = m[1];
@@ -581,6 +629,33 @@ const dotPipe = {
                 continue;
             }
 
+            // ==========================
+            // Operator property setter
+            // ==========================
+            if (m = /^([#\.\$]?[\w\-]+)\.([a-zA-Z\-]+):(.+)$/.exec(seg)) {
+                let selector = m[1];
+                let prop = m[2];
+                let value = m[3];
+                const s = currentShell || entry;
+
+                // resolve variables such as !hp or !color
+                if (value.startsWith('!')) {
+                    value = s.dpVars[value.slice(1)];
+                } else {
+                    value = dotPipe.parseValue(value);
+                }
+
+                const el = dotPipe.resolveElement(selector);
+                if (!el) {
+                    console.warn("[dotPipe] selector not found:", selector);
+                    continue;
+                }
+
+                el.style[prop] = value;
+                currentValue = value;
+                continue;
+            }
+
             // --- nop:varName stores currentValue
             if (m = /^nop:([a-zA-Z0-9_]+)$/.exec(seg)) {
                 (currentShell || entry).dpVars[m[1]] = currentValue;
@@ -620,6 +695,74 @@ const dotPipe = {
                 continue;
             }
         }
+    },
+
+    // returns array of elements given selector and optional indexExpr
+    getElementsForSelector: function (selector, indexExpr) {
+        // selector may be '#id', '$id', '.class' or bare id
+        if (!selector) return [];
+
+        // normalize $ to #
+        if (selector[0] === '$') selector = '#' + selector.slice(1);
+
+        // ID selector -> single element in array
+        if (selector[0] === '#') {
+            const el = document.getElementById(selector.slice(1));
+            return el ? [el] : [];
+        }
+
+        // class selector -> collection
+        let elems = [];
+        if (selector[0] === '.') {
+            elems = Array.from(document.getElementsByClassName(selector.slice(1)));
+        } else {
+            // bare id fallback
+            const el = document.getElementById(selector);
+            if (el) elems = [el];
+        }
+
+        if (!indexExpr || indexExpr === '') return elems;
+
+        // indexExpr handling: "x,y", "start:end:step", "N" or negative indices or empty -> all
+        if (indexExpr.includes(',')) {
+            const indices = indexExpr.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+            const out = [];
+            indices.forEach(idx => {
+                if (idx < 0) idx = elems.length + idx;
+                if (idx >= 0 && idx < elems.length) out.push(elems[idx]);
+            });
+            return out;
+        }
+        if (indexExpr.includes(':')) {
+            const parts = indexExpr.split(':').map(s => s.trim());
+            let start = parts[0] === '' ? 0 : parseInt(parts[0], 10);
+            let endPart = parts[1];
+            let step = parts[2] ? parseInt(parts[2], 10) : 1;
+
+            if (isNaN(start)) start = 0;
+            if (!endPart) {
+                endPart = elems.length;
+            }
+            let end = parseInt(endPart, 10);
+            if (isNaN(end)) end = elems.length;
+            if (start < 0) start = elems.length + start;
+            if (end < 0) end = elems.length + end;
+
+            start = Math.max(0, start);
+            end = Math.min(elems.length, end);
+
+            const out = [];
+            for (let i = start; i < end; i += step) {
+                out.push(elems[i]);
+            }
+            return out;
+        }
+
+        // single index
+        let idx = parseInt(indexExpr, 10);
+        if (isNaN(idx)) return elems;
+        if (idx < 0) idx = elems.length + idx;
+        return (idx >= 0 && idx < elems.length) ? [elems[idx]] : [];
     },
 
     // ======================

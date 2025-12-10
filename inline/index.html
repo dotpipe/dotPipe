@@ -44,13 +44,12 @@
   <h2>1. Counter (Shell Example)</h2>
   <div id="counterDisplay" class="output">0</div>
   <div id="upBtn" class="demo-box" inline="
-|&counter:#counterDisplay
+
 |inc:counter,1
 |nop:val
 |$counterDisplay:!val
 ">Up</div>
   <div id="downBtn" class="demo-box" inline="
-|&counter:#counterDisplay
 |dec:counter,1
 |nop:val
 |$counterDisplay:!val
@@ -87,7 +86,7 @@
   <h2>5. ID and Class Examples</h2>
   <div id="uniqueItem" class="output">Unique Item</div>
   <div id="macro1" class="demo-box" inline="
-|#uniqueItem.style.backgroundColor:yellow
+|#uniqueItem.backgroundColor:yellow
 ">Color Unique Item Yellow</div>
 
   <div class="item">1</div>
@@ -95,16 +94,16 @@
   <div class="item">3</div>
   <div class="item">4</div>
   <div id="macro2" class="demo-box" inline="
-|.item[].style.color:red
+|.item[].color:red
 ">Color All Red</div>
   <div id="macro3" class="demo-box" inline="
-|.item[0].style.fontWeight:bold
+|.item[0].fontWeight:bold
 ">Bold First Item</div>
   <div id="macro4" class="demo-box" inline="
-|.item[-1].style.textDecoration:underline
+|.item[-1].textDecoration:underline
 ">Underline Last Item</div>
   <div id="macro5" class="demo-box" inline="
-|.item[0:4:2].style.backgroundColor:lightblue
+|.item[0:4:2].backgroundColor:lightblue
 ">Highlight Every 2nd Item</div>
 
   <script src="dotpipe.js"></script>
