@@ -1,96 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>dotPipe Interactive Demo</title>
-<style>
-    body { font-family: sans-serif; margin: 20px; }
-    .demo-box { padding: 10px; border: 1px solid #ccc; margin-bottom: 10px; cursor: pointer; background: #f9f9f9; }
-    .output { padding: 10px; margin: 5px 0; border: 1px dashed #999; min-height: 20px; }
-    .item { display: inline-block; margin: 2px; padding: 5px 10px; border: 1px solid #333; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dotPipe Shell Demo Fixed Toggle</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+
+    .demo-box {
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin: 5px;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .output {
+      padding: 10px;
+      border: 1px dashed #999;
+      min-width: 40px;
+      text-align: center;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    .item {
+      display: inline-block;
+      margin: 2px;
+      padding: 5px 10px;
+      border: 1px solid #333;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>dotPipe Interactive Macro Demo</h1>
+  <h1>dotPipe Shell Demo Fixed Toggle</h1>
 
-<h2>1. Basic Variable & Output</h2>
-<div id="varOutput" class="output"></div>
-<div id="macro1" class="demo-box" inline="&msg:Hello World|nop:copyMsg|$varOutput:!copyMsg">
-    Click me to assign a variable and output it
-</div>
+  <h2>1. Counter (Shell Example)</h2>
+  <div id="counterDisplay" class="output">0</div>
+  <div id="upBtn" class="demo-box" inline="
+|+counterShell:counterShell
+|&counter:0
+|inc:counter,1
+|nop:val
+|$counterDisplay:!val
+|-counterShell
+">Up</div>
+  <div id="downBtn" class="demo-box" inline="
+|+counterShell:counterShell
+|&counter:0
+|dec:counter
+|nop:val
+|$counterDisplay:!val
+|-counterShell
+">Down</div>
 
-<h2>2. ID Selector #id</h2>
-<div id="uniqueItem" class="output">Unique Item</div>
-<div id="macro2" class="demo-box" inline="#uniqueItem.style.backgroundColor:yellow">
-    Click me to color the unique item yellow
-</div>
 
-<h2>3. Class Selector .class[n] and .class[]</h2>
-<div class="item">1</div>
-<div class="item">2</div>
-<div class="item">3</div>
-<div class="item">4</div>
-<div id="macro3" class="demo-box" inline=".item[].style.color:red">
-    Click me to color all .item red
-</div>
-<div id="macro4" class="demo-box" inline=".item[0].style.fontWeight:bold">
-    Click me to bold the first .item
-</div>
-<div id="macro5" class="demo-box" inline=".item[-1].style.textDecoration:underline">
-    Click me to underline the last .item
-</div>
-<div id="macro6" class="demo-box" inline=".item[0:4:2].style.backgroundColor:lightblue">
-    Click me to highlight every 2nd item
-</div>
+  <h2>2. Toggle Button (Boolean State)</h2>
+  <div id="toggleDisplay" class="output">OFF</div>
+  <div id="toggleBtn" class="demo-box" inline="
+|+toggleShell:toggleShell
+|&isOn:!isOn?false
+|toggle:isOn
+|nop:val
+|$toggleDisplay:!val
+|-toggleShell
 
-<h2>4. AJAX & Fetch (mock example)</h2>
-<div id="ajaxOutput" class="output"></div>
-<div id="macro7" class="demo-box" inline="call:mockAjax:ajaxOutput|$ajaxOutput:!ajaxOutput">
-    Click me to fetch data (mock)
-</div>
+">Toggle</div>
 
-<h2>5. Nested Shells</h2>
-<div id="shellOutput" class="output"></div>
-<div id="macro8" class="demo-box" inline="|+shellOutput:myShell|&counter:5|$shellOutput:!counter|-myShell">
-    Click me to run a shell storing counter
-</div>
+  <h2>3. Clamp Example</h2>
+  <div id="clampDisplay" class="output">50</div>
+  <div id="clampBtn" class="demo-box" inline="
+|+clampShell:clampShell
+|&val:50
+|inc:val
+|clamp:val:0:100
+|nop:val2
+|$clampDisplay:!val2
+|-clampShell
+">Increase (clamped 0-100)</div>
 
-<h2>6. Custom Verb / Call</h2>
-<div id="callOutput" class="output"></div>
-<div id="macro9" class="demo-box" inline="call:customVerb:Hello from call|$callOutput:!custom">
-    Click me to call a custom verb
-</div>
+  <h2>4. Sleep Example</h2>
+  <div id="sleepDisplay" class="output">Waiting...</div>
+  <div id="sleepBtn" class="demo-box" inline="
+|sleep:1000
+|&msg:Done
+|$sleepDisplay:!msg
+">Wait 1 second</div>
 
-<script src="dotpipe.js"></script>
-<script>
-/* --- Register all inline macros --- */
-dotPipe.register();
+  <h2>5. ID and Class Examples</h2>
+  <div id="uniqueItem" class="output">Unique Item</div>
+  <div id="macro1" class="demo-box" inline="
+|#uniqueItem.style.backgroundColor:yellow
+">Color Unique Item Yellow</div>
 
-/* --- Custom verb example --- */
-dotPipe.verbs.customVerb = async function(msg) {
-    const result = "Custom verb says: " + msg;
-    // store result in dpVars.custom so it can be accessed via !custom
-    if(dotPipe.currentElem) {
-        const key = dotPipe.currentElem.id || Symbol();
-        dotPipe.matrix[key].dpVars.custom = result;
-    }
-    return result;
-};
+  <div class="item">1</div>
+  <div class="item">2</div>
+  <div class="item">3</div>
+  <div class="item">4</div>
+  <div id="macro2" class="demo-box" inline="
+|.item[].style.color:red
+">Color All Red</div>
+  <div id="macro3" class="demo-box" inline="
+|.item[0].style.fontWeight:bold
+">Bold First Item</div>
+  <div id="macro4" class="demo-box" inline="
+|.item[-1].style.textDecoration:underline
+">Underline Last Item</div>
+  <div id="macro5" class="demo-box" inline="
+|.item[0:4:2].style.backgroundColor:lightblue
+">Highlight Every 2nd Item</div>
 
-/* --- Mock AJAX function --- */
-window.mockAjax = async function(outputElId) {
-    const outputEl = document.getElementById(outputElId);
-    const fakeData = "Fetched data: " + Math.random().toFixed(3);
-    if(outputEl) outputEl.innerHTML = fakeData;
-    // store in dpVars so dotPipe $id:!var works
-    if(dotPipe.currentElem) {
-        const key = dotPipe.currentElem.id || Symbol();
-        dotPipe.matrix[key].dpVars[outputElId] = fakeData;
-    }
-    return fakeData;
-};
-</script>
+  <script src="dotpipe.js"></script>
+  <script>
+
+    document.addEventListener("DOMContentLoaded", () => {
+      (async () => {
+        dotPipe.register();
+        // load initial values from JSON file
+        await dotPipe.loadVariablesFromFile('../inline/data.json');
+
+        // register inline elements
+        dotPipe.register('[inline]');
+
+        // optionally run macros immediately
+        Object.keys(dotPipe.matrix).forEach(async key => {
+          const el = dotPipe.matrix[key].element;
+          el.addEventListener('click', async () => await dotPipe.runInline(key));
+        });
+
+        // display initial counter
+        document.getElementById('counterDisplay').innerText = dotPipe.vars.counter;
+      })();
+
+      // Add helper function for boolean display
+      window.boolToString = function (val) {
+        return val ? "ON" : "OFF";
+      };
+    });
+  </script>
+
 </body>
+
 </html>
