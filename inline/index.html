@@ -44,45 +44,36 @@
   <h2>1. Counter (Shell Example)</h2>
   <div id="counterDisplay" class="output">0</div>
   <div id="upBtn" class="demo-box" inline="
-|+counterShell:counterShell
-|&counter:0
+|&counter:#counterDisplay
 |inc:counter,1
 |nop:val
 |$counterDisplay:!val
-|-counterShell
 ">Up</div>
   <div id="downBtn" class="demo-box" inline="
-|+counterShell:counterShell
-|&counter:0
-|dec:counter
+|&counter:#counterDisplay
+|dec:counter,1
 |nop:val
 |$counterDisplay:!val
-|-counterShell
 ">Down</div>
 
 
   <h2>2. Toggle Button (Boolean State)</h2>
   <div id="toggleDisplay" class="output">OFF</div>
   <div id="toggleBtn" class="demo-box" inline="
-|+toggleShell:toggleShell
 |&isOn:!isOn?false
 |toggle:isOn
 |nop:val
 |$toggleDisplay:!val
-|-toggleShell
-
 ">Toggle</div>
 
   <h2>3. Clamp Example</h2>
   <div id="clampDisplay" class="output">50</div>
   <div id="clampBtn" class="demo-box" inline="
-|+clampShell:clampShell
 |&val:50
 |inc:val
 |clamp:val:0:100
 |nop:val2
 |$clampDisplay:!val2
-|-clampShell
 ">Increase (clamped 0-100)</div>
 
   <h2>4. Sleep Example</h2>
@@ -128,14 +119,7 @@
         // register inline elements
         dotPipe.register('[inline]');
 
-        // optionally run macros immediately
-        Object.keys(dotPipe.matrix).forEach(async key => {
-          const el = dotPipe.matrix[key].element;
-          el.addEventListener('click', async () => await dotPipe.runInline(key));
-        });
-
-        // display initial counter
-        document.getElementById('counterDisplay').innerText = dotPipe.vars.counter;
+       
       })();
 
       // Add helper function for boolean display
