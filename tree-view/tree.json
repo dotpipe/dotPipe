@@ -7,7 +7,7 @@
             "style": "position: absolute; left: 100px; top: 100px;;",
             "td2": {
                 "tagname": "div",
-                "ajax": "tree-view/tree.json;sales-tag2",
+                "ajax": "../tree-view/tree.json;sales-tag2",
                 "class": "sale-label tree-view",
                 "id": "sales-tag2",
                 "textContent": "On Sale!",

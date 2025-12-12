@@ -22,7 +22,7 @@
         "textContent": "Gibson \"Sunny\" Les Paul Standard",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+        "ajax": "../guitar/sunnydesc.json:guitardesc:1;../guitar/sunny.json:left-pic:1;"
       },
       "td2": {
         "tagname": "td",
@@ -30,7 +30,7 @@
         "id": "i-am-dumb2",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+        "ajax": "../guitar/sunnydesc.json:guitardesc:1;../guitar/sunny.json:left-pic:1;"
       },
       "td3": {
         "tagname": "td",
@@ -38,7 +38,7 @@
         "id": "i-am-dumb3",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+        "ajax": "../guitar/sunnydesc.json:guitardesc:1;../guitar/sunny.json:left-pic:1;"
       },
       "td11": {
         "tagname": "td",
@@ -46,21 +46,21 @@
         "id": "i-am-dumb4",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+        "ajax": "../guitar/m2m.json:left-pic:1;../guitar/m2mdesc.json:guitardesc:1"
       },
       "td12": {
         "tagname": "td",
         "textContent": "Electric",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+        "ajax": "../guitar/m2m.json:left-pic:1;../guitar/m2mdesc.json:guitardesc:1"
       },
       "td13": {
         "tagname": "td",
         "textContent": "$1499.99",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+        "ajax": "../guitar/m2m.json:left-pic:1;../guitar/m2mdesc.json:guitardesc:1"
       }
     },
     "guitar2": {
@@ -72,21 +72,21 @@
         "id": "i-am-dumb2",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+        "ajax": "../guitar/m2m.json:left-pic:1;../guitar/m2mdesc.json:guitardesc:1"
       },
       "td11": {
         "tagname": "td",
         "textContent": "Electric",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+        "ajax": "../guitar/m2m.json:left-pic:1;../guitar/m2mdesc.json:guitardesc:1"
       },
       "td31": {
         "tagname": "td",
         "textContent": "$1499.99",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+        "ajax": "../guitar/m2m.json:left-pic:1;../guitar/m2mdesc.json:guitardesc:1"
       },
       "td12": {
         "tagname": "td",
@@ -94,21 +94,21 @@
         "id": "i-am-dumb7",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+        "ajax": "../guitar/m2m.json:left-pic:1;../guitar/m2mdesc.json:guitardesc:1"
       },
       "td21": {
         "tagname": "td",
         "textContent": "Electric",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+        "ajax": "../guitar/m2m.json:left-pic:1;../guitar/m2mdesc.json:guitardesc:1"
       },
       "td13": {
         "tagname": "td",
         "textContent": "$1499.99",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "m2m.json:left-pic:1;m2mdesc.json:guitardesc:1"
+        "ajax": "../guitar/m2m.json:left-pic:1;../guitar/m2mdesc.json:guitardesc:1"
       }
     },
     "guitar6": {
@@ -120,21 +120,21 @@
         "id": "i-am-dumb9",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+        "ajax": "../guitar/taylordesc.json:guitardesc:1;../guitar/taylor.json:left-pic:1;"
       },
       "td21": {
         "tagname": "td",
         "textContent": "Acoustic-Electric",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+        "ajax": "../guitar/taylordesc.json:guitardesc:1;../guitar/taylor.json:left-pic:1;"
       },
       "td31": {
         "tagname": "td",
         "textContent": "$999.99",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+        "ajax": "../guitar/taylordesc.json:guitardesc:1;../guitar/taylor.json:left-pic:1;"
       },
       "td12": {
         "tagname": "td",
@@ -142,21 +142,21 @@
         "id": "i-am-dumb8",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+        "ajax": "../guitar/taylordesc.json:guitardesc:1;../guitar/taylor.json:left-pic:1;"
       },
       "td22": {
         "tagname": "td",
         "textContent": "Acoustic-Electric",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+        "ajax": "../guitar/taylordesc.json:guitardesc:1;../guitar/taylor.json:left-pic:1;"
       },
       "td32": {
         "tagname": "td",
         "textContent": "$999.99",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "taylordesc.json:guitardesc:1;taylor.json:left-pic:1;"
+        "ajax": "../guitar/taylordesc.json:guitardesc:1;../guitar/taylor.json:left-pic:1;"
       }
     },
     "guitar7": {
@@ -168,21 +168,21 @@
         "textContent": "Gibson \"Sunny\" Les Paul Standard",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+        "ajax": "../guitar/sunnydesc.json:guitardesc:1;../guitar/sunny.json:left-pic:1;"
       },
       "td2": {
         "tagname": "td",
         "textContent": "Electric",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+        "ajax": "../guitar/sunnydesc.json:guitardesc:1;../guitar/sunny.json:left-pic:1;"
       },
       "td3": {
         "tagname": "td",
         "textContent": "$2499.99",
         "class": "multi-part modala-multi-last sales-item modala",
         "method": "GET",
-        "ajax": "sunnydesc.json:guitardesc:1;sunny.json:left-pic:1;"
+        "ajax": "../guitar/sunnydesc.json:guitardesc:1;../guitar/sunny.json:left-pic:1;"
       }
     }
   }

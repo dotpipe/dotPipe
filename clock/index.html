@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dotpipe Output Dashboard</title>
+<style>
+body { background:#111; color:#fff; font-family:monospace; padding:20px; }
+/* --- Clock --- */
+dp-clock, output[type="clock"] { width:100px; height:100px; border-radius:50%; border:2px solid #0f0; position:relative; display:inline-block; margin:10px; }
+/* --- Clock hands fixed --- */
+.dp-hand {
+    width: 2px;
+    position: absolute;
+    top: 50%;      /* center vertically */
+    left: 50%;     /* center horizontally */
+    transform-origin: bottom center; /* pivot from bottom */
+    border-radius: 1px;
+}
+
+/* --- Knob pointer fixed --- */
+.knob-pointer {
+    position: absolute;
+    width: 2px;
+    height: 50%;           /* pointer length */
+    background: #fff;
+    top: 50%;              /* center vertically */
+    left: 50%;             /* center horizontally */
+    transform-origin: bottom center; /* pivot at bottom */
+    border-radius: 1px;
+    transition: transform 0.1s linear;
+}
+
+.dp-hour { height:25%; background:#0f0; }
+.dp-minute { height:35%; background:#0f0; }
+.dp-second { height:40%; background:red; }
+/* --- Switches --- */
+output[type="switch"], dp-switch { width:60px; height:30px; border-radius:15px; display:inline-block; margin:10px; position:relative; cursor:pointer; transition: background 0.3s; }
+.switch-knob { width:28px; height:28px; border-radius:50%; background:#fff; position:absolute; top:1px; transition:left 0.3s; }
+/* --- Knobs --- */
+output[type="knob"], dp-knob { width:60px; height:60px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #555, #222); display:inline-block; margin:10px; position:relative; cursor:grab; box-shadow:0 3px 6px rgba(0,0,0,0.6); }
+.knob-pointer { position:absolute; width:2px; height:50%; background:#fff; top:50%; left:50%; transform-origin:bottom center; border-radius:1px; transition:transform 0.1s linear; }
+.knob-value { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:12px; color:#fff; user-select:none; }
+/* --- Dropdown --- */
+output[type="dropdown"], dp-dropdown { display:inline-flex; position:relative; margin:10px; align-items:center; }
+.dp-textbtn { flex:1; background:#222; color:#fff; border:none; padding:8px; cursor:pointer; }
+.dp-arrowbtn { background:#444; color:#fff; border:none; padding:8px; cursor:pointer; }
+.dp-dropdown-content { display:none; position:absolute; top:100%; left:0; background:#333; min-width:150px; z-index:100; }
+.dp-dropdown-content button { display:block; width:100%; background:none; color:#fff; border:none; text-align:left; padding:8px; cursor:pointer; }
+.dp-embed-container { margin-left:20px; margin-top:5px; }
+</style>
+</head>
+<body>
+
+<div id="pageRoot"></div>
+
+<script src="../dotpipe.js"></script>
+<script>
+// --- modala function (simplified centrist + output + type support) ---
+// function modala(value, tempTag, root, id) {
+//     if(typeof(tempTag)=="string") tempTag=document.getElementById(tempTag);
+//     if(!tempTag) return;
+//     if(root===undefined) root=tempTag;
+
+//     let tagName = value.tagname || "div";
+//     if(tagName.toLowerCase()==="output") tagName="output";
+//     const temp=document.createElement(tagName);
+
+//     if(value.id) temp.id=value.id;
+//     if(value.style) temp.style.cssText=value.style;
+//     if(value.textcontent) temp.textContent=value.textcontent;
+//     if(value.type) temp.setAttribute("type", value.type);
+
+//     if(value.header && typeof value.header==="object")
+//         Object.entries(value.header).forEach(([hk,hv])=>{ const h=document.createElement(hk); h.innerText=hv; temp.appendChild(h); });
+
+//     if(value.buttons && Array.isArray(value.buttons))
+//         value.buttons.forEach(btnDef=>{
+//             const btn=document.createElement("input"); btn.type="button";
+//             Object.entries(btnDef).forEach(([k,v])=>{ if(["text","value","textcontent","innerhtml","innertext"].includes(k.toLowerCase())) btn.value=v; else btn.setAttribute(k,v); });
+//             temp.appendChild(btn);
+//         });
+
+//     if(value.css){ const link=document.createElement("link"); link.href=value.css; link.rel="stylesheet"; tempTag.appendChild(link);}
+//     if(value.js){ const script=document.createElement("script"); script.src=value.js; script.defer=true; tempTag.appendChild(script); }
+
+//     if(value.components && Array.isArray(value.components))
+//         value.components.forEach(c=>modala(c,temp,root,id));
+
+//     if(value.embed && typeof value.embed==="object"){
+//         const embedContainer=document.createElement("div"); embedContainer.className="dp-embed-container";
+//         modala(value.embed,embedContainer,root,id);
+//         temp.appendChild(embedContainer);
+//     }
+
+//     tempTag.appendChild(temp);
+//     // domContentLoad && domContentLoad();
+//     return tempTag;
+// }
+
+// --- initialize behavior ---
+function initOutputComponents(outputRoot){
+    if(!outputRoot) outputRoot=document.body;
+
+    // Clock
+    outputRoot.querySelectorAll('[type="clock"]').forEach(clockEl=>{
+        const interval=parseInt(clockEl.getAttribute("update")||1000);
+        const hour=document.createElement("div"), min=document.createElement("div"), sec=document.createElement("div");
+        hour.className="dp-hand dp-hour"; min.className="dp-hand dp-minute"; sec.className="dp-hand dp-second";
+        clockEl.append(hour,min,sec);
+        function updateClock(){ const now=new Date();
+            const h=now.getHours()%12, m=now.getMinutes(), s=now.getSeconds();
+            hour.style.transform=`rotate(${h*30+m*0.5}deg) translate(-50%,-50%)`;
+            min.style.transform=`rotate(${m*6}deg) translate(-50%,-50%)`;
+            sec.style.transform=`rotate(${s*6}deg) translate(-50%,-50%)`;
+        }
+        updateClock(); setInterval(updateClock, interval);
+    });
+
+    // Switches
+    outputRoot.querySelectorAll('[type="switch"]').forEach(sw=>{
+        if(sw._initialized) return; sw._initialized=true;
+        sw.dataset.on=sw.getAttribute("value")==="on";
+        sw.style.background=sw.dataset.on==="true"?"#0f0":"#444";
+        let knob=sw.querySelector(".switch-knob");
+        if(!knob){ knob=document.createElement("div"); knob.className="switch-knob"; sw.appendChild(knob);}
+        knob.style.left=sw.dataset.on==="true"?"31px":"1px";
+        sw.addEventListener("click",()=>{ sw.dataset.on=sw.dataset.on!=="true";
+            sw.setAttribute("value",sw.dataset.on==="true"?"on":"off");
+            sw.style.background=sw.dataset.on==="true"?"#0f0":"#444";
+            knob.style.left=sw.dataset.on==="true"?"31px":"1px";
+        });
+    });
+
+    // Knobs
+    outputRoot.querySelectorAll('[type="knob"]').forEach(knob=>{
+        if(knob._initialized) return; knob._initialized=true;
+        const min=parseFloat(knob.getAttribute("min")||0), max=parseFloat(knob.getAttribute("max")||100);
+        let val=parseFloat(knob.getAttribute("value")||min);
+        const pointer=document.createElement("div"); pointer.className="knob-pointer";
+        const label=document.createElement("div"); label.className="knob-value"; label.textContent=val.toFixed(0);
+        knob.append(pointer,label);
+        const start=36,end=324,total=end-start;
+        function valToAng(v){ return start+(v-min)/(max-min)*total; }
+        function angToVal(a){ let r=(a-start)/total; r=Math.min(Math.max(r,0),1); return min+r*(max-min); }
+        function updatePointer(){ pointer.style.transform=`rotate(${valToAng(val)}deg)`; label.textContent=val.toFixed(0); }
+        updatePointer();
+        knob.addEventListener("mousedown",e=>{
+            const rect=knob.getBoundingClientRect(); const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+            const onMove=e2=>{ let angle=Math.atan2(e2.clientY-cy,e2.clientX-cx)*180/Math.PI+90;
+                if(angle<0) angle+=360; if(angle<start&&angle>0) angle=start; if(angle>end&&angle<360) angle=end;
+                val=angToVal(angle); updatePointer();};
+            document.addEventListener("mousemove",onMove);
+            document.addEventListener("mouseup",()=>document.removeEventListener("mousemove",onMove),{once:true});
+        });
+    });
+
+    // Dropdowns
+    outputRoot.querySelectorAll('[type="dropdown"]').forEach(drop=>{
+        if(drop._initialized) return; drop._initialized=true;
+        drop.style.display="inline-flex"; drop.style.position="relative"; drop.style.alignItems="center";
+
+        let textBtn=drop.querySelector(".dp-textbtn"); if(!textBtn){ textBtn=document.createElement("button"); textBtn.className="dp-textbtn"; textBtn.textContent=drop.getAttribute("value")||"Select"; drop.appendChild(textBtn);}
+        let arrowBtn=drop.querySelector(".dp-arrowbtn"); if(!arrowBtn){ arrowBtn=document.createElement("button"); arrowBtn.className="dp-arrowbtn"; arrowBtn.textContent="▼"; drop.appendChild(arrowBtn);}
+        let div=drop.querySelector(".dp-dropdown-content"); if(!div){ div=document.createElement("div"); div.className="dp-dropdown-content"; div.style.display="none"; drop.appendChild(div);}
+
+        const options=drop.options || drop._jsonOptions || drop._optionsArray || [];
+        if(options.length>0){ div.innerHTML=""; options.forEach(opt=>{
+            const b=document.createElement("button"); b.textContent=opt.text;
+            b.addEventListener("click",e=>{
+                e.stopPropagation(); textBtn.textContent=opt.text; drop.setAttribute("value",opt.text); div.style.display="none";
+                if(opt.embed){
+                    let embedContainer=drop.querySelector(".dp-embed-container"); if(!embedContainer){ embedContainer=document.createElement("div"); embedContainer.className="dp-embed-container"; drop.appendChild(embedContainer);}
+                    embedContainer.innerHTML=""; modala(opt.embed,embedContainer); initOutputComponents(embedContainer);
+                }
+            });
+            div.appendChild(b);
+        });}
+
+        arrowBtn.addEventListener("click",e=>{
+            e.stopPropagation();
+            if(div.style.display==="block"){ div.style.display="none"; arrowBtn.textContent="◄"; }
+            else{ div.style.display="block"; arrowBtn.textContent="▼"; }
+        });
+        document.addEventListener("click",()=>{ div.style.display="none"; arrowBtn.textContent="▼"; });
+    });
+}
+
+// --- Example JSON ---
+const pageJSON={
+    components:[
+        { tagname:"output",type:"clock", update:1000},
+        { tagname:"output",type:"switch", value:"off"},
+        { tagname:"output",type:"switch", value:"on"},
+        { tagname:"output",type:"knob", value:25, min:0, max:100},
+        { tagname:"output",type:"knob", value:75, min:0, max:100},
+        { tagname:"output",type:"dropdown", value:"Select", options:[
+            {text:"Option 1", embed:{ tagname:"output",type:"knob", value:50, min:0, max:100}},
+            {text:"Option 2", embed:{ tagname:"output",type:"switch", value:"on"}}
+        ]}
+    ]
+};
+
+// --- Build DOM ---
+document.addEventListener("DOMContentLoaded",()=>{
+    modala(pageJSON,"pageRoot");
+    initOutputComponents(document.getElementById("pageRoot"));
+});
+</script>
+
+</body>
+</html>

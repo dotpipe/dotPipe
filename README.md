@@ -325,191 +325,357 @@ function process(val){ alert(val); }
 </script>
 ```
 
-# DotPipe inline macro system
+# DotPipe Inline Macro System
 
-## Overview
-DotPipe supports inline macros that let you declaratively manipulate DOM elements, assign variables, and chain multiple operations in a single inline attribute. Macros use prefixes (# for IDs, . for classes) and index expressions ([n], [], [x,y], [start:end], [start:end:step]) to target elements precisely.
+DotPipe is a lightweight, declarative inline-macro engine for HTML.
+It allows you to manipulate the DOM, update variables, bind styles/attributes, run logic, and perform slice-indexing on class lists — all from a single `inline="..."` attribute.
+
+No external frameworks required.
 
 ---
 
-## Syntax
+## ✨ Features
 
-### Variable declaration
-- **Form:** `|&varname:value|`
-- **Effect:** Declares a variable varname with the given value, scoped to the current inline processor (or shell if inside one).
-- **Example:**
+* **Inline variables** (`|&name:value|`, `!name`)
+* **DOM bindings by id/class** (`#id.prop:val`, `.class[n].prop:val`)
+* **Full index expressions** (`[n]`, `[]`, `[a,b]`, `[start:count]`, `[start:end:step]`, `[-n]`, etc.)
+* **Style & class manipulation**
+* **Chained operations** (`op1;op2;op3`)
+* **Scoped shells** (`|+target:scopeName` / `|-scopeName`)
+* **Negative indexing & clamped ranges**
+* **Declarative, readable, framework-free**
+
+---
+
+# 1. Inline Macro Syntax
+
+Each operation begins with a pipe (`|`) inside an element's `inline` attribute.
+
 ```html
-<div inline="|&msg:Rustic ain't it?|"></div>
+<div inline="|operation1|operation2|..."></div>
 ```
 
-### Variable substitution
-- **Form:** `!varname`
-- **Effect:** Substitutes the value of a previously declared variable.
-- **Example:**
-```html
-<div inline="|&msg:Hello|.title[0].innerText:!msg"></div>
+Macros can declare variables, reference variables, target DOM elements, style them, update attributes, etc.
+
+---
+
+# 2. Variables
+
+### Declare a variable
+
 ```
-The first .title element’s text becomes “Hello”.
-
-### Element targeting and property assignment
-- **By ID:** `#id.property:value`
-- **By class (single index):** `.class[n].property:value`
-- **All elements of a class:** `.class[].property:value`
-- **Explicit indices:** `.class[x,y].property:value`
-- **Slice with count:** `.class[start:count].property:value`
-- **Slice with step:** `.class[start:end:step].property:value`
-- **Negative indices:** `.class[-n].property:value` (relative to end)
-
-- **Examples:**
-```html
-<div inline="#status.innerText:Ready"></div>
-<div inline=".title[2].innerText:Hello"></div>
-<div inline=".title[].style.color:blue"></div>
-<div inline=".title[0,2].classList.add:highlight"></div>
-<div inline=".title[0:2].innerText:Hello"></div>         <!-- indices 0 and 1 -->
-<div inline=".title[0:6:2].style.color:green"></div>     <!-- indices 0,2,4 -->
-<div inline=".title[-2].style.color:red"></div>          <!-- last two -->
-<div inline=".title[-2:1].style.fontWeight:bold"></div>  <!-- next-to-last one -->
-<div inline=".title[-6:-1:2].classList.add:alt"></div>   <!-- every second from 6th-from-last to last-but-one -->
+|&varname:value|
 ```
 
----
+### Substitute a variable
 
-## Index expressions
-
-| **Form**        | **Meaning**                                                                 |
-|-----------------|------------------------------------------------------------------------------|
-| **[0]**         | First element                                                                |
-| **[1]**         | Second element                                                               |
-| **[]**          | All elements                                                                 |
-| **[0,2]**       | Elements at indices 0 and 2                                                  |
-| **[0:2]**       | Start at 0, yield 2 total → indices 0 and 1                                  |
-| **[-2]**        | Last 2 elements                                                              |
-| **[-2:1]**      | Start 2 from end, yield 1 → next-to-last element                             |
-| **[0:6:2]**     | Indices 0, 2, 4 (step of 2)                                                  |
-| **[-6:-1:2]**   | Every second element from 6th-from-last up to last-but-one                   |
-| **[-3:-5]**     | From n-4 to n-9 (negative range relative to end, clamped to bounds)          |
-
-Notes:
-- Negative start/end are interpreted relative to the end: −1 is last, −2 is next-to-last, etc.
-- For [start:count], count is the number of elements to yield (end = start + count).
-- Step defaults to 1 when omitted.
-- Indices are clamped to [0, length] to avoid out-of-range access.
-
----
-
-## Supported properties
-
-- **Content:**
-  - `.class[n].innerText:value`
-  - `.class[n].innerHTML:value`
-
-- **Classes:**
-  - `.class[n].classList.add:value`
-  - `.class[n].classList.remove:value`
-  - `.class[n].classList.toggle:value`
-
-- **Styles:**
-  - `.class[n].style.color:red`
-  - `.class[n].style.fontWeight:bold`
-  - Any CSS property via `.style.<prop>:<value>`
-
-- **Generic element properties:**
-  - `.class[n].value:some text`
-  - `.class[n].checked:true`
-
----
-
-## Chaining operations
-- **Form:** Separate operations with `;`
-- **Example:**
-```html
-<div inline="|&msg:Hello World|.title[0].innerText:!msg;.title[].style.color:blue;.title[2].classList.add:highlight"></div>
 ```
-- **Effect:**
-  - Declares msg = “Hello World”
-  - Sets first .title text to “Hello World”
-  - Colors all .title elements blue
-  - Adds highlight class to the third .title
+!varname
+```
 
----
+### Example
 
-## Shell support (scoped operations)
-- **Start shell:** `|+targetId:timerName`
-- **Close shell:** `|-timerName`
-- Variables and operations inside a shell are scoped to that shell until it’s closed.
-
-- **Example:**
 ```html
-<div inline="|+sidebar:tick|&msg:Scoped|.note[].innerText:!msg|-tick|.note[0].innerText:Global"></div>
+<div inline="|&msg:Hello World|#title.innerText:!msg"></div>
 ```
 
 ---
 
-## Complete examples
+# 3. Targeting DOM Elements
+
+DotPipe uses prefix operators for selecting DOM nodes:
+
+| Prefix | Meaning                  |
+| ------ | ------------------------ |
+| `#`    | Select element by ID     |
+| `.`    | Select elements by class |
+
+Property to assign follows a dot:
+
+```
+#id.property:value
+.class[n].property:value
+```
+
+---
+
+# 4. Index Expressions
+
+Indexes are placed in square brackets after the class name:
+
+| Form            | Meaning                                          |
+| --------------- | ------------------------------------------------ |
+| `.box[0]`       | First element                                    |
+| `.box[2]`       | Third element                                    |
+| `.box[]`        | All elements                                     |
+| `.box[0,3]`     | Elements 0 and 3                                 |
+| `.box[0:3]`     | 3 items starting at index 0 → indices 0,1,2      |
+| `.box[0:6:2]`   | Indices 0,2,4                                    |
+| `.box[-1]`      | Last element                                     |
+| `.box[-2]`      | Last two elements                                |
+| `.box[-2:1]`    | 1 element starting from second-to-last           |
+| `.box[-6:-1:2]` | Every 2nd element between those relative indices |
+
+### Notes
+
+* Negative indices are relative to the end (`-1` = last, `-2` = next-to-last).
+* `[start:count]` is different from `[start:end]`:
+
+  * `[0:2]` = 2 items → indices 0 and 1.
+* Ranges are clamped to list length.
+
+---
+
+# 5. Supported Properties
+
+### Content
+
+```
+innerText
+innerHTML
+```
+
+### Element properties
+
+```
+value
+checked
+disabled
+src
+href
+```
+
+### Class operations
+
+```
+classList.add
+classList.remove
+classList.toggle
+```
+
+### Styling
+
+```
+style.<cssProperty>
+```
+
+Examples:
+
+```
+#box.style.background:red
+.card[].style.color:#0af
+```
+
+---
+
+# 6. Variable-Driven Operations
+
+Since property values can include `!varname`:
 
 ```html
-<!-- Basic variable and single target -->
-<div inline="|&msg:Rustic ain't it?|.title[1].innerText:!msg"></div>
+<div inline="|&c:#ff0|.highlight[].style.color:!c"></div>
+```
 
-<!-- Apply to all elements -->
-<div inline=".title[].classList.add:highlight"></div>
+---
 
-<!-- Multiple precise indices -->
+# 7. Chaining Operations
+
+Chain multiple instructions with semicolons:
+
+```html
+<div inline="|&msg:Hello|.title[0].innerText:!msg;.title[].style.color:blue"></div>
+```
+
+---
+
+# 8. Shells (Scoped Execution)
+
+Shells create temporary variable scopes.
+
+### Open a shell
+
+```
+|+targetId:shellName
+```
+
+### Close a shell
+
+```
+|-shellName
+```
+
+### Example
+
+```html
+<div inline="
+  |+sidebar:tick
+  |&msg:Scoped
+  |.note[].innerText:!msg
+  |-tick
+  |.note[0].innerText:Global
+"></div>
+```
+
+---
+
+# 9. Complete Examples
+
+### Basic variable & ID assignment
+
+```html
+<div inline="|&msg:Rustic ain't it?|#status.innerText:!msg"></div>
+```
+
+### Target the second `.title`
+
+```html
+<div inline=".title[1].innerText:Hello"></div>
+```
+
+### Set style on all elements of a class
+
+```html
+<div inline=".badge[].style.color:blue"></div>
+```
+
+### Multiple, precise targets
+
+```html
 <div inline=".item[0,3,5].style.color:purple"></div>
+```
 
-<!-- Slices and steps -->
-<div inline=".card[0:4].classList.add:featured"></div>     <!-- first four -->
+### Slices & steps
+
+```html
+<div inline=".card[0:4].classList.add:featured"></div>       <!-- first four -->
 <div inline=".card[1:5:2].style.border:1px solid #333"></div> <!-- indices 1,3 -->
-<div inline=".card[-2].style.opacity:0.8"></div>           <!-- last two -->
+<div inline=".card[-2].style.opacity:0.8"></div>              <!-- last two -->
+```
 
-<!-- Mixed chain -->
-<div inline="|&color:#0af|.badge[0].style.background:!color;.badge[2].classList.add:active;.badge[].style.color:white"></div>
+### Mixed chain with variables
+
+```html
+<div inline="
+  |&color:#0af
+  |.badge[0].style.background:!color
+  |.badge[2].classList.add:active
+  |.badge[].style.color:white
+"></div>
 ```
 
 ---
 
-## Quick reference
+# 10. Attribute Binding
 
-```text
+Attributes can be set directly:
+
+```html
+#avatar[src]:!imageURL
+#panel[data-mode]:edit
+```
+
+Examples:
+
+```html
+<div inline="|&name:Sam|#card[data-user]:!name"></div>
+```
+
+---
+
+# 11. Special Notes on Behavior
+
+### Order matters
+
+Later operations can override earlier ones.
+
+### Variables are evaluated before assignment
+
+So:
+
+```
+|&a:10|&b:!a|
+```
+
+stores `b = 10`.
+
+### All index expressions are clamped
+
+e.g., requesting `.card[200]` simply yields an empty set.
+
+---
+
+# 12. Quick Reference
+
+```
 Variables
-  |&name:value|           Declare variable
-  !name                   Substitute variable
+  |&name:value|      Declare
+  !name              Substitute
 
 Targets
-  #id.property:value      ID-based target and property assignment
-  .class[n].property:value
-  .class[].property:value
-  .class[x,y].property:value
-  .class[start:count].property:value
-  .class[start:end:step].property:value
-  .class[-n].property:value
+  #id.prop:val
+  .class[n].prop:val
+  .class[].prop:val
+  .class[a,b].prop:val
+  .class[start:count].prop:val
+  .class[start:end:step].prop:val
+  .class[-n].prop:val
 
 Properties
   innerText, innerHTML
-  classList.add/remove/toggle
   style.<prop>
-  any element property (value, checked, etc.)
+  classList.add/remove/toggle
+  value, checked, disabled, src, href, etc.
 
 Chaining
   op1;op2;op3
 
 Shells
-  |+targetId:timerName    Open shell (scoped)
-  |-timerName             Close shell
+  |+targetId:shellName
+  |-shellName
 ```
 
 ---
 
-## Implementation notes
-- Inline macros are parsed in your dotPipe.runInline loop:
-  - Variables are collected and substituted.
-  - Macro operations match `([#.][\w-]+)(?:\[(.*?)\])?\.(.+?):(.+)`.
-  - Index expressions support single, all, explicit lists, slices, negative indices, and steps.
-  - Property setting supports classList operations, style properties, content, and generic element properties.
-- Operations are executed in order; later ops can overwrite earlier ones.
-- When using shells, variables defined within are merged back to parent when the shell is closed.
+# 13. Implementation Notes
+
+DotPipe’s inline processor (`runInline`) does the following:
+
+1. **Extracts variables** declared with `|&name:value|`.
+2. **Substitutes variables** (replacing `!name` with values).
+3. **Parses DOM operations** using:
+
+   ```
+   ([#.][\w-]+)(?:\[(.*?)\])?\.(.+?):(.+)
+   ```
+4. **Resolves index expressions**:
+
+   * single, multiple, empty, slice, range, step, negative
+   * clamps indices to collection length
+5. **Targets elements**:
+
+   * `#id` → document.getElementById
+   * `.class[...]` → elements via classQuery
+6. **Assigns property**:
+
+   * `innerText`, `innerHTML`
+   * `.style.<prop>`
+   * `.classList.add/remove/toggle`
+   * generic property/mutation
+7. **Applies chained operations** in sequence.
+8. **Handles shells** by stacking and restoring dpVars.
 
 ---
 
-If you want a condensed cheat sheet as a standalone file, I can generate that too.
+# 14. Example: Everything Combined
+
+```html
+<div inline="
+  |&username:Anthony
+  |&color:#36f
+  |.card[0].innerText:!username
+  |.card[0].style.background:!color
+  |.card[1,2].classList.add:highlight
+  |.card[].style.color:white
+  |.card[-1].style.opacity:0.75
+"></div>
+```
