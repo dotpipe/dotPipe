@@ -7,27 +7,130 @@
     <title>dotPipe JSON Tree</title>
     <script src="./dotpipe.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1e1e1e;
-            color: #fff;
-            padding: 20px;
+        .modal-tip-box {
+            background: #fff;
+            color: #222;
+            padding: 8px 10px;
+            border-radius: 6px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            border: 1px solid #ddd;
+            max-width: 260px;
+            font-size: 13px;
+            animation: fadeUpshow 0.18s ease-out;
         }
 
+        @keyframes fadeUpshow {
+            from {
+                opacity: 0;
+                transform: translateY(3px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Optional arrow */
+        .modal-tip-box::before {
+            content: "";
+            position: absolute;
+            left: -6px;
+            top: 10px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent #fff transparent transparent;
+            filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.1));
+        }
+
+        /* Base tree item */
         .tree-item {
-            margin-left: 20px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 4px 6px;
+            font-family: system-ui, sans-serif;
+            font-size: 14px;
+            color: #222;
             cursor: pointer;
+            user-select: none;
+            line-height: 1.2;
+            border-radius: 4px;
+            --indent: 18px;
         }
 
-        .highlight {
-            background-color: #444;
-            border-radius: 5px;
-            padding: 2px;
+        /* Icon styling */
+        .tree-item .tree-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 6px;
+            object-fit: contain;
         }
 
+        /* Hover highlight */
+        .tree-item:hover {
+            background: rgba(80, 120, 255, 0.10);
+        }
+
+        /* Selected item */
+        .tree-item.highlight {
+            background: rgba(80, 120, 255, 0.25);
+            color: #000;
+            font-weight: 600;
+            border-left: 3px solid rgba(60, 100, 255, 0.8);
+        }
+
+        /* CHILDREN BLOCK */
         .sub-tree {
-            display: none;
-            margin-left: 20px;
+            margin-left: var(--indent);
+            padding-left: 10px;
+            border-left: 1px solid #ddd;
+            animation: fadeInTree 0.25s ease-out;
+        }
+
+        /* Fade in */
+        @keyframes fadeInTree {
+            from {
+                opacity: 0;
+                transform: translateY(-2px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Tree branches / connectors */
+        .tree-item::before {
+            content: '';
+            position: absolute;
+            left: calc(-1 * var(--indent) + 8px);
+            top: 50%;
+            width: var(--indent);
+            height: 1px;
+            background: #ddd;
+        }
+
+        .tree-item:first-child::before {
+            top: 14px;
+        }
+
+        .tree-item:last-child::after {
+            content: '';
+            position: absolute;
+            left: calc(-1 * var(--indent) + 8px);
+            top: 14px;
+            width: 1px;
+            height: calc(100% - 14px);
+            background: #fff;
+            /* mask branch for last child */
+        }
+
+        /* Remove lines at the very root */
+        .tree-root>.tree-item::before,
+        .tree-root>.tree-item::after {
+            display: none !important;
         }
     </style>
 </head>
@@ -38,52 +141,35 @@
 
     <script>
         const jsonData = {
-            "label": "Root",
-            "table": {
-                "label": "Table",
-                "sales": {
-                    "textContent": "Sales",
-                    "td2": {
-                        "ajax": "tree-view/tree.json",
-                        "icon": "apes.jpg",
-                        "class": "sale-label tree-view",
-                        "id": "sales-tag",
-                        "insert": "sales-tag",
-                        "textContent": "On Sale!",
-                        "style": "color: #406;"
-                    },
-                    "sale1": {
-                        "tagname": "td",
-                        "class": "sale-label mouse",
-                        "id": "sales-tag1",
-                        "modal-tip": "tree-view/tree.json;sales-tag1;tree-item;;;2000;100",
-                        "textContent": "On Sale!!!",
-                        "style": "color: #406;"
-                    },
-                    "sale2": {
-                        "tagname": "td",
-                        "class": "sale-label mouse test-callback",
-                        "id": "sales-tag1",
-                        "modal-tip": "tree-view/tree.json;sales-tag1;tree-item;;;2000;100",
-                        "textContent": "NEW ARRIVAL!!!",
-                        "style": "color: #406;",
-                        "name": "test2",
-                        "value": "test1"
-                    },
-                    "sale3": {
-                        "tagname": "td",
-                        "class": "sale-label mouse test-callback",
-                        "id": "sales-tag1",
-                        "callback": "test",
-                        "callback-class": "test-callback",
-                        "textContent": "NEW DEAL!!!",
-                        "style": "color: #406;",
-                        "name": "test1",
-                        "value": "test2"
-                    }
+            label: "Products",
+            //icon: "icons/folder.svg",
+            children: [
+                {
+                    label: "Books",
+                    //icon: "icons/folder.svg",
+                    children: [
+                        { label: "Fiction" },
+                        { label: "Non-fiction" }
+                    ]
+                },
+                {
+                    tagname: "div",
+                    label: "Electronics",
+                    //icon: "icons/folder.svg",
+                    id: "serve",
+                    class: "mouse modala",
+                    event: "click",
+                    modaltip: "../tree-view/electronics.json:treeTip:2000:9999",
+                    children: [
+                        { label: "Laptops" },
+                        { label: "Smartphones" },
+                        { label: "Cameras" },
+                        { tagname: "div", label: "More", id: "treeTip" }
+                    ]
                 }
-            }
+            ]
         };
+
         renderTree(jsonData, "jsonTree");
     </script>
 

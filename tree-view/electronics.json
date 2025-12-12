@@ -1,0 +1,26 @@
+{
+    "label": "Electronics",
+    "tagname": "div",
+    "id": "serve",
+    "class": "mouse",
+    "event": "click",
+    "children": [
+        {
+            "label": "Laptops",
+            "tagname": "div"
+        },
+        {
+            "label": "Smartphones",
+            "tagname": "div"
+        },
+        {
+            "label": "Cameras",
+            "tagname": "div"
+        },
+        {
+            "tagname": "div",
+            "label": "More",
+            "id": "treeTip"
+        }
+    ]
+}

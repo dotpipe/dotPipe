@@ -105,6 +105,29 @@
   <div id="macro5" class="demo-box" inline="
 |.item[0:4:2].backgroundColor:lightblue
 ">Highlight Every 2nd Item</div>
+<div id="userCard">Card</div>
+<span id="username"></span>
+
+<!-- set attribute data-name on #userCard from variable "username" -->
+<button id="setName" inline="|&username:Anthony|#userCard[data-name]:!username|#username.text:!username">Set Name</button>
+
+<!-- set image src from var -->
+<img id="avatar" src="" alt="avatar"/>
+<button id="setAvatar" inline="|&imgURL:https://example.com/a.png|#avatar[src]:!imgURL">Set Avatar</button>
+
+<div class="box" id="b0">Box0</div>
+<div class="box" id="b1">Box1</div>
+<div class="box" id="b2">Box2</div>
+
+<!-- set backgroundColor on second .box (index 1) from var -->
+<button id="colorSecond" inline="|&c:lightblue|.box[1].backgroundColor:!c">Color 2nd</button>
+
+<!-- set text for all .box using empty index [] (your getElementsForSelector returns all when indexExpr blank) -->
+<button id="setAllBoxes" inline="|&txt:ALL|.box[].text:!txt">Set All Text</button>
+
+<div id="styleBox">Style Me</div>
+<button id="makeBig" inline="|&sz:32px|#styleBox.fontSize:!sz">Make Big</button>
+<button id="makeSmall" inline="|&sz:12px|#styleBox.fontSize:!sz">Make Small</button>
 
   <script src="dotpipe.js"></script>
   <script>

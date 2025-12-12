@@ -530,6 +530,50 @@ const dotPipe = {
             let seg = segments[i].trim();
             let m;
 
+            // ===============================
+            // ATTRIBUTE BINDING
+            // Supports: #id[attr]:value
+            //           .class[][attr]:value
+            // ===============================
+            if (m = /^([#\.]?[a-zA-Z0-9_\-]+)(\[\s*([a-zA-Z0-9_\-]+)\s*\])\s*:(.+)$/.exec(seg)) {
+
+                const selector = m[1];          // "#id" or ".class" or "id"
+                const attrName = m[3];          // attribute inside the [attr]
+                let rawValue = m[4];            // literal or !var
+
+                const s = currentShell || entry;
+
+                // Resolve !var
+                if (rawValue.startsWith('!')) {
+                    rawValue = s.dpVars[rawValue.slice(1)];
+                } else {
+                    rawValue = dotPipe.parseValue(rawValue);
+                }
+
+                // Get elements — re-use your selector logic
+                let elems = [];
+                if (selector.startsWith('#')) {
+                    const el = document.getElementById(selector.slice(1));
+                    if (el) elems = [el];
+                } else if (selector.startsWith('.')) {
+                    elems = Array.from(document.getElementsByClassName(selector.slice(1)));
+                } else {
+                    const el = document.getElementById(selector);
+                    if (el) elems = [el];
+                }
+
+                elems.forEach(el => {
+                    if (rawValue === null || rawValue === undefined) {
+                        el.removeAttribute(attrName);
+                    } else {
+                        el.setAttribute(attrName, rawValue);
+                    }
+                });
+
+                currentValue = rawValue;
+                continue;
+            }
+
             // Operator property / text setter supporting [indexExpr]
             if (m = /^([#\.\$]?[\w\-]+)(?:\[(.*?)\])?\.(text|style|[a-zA-Z\-]+)\:(.+)$/.exec(seg)) {
                 const selector = m[1];          // e.g. ".item" or "#id" or "$id" or "bareId"
@@ -878,26 +922,41 @@ const dotPipe = {
             console.log(value);
             return value;
         },
-
         inc: function (varName, ...args) {
-            const shell = args[args.length - 1];  // always last argument
+            const shell = args[args.length - 1];  // last argument is shell
             let step = 1;
             if (args.length > 1) {
-                step = parseFloat(args[0]) || 1;  // if step provided
+                step = parseFloat(args[0]);  // take the numeric step from macro
             }
+
+            // resolve $id to dpVars
+            if (varName.startsWith('$')) {
+                const id = varName.slice(1);
+                shell.dpVars[id] = (parseFloat(shell.dpVars[id] || 0) + step);
+                return shell.dpVars[id];
+            }
+
             shell.dpVars[varName] = (parseFloat(shell.dpVars[varName] || 0) + step);
             return shell.dpVars[varName];
         },
 
         dec: function (varName, ...args) {
-            const shell = args[args.length - 1];  // always last argument
+            const shell = args[args.length - 1];
             let step = 1;
             if (args.length > 1) {
-                step = parseFloat(args[0]) || 1;  // if step provided
+                step = parseFloat(args[0]);
             }
+
+            if (varName.startsWith('$')) {
+                const id = varName.slice(1);
+                shell.dpVars[id] = (parseFloat(shell.dpVars[id] || 0) - step);
+                return shell.dpVars[id];
+            }
+
             shell.dpVars[varName] = (parseFloat(shell.dpVars[varName] || 0) - step);
             return shell.dpVars[varName];
         },
+
         toggle: function (varName, shell) {
             if (shell.dpVars[varName] === undefined) shell.dpVars[varName] = false;
             shell.dpVars[varName] = !shell.dpVars[varName];

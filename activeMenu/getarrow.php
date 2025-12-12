@@ -34,7 +34,7 @@ $file = '{
         "class": "mouse",
         "textContent":"'.$page.'",
         "display": "main;",
-        "tool-tip": "'.$page.';;;1000;100",
+        "tool-tip": "../activeMenu/'.$page.';;;1000;100",
         "footer": {
             "tagname": "div",
             "id": "footer",
@@ -49,7 +49,7 @@ $file = '{
                 "id": "footer-img",
                 "class": "modala",
                 "display": "main;footer;",
-                "ajax": "'.$lc.'.php",
+                "ajax": "../activeMenu/'.$lc.'.php",
                 "query": "date:'.$date.'",
                 "insert": "main-body"
             }

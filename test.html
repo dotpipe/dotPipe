@@ -1,7 +1,74 @@
-<hml>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<title>DotPipe Demo</title>
+<style>
+  body { font-family: sans-serif; margin: 2em; }
+  .title { font-size: 1.5em; margin: 0.5em 0; }
+  .badge { display: inline-block; padding: 0.3em 0.6em; background: #eee; margin: 0.2em; border-radius: 4px; }
+  .highlight { background-color: yellow; }
+  .active { background-color: #0af; color: white; }
+  .card { border: 1px solid #ccc; padding: 1em; margin: 0.5em 0; }
+</style>
 <script src="dotpipe.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    dotPipe.register(); // register all elements with 'inline'
+
+
+    console.log("DotPipe demo executed!");
+});
+</script>
+</head>
 <body>
-<tag id="test" class="redirect" ajax="https://x.com">Testing</tag>
+
+<h1>DotPipe Demo</h1>
+
+<!-- Titles -->
+<div class="title"></div>
+<div class="title"></div>
+<div class="title"></div>
+
+<!-- Badges -->
+<div class="badge"></div>
+<div class="badge"></div>
+<div class="badge"></div>
+
+<!-- Cards -->
+<div class="card" id="card1">Card 1</div>
+<div class="card" id="card2">Card 2</div>
+<div class="card" id="card3">Card 3</div>
+<div class="card" id="card4">Card 4</div>
+
+<!-- Controls -->
+<button id="incBtn" inline="
+  inc:$counter,4|
+  $counter
+">+4</button>
+
+<button id="decBtn" inline="
+  dec:$counter|
+  $counter
+">-1</button>
+
+<span id="counter">0</span>
+
+
+<!-- Example inline macros -->
+<div id="s1" inline="
+  |&msg:Hello DotPipe|
+  .title[0].text:!msg|
+  .title[1].text:World|
+  .title[2].text:!|
+  .badge[0].add:highlight|
+  .badge[1].text:!msg|
+  .badge[1].add:active|
+  .card[0:2].border:2px solid red|
+  .card[2:4].background:#f0f0f0|
+">Body</div>
+
+
 </body>
 </html>
+

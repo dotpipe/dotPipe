@@ -1,7 +1,7 @@
 {
 	"header": {
 		"title": "David's Guitar Show",
-		"css": "dark-theme.css",
+		"css": "../guitar/dark-theme.css",
 		"meta": {
 			"a": {
 				"tagname": "meta",
@@ -86,7 +86,7 @@
 					"style": "background:orange;color:white;padding:2em;border-radius:12px;font-size:2em;",
 					"textContent": "Learn More About Financing Through David's",
 					"class": "modala",
-					"ajax": "./reasons_to_work.json",
+					"ajax": "../guitar/reasons_to_work.json",
 					"insert": "me"
 				},
 				"colspan": "4"
@@ -121,7 +121,7 @@
 					"id": "dark-mode-button",
 					"textContent": "Deals",
 					"class": "multi-part modala-multi-last deal-button modala",
-					"ajax": "./learn-more-info.json:learn-more-content",
+					"ajax": "../guitar/learn-more-info.json:learn-more-content",
 					"boxes": 3
 				},
 				"menuItemA": {
@@ -141,7 +141,7 @@
 					"textContent": "Home",
 					"id": "test",
 					"class": "modala",
-					"ajax": "./reasons_to_work.json:me:2;./learn-more-info.json:learn-more-content:3",
+					"ajax": "../guitar/reasons_to_work.json:me:2;../guitar/learn-more-info.json:learn-more-content:3",
 					"style": "margin: 5px;"
 				},
 				"menuItem2": {
@@ -213,6 +213,6 @@
 			}
 		}
 	},
-	"php": "makefile.php",
-	"modal": "reasons_to_work.json"
+	"php": "../guitar/makefile.php",
+	"modal": "../guitar/reasons_to_work.json"
 }

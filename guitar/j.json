@@ -4,7 +4,7 @@
         "id": "idtag1",
         "type": "img",
         "style": "display:block",
-        "sources": "headstockfront.jpg;headstockback.jpg;backheel.jpg;headstockback.jpg",
+        "sources": "../guitar/headstockfront.jpg;../guitar/headstockback.jpg;../guitar/backheel.jpg;../guitar/headstockback.jpg",
         "auto": true,
         "delay": 1500,
         "boxes": 4,

@@ -53,7 +53,7 @@
 
     <script>
         try {
-            modal("./draft.json", "collective-content");
+            modal("../activeMenu/draft.json", "collective-content");
         }
         catch(e) {
             console.log(e);
