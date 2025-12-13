@@ -142,29 +142,28 @@
     <script>
         const jsonData = {
             label: "Products",
-            //icon: "icons/folder.svg",
+            icon: "icons/folder.svg",
             children: [
                 {
                     label: "Books",
-                    //icon: "icons/folder.svg",
+                    icon: "icons/folder.svg",
                     children: [
                         { label: "Fiction" },
                         { label: "Non-fiction" }
                     ]
                 },
                 {
-                    tagname: "div",
                     label: "Electronics",
-                    //icon: "icons/folder.svg",
+                    icon: "icons/folder.svg",
                     id: "serve",
-                    class: "mouse modala",
-                    event: "click",
+                    class: "mouse",
+                    event: "mouseover",
                     modaltip: "../tree-view/electronics.json:treeTip:2000:9999",
                     children: [
                         { label: "Laptops" },
                         { label: "Smartphones" },
                         { label: "Cameras" },
-                        { tagname: "div", label: "More", id: "treeTip" }
+                        { tagname: "div", label: "More", style: "width:auto;height:auto;padding:15px;", id: "treeTip" }
                     ]
                 }
             ]
