@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 
@@ -32,7 +31,7 @@ for($i = 1 ; $i <= 11 ; $i++) {
             "innerHTML": "➤",
             "method": "GET",
             "tool-tip": "'. $keys[$i - 1]. ';;;1000;100",
-            "ajax": "getarrow.php",
+            "ajax": "./getarrow.php",
             "name": "main",
             "value": "'.$i.'",
             "form-class": "arrow'.$i.'",

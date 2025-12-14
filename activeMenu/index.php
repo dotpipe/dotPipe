@@ -53,7 +53,8 @@
 
     <script>
         try {
-            modal("../activeMenu/draft.json", "collective-content");
+            const variable = { modal: "../activeMenu/draft.json:collective-content" };
+            modala(variable, "collective-content");
         }
         catch(e) {
             console.log(e);

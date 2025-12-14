@@ -1,6 +1,5 @@
 {
     "label": "Electronics",
-    "tagname": "div",
     "id": "serve",
     "class": "mouse",
     "event": "click",
