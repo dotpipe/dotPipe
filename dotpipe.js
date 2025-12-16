@@ -3180,20 +3180,38 @@ function processTabTags() {
             return;
         }
 
-        // Get attributes
-        const tabsData = element.getAttribute("tab")?.split(";") || [];
+        // Get attributes (support both `tab` and `tabs` for compatibility)
+        const rawTabs = element.getAttribute("tab") || element.getAttribute("tabs") || "";
+        const tabsData = rawTabs.split(";").map(s => s.trim()).filter(Boolean);
         const tabClass = element.getAttribute("class") || "";
         const tabStyle = element.getAttribute("style") || "";
+        const parentId = element.getAttribute("id") || `tabs-${Math.random().toString(36).substring(2, 9)}`;
 
         if (tabsData.length === 0) {
-            console.error("Tabs tag requires tab attribute");
+            console.error("Tabs tag requires a 'tab' or 'tabs' attribute with definitions");
             element.innerHTML = "<div class='tabs-error'>Configuration error: No tabs specified</div>";
             element.classList.add("processed");
             return;
         }
 
-        // Generate the tabs HTML
-        const tabsHTML = createTabsInterface(tabsData, tabClass, tabStyle);
+        // Validate and auto-generate tab definitions
+        const validatedTabs = tabsData.map((tabData, index) => {
+            const parts = tabData.split(":");
+            const name = (parts[0] || "Tab").trim();
+            // Auto-generate ID if not provided: use parentId + index
+            let id = parts[1] ? parts[1].trim() : `${parentId}-tab-${index}`;
+            const source = parts[2] ? parts[2].trim() : "";
+
+            // Warn if required parts are missing
+            if (!source) {
+                console.warn(`Tab "${name}" (id: "${id}") has no source file specified`);
+            }
+
+            return { name, id, source, index };
+        });
+
+        // Generate the tabs HTML with properly validated data
+        const tabsHTML = createTabsInterface(validatedTabs, tabClass, tabStyle);
 
         // Replace the tabs tag content with our generated HTML
         element.innerHTML = tabsHTML;
@@ -3201,53 +3219,129 @@ function processTabTags() {
         // Mark as processed
         element.classList.add("processed");
 
+        // Set up tab switching functionality (can't rely on inline script with innerHTML)
+        setupTabSwitching(element, validatedTabs);
+
         // Process the newly added elements with dotpipe.js
         domContentLoad();
 
         // Preload all tab content
-        preloadAllTabContent(tabsData);
+        preloadAllTabContent(validatedTabs);
+    });
+}
+
+/**
+ * Sets up tab switching functionality for a tabs container
+ * This is called after innerHTML is set since inline scripts don't execute
+ * @param {Element} container - The tabs container element
+ * @param {Array} validatedTabs - Array of validated tab objects
+ */
+function setupTabSwitching(container, validatedTabs) {
+    const tabsContainer = container.querySelector('.tabs-container');
+    if (!tabsContainer) {
+        console.error('Could not find tabs-container');
+        return;
+    }
+
+    const headers = tabsContainer.querySelectorAll('.tab-header');
+    const contents = tabsContainer.querySelectorAll('.tab-content');
+
+    function switchTab(tabId) {
+        // Remove active class from tabs in this container only
+        headers.forEach(h => {
+            h.classList.remove('active');
+            h.setAttribute('aria-selected', 'false');
+        });
+        contents.forEach(c => c.classList.remove('active'));
+
+        // Add active class to clicked tab and its content
+        const activeHeader = tabsContainer.querySelector(`[data-tab="${tabId}"]`);
+        const activeContent = tabsContainer.querySelector(`#tab-content-${tabId}`);
+
+        if (activeHeader) {
+            activeHeader.classList.add('active');
+            activeHeader.setAttribute('aria-selected', 'true');
+            activeHeader.focus();
+        }
+        if (activeContent) {
+            activeContent.classList.add('active');
+        }
+    }
+
+    // Attach click handlers to each header
+    headers.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tabId = this.getAttribute('data-tab');
+            if (tabId) {
+                switchTab(tabId);
+            }
+        });
+
+        // Keyboard navigation support
+        tab.addEventListener('keydown', function(e) {
+            const allTabs = Array.from(headers);
+            const currentIndex = allTabs.indexOf(this);
+            let nextTab = null;
+
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                nextTab = allTabs[(currentIndex + 1) % allTabs.length];
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                nextTab = allTabs[(currentIndex - 1 + allTabs.length) % allTabs.length];
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                nextTab = allTabs[0];
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                nextTab = allTabs[allTabs.length - 1];
+            }
+
+            if (nextTab) {
+                const tabId = nextTab.getAttribute('data-tab');
+                switchTab(tabId);
+            }
+        });
     });
 }
 
 /**
  * Creates a tabbed interface based on provided attributes
- * @param {Array} tabsData - Array of tab definitions in format "TabName:TabId:ContentSource"
- * @param {string} tabClass - CSS classes to apply to tabs
- * @param {string} tabStyle - Inline styles to apply to tabs
+ * Properly organized to use Label:id:source format consistently
+ * @param {Array} validatedTabs - Array of tab definition objects: {name, id, source, index}
+ * @param {string} tabClass - CSS classes to apply to tab headers
+ * @param {string} tabStyle - Inline styles to apply to tab headers
  * @returns {string} HTML for the tabbed interface
  */
-function createTabsInterface(tabsData, tabClass, tabStyle) {
-    // Parse tab data
-    const tabs = tabsData.map(tabData => {
-        const parts = tabData.split(":");
-        return {
-            name: parts[0] || "Tab",
-            id: parts[1] || `tab-${Math.random().toString(36).substring(2, 9)}`,
-            source: parts[2] || ""
-        };
-    });
+function createTabsInterface(validatedTabs, tabClass, tabStyle) {
+    // validatedTabs is already an array of objects with {name, id, source, index}
+    const tabs = validatedTabs;
 
     // Set first tab as active by default
     const activeTab = tabs[0];
 
-    // Create tabs HTML
-    let tabsHeaderHTML = tabs.map((tab, index) => {
-        const isActive = index === 0 ? 'active' : '';
-        return `<div class="tab-header ${isActive} ${tabClass}" id="header-${tab.id}" data-tab="${tab.id}" data-source="${tab.source}" style="${tabStyle}">${tab.name}</div>`;
+    // Create tabs header HTML with properly generated IDs
+    let tabsHeaderHTML = tabs.map((tab) => {
+        const isActive = tab.index === 0 ? 'active' : '';
+        const headerId = `tab-header-${tab.id}`;
+        const tabName = (tab && tab.name) ? tab.name : (typeof tab === 'string' ? tab.split(':')[0] : 'Tab');
+        return `<div class="tab-header ${isActive} ${tabClass}" id="${headerId}" data-tab="${tab.id}" data-source="${tab.source}" data-index="${tab.index}" style="${tabStyle}" role="button" tabindex="0" aria-selected="${tab.index === 0}">${tabName}</div>`;
     }).join('');
 
     // Create tab content containers - initially empty for preloading
-    let tabsContentHTML = tabs.map((tab, index) => {
-        const isActive = index === 0 ? 'active' : '';
-        return `<div class="tab-content ${isActive}" id="content-${tab.id}">
+    let tabsContentHTML = tabs.map((tab) => {
+        const isActive = tab.index === 0 ? 'active' : '';
+        const contentId = `tab-content-${tab.id}`;
+        return `<div class="tab-content ${isActive}" id="${contentId}" data-tab="${tab.id}" role="tabpanel">
                   <div class="tab-loading">Loading content...</div>
                 </div>`;
     }).join('');
 
     // Combine everything
     const html = `
-    <div class="tabs-container">
-        <div class="tabs-header">
+    <div class="tabs-container" role="tablist">
+        <div class="tabs-header" role="presentation">
             ${tabsHeaderHTML}
         </div>
         <div class="tabs-content">
@@ -3266,6 +3360,7 @@ function createTabsInterface(tabsData, tabClass, tabStyle) {
             display: flex;
             border-bottom: 1px solid #ddd;
             background-color: #f8f9fa;
+            flex-wrap: wrap;
         }
         
         .tab-header {
@@ -3276,10 +3371,17 @@ function createTabsInterface(tabsData, tabClass, tabStyle) {
             margin-right: 5px;
             border-radius: 5px 5px 0 0;
             transition: all 0.3s ease;
+            user-select: none;
+            -webkit-user-select: none;
         }
         
         .tab-header:hover {
             background-color: #e9ecef;
+        }
+
+        .tab-header:focus {
+            outline: 2px solid #667eea;
+            outline-offset: -2px;
         }
         
         .tab-header.active {
@@ -3302,6 +3404,12 @@ function createTabsInterface(tabsData, tabClass, tabStyle) {
         
         .tab-content.active {
             display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .tabs-error {
@@ -3318,69 +3426,87 @@ function createTabsInterface(tabsData, tabClass, tabStyle) {
             color: #666;
         }
     </style>
-
-    <script>
-        // Tab switching functionality
-        document.querySelectorAll('.tab-header').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Get the tab ID
-                const tabId = this.getAttribute('data-tab');
-                
-                // Remove active class from all tabs
-                document.querySelectorAll('.tab-header').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-                
-                // Add active class to current tab
-                this.classList.add('active');
-                document.getElementById('content-' + tabId).classList.add('active');
-            });
-        });
-    </script>
     `;
 
     return html;
 }
 
 /**
- * Preloads content for all tabs
- * @param {Array} tabsData - Array of tab definitions
+ * Preloads content for all tabs using proper organized tab definitions
+ * @param {Array} validatedTabs - Array of validated tab objects: {name, id, source, index}
  */
-function preloadAllTabContent(tabsData) {
-    tabsData.forEach(tabData => {
-        const parts = tabData.split(":");
-        const tabId = parts[1] || `tab-${Math.random().toString(36).substring(2, 9)}`;
-        const source = parts[2] || "";
+function preloadAllTabContent(validatedTabs) {
+    validatedTabs.forEach(tab => {
+        const { id: tabId, source } = tab;
+        const contentId = `tab-content-${tabId}`;
 
-        if (source) {
-            // Create a pipe element for each tab
-            let pipeElement = document.createElement('pipe');
-            pipeElement.id = `pipe-${tabId}-preload`;
-            pipeElement.setAttribute('ajax', source);
-            pipeElement.setAttribute('insert', `content-${tabId}`);
+        if (!source) {
+            console.warn(`Tab "${tab.name}" has no source specified`);
+            return;
+        }
 
-            // Set appropriate class based on file extension
-            if (source.toLowerCase().endsWith('.json')) {
-                pipeElement.classList.add('modala');
-            } else if (source.toLowerCase().endsWith('.html')) {
-                pipeElement.classList.add('text-html');
-                pipeElement.classList.add('plain-html');
-            } else {
-                // Default handling for other file types
-                pipeElement.classList.add('text-html');
-            }
+        const contentElem = document.getElementById(contentId);
 
-            // Add pipe element to the document
-            document.body.appendChild(pipeElement);
+        if (!contentElem) {
+            console.error(`Content container not found for tab: ${tabId}`);
+            return;
+        }
 
-            // Trigger the pipe to load content
-            pipes(pipeElement);
-
-            // Remove the pipe element after use
-            setTimeout(() => {
-                if (document.body.contains(pipeElement)) {
-                    document.body.removeChild(pipeElement);
+        // Handle JSON resources
+        if (source.toLowerCase().endsWith('.json')) {
+            getJSONFile(source).then(jsonObj => {
+                // Clear loading placeholder
+                contentElem.innerHTML = '';
+                try {
+                    // Check if JSON looks like a modala definition
+                    const keys = Object.keys(jsonObj || {});
+                    const looksLikeModala = keys.some(k => ['tagname','tagName','header','buttons','select','options','textcontent','innerhtml','innertext'].includes(k));
+                    
+                    if (!looksLikeModala) {
+                        // Build a simple key/value HTML list for simple JSON objects
+                        const html = '<div class="kv-list">' + keys.map(k => `<div class="kv-row"><strong>${escapeHtml(k)}:</strong> ${escapeHtml(String(jsonObj[k]))}</div>`).join('') + '</div>';
+                        const wrapper = { tagName: 'div', innerhtml: html };
+                        modala(wrapper, contentElem);
+                    } else {
+                        // Use modala for complex definitions
+                        modala(jsonObj, contentElem);
+                    }
+                } catch (e) {
+                    console.error('Failed to render JSON in tab:', tabId, e);
+                    contentElem.innerHTML = `<div style="color: #c62828; padding: 10px;">Error loading tab content</div>`;
                 }
-            }, 2000);
+            }).catch(err => {
+                console.error(`Failed to load tab JSON (${source}):`, err);
+                contentElem.innerHTML = `<div style="color: #c62828; padding: 10px;">Error loading: ${escapeHtml(source)}</div>`;
+            });
+            return;
+        }
+
+        // Handle HTML and other resources with <pipe> element injection
+        let pipeElement = document.createElement('pipe');
+        pipeElement.id = `pipe-${tabId}-loader`;
+        pipeElement.setAttribute('ajax', source);
+        pipeElement.setAttribute('insert', contentId);
+
+        // Set appropriate classes based on file extension
+        if (source.toLowerCase().endsWith('.html')) {
+            pipeElement.classList.add('text-html', 'plain-html');
+        } else {
+            pipeElement.classList.add('text-html');
+        }
+
+        // Clear loading placeholder and inject pipe element
+        contentElem.innerHTML = `<div class="tab-preload-wrapper" id="preload-wrap-${tabId}"></div>`;
+        
+        const wrapperElem = document.getElementById(`preload-wrap-${tabId}`);
+        if (wrapperElem) {
+            wrapperElem.appendChild(pipeElement);
+            // Process the pipe element to trigger AJAX loading
+            pipes(pipeElement);
+        } else {
+            // Fallback: add pipe to body if wrapper not found
+            document.body.appendChild(pipeElement);
+            pipes(pipeElement);
         }
     });
 }
@@ -5525,7 +5651,9 @@ function modala(value, tempTag, root, id) {
             var options = null;
             // console.log(v)
             optsArray.forEach((e, f) => {
-                var g = e.split(":");
+                // Split only on first colon to support URLs (http://...)
+                var colonIndex = e.indexOf(":");
+                var g = colonIndex > 0 ? [e.substring(0, colonIndex), e.substring(colonIndex + 1)] : [e, e];
                 options = document.createElement("option");
                 options.setAttribute("value", g[1]);
                 options.textContent = (g[0]);
@@ -6209,7 +6337,27 @@ function pipes(elem, stop = false) {
     if (elem.hasAttribute("ajax")) {
         var parts = elem.getAttribute("ajax").split(";");
         parts.forEach((part) => {
-            var [file, target, limit] = part.split(":");
+            // Handle protocol colons (http:// or https://) correctly
+            var file, target, limit;
+            if (part.match(/^https?:\/\//)) {
+                // URL with protocol - find the last colon that's not part of protocol
+                var protocolEnd = part.indexOf('://') + 3;
+                var afterProtocol = part.substring(protocolEnd);
+                var lastColon = afterProtocol.lastIndexOf(':');
+                
+                if (lastColon !== -1) {
+                    file = part.substring(0, protocolEnd + lastColon);
+                    var remaining = afterProtocol.substring(lastColon + 1).split(':');
+                    target = remaining[0];
+                    limit = remaining[1];
+                } else {
+                    file = part;
+                }
+            } else {
+                // No protocol, use simple split
+                [file, target, limit] = part.split(":");
+            }
+            
             var clone = elem.cloneNode(true);
             clone.setAttribute("ajax", file);
             clone.setAttribute("insert", target);
