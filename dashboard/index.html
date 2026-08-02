@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="XI XI background interface for live API, endpoint, audit, and domPipe control.">
+  <title>XI XI Control Panel</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="../domPipe.js"></script>
+</head>
+<body>
+  <div class="workspace-shell">
+    <header class="shell-bar">
+      <div class="brand-lockup">
+        <a class="brand-mark" href="./" aria-label="Open XI XI Control Panel"><span class="brand-glyph">◈</span></a>
+        <div>
+          <p class="eyebrow">XI XI / SITE CONFIGURATION</p>
+          <h1>XI XI Control Panel</h1>
+        </div>
+      </div>
+      <div class="shell-actions">
+        <span class="connection-state"><span class="status-dot"></span><span id="connectionLabel">Local workspace</span></span>
+        <button class="icon-button" id="themeToggle" type="button" aria-label="Toggle light and dark theme">◐</button>
+        <button class="window-button" id="minimizePanel" type="button" aria-label="Minimize" aria-pressed="false">−</button>
+        <button class="window-button close" id="closePanel" type="button" aria-label="Close">×</button>
+      </div>
+    </header>
+
+    <nav class="command-bar" aria-label="Workspace commands">
+      <div class="command-group">
+        <button class="command-button primary" id="newApi" type="button"><span>＋</span> New API</button>
+        <button class="command-button" id="saveApi" type="button"><span>⌘</span> Save</button>
+        <button class="command-button" id="duplicateApi" type="button"><span>⧉</span> Duplicate</button>
+      </div>
+      <div class="command-group command-group-right">
+        <button class="command-button" id="openRemoteConsole" type="button"><span>⌁</span> SSH console</button>
+        <button class="command-button" id="syncExtensions" type="button"><span>↻</span> Sync PHP APIs</button>
+        <label class="command-button file-command"><span>▣</span> Load page JSON<input id="loadPageJson" type="file" accept="application/json"></label>
+        <button class="command-button" id="exportApis" type="button"><span>⇩</span> Export</button>
+        <label class="command-button file-command" for="importApis"><span>⇧</span> Import<input id="importApis" type="file" accept="application/json"></label>
+        <button class="command-button danger" id="deleteApi" type="button"><span>⌫</span> Delete</button>
+      </div>
+    </nav>
+    <section class="xi-console" aria-label="XI XI command console">
+      <div class="console-prompt"><span>xi$</span><input id="xiCommand" type="text" autocomplete="off" spellcheck="false" placeholder="status · list · inspect · pause api-id · resume api-id · get api-id"></div>
+      <button class="command-button" id="runXI" type="button">Run</button>
+      <pre id="xiOutput" class="console-output">XI XI console ready. Type “xi help”.</pre>
+    </section>
+    <main class="workspace-grid">
+      <aside class="site-drawer" aria-label="Registered XI XI sites">
+        <div class="site-drawer-heading"><p class="eyebrow">SITES / XI XI</p><h2>Registered sites</h2><button class="small-button" id="newSite" type="button">＋ Register</button></div>
+        <form id="siteRegisterForm" class="site-register-form" hidden><label><span>Site name</span><input id="siteNameInput" required placeholder="My XI site"></label><label><span>Site URL</span><input id="siteUrlInput" required placeholder="http://127.0.0.1:8787/xi-xi-demo/"></label><div><button class="small-button" id="saveSiteRegistration" type="submit">Save</button><button class="text-button" id="cancelSiteRegistration" type="button">Cancel</button></div></form>
+        <div id="siteList" class="site-list"></div>
+        <div class="site-drawer-footer"><span class="status-dot"></span><span id="siteRegistryState">Local site registry</span></div>
+      </aside>
+      <aside class="control-nav" aria-label="XI XI background interface">
+        <div class="control-nav-heading">
+          <p class="eyebrow">XI XI</p>
+          <h2>Control plane</h2>
+          <p>Live setup, routes, and page surfaces.</p>
+        </div>
+        <nav class="control-sections" aria-label="Control plane sections">
+          <button class="control-section active" type="button" data-control-view="apis"><span class="nav-glyph">◈</span><span><strong>API workspace</strong><small>Requests & registry</small></span></button>
+          <button class="control-section" type="button" data-control-view="xi"><span class="nav-glyph">⌘</span><span><strong>XI config</strong><small>Rules & inheritance</small></span></button>
+          <button class="control-section" type="button" data-control-view="endpoints"><span class="nav-glyph">↗</span><span><strong>Endpoints</strong><small>Pause & resume</small></span></button>
+          <button class="control-section" type="button" data-control-view="audit"><span class="nav-glyph">≋</span><span><strong>Audit trail</strong><small>Events & health</small></span></button>
+          <button class="control-section" type="button" data-control-view="tiers"><span class="nav-glyph">◇</span><span><strong>Tier services</strong><small>Runtime capacity</small></span></button>
+          <button class="control-section" type="button" data-control-view="json"><span class="nav-glyph">{ }</span><span><strong>JSON / pages</strong><small>Components & preview</small></span></button>
+          <button class="control-section" type="button" data-control-view="attributes"><span class="nav-glyph">#</span><span><strong>Attributes</strong><small>domPipe recognition</small></span></button>
+          <button class="control-section" type="button" data-control-view="files"><span class="nav-glyph">▤</span><span><strong>Files</strong><small>Source editor</small></span></button>
+        </nav>
+        <div class="control-nav-footer"><span class="status-dot"></span><span>Live local channel</span></div>
+      </aside>
+
+      <aside class="api-sidebar" aria-label="Saved API definitions">
+        <div class="sidebar-heading">
+          <div>
+            <p class="eyebrow">REGISTRY</p>
+            <h2>Saved APIs</h2>
+          </div>
+          <span class="count-badge" id="apiCount">0</span>
+        </div>
+        <label class="search-box">
+          <span aria-hidden="true">⌕</span>
+          <input id="apiSearch" type="search" placeholder="Filter APIs" autocomplete="off">
+        </label>
+        <div class="api-list" id="apiList" aria-live="polite"></div>
+        <div class="sidebar-footer">
+          <span class="legend"><span class="method-dot get"></span> Read</span>
+          <span class="legend"><span class="method-dot write"></span> Write</span>
+          <span class="legend"><span class="method-dot other"></span> Other</span>
+        </div>
+      </aside>
+
+      <section class="request-panel" aria-label="API request editor">
+        <section class="control-view control-view-copy" data-control-panel="xi" hidden>
+          <div class="panel-titlebar"><div><p class="eyebrow">XI CONFIG</p><h2>Server rules</h2></div><span class="panel-kicker">.xi / live</span></div>
+          <div class="control-summary"><span class="summary-icon">⌘</span><div><strong>Directory policy</strong><p>Changes stay in this browser until exported or handed to XI.</p></div><span class="live-badge">READY</span></div>
+          <form class="settings-form" id="xiConfigForm">
+            <label class="field"><span>Root directory</span><input id="xiRoot" value="." placeholder="."></label>
+            <div class="form-row"><label class="field grow"><span>Endpoint entry</span><input id="xiEntry" value="index.php"></label><label class="field grow"><span>Audit log</span><input id="xiAudit" value=".xi-audit.jsonl"></label></div>
+            <div class="form-row"><label class="field grow"><span>Max upload bytes</span><input id="xiMaxBytes" type="number" value="1048576"></label><label class="field grow"><span>Clock skew seconds</span><input id="xiClockSkew" type="number" value="60"></label></div>
+            <label class="toggle-row"><input id="xiWrites" type="checkbox"><span><strong>Allow writes</strong><small>Permit signed XI edits for this directory.</small></span></label>
+            <div class="editor-section"><div class="section-heading"><div><p class="eyebrow">REMOTE AUDIT API</p><h3>Audited webserver</h3></div><span class="field-hint">read-only browser token</span></div><div class="form-row"><label class="field grow"><span>XI server URL</span><input id="auditServerUrl" type="url" placeholder="https://site.example/xi-server.php"></label><label class="field grow"><span>Dashboard token <span class="field-hint">session only</span></span><input id="auditServerToken" type="password" autocomplete="off" placeholder="Read-only token"></label></div><div class="request-footer"><span class="field-hint" id="auditServerState">Not connected</span><button class="command-button" id="connectAuditServer" type="button">Connect / audit</button></div><div id="auditProgramList" class="audit-program-list"><div class="empty-list">Connect to list audited programs.</div></div></div>
+            <div class="editor-section"><div class="section-heading"><div><p class="eyebrow">RULES</p><h3>Allow / deny wildcards</h3></div><span class="field-hint">one pattern per line</span></div><div class="form-row"><label class="field grow"><span>Allow</span><textarea id="xiAllow" class="code-input" rows="6">"endpoint/**"
+"dashboard/**"</textarea></label><label class="field grow"><span>Deny</span><textarea id="xiDeny" class="code-input" rows="6">".git**"
+".xi"
+"*.env"</textarea></label></div></div>
+            <div class="request-footer"><span class="field-hint" id="xiConfigState">Local draft</span><button class="send-button" id="saveXIConfig" type="button">Save config</button></div>
+          </form>
+        </section>
+
+        <section class="control-view control-view-copy" data-control-panel="endpoints" hidden>
+          <div class="panel-titlebar"><div><p class="eyebrow">ENDPOINTS</p><h2>Route lifecycle</h2></div><span class="panel-kicker" id="endpointCount">0 routes</span></div>
+          <div class="control-summary"><span class="summary-icon">↗</span><div><strong>Named routes</strong><p>Pause a route to return 503. Denied paths remain 404.</p></div><span class="live-badge">XI LINKED</span></div>
+          <div class="endpoint-table" id="endpointTable"></div>
+        </section>
+
+        <section class="control-view control-view-copy" data-control-panel="audit" hidden>
+          <div class="panel-titlebar"><div><p class="eyebrow">AUDIT TRAIL</p><h2>Recent activity</h2></div><button class="text-button" id="clearAudit" type="button">Clear local events</button></div>
+          <div class="audit-health"><div><span class="health-number" id="auditEventCount">0</span><span>events this session</span></div><div><span class="health-number green-text">200</span><span>active response</span></div><div><span class="health-number amber-text">503</span><span>paused response</span></div></div>
+          <div class="audit-list" id="auditList"></div>
+        </section>
+
+        <section class="control-view control-view-copy" data-control-panel="tiers" hidden>
+          <div class="panel-titlebar"><div><p class="eyebrow">TIER SERVICES</p><h2>Runtime capacity</h2></div><span class="panel-kicker">policy preview</span></div>
+          <div class="tier-grid">
+            <article class="tier-card"><div class="tier-top"><span class="tier-mark">01</span><span class="tier-status">ACTIVE</span></div><h3>Shared Hosting</h3><p>Bounded read and lifecycle operations for shared infrastructure.</p><strong>10 endpoints · 60 req/min</strong></article>
+            <article class="tier-card featured"><div class="tier-top"><span class="tier-mark">02</span><span class="tier-status">ACTIVE</span></div><h3>Managed VPS</h3><p>Signed edits, JSON pages, endpoint creation, and live API replacement.</p><strong>100 endpoints · 600 req/min</strong></article>
+            <article class="tier-card"><div class="tier-top"><span class="tier-mark">03</span><span class="tier-status">ACTIVE</span></div><h3>Dedicated</h3><p>Full rule and file operation surface subject to server policy.</p><strong>1000 endpoints · 6000 req/min</strong></article>
+          </div>
+          <div class="notice-box"><span>i</span><p>Tiers are descriptive policy surfaces in the XI. The server remains the authority for enforcement.</p></div>
+        </section>
+
+        <section class="control-view control-view-copy" data-control-panel="json" hidden>
+          <div class="panel-titlebar"><div><p class="eyebrow">JSON / PAGES</p><h2>Component editor</h2></div><span class="panel-kicker">modala compatible</span></div>
+          <div class="control-summary"><span class="summary-icon">{ }</span><div><strong>Load a page definition</strong><p>Feed JSON directly into the existing renderer or inspect the last response.</p></div></div>
+          <label class="field"><span>Page JSON</span><textarea id="controlPageJson" class="code-input large-code" spellcheck="false" rows="15" placeholder='{"tag":"section","class":"markdown","text":"# Hello"}'></textarea></label>
+          <div class="json-crosshatch"><div class="section-heading"><div><p class="eyebrow">CROSSHATCH / NESTED CONTAINERS</p><h3>WYSIWYG structure map</h3></div><span class="field-hint">select a node to edit in place</span></div><div id="jsonTree" class="json-tree"><div class="empty-list">Load JSON to map its containers.</div></div><div id="jsonNodeEditor" class="json-node-editor" hidden><div class="form-row"><label class="field grow"><span>Tag</span><input id="jsonNodeTag" type="text"></label><label class="field grow"><span>Class</span><input id="jsonNodeClass" type="text"></label></div><div class="form-row"><label class="field grow"><span>Text</span><textarea id="jsonNodeText" class="code-input" rows="3"></textarea></label><label class="field grow"><span>Inner HTML</span><textarea id="jsonNodeHtml" class="code-input" rows="3"></textarea></label></div><button id="applyJsonNode" class="send-button" type="button">Apply node</button></div></div>
+          <div class="form-row"><label class="field grow"><span>Remote JSON path</span><input id="remoteJsonPath" type="text" placeholder="/pages/home.json"></label><button class="command-button" id="previewControlJson" type="button">Preview page</button><button class="send-button" id="publishPageJsonPatch" type="button">Publish JSON patch</button></div>
+          <div class="request-footer"><span class="field-hint">Patch publishes the full JSON with a base-hash conflict check.</span></div>
+        </section>
+
+        <section class="control-view control-view-copy" data-control-panel="attributes" hidden>
+          <div class="panel-titlebar"><div><p class="eyebrow">ATTRIBUTE RECOGNITION</p><h2>domPipe surface map</h2></div><span class="panel-kicker">legacy + data-*</span></div>
+          <div class="control-summary"><span class="summary-icon">#</span><div><strong>Attribute finishing</strong><p>Every managed attribute mirrors to its data-* form while preserving the original spelling.</p></div><span class="live-badge">SYNCED</span></div>
+          <div class="attribute-map" id="attributeMap"></div>
+          <div class="surface-editor">
+            <div class="section-heading"><div><p class="eyebrow">LIVE DOCUMENT</p><h3>Element editor</h3></div><button class="text-button" id="refreshSurface" type="button">Refresh elements</button></div>
+            <label class="field"><span>Managed element</span><select id="surfaceElement"><option value="">No managed elements found</option></select></label>
+            <div class="form-row"><label class="field grow"><span>id</span><input id="surfaceId" type="text"></label><label class="field grow"><span>class</span><input id="surfaceClass" type="text"></label></div>
+            <label class="field"><span>innerText</span><textarea id="surfaceText" class="code-input" rows="3"></textarea></label>
+            <label class="field"><span>innerHTML</span><textarea id="surfaceHtml" class="code-input" rows="5"></textarea></label>
+            <label class="field"><span>Attributes JSON <span class="field-hint">legacy names are mirrored to data-* automatically</span></span><textarea id="surfaceAttributes" class="code-input" rows="5" spellcheck="false">{}</textarea></label>
+            <div class="request-footer"><span class="field-hint" id="surfaceState">Live, unsaved</span><button class="send-button" id="applySurface" type="button">Apply to document</button></div>
+          </div>
+          <div class="editor-section"><div class="section-heading"><div><p class="eyebrow">JS / FETCH SURFACES</p><h3>Runtime definitions</h3></div><span class="field-hint">Edit APIs in the workspace registry</span></div><div id="surfaceScripts" class="surface-scripts"></div></div>
+        </section>
+
+        <section class="control-view control-view-copy" data-control-panel="files" hidden>
+          <div class="panel-titlebar"><div><p class="eyebrow">FILES / XI</p><h2>Source editor</h2></div><span class="panel-kicker">live draft</span></div>
+          <div class="control-summary"><span class="summary-icon">▤</span><div><strong>Edit a registered site file</strong><p>Load a same-origin file, change it here, then stage the replacement for XI.</p></div></div>
+          <div class="section-heading"><div><p class="eyebrow">WEB PAGES</p><h3>Open in editor tab</h3></div><span class="field-hint">click a page</span></div><div id="webpageList" class="webpage-list"></div>
+          <div class="form-row"><label class="field grow"><span>Site-relative file path</span><input id="filePath" value="xi-xi-demo/index.php" placeholder="xi-xi-demo/index.php"></label><button id="loadFile" class="command-button" type="button">Load file</button></div>
+          <div class="editor-section"><div class="section-heading"><div><p class="eyebrow">REMOTE SOURCE</p><h3>Audited program source</h3></div><span class="field-hint">select a file from the connected server</span></div><div class="form-row"><label class="field grow"><span>Remote path</span><input id="remoteSourcePath" type="text" placeholder="/domPipe.js"></label><button id="fetchRemoteSource" class="command-button" type="button">Get source</button><button id="publishRemoteSource" class="send-button" type="button">Publish source</button></div></div>
+          <label class="field"><span>File contents</span><textarea id="fileEditor" class="code-input large-code" spellcheck="false" rows="22" placeholder="Load a file to edit it here."></textarea></label>
+          <div class="request-footer"><span class="field-hint" id="fileEditorState">No file loaded</span><div class="command-group"><button id="saveFileDraft" class="command-button" type="button">Save draft</button><button id="stageFile" class="send-button" type="button">Stage for XI</button></div></div>
+        </section>
+
+        <div class="control-view" data-control-panel="apis">
+        <div class="panel-titlebar">
+          <div>
+            <p class="eyebrow">REQUEST DEFINITION</p>
+            <h2 id="requestTitle">Untitled API</h2>
+          </div>
+          <div class="panel-tools">
+            <span class="dirty-state" id="dirtyState">Saved</span>
+            <button class="small-button" id="resetApi" type="button">Reset</button>
+          </div>
+        </div>
+
+        <form id="requestForm" novalidate>
+          <div class="form-row identity-row">
+            <label class="field grow"><span>Display name</span><input id="apiName" type="text" required placeholder="My API"></label>
+            <label class="field method-field"><span>Method</span><select id="apiMethod"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>HEAD</option></select></label>
+          </div>
+          <label class="field"><span>Request URL</span><div class="url-input"><span>↗</span><input id="apiUrl" type="url" required placeholder="https://example.test/v1/resource"></div></label>
+          <div class="form-row connection-row">
+            <label class="field grow"><span>Server base URL <span class="field-hint">optional</span></span><input id="apiServer" type="url" placeholder="https://api.example.test"></label>
+            <label class="field grow"><span>Bearer token <span class="field-hint">session only</span></span><input id="apiToken" type="password" autocomplete="off" placeholder="Not exported or persisted"></label>
+          </div>
+          <label class="field"><span>Idempotency key <span class="field-hint">stable across retries</span></span><input id="apiIdempotency" type="text" placeholder="Auto-generated from API identity"></label>
+          <div class="editor-section">
+            <div class="section-heading"><div><p class="eyebrow">HEADERS</p><h3>Request metadata</h3></div><button class="text-button" id="formatHeaders" type="button">Format JSON</button></div>
+            <textarea id="apiHeaders" class="code-input" spellcheck="false" rows="6" placeholder='{"Content-Type":"application/json"}'></textarea>
+          </div>
+          <div class="editor-section body-section">
+            <div class="section-heading"><div><p class="eyebrow">BODY</p><h3>Payload</h3></div><span class="field-hint">Ignored for GET and HEAD</span></div>
+            <textarea id="apiBody" class="code-input" spellcheck="false" rows="8" placeholder='{"message":"Hello from domPipe"}'></textarea>
+          </div>
+          <div class="request-footer">
+            <div class="request-hint"><span class="keycap">Ctrl</span><span>+</span><span class="keycap">Enter</span> Send request</div>
+            <button class="send-button" id="sendRequest" type="submit"><span>▶</span> Send request</button>
+          </div>
+        </form>
+        </div>
+      </section>
+
+      <section class="response-panel" aria-label="API response and diagnostics">
+        <div class="response-tabs" role="tablist">
+          <button class="response-tab active" type="button" role="tab" aria-selected="true" data-response-tab="body">Response</button>
+          <button class="response-tab" type="button" role="tab" aria-selected="false" data-response-tab="headers">Headers</button>
+          <button class="response-tab" type="button" role="tab" aria-selected="false" data-response-tab="activity">Activity</button>
+          <button class="response-tab" type="button" role="tab" aria-selected="false" data-response-tab="page">Page</button>
+        </div>
+        <div class="response-meta">
+          <span class="response-status" id="responseStatus">Ready</span>
+          <span id="responseTiming">No request sent</span>
+          <button class="text-button" id="copyResponse" type="button">Copy</button>
+        </div>
+        <div class="response-viewer" id="responseViewer">
+          <div class="empty-response"><div class="empty-icon">⌁</div><h3>Response stream is clear</h3><p>Configure an API on the left, then send a request to inspect its response here.</p></div>
+        </div>
+        <div class="status-strip"><span class="status-dot"></span><span id="statusMessage">Workspace ready</span><span class="status-spacer"></span><span id="savedTimestamp">Local only</span></div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog id="remoteConsoleModal" class="remote-console-modal" aria-labelledby="remoteConsoleTitle">
+    <form method="dialog" class="remote-console-card" id="remoteConsoleForm">
+      <div class="panel-titlebar"><div><p class="eyebrow">LOCAL SSH BROKER</p><h2 id="remoteConsoleTitle">Remote terminal access</h2></div><button class="text-button" value="cancel" aria-label="Close SSH console">Close</button></div>
+      <p class="field-hint">The browser talks only to the local broker. SSH keys and known_hosts stay on this computer.</p>
+      <div class="form-row"><label class="field grow"><span>Broker URL</span><input id="sshBrokerUrl" type="url" value="http://127.0.0.1:8790" autocomplete="off"></label><label class="field grow"><span>Local broker token <span class="field-hint">session only</span></span><input id="sshBrokerToken" type="password" autocomplete="off"></label></div>
+      <div class="form-row"><label class="field grow"><span>Registered SSH site</span><select id="sshSite"><option value="default">Default site</option></select></label><label class="field grow"><span>Safe operation</span><select id="sshOperation"><option value="status">status</option><option value="list">list</option><option value="get">get</option><option value="install">install allowlisted software</option></select></label></div>
+      <div class="form-row"><label class="field grow" id="sshPathField" hidden><span>Remote file path</span><input id="sshRemotePath" type="text" placeholder="/var/www/site/index.php" autocomplete="off"></label><label class="field grow" id="sshPackageField" hidden><span>Allowlisted package</span><input id="sshPackage" type="text" placeholder="package-name" autocomplete="off"></label></div>
+      <pre id="sshConsoleOutput" class="console-output">Broker is not connected.</pre>
+      <div class="request-footer"><span class="field-hint" id="sshConsoleState">Not connected</span><button class="command-button" id="testSshBroker" type="button">Test broker</button><button class="send-button" id="runSshOperation" type="button">Run safely</button></div>
+    </form>
+  </dialog>
+  <script src="xi-extension.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

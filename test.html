@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DotPipe Demo</title>
+<title>DomPipe Demo</title>
 <style>
   body { font-family: sans-serif; margin: 2em; }
   .title { font-size: 1.5em; margin: 0.5em 0; }
@@ -11,19 +11,19 @@
   .active { background-color: #0af; color: white; }
   .card { border: 1px solid #ccc; padding: 1em; margin: 0.5em 0; }
 </style>
-<script src="dotpipe.js"></script>
+<script src="domPipe.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
-    dotPipe.register(); // register all elements with 'inline'
+    domPipe.register(); // register all elements with 'inline'
 
 
-    console.log("DotPipe demo executed!");
+    console.log("DomPipe demo executed!");
 });
 </script>
 </head>
 <body>
 
-<h1>DotPipe Demo</h1>
+<h1>DomPipe Demo</h1>
 
 <!-- Titles -->
 <div class="title"></div>
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 <!-- Example inline macros -->
 <div id="s1" inline="
-  |&msg:Hello DotPipe|
+  |&msg:Hello DomPipe|
   .title[0].text:!msg|
   .title[1].text:World|
   .title[2].text:!|

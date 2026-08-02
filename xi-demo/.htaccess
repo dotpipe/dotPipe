@@ -1,0 +1,9 @@
+Options -Indexes
+
+# This demo mirrors ELSN endpoint routing; do not expose endpoint index files.
+RewriteEngine On
+RewriteRule ^(?:.+/)+index\.php$ - [R=404,L,NC]
+
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>

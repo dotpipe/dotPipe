@@ -1,0 +1,10 @@
+Options -Indexes
+
+# Endpoint index.php files must be reached through gateway.php so allow/deny
+# and pause state cannot be bypassed by a direct URL.
+RewriteEngine On
+RewriteRule ^(?:.+/)+index\.php$ - [R=404,L,NC]
+
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>

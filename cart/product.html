@@ -108,17 +108,17 @@
   <p id="product-price"></p>
   <p id="product-desc">This is a great product. Add it to your cart to continue.</p>
 
-  <!-- DotPipe tags -->
+  <!-- DomPipe tags -->
   <cart id="productCart" bind="CartController">
     <item id="productItem" name="" price="0" quantity="1" bind="ItemController"></item>
   </cart>
 
   <button id="add">Add to cart</button>
   <a href="cart.html">Go to cart</a>
-<script src="../dotpipe.js"></script>
+<script src="../domPipe.js"></script>
   <script>
     // Lightweight binder (from earlier)
-    // class DotPipeBinder {
+    // class DomPipeBinder {
     //   constructor(){ this.controllers = {}; }
     //   register(name, controller){ this.controllers[name] = controller; }
     //   bindElement(el){
@@ -181,13 +181,13 @@
     itemEl.setAttribute("price", String(product.price));
     itemEl.setAttribute("quantity", "1");
 
-    const binder = new DotPipeBinder();
+    const binder = new DomPipeBinder();
     binder.register("CartController", CartController);
     binder.register("ItemController", ItemController);
     binder.init(); binder.observe();
 
     // Persist cart to localStorage
-    const CART_KEY = "../dotpipe.cart";
+    const CART_KEY = "../domPipe.cart";
     function saveCart(cartEl){
       const items = Array.from(cartEl.querySelectorAll("item")).map(it => ({
         name: it.getAttribute("name"),

@@ -1,4 +1,4 @@
-// dotpipe.js chat integration
+// domPipe.js chat integration
 function createChatInterface(containerId, userHandle) {
     var container = document.getElementById(containerId);
     
@@ -535,7 +535,7 @@ function initializeChatElement(element) {
     renderChatElement(element);
 }
 
-// DotPipe integration - Register the chat element
+// DomPipe integration - Register the chat element
 function registerChatElement() {
     // Find all chat elements and initialize them
     const chatElements = document.querySelectorAll('chat');

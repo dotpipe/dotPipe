@@ -1,0 +1,15 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+body { margin: 0; color: #243142; background: #f5f7fa; }
+.container { width: min(1100px, calc(100% - 2rem)); margin: 0 auto; }
+header, footer { padding: 1rem 0; background: #243142; color: white; }
+main { padding: 2rem 0; }
+.example-section { margin: 1rem 0; padding: 1rem; background: white; border: 1px solid #d9e0e8; border-radius: .5rem; }
+.content-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.content-box { min-height: 3rem; padding: .75rem; border: 1px solid #c7d0db; border-radius: .35rem; }
+refresh { display: inline-block; margin-top: .75rem; padding: .45rem .75rem; color: white; background: #2463eb; border-radius: .35rem; cursor: pointer; }
+@media (max-width: 640px) { .content-grid { grid-template-columns: 1fr; } }

@@ -108,9 +108,9 @@
     <button type="submit">Place order</button>
   </form>
 
-  <script src="../dotpipe.js"></script>
+  <script src="../domPipe.js"></script>
   <script>
-    // class DotPipeBinder {
+    // class DomPipeBinder {
     //   constructor(){ this.controllers = {}; }
     //   register(n,c){ this.controllers[n]=c; }
     //   bindElement(el){
@@ -133,7 +133,7 @@
     //   }
     // }
 
-    const CART_KEY="../dotpipe.cart";
+    const CART_KEY="../domPipe.cart";
 
     const CartController = {
       init(cartEl){
@@ -160,7 +160,7 @@
       document.getElementById("total").textContent = cartEl.dataset.total;
     }
 
-    const binder=new DotPipeBinder();
+    const binder=new DomPipeBinder();
     binder.register("CartController", CartController);
     document.addEventListener("DOMContentLoaded", ()=>{ binder.init(); binder.observe(); });
 

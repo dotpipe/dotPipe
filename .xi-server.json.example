@@ -1,0 +1,10 @@
+{
+  "root": ".",
+  "allowWrites": false,
+  "maxBytes": 1048576,
+  "clockSkewSeconds": 300,
+  "keys": { "editor-1": "replace-with-a-long-random-secret" },
+  "allow": ["dashboard/*.json", "API/**/*.php", "*.html", "*.css", "*.js"],
+  "deny": [".git/**", ".xi*", "*.key.json", "*.env", "*.log", "vendor/**"],
+  "auditLog": ".xi-audit.log"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "xi-server-node",
+  "version": 1,
+  "entry": "xi-server.php",
+  "endpointEntry": "index.php",
+  "directoryConfig": ".xi",
+  "endpointModel": "directory-index"
+}
