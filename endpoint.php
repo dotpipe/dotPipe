@@ -1,19 +1,25 @@
 <?php
-// endpoint.php
 
-// Get POST data
-$data = json_decode(file_get_contents("php://input"), true);
+header('Content-Type: application/json; charset=utf-8');
 
-if ($data['command'] === 'ping') {
-    // Respond with ping status
-    echo json_encode(["status" => "success", "message" => "Pong"]);
-} elseif ($data['command'] === 'open') {
-    // Handle the open command (could be initializing a session, etc.)
-    echo json_encode(["status" => "success", "message" => "Connection Opened"]);
-} elseif ($data['command'] === 'close') {
-    // Handle closing the connection
-    echo json_encode(["status" => "success", "message" => "Connection Closed"]);
-} else {
-    echo json_encode(["error" => "Unknown command"]);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'POST required']);
+    exit;
 }
-?>
+
+$data = json_decode(file_get_contents('php://input'), true);
+$command = is_array($data) ? ($data['command'] ?? null) : null;
+$responses = [
+    'ping' => ['status' => 'success', 'message' => 'Pong'],
+    'open' => ['status' => 'success', 'message' => 'Connection Opened'],
+    'close' => ['status' => 'success', 'message' => 'Connection Closed'],
+];
+
+if (!isset($responses[$command])) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Unknown command']);
+    exit;
+}
+
+echo json_encode($responses[$command]);

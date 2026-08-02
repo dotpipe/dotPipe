@@ -1,0 +1,18 @@
+{
+  "sites": [
+    {
+      "id": "production-linux",
+      "name": "Production Linux",
+      "host": "server.example.com",
+      "port": 22,
+      "user": "operator",
+      "identityFile": "~/.ssh/id_ed25519",
+      "knownHostsFile": "~/.ssh/known_hosts",
+      "shell": "sh",
+      "allow": ["status", "list", "get"],
+      "deny": ["shell", "sudo", "rm", "delete", "reboot", "shutdown"],
+      "allowedPackages": [],
+      "packageManager": "apt"
+    }
+  ]
+}

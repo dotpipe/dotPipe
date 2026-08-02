@@ -1,3 +1,3 @@
-<script src="../dotpipe.js"></script>
+<script src="../domPipe.js"></script>
 
-<pipe ajax="arrow-area.json" class="strict-json">
+<pipe id="arrow-area-pipe" ajax="arrow-area.json" class="strict-json">

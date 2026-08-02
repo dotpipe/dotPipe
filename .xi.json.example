@@ -1,0 +1,5 @@
+{
+  "url": "https://example.test/xi-server.php",
+  "keyfile": ".xi.key.json",
+  "timeoutSeconds": 15
+}

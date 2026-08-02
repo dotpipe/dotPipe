@@ -1,0 +1,8 @@
+Options -Indexes
+
+RewriteEngine On
+RewriteRule ^(?:\.git|\.xi-trash)(?:/|$) - [R=404,L,NC]
+
+<FilesMatch "^(?:\.xi|\.xi|\.env|.*\.key\.json$|.*\.log$)">
+  Require all denied
+</FilesMatch>

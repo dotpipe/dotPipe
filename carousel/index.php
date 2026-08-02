@@ -1,7 +1,7 @@
 <html>
 <head>
 
-    <script src="../dotpipe.js"></script>
+    <script src="../domPipe.js"></script>
 </head>
 </html>
 <script>

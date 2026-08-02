@@ -6,11 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shopping Cart Example</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="../dotpipe.js"></script>
-  <script src="cart-component.js"></script>
-  <script src="checkout-component.js"></script>
-  <script src="order-confirmation-component.js"></script>
-  <title>Cart</title>
+  <script src="../domPipe.js"></script>
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -172,32 +168,8 @@
 
   <button id="checkoutBtn">Go to checkout</button>
   <button id="clearBtn">Clear cart</button>
-<script src="../dotpipe.js"></script>
   <script>
-    // class DotPipeBinder {
-    //   constructor() { this.controllers = {}; }
-    //   register(n, c) { this.controllers[n] = c; }
-    //   bindElement(el) {
-    //     const n = el.getAttribute("bind"); const c = this.controllers[n];
-    //     if (!n || !c) return;
-    //     if (typeof c.init === "function") c.init(el);
-    //     Object.keys(c).forEach(k => {
-    //       if (k.startsWith("on")) {
-    //         const ev = k.slice(2).toLowerCase();
-    //         el.addEventListener(ev, e => c[k](el, e));
-    //       }
-    //     });
-    //   }
-    //   init(root = document) { root.querySelectorAll("[bind]").forEach(el => this.bindElement(el)); }
-    //   observe() {
-    //     const obs = new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(n => {
-    //       if (n.nodeType === 1) { if (n.hasAttribute && n.hasAttribute("bind")) this.bindElement(n); this.init(n); }
-    //     })));
-    //     obs.observe(document.body, { childList: true, subtree: true });
-    //   }
-    // }
-
-    const CART_KEY = "../dotpipe.cart";
+    const CART_KEY = "../domPipe.cart";
 
     const CartController = {
       init(cartEl) {
@@ -259,7 +231,7 @@
       });
     }
 
-    const binder = new DotPipeBinder();
+    const binder = new DomPipeBinder();
     binder.register("CartController", CartController);
     document.addEventListener("DOMContentLoaded", () => { binder.init(); binder.observe(); });
 

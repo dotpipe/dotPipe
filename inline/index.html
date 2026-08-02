@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>dotPipe Shell Demo Fixed Toggle</title>
+  <title>domPipe Shell Demo Fixed Toggle</title>
   <style>
     body {
       font-family: sans-serif;
@@ -39,7 +39,7 @@
 
 <body>
 
-  <h1>dotPipe Shell Demo Fixed Toggle</h1>
+  <h1>domPipe Shell Demo Fixed Toggle</h1>
 
   <h2>1. Counter (Shell Example)</h2>
   <div id="counterDisplay" class="output">0</div>
@@ -129,17 +129,17 @@
 <button id="makeBig" inline="|&sz:32px|#styleBox.fontSize:!sz">Make Big</button>
 <button id="makeSmall" inline="|&sz:12px|#styleBox.fontSize:!sz">Make Small</button>
 
-  <script src="dotpipe.js"></script>
+  <script src="../domPipe.js"></script>
   <script>
 
     document.addEventListener("DOMContentLoaded", () => {
       (async () => {
-        dotPipe.register();
+        domPipe.register();
         // load initial values from JSON file
-        await dotPipe.loadVariablesFromFile('../inline/data.json');
+        await domPipe.loadVariablesFromFile('../inline/data.json');
 
         // register inline elements
-        dotPipe.register('[inline]');
+        domPipe.register('[inline]');
 
        
       })();

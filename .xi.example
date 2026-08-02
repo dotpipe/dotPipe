@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xi root="." auditLog=".xi-audit.log" endpointEntry="index.php" stateFile=".xi-state.json" tokenAssertionIntervalSeconds="600" dashboardOrigin="http://127.0.0.1:8787" operatorEmail="operator@example.test" allowWrites="false" allowBrowserWrites="false" maxBytes="1048576" clockSkewSeconds="300">
+  <keys>
+    <key id="editor-1">replace-with-a-long-random-secret</key>
+  </keys>
+  <dashboardTokens>
+    <token id="xi-readonly">replace-with-a-separate-read-only-dashboard-token</token>
+  </dashboardTokens>
+  <audit>
+    <program id="dompipe" name="domPipe runtime" root="." entry="domPipe.js">
+      <file>domPipe.js</file>
+      <file>package.json</file>
+    </program>
+    <program id="xi-xi" name="XI XI control plane" root="dashboard" entry="index.html">
+      <file>dashboard/index.html</file>
+      <file>dashboard/app.js</file>
+      <file>dashboard/xi-extension.js</file>
+    </program>
+  </audit>
+  <allow>
+    "**/index.php"
+    "dashboard/*.json"
+    "dashboard/*.html"
+    "dashboard/*.js"
+    "dashboard/*.css"
+    "*.html"
+    "*.css"
+    "*.js"
+  </allow>
+  <deny>
+    ".git**"
+    ".xi"
+    ".xi*"
+    ".xi-state.json"
+    "*.key.json"
+    "*.env"
+    "*.log"
+    "vendor/**"
+  </deny>
+</xi>
