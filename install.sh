@@ -90,23 +90,23 @@ umask 077
 printf '{\n  "url": "%s/xi-server.php",\n  "keyfile": ".xi.key.json",\n  "timeoutSeconds": 15\n}\n' "$ORIGIN" > "$ROOT/.xi.json"
 printf '{\n  "id": "editor-1",\n  "secret": "%s"\n}\n' "$SECRET" > "$ROOT/.xi.key.json"
 chmod 600 "$ROOT/.xi" "$ROOT/.xi.json" "$ROOT/.xi.key.json"
-printf 'HMAC key id: editor-1\nHMAC secret: %s\nDashboard token: %s\n' "$SECRET" "$DASHBOARD_TOKEN" > "$ROOT/../.xi-xi-credentials.txt"
-chmod 600 "$ROOT/../.xi-xi-credentials.txt"
+printf 'HMAC key id: editor-1\nHMAC secret: %s\nDashboard token: %s\n' "$SECRET" "$DASHBOARD_TOKEN" > "$ROOT/../.xi-credentials.txt"
+chmod 600 "$ROOT/../.xi-credentials.txt"
 
-APACHE_PORTS_BACKUP="/etc/apache2/ports.conf.xi-xi.bak"
+APACHE_PORTS_BACKUP="/etc/apache2/ports.conf.xi.bak"
 if [[ ! -e "$APACHE_PORTS_BACKUP" ]]; then cp /etc/apache2/ports.conf "$APACHE_PORTS_BACKUP"; fi
 printf 'Listen 127.0.0.1:%s\n' "$PORT" > /etc/apache2/ports.conf
-cat > /etc/apache2/sites-available/xi-xi.conf <<EOF
+cat > /etc/apache2/sites-available/xi.conf <<EOF
 <VirtualHost 127.0.0.1:${PORT}>
-    ServerName xi-xi.local
+    ServerName xi.local
     DocumentRoot ${ROOT}
     <Directory ${ROOT}>
         Options -Indexes +FollowSymLinks
         AllowOverride All
         Require all granted
     </Directory>
-    ErrorLog \${APACHE_LOG_DIR}/xi-xi-error.log
-    CustomLog \${APACHE_LOG_DIR}/xi-xi-access.log combined
+    ErrorLog \${APACHE_LOG_DIR}/xi-error.log
+    CustomLog \${APACHE_LOG_DIR}/xi-access.log combined
 </VirtualHost>
 EOF
 
@@ -115,15 +115,15 @@ a2enmod mpm_prefork rewrite >/dev/null
 PHP_MODULE="$(basename "$(find /etc/apache2/mods-available -maxdepth 1 -name 'php*.load' -print -quit)" .load)"
 [[ -n "$PHP_MODULE" ]] && a2enmod "$PHP_MODULE" >/dev/null
 a2dissite 000-default >/dev/null 2>&1 || true
-a2ensite xi-xi >/dev/null
+a2ensite xi >/dev/null
 apache2ctl configtest
 systemctl enable --now apache2
 
-chmod +x "$ROOT/xi.mjs" "$ROOT/xi-core.mjs" "$ROOT/tools/xi-xi-ssh.mjs" "$ROOT/tools/xi-xi-ssh-broker.mjs"
+chmod +x "$ROOT/xi.mjs" "$ROOT/xi-core.mjs" "$ROOT/tools/xi-ssh.mjs" "$ROOT/tools/xi-ssh-broker.mjs"
 ln -sfn "$ROOT/xi.mjs" /usr/local/bin/xi
 
 echo "XI XI installed at http://127.0.0.1:${PORT}/dashboard/"
-echo "Credentials saved outside the web root: $ROOT/../.xi-xi-credentials.txt"
+echo "Credentials saved outside the web root: $ROOT/../.xi-credentials.txt"
 echo "Apache is loopback-only; no public listener was created."
 echo "Run 'npm run ssh-broker' as the operator user for the local SSH dashboard console."
 echo "Run 'xi install --interval=5m' as the operator user to opt into the audit timer."

@@ -7,6 +7,7 @@ if (!args.length || args.includes('--help') || args.includes('-h')) {
 Usage:
   xi status
   xi audit
+  xi signal [--rebase]
   xi list [remote-directory]
   xi get <remote-file> [local-file]
   xi -e <remote-file> <local-file>

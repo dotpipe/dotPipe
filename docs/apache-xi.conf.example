@@ -1,13 +1,13 @@
 <VirtualHost 127.0.0.1:8789>
-    ServerName xi-xi.local
-    DocumentRoot /var/www/xi-xi
+    ServerName xi.local
+    DocumentRoot /var/www/xi
 
-    <Directory /var/www/xi-xi>
+    <Directory /var/www/xi>
         Options -Indexes +FollowSymLinks
         AllowOverride All
         Require all granted
     </Directory>
 
-    ErrorLog ${APACHE_LOG_DIR}/xi-xi-error.log
-    CustomLog ${APACHE_LOG_DIR}/xi-xi-access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/xi-error.log
+    CustomLog ${APACHE_LOG_DIR}/xi-access.log combined
 </VirtualHost>

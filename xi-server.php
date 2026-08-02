@@ -115,7 +115,7 @@ function xi_auth_file(string $root, array $config): string
     $configured = (string) ($config['authStateFile'] ?? '');
     $file = $configured !== ''
         ? (preg_match('~^(?:[A-Za-z]:[\\/]|/)~', $configured) ? $configured : dirname($root) . DIRECTORY_SEPARATOR . $configured)
-        : dirname($root) . DIRECTORY_SEPARATOR . '.xi-xi-auth.json';
+        : dirname($root) . DIRECTORY_SEPARATOR . '.xi-auth.json';
     $resolvedParent = realpath(dirname($file));
     if ($resolvedParent !== false && ($resolvedParent === $root || str_starts_with($resolvedParent, $root . DIRECTORY_SEPARATOR))) {
         xi_fail(500, 'auth state must be stored outside the public site root', 'auth_state_exposed');
@@ -266,7 +266,7 @@ function xi_auth(array $config, string $action, string $remote, string $body, st
             if (in_array($fetchSite, ['cross-site', 'none'], true)) xi_fail(403, 'cross-site write rejected', 'fetch_site_rejected');
         }
         $sessionActions = ['status', 'manifest', 'audit', 'list', 'read'];
-        if (($config['allowBrowserWrites'] ?? false) === true) $sessionActions = array_merge($sessionActions, ['write', 'patch']);
+        if (($config['allowBrowserWrites'] ?? false) === true) $sessionActions = array_merge($sessionActions, ['write', 'patch', 'pause', 'resume']);
         if (!in_array($action, $sessionActions, true)) xi_fail(403, 'dashboard session is not allowed to perform this action', 'session_scope');
         $GLOBALS['xi_auth_context'] = ['type' => 'session', 'id' => null, 'fingerprint' => 'sha256:' . hash('sha256', $cookie)];
         return 'dashboard-session';
@@ -320,8 +320,8 @@ function xi_change_receipt(string $action, string $remote, string $authMode): ar
         'credentialId' => $context['id'] ?? null,
         'tokenFingerprint' => $context['fingerprint'] ?? null,
     ];
-    header('X-XI-XI-Change: applied');
-    header('X-XI-XI-Request-Id: ' . $receipt['requestId']);
+    header('X-XI-Change: applied');
+    header('X-XI-Request-Id: ' . $receipt['requestId']);
     return $receipt;
 }
 
@@ -415,7 +415,7 @@ function xi_cors(array $config): void
     $origin = (string) ($config['dashboardOrigin'] ?? '');
     if ($origin === '*') xi_fail(500, 'dashboardOrigin cannot be wildcarded when credentials are enabled', 'invalid_origin');
     if ($origin !== '') header('Access-Control-Allow-Origin: ' . $origin);
-    header('Access-Control-Allow-Headers: Authorization, Content-Type, X-XI-Key-Id, X-XI-Timestamp, X-XI-Signature, X-XI-XI-Token');
+    header('Access-Control-Allow-Headers: Authorization, Content-Type, X-XI-Key-Id, X-XI-Timestamp, X-XI-Signature, X-XI-Token');
     header('Access-Control-Allow-Methods: GET, PUT, OPTIONS');
     if ($origin !== '') header('Access-Control-Allow-Credentials: true');
 }
@@ -431,7 +431,7 @@ $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
 $maxRequestBytes = max(1, (int) ($config['maxBytes'] ?? 1048576));
 if ($contentLength > $maxRequestBytes) xi_fail(413, 'request is too large', 'file_too_large');
 $body = file_get_contents('php://input') ?: '';
-$actions = ['status', 'manifest', 'audit', 'list', 'read', 'write', 'patch', 'log', 'pause', 'resume'];
+$actions = ['status', 'manifest', 'audit', 'list', 'read', 'write', 'patch', 'log', 'pause', 'resume', 'signal'];
 if (!in_array($action, $actions, true)) xi_fail(400, 'unsupported action', 'unsupported_action');
 $configuredRoot = (string) ($config['root'] ?? '.');
 $rootPath = preg_match('~^(?:[A-Za-z]:[\\/]|/)~', $configuredRoot) ? $configuredRoot : __DIR__ . DIRECTORY_SEPARATOR . $configuredRoot;
@@ -443,6 +443,15 @@ $digestAssertion = xi_digest_assertion($root, $config);
 if ($action === 'status') {
     xi_json(200, ['ok' => true, 'service' => 'xi', 'version' => 2, 'auth' => $authMode, 'siteDigest' => $digestAssertion, 'paused' => xi_state($root, $config)]);
 }
+if ($action === 'signal') {
+    try { $signal = json_decode($body, true, 16, JSON_THROW_ON_ERROR); } catch (Throwable $error) { xi_fail(400, 'signal body must be valid JSON', 'invalid_signal'); }
+    $clientDigest = strtolower(trim((string) ($signal['clientDigest'] ?? '')));
+    if (!preg_match('/^[a-f0-9]{64}$/', $clientDigest)) xi_fail(400, 'signal requires a SHA256 clientDigest', 'invalid_client_digest');
+    $serverDigest = (string) ($digestAssertion['digest'] ?? '');
+    $matched = hash_equals($serverDigest, $clientDigest);
+    $rebaseAllowed = ($config['allowWrites'] ?? false) === true && ($config['allowClientRebase'] ?? false) === true;
+    xi_json(200, ['ok' => true, 'synced' => $matched, 'clientDigest' => $clientDigest, 'serverDigest' => $serverDigest, 'rebaseRequired' => !$matched, 'rebaseAllowed' => $rebaseAllowed, 'rebaseComplete' => ($signal['rebaseComplete'] ?? false) === true && $matched, 'siteDigest' => $digestAssertion]);
+}
 if ($action === 'manifest') {
     xi_json(200, [
         'ok' => true,
@@ -450,7 +459,7 @@ if ($action === 'manifest') {
         'version' => 2,
         'auth' => $authMode,
         'siteDigest' => $digestAssertion,
-        'capabilities' => array_values(array_merge(['status', 'manifest', 'audit', 'list', 'read'], (($config['allowWrites'] ?? false) || ($config['allowBrowserWrites'] ?? false)) ? ['patch'] : [])),
+        'capabilities' => array_values(array_merge(['status', 'manifest', 'audit', 'list', 'read'], (($config['allowWrites'] ?? false) || ($config['allowBrowserWrites'] ?? false)) ? ['patch', 'pause', 'resume'] : [])),
         'programs' => xi_programs($config),
         'endpointEntry' => (string) ($config['endpointEntry'] ?? 'index.php'),
     ]);

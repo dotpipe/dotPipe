@@ -39,7 +39,7 @@ Use `gateway.php` as the only public entry for ELSN endpoints. Verify the web-se
 
 Do not use PHP’s built-in server as the production front end. Apache must have `AllowOverride` enabled for the supplied ELSN `.htaccess`; Nginx must explicitly deny direct `/<endpoint>/index.php` requests and route public endpoint requests through `gateway.php`.
 
-The repository includes `docs/apache-xi-xi.conf.example` as a starting point for an Apache virtual host. Restrict the listener and `Require` scope to the intended deployment network before exposing it beyond localhost.
+The repository includes `docs/apache-xi.conf.example` as a starting point for an Apache virtual host. Restrict the listener and `Require` scope to the intended deployment network before exposing it beyond localhost.
 
 ## Known demo limitations
 

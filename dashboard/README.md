@@ -20,7 +20,7 @@ API definitions, registered sites, local audit entries, XI drafts, and file draf
 
 ## Webapp operations
 
-Open `webapps.html` from the **Webapps** command-bar entry in `index.html`. The page reads the shared `xi.xi.sites.v1` registry when available and falls back to useful demo sites. A selected site is kept in the `?site=` query string for separate tabs. Pause/resume, notice, and client-refresh actions are explicitly local simulation state, persisted only as UI/demo state under `xi.webapps.control-state.v1`; no tokens or credentials are stored and no remote action channel is fabricated. The right-hand details pane documents the future `XI_ACTION_ENDPOINT` hook. The existing editor is opened with `file-editor.html?file=landing/index.html`.
+Open `webapps.html` from the **Webapps** command-bar entry in `index.html`. The page reads the shared `xi.xi.sites.v1` registry when available and falls back to useful demo sites. A selected site is kept in the `?site=` query string for separate tabs. Enter a registered site's `xi-server.php` URL, endpoint name, and one-time dashboard token to use the real XI status channel and pause/resume lifecycle. The token is held only in session memory for the initial exchange; XI rotates it into an HttpOnly session cookie and the page never stores the usable token. Browser pause/resume requires the server's explicit `allowBrowserWrites="true"` policy. Notice broadcast and live client refresh remain unavailable until the server exposes those capabilities; the dashboard does not pretend to send them. Without a connection, pause/resume and telemetry are clearly labeled local simulation state under `xi.webapps.control-state.v1`. The existing editor is opened with `file-editor.html?file=landing/index.html`.
 
 ## Remote audited source
 
@@ -40,4 +40,4 @@ After the first valid token exchange, the server replaces the token with an Http
 
 ## File editor
 
-Open `file-editor.html?file=landing/index.html`. Preview starts as the full page. Clicking a container selects only its inner HTML for Source and HTML→JSON editing. Invalid changes restore the last-good source and display a warning. File operations are local-only and keep up to 20 undo stages in `.xi-trash`.
+Open `file-editor.html?file=landing/index.html`. Preview starts as the full page. Clicking a container selects only its inner HTML for Source and HTML→JSON editing. Invalid changes restore the last-good source and display a warning. File operations are local-only and keep up to 20 undo stages in `.xi-trash`; tree summaries can be selected as operation targets, directories can be copied or moved recursively, and Delete moves a file or directory to trash for full-path Undo.

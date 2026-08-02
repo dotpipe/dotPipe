@@ -68,8 +68,16 @@
         <section class="panel health-panel">
           <div class="panel-heading"><div><p class="eyebrow">HEALTH / INTEGRITY</p><h3>Service details</h3></div><span class="status-pill small" id="healthStatus">HEALTHY</span></div>
           <dl class="detail-list"><div><dt>Endpoint health</dt><dd id="endpointHealth">200 / healthy</dd></div><div><dt>Deployment digest</dt><dd class="mono" id="deploymentDigest">sha256:—</dd></div><div><dt>Version</dt><dd class="mono" id="siteVersion">—</dd></div><div><dt>Last deploy</dt><dd class="mono" id="lastDeploy">—</dd></div></dl>
-          <div class="safe-mode"><span class="safe-icon">✓</span><div><strong>Safe mode active</strong><p>Controls change this browser's demo state only. Tokens and credentials are never stored.</p></div></div>
-          <div class="endpoint-hook"><p class="eyebrow">FUTURE XI SERVER HOOK</p><code id="actionEndpoint">XI_ACTION_ENDPOINT not configured</code><small>Configure an action endpoint before enabling remote controls.</small></div>
+          <div class="connection-box">
+            <div class="panel-heading compact"><div><p class="eyebrow">XI SERVER CONNECTION</p><h3>Live control channel</h3></div><span class="panel-kicker" id="remoteState">NOT CONNECTED</span></div>
+            <label class="field"><span>XI server URL</span><input id="xiServerUrl" type="url" placeholder="https://site.example/xi-server.php" autocomplete="url"></label>
+            <label class="field"><span>One-time dashboard token</span><input id="xiDashboardToken" type="password" placeholder="Read-only pairing token" autocomplete="off"></label>
+            <label class="field"><span>Endpoint name</span><input id="xiEndpoint" type="text" placeholder="health" autocomplete="off"></label>
+            <div class="connection-actions"><button class="command-button" id="connectXI" type="button">Connect live</button><button class="text-button" id="refreshXI" type="button">Refresh status</button></div>
+            <p class="connection-help">The server rotates the pairing token into an HttpOnly session. The browser never stores the token. Live pause/resume requires server-side browser writes to be explicitly enabled.</p>
+          </div>
+          <div class="safe-mode" id="safeMode"><span class="safe-icon">✓</span><div><strong>Local simulation active</strong><p>Connect an XI server above to control the registered webapp itself.</p></div></div>
+          <div class="endpoint-hook"><p class="eyebrow">CONTROL CHANNEL</p><code id="actionEndpoint">XI server not configured</code><small id="actionEndpointHelp">No remote request will be sent until a live XI server is connected.</small></div>
         </section>
       </aside>
     </div>

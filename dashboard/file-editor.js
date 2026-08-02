@@ -2,8 +2,9 @@
   'use strict';
 
   const $ = id => document.getElementById(id);
-  const file = new URLSearchParams(location.search).get('file') || 'xi-xi-demo/index.php';
-  let editableFiles = ['xi-xi-demo/index.php', 'xi-xi-demo/api/index.php', 'xi-xi-demo/health/index.php', 'xi-xi-demo/fragment/index.php', 'landing/index.html', 'inline/index.html', 'cart/cart.html', 'tree-view/index.html'];
+  const file = new URLSearchParams(location.search).get('file') || 'xi-demo/index.php';
+  let editableFiles = ['xi-demo/index.php', 'xi-demo/api/index.php', 'xi-demo/health/index.php', 'xi-demo/fragment/index.php', 'landing/index.html', 'inline/index.html', 'cart/cart.html', 'tree-view/index.html'];
+  let selectedOperationPath = file;
   let selectedElement = null;
   let baselineSource = '';
   let lastGoodSource = '';
@@ -46,6 +47,8 @@
         details.open = file === folderPath || file.startsWith(`${folderPath}/`);
         const summary = document.createElement('summary');
         summary.textContent = name;
+        summary.dataset.fileDirectory = folderPath;
+        summary.title = `Select directory ${folderPath} for file operations`;
         details.appendChild(summary);
         renderNode(details, node.folders[name], folderPath);
         parent.appendChild(details);
@@ -100,27 +103,27 @@
   }
 
   async function createFile() {
-    const path = window.prompt('New file path', 'xi-xi-demo/new-page.html');
+    const path = window.prompt('New file path', 'xi-demo/new-page.html');
     if (!path) return;
     try { const result = await fileOperation({ action: 'create', path, content: '' }); if (!editableFiles.includes(path)) editableFiles.push(path); renderFileNavigator(); setStatus(`Created ${path}.`, 'XI-CREATE'); } catch (error) { setStatus(`Create failed: ${error.message}`, 'XI-CREATE', true); }
   }
 
   async function copyCurrentFile() {
-    const suggestion = file.replace(/(\.[^./]+)$/, '-copy$1');
+    const suggestion = selectedOperationPath.replace(/(\.[^./]+)$/, '-copy$1');
     const destination = window.prompt('Copy current file to', suggestion);
     if (!destination) return;
-    try { await fileOperation({ action: 'copy', source: file, destination }); if (!editableFiles.includes(destination)) editableFiles.push(destination); renderFileNavigator(); setStatus(`Copied ${file} to ${destination}.`, 'XI-COPY'); } catch (error) { setStatus(`Copy failed: ${error.message}`, 'XI-COPY', true); }
+    try { await fileOperation({ action: 'copy', source: selectedOperationPath, destination }); if (!editableFiles.includes(destination) && !destination.endsWith('/')) editableFiles.push(destination); renderFileNavigator(); setStatus(`Copied ${selectedOperationPath} to ${destination}.`, 'XI-COPY'); } catch (error) { setStatus(`Copy failed: ${error.message}`, 'XI-COPY', true); }
   }
 
   async function moveCurrentFile() {
-    const destination = window.prompt('Move current file to', file);
-    if (!destination || destination === file) return;
-    try { await fileOperation({ action: 'move', source: file, destination }); editableFiles = editableFiles.filter(path => path !== file); editableFiles.push(destination); setStatus(`Moved to ${destination}.`, 'XI-MOVE'); window.setTimeout(() => { location.href = `file-editor.html?file=${encodeURIComponent(destination)}`; }, 250); } catch (error) { setStatus(`Move failed: ${error.message}`, 'XI-MOVE', true); }
+    const destination = window.prompt('Move selected path to', selectedOperationPath);
+    if (!destination || destination === selectedOperationPath) return;
+    try { await fileOperation({ action: 'move', source: selectedOperationPath, destination }); editableFiles = editableFiles.filter(path => path !== selectedOperationPath && !path.startsWith(`${selectedOperationPath}/`)); if (!destination.endsWith('/')) editableFiles.push(destination); setStatus(`Moved to ${destination}.`, 'XI-MOVE'); if (selectedOperationPath === file) window.setTimeout(() => { location.href = `file-editor.html?file=${encodeURIComponent(destination)}`; }, 250); else { selectedOperationPath = destination; renderFileNavigator(); } } catch (error) { setStatus(`Move failed: ${error.message}`, 'XI-MOVE', true); }
   }
 
   async function deleteCurrentFile() {
-    if (!window.confirm(`Move ${file} to the temporary trash bin?`)) return;
-    try { await fileOperation({ action: 'delete', path: file }); editableFiles = editableFiles.filter(path => path !== file); setStatus(`${file} moved to Trash.`, 'XI-TRASH'); window.setTimeout(() => { location.href = 'file-editor.html?file=xi-xi-demo%2Findex.php'; }, 250); } catch (error) { setStatus(`Delete failed: ${error.message}`, 'XI-TRASH', true); }
+    if (!window.confirm(`Move ${selectedOperationPath} to the temporary trash bin?`)) return;
+    try { await fileOperation({ action: 'delete', path: selectedOperationPath }); editableFiles = editableFiles.filter(path => path !== selectedOperationPath && !path.startsWith(`${selectedOperationPath}/`)); setStatus(`${selectedOperationPath} moved to Trash.`, 'XI-TRASH'); if (selectedOperationPath === file) window.setTimeout(() => { location.href = 'file-editor.html?file=xi-demo%2Findex.php'; }, 250); else { selectedOperationPath = ''; renderFileNavigator(); } } catch (error) { setStatus(`Delete failed: ${error.message}`, 'XI-TRASH', true); }
   }
 
   async function undoFileOperation(id = undoStages.at(-1)?.id) {
@@ -159,12 +162,14 @@
 
   async function zipPackage() {
     try {
-      const entries = await Promise.all(editableFiles.map(async path => { const response = await fetch(`../${path}`); if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`); return { path, content: await response.text() }; }));
+      const entries = await Promise.all(editableFiles.map(async path => { const response = await fetch('file-ops.php', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ action:'read', path }) }); const result = await response.json().catch(() => ({})); if (!response.ok) throw new Error(`${path}: ${result.error || `HTTP ${response.status}`}`); const bytes = Uint8Array.from(atob(result.content || ''), character => character.charCodeAt(0)); return { path, content: new TextDecoder().decode(bytes) }; }));
       const link = document.createElement('a');
       link.href = URL.createObjectURL(zipStore(entries));
-      link.download = 'xi-xi-files.zip';
+      link.download = 'xi-files.zip';
+      link.style.display = 'none';
+      document.body.appendChild(link);
       link.click();
-      URL.revokeObjectURL(link.href);
+      window.setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 1000);
       setStatus(`Zipped ${entries.length} registered files.`, 'XI-ZIP');
     } catch (error) {
       setStatus(`ZIP could not be created: ${error.message}`, 'XI-ZIP', true);
@@ -408,6 +413,12 @@
 
   document.querySelectorAll('[data-file-view]').forEach(tab => tab.addEventListener('click', () => setView(tab.dataset.fileView)));
   renderFileNavigator();
+  $('fileNavigator').addEventListener('click', event => {
+    const summary = event.target.closest('[data-file-directory]');
+    if (!summary) return;
+    selectedOperationPath = summary.dataset.fileDirectory;
+    setStatus(`Selected directory ${selectedOperationPath}.`, 'XI-SELECT');
+  });
   $('sourceEditor').addEventListener('input', () => {
     try {
       if (selectedElement) selectedElement.innerHTML = $('sourceEditor').value;
@@ -459,7 +470,7 @@
   $('jsonEditor').addEventListener('blur', () => setTimeout(hideJsonAutocomplete, 120));
   $('saveDraft').addEventListener('click', () => {
     try {
-      localStorage.setItem(`xi-xi.file-draft:${file}`, fullPageSource());
+      localStorage.setItem(`xi.file-draft:${file}`, fullPageSource());
       setStatus('Full webpage draft saved.', 'XI-DRAFT');
     } catch (error) {
       setStatus(`Draft could not be saved: ${error.message}`, 'XI-DRAFT', true);
