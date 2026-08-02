@@ -11,10 +11,16 @@
 - `file-ops.php`: loopback-only create/copy/move/delete/undo/trash endpoint.
 - `sample-page.json`: page component payload used by the JSON workspace.
 - `styles.css`: themed control-panel and editor presentation.
+- `webapps.html`: operator dashboard for registered webapps, client sessions, health details, and safe local controls.
+- `webapps.js` / `webapps.css`: query-selected webapp state, demo telemetry, local audit actions, and responsive operations-console presentation.
 
 ## Storage and authority
 
 API definitions, registered sites, local audit entries, XI drafts, and file drafts are browser storage. Remote bootstrap tokens are entered for one pairing request only and are not persisted by the dashboard. None of these controls enforce a remote server policy; use XI/ELSN for server-side writes and endpoint lifecycle.
+
+## Webapp operations
+
+Open `webapps.html` from the **Webapps** command-bar entry in `index.html`. The page reads the shared `xi.xi.sites.v1` registry when available and falls back to useful demo sites. A selected site is kept in the `?site=` query string for separate tabs. Pause/resume, notice, and client-refresh actions are explicitly local simulation state, persisted only as UI/demo state under `xi.webapps.control-state.v1`; no tokens or credentials are stored and no remote action channel is fabricated. The right-hand details pane documents the future `XI_ACTION_ENDPOINT` hook. The existing editor is opened with `file-editor.html?file=landing/index.html`.
 
 ## Remote audited source
 

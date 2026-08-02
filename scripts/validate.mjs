@@ -26,7 +26,9 @@ for (const file of files.filter(file => sourceExtensions.has(extname(file)))) {
   }
 }
 
-const attributePattern = /(?:src|href|action)\s*=\s*["']([^"']+)["']/gi;
+// Match resource-bearing HTML attributes, not application state hooks such as
+// data-action="pause". The latter is intentionally a command name, not a file.
+const attributePattern = /(?<!data-)(?:src|href|action)\s*=\s*["']([^"']+)["']/gi;
 for (const file of files.filter(file => documentExtensions.has(extname(file)))) {
   const source = readFileSync(file, 'utf8');
   for (const match of source.matchAll(attributePattern)) {
