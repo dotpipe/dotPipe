@@ -53,8 +53,8 @@ if ($action === 'undo') {
     $items = array_values(array_filter($items, fn($entry) => ($entry['id'] ?? '') !== $id)); file_ops_save_history($root, $items); echo json_encode(['ok' => true]); exit;
 }
 if ($action === 'create') { $target = file_ops_path((string) ($input['path'] ?? ''), $root, $extensions); $content = (string) ($input['content'] ?? ''); if (strlen($content) > 2 * 1024 * 1024) file_ops_fail(413, 'file is too large'); if (file_exists($target) || is_link($target)) file_ops_fail(409, 'file already exists'); if (!is_dir(dirname($target)) && !mkdir(dirname($target), 0750, true)) file_ops_fail(500, 'could not create parent directory'); if (file_put_contents($target, $content, LOCK_EX) === false) file_ops_fail(500, 'could not create file'); $id = file_ops_record($root, ['action' => 'create', 'path' => file_ops_rel($target, $root)]); echo json_encode(['ok' => true, 'id' => $id, 'path' => file_ops_rel($target, $root)]); exit; }
-$source = file_ops_path((string) ($input['path'] ?? ''), $root, $extensions);
 if ($action === 'write') {
+    $source = file_ops_path((string) ($input['path'] ?? ''), $root, $extensions);
     if (!is_file($source) || is_link($source)) file_ops_fail(404, 'file not found');
     $content = (string) ($input['content'] ?? ''); if (strlen($content) > 2 * 1024 * 1024) file_ops_fail(413, 'file is too large');
     if (is_link($trashRoot) || (is_dir($trashRoot) && (($resolvedTrash = realpath($trashRoot)) === false || ($resolvedTrash !== $root && !str_starts_with($resolvedTrash, $root . DIRECTORY_SEPARATOR))))) file_ops_fail(403, 'trash directory escapes the workspace');

@@ -70,6 +70,26 @@
 
   function escapeHtml(value) { return String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character])); }
 
+  function fileDialog({ title, copy, label = 'Path', value = '', confirm = 'Continue', input = true }) {
+    const dialog = $('fileOperationDialog');
+    const form = $('fileOperationForm');
+    const field = $('fileOperationField');
+    const editor = $('fileOperationInput');
+    $('fileOperationTitle').textContent = title;
+    $('fileOperationCopy').textContent = copy;
+    $('fileOperationLabel').textContent = label;
+    $('fileOperationConfirm').textContent = confirm;
+    field.hidden = !input;
+    editor.value = value;
+    return new Promise(resolve => {
+      const finish = result => { form.onsubmit = null; $('fileOperationCancel').onclick = null; dialog.close(); resolve(result); };
+      form.onsubmit = event => { event.preventDefault(); finish(input ? editor.value.trim() : true); };
+      $('fileOperationCancel').onclick = () => finish(input ? '' : false);
+      dialog.showModal();
+      if (input) editor.focus(); else $('fileOperationConfirm').focus();
+    });
+  }
+
   function previewSource(source) {
     const normalizedFile = file.replace(/^\/+/, '').split('/').filter(part => part && part !== '.' && part !== '..').join('/');
     const fileUrl = new URL(`../${normalizedFile}`, location.href);
@@ -103,26 +123,26 @@
   }
 
   async function createFile() {
-    const path = window.prompt('New file path', 'xi-demo/new-page.html');
+    const path = await fileDialog({ title:'Create a file', copy:'Choose a workspace-relative file path.', label:'New file path', value:'xi-demo/new-page.html' });
     if (!path) return;
     try { const result = await fileOperation({ action: 'create', path, content: '' }); if (!editableFiles.includes(path)) editableFiles.push(path); renderFileNavigator(); setStatus(`Created ${path}.`, 'XI-CREATE'); } catch (error) { setStatus(`Create failed: ${error.message}`, 'XI-CREATE', true); }
   }
 
   async function copyCurrentFile() {
     const suggestion = selectedOperationPath.replace(/(\.[^./]+)$/, '-copy$1');
-    const destination = window.prompt('Copy current file to', suggestion);
+    const destination = await fileDialog({ title:'Copy selected path', copy:`Copy ${selectedOperationPath} to a new file or directory.`, label:'Destination path', value:suggestion });
     if (!destination) return;
     try { await fileOperation({ action: 'copy', source: selectedOperationPath, destination }); if (!editableFiles.includes(destination) && !destination.endsWith('/')) editableFiles.push(destination); renderFileNavigator(); setStatus(`Copied ${selectedOperationPath} to ${destination}.`, 'XI-COPY'); } catch (error) { setStatus(`Copy failed: ${error.message}`, 'XI-COPY', true); }
   }
 
   async function moveCurrentFile() {
-    const destination = window.prompt('Move selected path to', selectedOperationPath);
+    const destination = await fileDialog({ title:'Move selected path', copy:`Move ${selectedOperationPath} to a new file or directory.`, label:'Destination path', value:selectedOperationPath });
     if (!destination || destination === selectedOperationPath) return;
     try { await fileOperation({ action: 'move', source: selectedOperationPath, destination }); editableFiles = editableFiles.filter(path => path !== selectedOperationPath && !path.startsWith(`${selectedOperationPath}/`)); if (!destination.endsWith('/')) editableFiles.push(destination); setStatus(`Moved to ${destination}.`, 'XI-MOVE'); if (selectedOperationPath === file) window.setTimeout(() => { location.href = `file-editor.html?file=${encodeURIComponent(destination)}`; }, 250); else { selectedOperationPath = destination; renderFileNavigator(); } } catch (error) { setStatus(`Move failed: ${error.message}`, 'XI-MOVE', true); }
   }
 
   async function deleteCurrentFile() {
-    if (!window.confirm(`Move ${selectedOperationPath} to the temporary trash bin?`)) return;
+    if (!await fileDialog({ title:'Move to Trash', copy:`The selected path will be moved to temporary trash and can be restored with Undo.`, confirm:'Move to Trash', input:false })) return;
     try { await fileOperation({ action: 'delete', path: selectedOperationPath }); editableFiles = editableFiles.filter(path => path !== selectedOperationPath && !path.startsWith(`${selectedOperationPath}/`)); setStatus(`${selectedOperationPath} moved to Trash.`, 'XI-TRASH'); if (selectedOperationPath === file) window.setTimeout(() => { location.href = 'file-editor.html?file=xi-demo%2Findex.php'; }, 250); else { selectedOperationPath = ''; renderFileNavigator(); } } catch (error) { setStatus(`Delete failed: ${error.message}`, 'XI-TRASH', true); }
   }
 
@@ -438,6 +458,7 @@
   $('deleteFile').addEventListener('click', deleteCurrentFile);
   $('undoFile').addEventListener('click', () => undoFileOperation());
   $('toggleTrash').addEventListener('click', () => { $('trashBin').hidden = !$('trashBin').hidden; });
+  $('fileOperationDialog').addEventListener('cancel', event => { event.preventDefault(); $('fileOperationCancel').click(); });
   $('trashBin').addEventListener('click', event => { const button = event.target.closest('[data-restore-trash]'); if (button) undoFileOperation(button.dataset.restoreTrash); });
   loadFileHistory();
   $('jsonEditor').addEventListener('input', () => showJsonAutocomplete());
