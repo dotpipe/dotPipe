@@ -1,6 +1,6 @@
-# Local XI XI tools
+# Local XI tools
 
-`xi-ssh.mjs` is the platform-neutral local SSH adapter for the XI XI remote console. It uses the native OpenSSH client on Windows, Linux, and macOS; it does not store passwords or private keys and does not expose them to the browser.
+`xi-ssh.mjs` is the platform-neutral local SSH adapter for the XI remote console. It uses the native OpenSSH client on Windows, Linux, and macOS; it does not store passwords or private keys and does not expose them to the browser.
 
 Copy `.xi-ssh.example.json` to `.xi-ssh.json` and replace the host, user, and key paths. Keep the real file out of version control. Use `ssh-add` with the local `ssh-agent` before connecting.
 

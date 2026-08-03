@@ -35,7 +35,7 @@ Each runnable directory has a local `README.md` with its entry points, data file
 
 `package.json` names the package `xi`, exposes `domPipe.js` as its main file, and maps the `xi` executable to `xi.mjs`. `xi-core.mjs` contains the signed server-editing implementation.
 
-On Linux, run `xi install` from a configured project directory to create and enable the user-level XI XI audit timer. It validates `.xi.json` and `.xi.key.json` first, writes no secrets into the unit file, and requires `--force` before replacing existing units.
+On Linux, run `xi install` from a configured project directory to create and enable the user-level XI audit timer. It validates `.xi.json` and `.xi.key.json` first, writes no secrets into the unit file, and requires `--force` before replacing existing units.
 
 For a fuller Debian/Ubuntu or WSL setup, review [`docs/INSTALL.md`](docs/INSTALL.md) and run `sudo bash ./install.sh`. It installs and configures a loopback-only Apache/PHP runtime, generates local credentials, and leaves the audit timer as an explicit operator-user opt-in.
 

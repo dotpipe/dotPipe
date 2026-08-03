@@ -2,14 +2,14 @@
 <html lang="en" data-theme="dark" data-site-id="xi-demo"><head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>XI XI Demo Site</title>
+  <title>XI Demo Site</title>
   <link rel="stylesheet" href="demo.css">
   <script src="../domPipe.js"></script>
 </head>
 <body>
   <main class="demo-shell">
     <header class="hero">
-      <div><p class="eyebrow">XI XI / LIVE SITE</p><h1 class="">Dashboard live edit verified</h1><p class="lede">A watchable site configuration: live JSON, HTML fragments, endpoint state, and domPipe bindings.</p></div>
+      <div><p class="eyebrow">XI / LIVE SITE</p><h1 class="">Dashboard live edit verified</h1><p class="lede">A watchable site configuration: live JSON, HTML fragments, endpoint state, and domPipe bindings.</p></div>
       <div class="hero-state"><span class="pulse"></span><span id="siteState">CONNECTING</span></div>
     </header>
     <nav class="demo-tabs" aria-label="Demo site tabs"><button class="demo-tab active" data-demo-tab="watch" type="button">Watch site</button><button class="demo-tab" data-demo-tab="pages" type="button">Pages</button><button class="demo-tab" data-demo-tab="nest" type="button">JSON Modala Nest Finder</button></nav>
@@ -24,14 +24,14 @@
       <article class="panel fragment-panel"><div class="panel-head"><div><p class="eyebrow">XI FRAGMENT</p><h2 id="fragmentTitle">Waiting for fragment</h2></div><span class="tag">HTML</span></div><div id="fragmentContent" class="fragment-content">The fragment endpoint will appear here.</div></article>
     </section>
     </div>
-    <section class="demo-tab-panel pages-panel" data-demo-panel="pages" hidden=""><div class="panel-head"><div><p class="eyebrow">SITE / PAGE TABS</p><h2>Registered pages</h2><p class="lede">Open each page in another browser tab. Edit in the Nest Finder, then publish and refresh the site.</p></div><span class="tag">MULTI-PAGE</span></div><div class="page-links"><a href="./" target="_blank"><strong>Watch site</strong><small>xi-demo/</small></a><a href="api/" target="_blank"><strong>API response</strong><small>api/index.php</small></a><a href="health/" target="_blank"><strong>Health endpoint</strong><small>health/index.php</small></a><a href="fragment/" target="_blank"><strong>HTML fragment</strong><small>fragment/index.php</small></a><a href="../dashboard/" target="_blank"><strong>XI XI Control Panel</strong><small>dashboard/</small></a></div></section>
+    <section class="demo-tab-panel pages-panel" data-demo-panel="pages" hidden=""><div class="panel-head"><div><p class="eyebrow">SITE / PAGE TABS</p><h2>Registered pages</h2><p class="lede">Open each page in another browser tab. Edit in the Nest Finder, then publish and refresh the site.</p></div><span class="tag">MULTI-PAGE</span></div><div class="page-links"><a href="./" target="_blank"><strong>Watch site</strong><small>xi-demo/</small></a><a href="api/" target="_blank"><strong>API response</strong><small>api/index.php</small></a><a href="health/" target="_blank"><strong>Health endpoint</strong><small>health/index.php</small></a><a href="fragment/" target="_blank"><strong>HTML fragment</strong><small>fragment/index.php</small></a><a href="../dashboard/" target="_blank"><strong>XI Control Panel</strong><small>dashboard/</small></a></div></section>
     <section class="demo-tab-panel nest-finder" data-demo-panel="nest" hidden="">
       <div class="panel-head"><div><p class="eyebrow">HTML → JSON / MODALA</p><h2>Nested container finder</h2><p class="lede">Hover any real HTML container to open that nest in the editor. The structure uses domPipe’s <code>htmlToJson</code> shape.</p></div><span class="tag">WYSIWYG</span></div>
       <div class="nest-modes"><button class="nest-mode active" data-nest-mode="view" type="button">View</button><button class="nest-mode" data-nest-mode="preview" type="button">Preview</button><button class="nest-mode" data-nest-mode="json" type="button">JSON</button></div>
       <div class="nest-grid"><div><label class="eyebrow" for="nestSource">SOURCE HTML</label><textarea id="nestSource" class="nest-editor" spellcheck="false">&lt;section class="nest-sample"&gt;&lt;div class="nest-card"&gt;&lt;h3&gt;Hover this card&lt;/h3&gt;&lt;p&gt;Every nested container becomes an editable JSON nest.&lt;/p&gt;&lt;button type="button"&gt;Action&lt;/button&gt;&lt;/div&gt;&lt;/section&gt;</textarea><button id="loadNest" class="nest-button" type="button">Render HTML</button><div id="nestTrail" class="nest-trail">Hover a container to see its nest path.</div></div><div><div class="nest-mode-panel active" data-nest-panel="view"><label class="eyebrow">FLAT HTML</label><pre id="nestFlatView" class="nest-flat-view"></pre></div><div class="nest-mode-panel" data-nest-panel="preview" hidden=""><label class="eyebrow">RENDERED PREVIEW</label><div id="nestPreview" class="nest-preview"></div></div><div class="nest-mode-panel" data-nest-panel="json" hidden=""><label class="eyebrow" for="nestJson">SELECTED NEST JSON</label><textarea id="nestJson" class="nest-editor" spellcheck="false" placeholder="Hover a container…"></textarea><button id="applyNest" class="nest-button" type="button">Apply JSON to hovered nest</button></div></div></div>
       <div class="publish-bar"><span id="publishState">Draft changes are local until published.</span><button id="publishNest" class="nest-button" type="button">Publish and refresh site</button></div>
     </section>
-    <footer><span>Site scope: <code>xi-demo</code></span><span>Rules: <code>.xi</code></span><a href="../dashboard/">Open XI XI Control Panel →</a></footer>
+    <footer><span>Site scope: <code>xi-demo</code></span><span>Rules: <code>.xi</code></span><a href="../dashboard/">Open XI Control Panel →</a></footer>
   </main>
   <script>
     (() => {

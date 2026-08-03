@@ -208,7 +208,7 @@ function xi_alert_invalid_token(string $root, array $config, string $reason): vo
     if ((int) ($state['lastInvalidAlertAt'] ?? 0) > time() - 600) return;
     $state['lastInvalidAlertAt'] = time();
     xi_save_auth_state($root, $config, $state);
-    @mail($email, 'XI XI token exchange rejected', "A dashboard token was rejected by the audited server. Reason: {$reason}\nTime: " . gmdate('c') . "\nRe-pair under supervision.");
+    @mail($email, 'XI token exchange rejected', "A dashboard token was rejected by the audited server. Reason: {$reason}\nTime: " . gmdate('c') . "\nRe-pair under supervision.");
 }
 
 function xi_pattern(string $pattern): string

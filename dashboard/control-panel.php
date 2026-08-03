@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode([
-    'name' => 'XI XI Control Panel',
+    'name' => 'XI Control Panel',
     'version' => 1,
     'surfaces' => ['xi', 'endpoints', 'audit', 'tiers', 'json', 'attributes', 'files'],
     'tiers' => [

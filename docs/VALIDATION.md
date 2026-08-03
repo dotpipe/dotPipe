@@ -15,7 +15,7 @@ php -l xi-server-node/gateway.php
 php -l dashboard/file-ops.php
 ```
 
-Then run the PHP server and request the dashboard, XI XI demo, API endpoints, and ELSN routes. A `200` page response proves routing only; it does not prove every interactive control.
+Then run the PHP server and request the dashboard, XI demo, API endpoints, and ELSN routes. A `200` page response proves routing only; it does not prove every interactive control.
 
 ## Manual coverage still required
 

@@ -1,8 +1,8 @@
-# XI XI Control Panel
+# XI Control Panel
 
 ## What it is
 
-XI XI is a browser-based background interface, not the enforcement server. `dashboard/index.html` loads `domPipe.js`, `dashboard/app.js`, and `xi-extension.js`; `styles.css` supplies the shell and light/dark theme.
+XI is a browser-based background interface, not the enforcement server. `dashboard/index.html` loads `domPipe.js`, `dashboard/app.js`, and `xi-extension.js`; `styles.css` supplies the shell and light/dark theme.
 
 ## Control surfaces
 

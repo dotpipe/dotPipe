@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="XI XI background interface for live API, endpoint, audit, and domPipe control.">
-  <title>XI XI Control Panel</title>
+  <meta name="description" content="XI background interface for live API, endpoint, audit, and domPipe control.">
+  <title>XI Control Panel</title>
   <link rel="stylesheet" href="styles.css">
   <script src="../domPipe.js"></script>
 </head>
@@ -12,10 +12,10 @@
   <div class="workspace-shell">
     <header class="shell-bar">
       <div class="brand-lockup">
-        <a class="brand-mark" href="./" aria-label="Open XI XI Control Panel"><span class="brand-glyph">◈</span></a>
+        <a class="brand-mark" href="./" aria-label="Open XI Control Panel"><span class="brand-glyph">◈</span></a>
         <div>
-          <p class="eyebrow">XI XI / SITE CONFIGURATION</p>
-          <h1>XI XI Control Panel</h1>
+          <p class="eyebrow">XI / SITE CONFIGURATION</p>
+          <h1>XI Control Panel</h1>
         </div>
       </div>
       <div class="shell-actions">
@@ -42,21 +42,21 @@
         <button class="command-button danger" id="deleteApi" type="button"><span>⌫</span> Delete</button>
       </div>
     </nav>
-    <section class="xi-console" aria-label="XI XI command console">
+    <section class="xi-console" aria-label="XI command console">
       <div class="console-prompt"><span>xi$</span><input id="xiCommand" type="text" autocomplete="off" spellcheck="false" placeholder="status · list · inspect · pause api-id · resume api-id · get api-id"></div>
       <button class="command-button" id="runXI" type="button">Run</button>
-      <pre id="xiOutput" class="console-output">XI XI console ready. Type “xi help”.</pre>
+      <pre id="xiOutput" class="console-output">XI console ready. Type “xi help”.</pre>
     </section>
     <main class="workspace-grid">
-      <aside class="site-drawer" aria-label="Registered XI XI sites">
-        <div class="site-drawer-heading"><p class="eyebrow">SITES / XI XI</p><h2>Registered sites</h2><button class="small-button" id="newSite" type="button">＋ Register</button></div>
+      <aside class="site-drawer" aria-label="Registered XI sites">
+        <div class="site-drawer-heading"><p class="eyebrow">SITES / XI</p><h2>Registered sites</h2><button class="small-button" id="newSite" type="button">＋ Register</button></div>
         <form id="siteRegisterForm" class="site-register-form" hidden><label><span>Site name</span><input id="siteNameInput" required placeholder="My XI site"></label><label><span>Site URL</span><input id="siteUrlInput" required placeholder="http://127.0.0.1:8787/xi-demo/"></label><div><button class="small-button" id="saveSiteRegistration" type="submit">Save</button><button class="text-button" id="cancelSiteRegistration" type="button">Cancel</button></div></form>
         <div id="siteList" class="site-list"></div>
         <div class="site-drawer-footer"><span class="status-dot"></span><span id="siteRegistryState">Local site registry</span></div>
       </aside>
-      <aside class="control-nav" aria-label="XI XI background interface">
+      <aside class="control-nav" aria-label="XI background interface">
         <div class="control-nav-heading">
-          <p class="eyebrow">XI XI</p>
+          <p class="eyebrow">XI</p>
           <h2>Control plane</h2>
           <p>Live setup, routes, and page surfaces.</p>
         </div>

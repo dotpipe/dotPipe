@@ -11,7 +11,7 @@
       <file>domPipe.js</file>
       <file>package.json</file>
     </program>
-    <program id="xi" name="XI XI control plane" root="dashboard" entry="index.html">
+    <program id="xi" name="XI control plane" root="dashboard" entry="index.html">
       <file>dashboard/index.html</file>
       <file>dashboard/app.js</file>
       <file>dashboard/xi-extension.js</file>

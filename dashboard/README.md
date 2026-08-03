@@ -1,4 +1,4 @@
-# dashboard — XI XI Control Panel
+# dashboard — XI Control Panel
 
 ## Entry points
 
@@ -32,7 +32,7 @@ Site registration accepts only HTTP(S) URLs. Same-origin paths are checked befor
 
 Clicking a registered site probes loopback URLs first and opens reachable sites in a new tab. The dashboard stays open; unreachable local sites produce an in-dashboard error instead of navigating to a dead page.
 
-The SSH console connects only to profiles exposed by the local XI XI SSH broker. Start it beside the dashboard with `npm run ssh-broker`; it listens on loopback `127.0.0.1:8790` and prints a one-time local token. Enter that token in the SSH console, press **Test broker**, and the registered site list is loaded into the dashboard. The broker keeps keys and host verification on the dashboard computer. Each profile has `allow`, `deny`, `allowedPackages`, and `packageManager` policy; deny rules win, and installs require both the `install` operation and an exact package allowlist entry. The browser can never submit arbitrary shell text.
+The SSH console connects only to profiles exposed by the local XI SSH broker. Start it beside the dashboard with `npm run ssh-broker`; it listens on loopback `127.0.0.1:8790` and prints a one-time local token. Enter that token in the SSH console, press **Test broker**, and the registered site list is loaded into the dashboard. The broker keeps keys and host verification on the dashboard computer. Each profile has `allow`, `deny`, `allowedPackages`, and `packageManager` policy; deny rules win, and installs require both the `install` operation and an exact package allowlist entry. The browser can never submit arbitrary shell text.
 
 For remote JSON pages, load the JSON through the audited source controls, edit the complete document in the JSON workspace, and use `Publish JSON patch`. The dashboard creates a constrained `add`/`replace`/`remove` patch. XI receives the full document, patch, and base hash; it rejects stale or mismatched edits and atomically publishes only after the patch reproduces the submitted document.
 

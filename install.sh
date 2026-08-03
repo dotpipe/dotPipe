@@ -10,7 +10,7 @@ DRY_RUN=0
 
 usage() {
   cat <<'EOF'
-XI XI Linux installer
+XI Linux installer
 
 Usage:
   sudo ./install.sh [options]
@@ -51,7 +51,7 @@ if ! [[ "$ORIGIN" =~ ^https?://127\.0\.0\.1(:[0-9]+)?$ ]]; then
   exit 2
 fi
 if (( DRY_RUN )); then
-  echo "Would install XI XI at: $ROOT"
+  echo "Would install XI at: $ROOT"
   echo "Would bind Apache to: 127.0.0.1:$PORT"
   echo "Would use dashboard origin: $ORIGIN"
   exit 0
@@ -122,7 +122,7 @@ systemctl enable --now apache2
 chmod +x "$ROOT/xi.mjs" "$ROOT/xi-core.mjs" "$ROOT/tools/xi-ssh.mjs" "$ROOT/tools/xi-ssh-broker.mjs"
 ln -sfn "$ROOT/xi.mjs" /usr/local/bin/xi
 
-echo "XI XI installed at http://127.0.0.1:${PORT}/dashboard/"
+echo "XI installed at http://127.0.0.1:${PORT}/dashboard/"
 echo "Credentials saved outside the web root: $ROOT/../.xi-credentials.txt"
 echo "Apache is loopback-only; no public listener was created."
 echo "Run 'npm run ssh-broker' as the operator user for the local SSH dashboard console."

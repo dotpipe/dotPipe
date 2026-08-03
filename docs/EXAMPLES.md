@@ -17,6 +17,6 @@
 | `login/` | `index.html` | Login/registration component with local form pages. |
 | `tree-view/` | `index.html`, `index2.html` | JSON tree/modal-tip rendering and chocolate/order UI. |
 | `xi-demo/` | `index.php` | ELSN-style site with `api/`, `fragment/`, and `health/` endpoint directories. |
-| `dashboard/` | `index.html`, `file-editor.html` | XI XI control panel and file editor. |
+| `dashboard/` | `index.html`, `file-editor.html` | XI control panel and file editor. |
 
 Each local README documents the files in that directory. Root-level `endpoint.php`, `crud.php`, `xi-server.php`, `xi.mjs`, `domPipe.js`, and the documentation HTML files are documented in the root and layer guides.

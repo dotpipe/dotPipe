@@ -1,4 +1,4 @@
-# XI XI installation
+# XI installation
 
 `install.sh` is the Linux/WSL staging installer. It requires Debian or Ubuntu with `apt-get` and must be run as root:
 

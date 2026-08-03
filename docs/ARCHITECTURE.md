@@ -3,8 +3,8 @@
 ## Layers
 
 1. **domPipe runtime (`domPipe.js`)** runs in a browser. It normalizes attributes, assigns IDs to active elements, initializes components, executes inline macros, renders JSON, and manages the live API registry.
-2. **XI XI (`dashboard/`)** is an operator-facing browser interface. It edits API definitions and page JSON locally, sends requests, syncs `dashboard/xi-extension.php`, and opens source files in a separate editor page.
-3. **XI XI CLI (`xi.mjs`)** is an optional Node CLI. It signs status, list, read, write, log, pause, and resume requests to `xi-server.php`.
+2. **XI (`dashboard/`)** is an operator-facing browser interface. It edits API definitions and page JSON locally, sends requests, syncs `dashboard/xi-extension.php`, and opens source files in a separate editor page.
+3. **XI CLI (`xi.mjs`)** is an optional Node CLI. It signs status, list, read, write, log, pause, and resume requests to `xi-server.php`.
 
 On Linux, `xi install` provisions a user-level systemd service and timer that runs authenticated audits. The connection is outbound from the managed computer to the configured control/API server. Live changes travel through the signed API and JSON Patch path; the remote server never gets arbitrary shell access to the computer running `xi`.
 4. **ELSN (`xi-server-node/gateway.php`)** is a PHP endpoint router. It maps a named directory to its `index.php`, applies XML allow/deny rules, reads pause state, and returns normalized errors.

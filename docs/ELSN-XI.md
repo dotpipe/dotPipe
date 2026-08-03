@@ -79,7 +79,7 @@ For a target webserver, copy `xi-server.php` and this repository's source to the
 php xi-install.php --root=. --origin=https://xi.example
 ```
 
-It creates `.xi` with separate HMAC and read-only dashboard credentials, audited `domPipe`/XI XI program entries, allow/deny rules, and writes disabled. The generated credentials are printed once; store them securely. The installer applies mode `0600` on systems that support POSIX permissions and refuses to overwrite an existing `.xi` unless `--force` is supplied.
+It creates `.xi` with separate HMAC and read-only dashboard credentials, audited `domPipe`/XI program entries, allow/deny rules, and writes disabled. The generated credentials are printed once; store them securely. The installer applies mode `0600` on systems that support POSIX permissions and refuses to overwrite an existing `.xi` unless `--force` is supplied.
 
 The CLI command is `xi`; its documented config remains `.xi.json` plus `.xi.key.json`. The server accepts `.xi`; the old `.xi-server.json` format remains only as a compatibility fallback for `xi-server.php`.
 

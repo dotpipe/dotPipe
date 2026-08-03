@@ -22,7 +22,7 @@ async function loadConfig() {
   return { profiles };
 }
 async function loadToken() {
-  try { return (await fs.readFile(tokenPath, 'utf8')).trim(); } catch (error) { if (error.code !== 'ENOENT') throw error; const token = crypto.randomBytes(32).toString('hex'); await fs.writeFile(tokenPath, `${token}\n`, { mode: 0o600 }); console.log(`XI XI local broker token (enter once in the dashboard): ${token}`); return token; }
+  try { return (await fs.readFile(tokenPath, 'utf8')).trim(); } catch (error) { if (error.code !== 'ENOENT') throw error; const token = crypto.randomBytes(32).toString('hex'); await fs.writeFile(tokenPath, `${token}\n`, { mode: 0o600 }); console.log(`XI local broker token (enter once in the dashboard): ${token}`); return token; }
 }
 function quotePosix(value) { return `'${String(value).replaceAll("'", "'\\''")}'`; }
 function quotePowerShell(value) { return `'${String(value).replaceAll("'", "''")}'`; }
@@ -60,6 +60,6 @@ async function main() {
     let raw = ''; for await (const chunk of request) { raw += chunk; if (raw.length > 4096) return json(response, 413, { ok: false, error: 'request too large' }); }
     try { const body = JSON.parse(raw || '{}'); const command = String(body.command || '').trim(); const config = await loadConfig(); const profile = config.profiles.find(item => item.id === String(body.site || 'default')) || config.profiles[0]; const result = await runSsh(command, profile); json(response, result.code === 0 ? 200 : 502, { ok: result.code === 0, code: result.code, site: profile.id, stdout: result.stdout, stderr: result.stderr }); } catch (error) { json(response, 400, { ok: false, error: error.message }); }
   });
-  server.listen(port, '127.0.0.1', () => console.log(`XI XI SSH broker listening on http://127.0.0.1:${port}`));
+  server.listen(port, '127.0.0.1', () => console.log(`XI SSH broker listening on http://127.0.0.1:${port}`));
 }
 main().catch(error => { console.error(`xi-ssh-broker: ${error.message}`); process.exitCode = 1; });
