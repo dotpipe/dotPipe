@@ -45,7 +45,7 @@ class CRUD
      * @method create
      * @param array $values
      * @param string $table
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException|PDOException
      * @return int
      *
      * $create([
@@ -83,7 +83,7 @@ class CRUD
      * @method read
      * @param array $ta_ky
      * @param string $where The where clause.
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException|PDOException
      * @return array
      *
      * Use instruction:
@@ -133,7 +133,7 @@ class CRUD
      * @param string $table
      * @param array $key_value
      * @param string $where The where clause.
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException|PDOException
      * @return int
      *
      * Use:
@@ -173,6 +173,7 @@ class CRUD
      * @method delete
      * @param string $table
      * @param string $where The where clause.
+     * @throws PDOException
      * @return int
      *
      * $delete($table,$where)
