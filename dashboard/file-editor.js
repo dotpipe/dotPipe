@@ -148,7 +148,7 @@
 
   async function undoFileOperation(id = undoStages.at(-1)?.id) {
     if (!id) { setStatus('No file operation is available to undo.', 'XI-UNDO', true); return; }
-    try { await fileOperation({ action: 'undo', id }); setStatus('Last file operation undone.', 'XI-UNDO'); location.reload(); } catch (error) { setStatus(`Undo failed: ${error.message}`, 'XI-UNDO', true); }
+    try { await fileOperation({ action: 'undo', id }); sessionStorage.setItem('xi.file-operation-flash', 'Last file operation undone.'); location.reload(); } catch (error) { setStatus(`Undo failed: ${error.message}`, 'XI-UNDO', true); }
   }
 
   function crc32(bytes) {
@@ -461,6 +461,8 @@
   $('fileOperationDialog').addEventListener('cancel', event => { event.preventDefault(); $('fileOperationCancel').click(); });
   $('trashBin').addEventListener('click', event => { const button = event.target.closest('[data-restore-trash]'); if (button) undoFileOperation(button.dataset.restoreTrash); });
   loadFileHistory();
+  const operationFlash = sessionStorage.getItem('xi.file-operation-flash');
+  if (operationFlash) { sessionStorage.removeItem('xi.file-operation-flash'); setStatus(operationFlash, 'XI-UNDO'); }
   $('jsonEditor').addEventListener('input', () => showJsonAutocomplete());
   $('jsonEditor').addEventListener('keydown', event => {
     const menu = $('jsonAutocomplete');
