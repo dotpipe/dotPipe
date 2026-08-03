@@ -29,8 +29,5 @@
   "bugs": {
     "url": "https://github.com/dompipe/xix/issues"
   },
-  "homepage": "https://github.com/dompipe/xix#readme",
-  "devDependencies": {
-    "electron": "^39.8.1"
-  }
+  "homepage": "https://github.com/dompipe/xix#readme"
 }
