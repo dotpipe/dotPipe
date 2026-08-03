@@ -23,7 +23,7 @@ PHP is required for the PHP endpoints and demos. Node.js is required only for `n
 
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — runtime and control-plane boundaries.
 - [`docs/DOMPIPE-RUNTIME.md`](docs/DOMPIPE-RUNTIME.md) — lifecycle, public APIs, attributes, tags, macros, Markdown, and listeners.
-- [`docs/XI-XI.md`](docs/XI-XI.md) — dashboard behavior, API registry, JSON/page editor, file editor, and site registry.
+- [`docs/XI.md`](docs/XI.md) — dashboard behavior, API registry, JSON/page editor, file editor, and site registry.
 - [`docs/ELSN-XI.md`](docs/ELSN-XI.md) — signed server protocol, XML `.xi` rules, endpoint status, and CLI commands.
 - [`docs/SECURITY.md`](docs/SECURITY.md) — trust boundaries, write controls, secrets, and deployment cautions.
 - [`docs/EXAMPLES.md`](docs/EXAMPLES.md) — verified purpose and entry point for each example directory.

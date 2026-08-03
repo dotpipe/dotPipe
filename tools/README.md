@@ -1,15 +1,15 @@
 # Local XI XI tools
 
-`xi-xi-ssh.mjs` is the platform-neutral local SSH adapter for the XI XI remote console. It uses the native OpenSSH client on Windows, Linux, and macOS; it does not store passwords or private keys and does not expose them to the browser.
+`xi-ssh.mjs` is the platform-neutral local SSH adapter for the XI XI remote console. It uses the native OpenSSH client on Windows, Linux, and macOS; it does not store passwords or private keys and does not expose them to the browser.
 
-Copy `.xi-xi-ssh.example.json` to `.xi-xi-ssh.json` and replace the host, user, and key paths. Keep the real file out of version control. Use `ssh-add` with the local `ssh-agent` before connecting.
+Copy `.xi-ssh.example.json` to `.xi-ssh.json` and replace the host, user, and key paths. Keep the real file out of version control. Use `ssh-add` with the local `ssh-agent` before connecting.
 
 Supported safe commands:
 
 ```text
-node tools/xi-xi-ssh.mjs status
-node tools/xi-xi-ssh.mjs list
-node tools/xi-xi-ssh.mjs get /path/to/file
+node tools/xi-ssh.mjs status
+node tools/xi-ssh.mjs list
+node tools/xi-ssh.mjs get /path/to/file
 ```
 
 The adapter requires strict host-key verification and `BatchMode=yes`. It intentionally does not accept arbitrary remote shell text. The dashboard can call this helper through a separately installed local broker without receiving SSH credentials.
@@ -22,9 +22,9 @@ Start the local broker from the project directory:
 npm run ssh-broker
 ```
 
-It listens only on `127.0.0.1:8790`, creates `.xi-xi-local-token` on first run, and prints the token once for entry into the Dashboard → SSH console modal. The token is not stored by the browser. The broker exposes only policy-approved operations.
+It listens only on `127.0.0.1:8790`, creates `.xi-local-token` on first run, and prints the token once for entry into the Dashboard → SSH console modal. The token is not stored by the browser. The broker exposes only policy-approved operations.
 
-Use `config.sites` in `.xi-xi-ssh.json` to register each managed computer. Every site has an independent policy:
+Use `config.sites` in `.xi-ssh.json` to register each managed computer. Every site has an independent policy:
 
 ```json
 {

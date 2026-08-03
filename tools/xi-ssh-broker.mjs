@@ -7,8 +7,8 @@ import http from 'node:http';
 import { spawn } from 'node:child_process';
 
 const root = process.cwd();
-const configPath = path.join(root, '.xi-xi-ssh.json');
-const tokenPath = path.join(root, '.xi-xi-local-token');
+const configPath = path.join(root, '.xi-ssh.json');
+const tokenPath = path.join(root, '.xi-local-token');
 const port = Number(process.env.XI_XI_SSH_PORT || 8790);
 const dashboardOrigin = process.env.XI_XI_DASHBOARD_ORIGIN || 'http://127.0.0.1:8787';
 const expandHome = value => String(value || '').replace(/^~(?=$|[\\/])/, os.homedir());
@@ -51,10 +51,10 @@ async function main() {
     const origin = request.headers.origin || '';
     if (origin && origin !== dashboardOrigin) return json(response, 403, { ok: false, error: 'origin rejected' });
     if (origin) response.setHeader('Access-Control-Allow-Origin', dashboardOrigin);
-    response.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-XI-XI-Local-Token'); response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); response.setHeader('Vary', 'Origin');
+    response.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-XI-Local-Token'); response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); response.setHeader('Vary', 'Origin');
     if (request.method === 'OPTIONS') return response.end();
-    if (request.headers['x-xi-xi-local-token'] !== token) return json(response, 401, { ok: false, error: 'local broker token rejected' });
-    if (request.url === '/health' && request.method === 'GET') return json(response, 200, { ok: true, service: 'xi-xi-ssh-broker' });
+    if (request.headers['x-xi-local-token'] !== token) return json(response, 401, { ok: false, error: 'local broker token rejected' });
+    if (request.url === '/health' && request.method === 'GET') return json(response, 200, { ok: true, service: 'xi-ssh-broker' });
     if (request.url === '/profiles' && request.method === 'GET') { const config = await loadConfig(); return json(response, 200, { ok: true, sites: config.profiles.map(profile => ({ id: profile.id, name: profile.name, host: profile.host, user: profile.user, allow: profile.allow, deny: profile.deny, allowedPackages: profile.allowedPackages, packageManager: profile.packageManager })) }); }
     if (request.url !== '/run' || request.method !== 'POST') return json(response, 404, { ok: false, error: 'not found' });
     let raw = ''; for await (const chunk of request) { raw += chunk; if (raw.length > 4096) return json(response, 413, { ok: false, error: 'request too large' }); }
@@ -62,4 +62,4 @@ async function main() {
   });
   server.listen(port, '127.0.0.1', () => console.log(`XI XI SSH broker listening on http://127.0.0.1:${port}`));
 }
-main().catch(error => { console.error(`xi-xi-ssh-broker: ${error.message}`); process.exitCode = 1; });
+main().catch(error => { console.error(`xi-ssh-broker: ${error.message}`); process.exitCode = 1; });

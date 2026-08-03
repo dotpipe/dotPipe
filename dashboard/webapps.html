@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="XI web application operations dashboard.">
+  <title>XI Webapps</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="webapps.css">
+</head>
+<body class="webapps-page">
+  <div class="webapps-shell">
+    <header class="shell-bar">
+      <div class="brand-lockup">
+        <a class="brand-mark" href="index.html" aria-label="Back to XI control panel"><span class="brand-glyph">◈</span></a>
+        <div><p class="eyebrow">XI XI / OPERATIONS</p><h1>Webapp control room</h1></div>
+      </div>
+      <div class="shell-actions">
+        <span class="connection-state"><span class="status-dot"></span><span id="connectionLabel">Local simulation</span></span>
+        <button class="icon-button" id="themeToggle" type="button" aria-label="Toggle light and dark theme">◐</button>
+        <a class="back-link" href="index.html">← Control panel</a>
+      </div>
+    </header>
+
+    <div class="webapps-layout">
+      <aside class="webapps-sidebar" aria-label="Registered webapps">
+        <div class="sidebar-heading"><div><p class="eyebrow">REGISTRY</p><h2>Registered webapps</h2></div><span class="count-badge" id="siteCount">0</span></div>
+        <div class="registry-note"><span class="status-dot"></span><span id="registryLabel">Local registry</span></div>
+        <div class="webapp-list" id="webappList"></div>
+      </aside>
+
+      <main class="webapps-main">
+        <section class="overview-header">
+          <div><p class="eyebrow">SELECTED WEBAPP / <span id="siteEnvironment">PRODUCTION</span></p><h2 id="siteName">Loading webapp</h2><p class="site-url" id="siteUrl">—</p></div>
+          <div class="overview-status"><span class="status-pill" id="siteStatus">READY</span><span class="mono muted" id="siteHeartbeat">heartbeat —</span></div>
+        </section>
+
+        <div class="metric-strip" aria-label="Webapp metrics">
+          <div class="metric"><span>Active users</span><strong id="activeUsers">—</strong><small>last 5 min</small></div>
+          <div class="metric"><span>Connected clients</span><strong id="connectedClients">—</strong><small>current sessions</small></div>
+          <div class="metric"><span>Requests / min</span><strong id="requestsPerMinute">—</strong><small>rolling average</small></div>
+          <div class="metric"><span>Error rate</span><strong id="errorRate">—</strong><small>last 15 min</small></div>
+        </div>
+
+        <section class="panel clients-panel">
+          <div class="panel-heading"><div><p class="eyebrow">LIVE CLIENTS</p><h3>Connected sessions</h3></div><span class="panel-kicker" id="clientState">DEMO TELEMETRY</span></div>
+          <div class="table-wrap"><table><thead><tr><th scope="col">User / session</th><th scope="col">Browser / device</th><th scope="col">Location</th><th scope="col">Last seen</th><th scope="col">State</th></tr></thead><tbody id="clientTable"></tbody></table></div>
+        </section>
+
+        <section class="panel activity-panel">
+          <div class="panel-heading"><div><p class="eyebrow">AUDIT FEED</p><h3>Recent activity</h3></div><button class="text-button" id="clearEvents" type="button">Clear local feed</button></div>
+          <div class="timeline" id="activityFeed"></div>
+        </section>
+      </main>
+
+      <aside class="webapps-details" aria-label="Webapp details and operator actions">
+        <section class="panel action-panel">
+          <div class="panel-heading"><div><p class="eyebrow">OPERATOR ACTIONS</p><h3>Control rail</h3></div><span class="field-hint">explicit / local</span></div>
+          <div class="simulation-note"><span>i</span><p>Local simulation. No XI server action endpoint is configured.</p></div>
+          <div class="action-list">
+            <button class="action-button warning" data-action="pause" type="button"><span>Ⅱ</span><span><strong>Pause webapp</strong><small>Stop new sessions</small></span></button>
+            <button class="action-button" data-action="resume" type="button"><span>▶</span><span><strong>Resume webapp</strong><small>Allow sessions again</small></span></button>
+            <button class="action-button" data-action="notice" type="button"><span>▱</span><span><strong>Broadcast notice</strong><small>Send a maintenance message</small></span></button>
+            <button class="action-button" data-action="refresh" type="button"><span>↻</span><span><strong>Refresh clients</strong><small>Request a client reload</small></span></button>
+            <a class="action-button" href="file-editor.html?file=landing/index.html"><span>▤</span><span><strong>Open editor</strong><small>Open existing XI editor</small></span></a>
+          </div>
+        </section>
+        <section class="panel health-panel">
+          <div class="panel-heading"><div><p class="eyebrow">HEALTH / INTEGRITY</p><h3>Service details</h3></div><span class="status-pill small" id="healthStatus">HEALTHY</span></div>
+          <dl class="detail-list"><div><dt>Endpoint health</dt><dd id="endpointHealth">200 / healthy</dd></div><div><dt>Deployment digest</dt><dd class="mono" id="deploymentDigest">sha256:—</dd></div><div><dt>Version</dt><dd class="mono" id="siteVersion">—</dd></div><div><dt>Last deploy</dt><dd class="mono" id="lastDeploy">—</dd></div></dl>
+          <div class="connection-box">
+            <div class="panel-heading compact"><div><p class="eyebrow">XI SERVER CONNECTION</p><h3>Live control channel</h3></div><span class="panel-kicker" id="remoteState">NOT CONNECTED</span></div>
+            <label class="field"><span>XI server URL</span><input id="xiServerUrl" type="url" placeholder="https://site.example/xi-server.php" autocomplete="url"></label>
+            <label class="field"><span>One-time dashboard token</span><input id="xiDashboardToken" type="password" placeholder="Read-only pairing token" autocomplete="off"></label>
+            <label class="field"><span>Endpoint name</span><input id="xiEndpoint" type="text" placeholder="health" autocomplete="off"></label>
+            <div class="connection-actions"><button class="command-button" id="connectXI" type="button">Connect live</button><button class="text-button" id="refreshXI" type="button">Refresh status</button></div>
+            <p class="connection-help">The server rotates the pairing token into an HttpOnly session. The browser never stores the token. Live pause/resume requires server-side browser writes to be explicitly enabled.</p>
+          </div>
+          <div class="safe-mode" id="safeMode"><span class="safe-icon">✓</span><div><strong>Local simulation active</strong><p>Connect an XI server above to control the registered webapp itself.</p></div></div>
+          <div class="endpoint-hook"><p class="eyebrow">CONTROL CHANNEL</p><code id="actionEndpoint">XI server not configured</code><small id="actionEndpointHelp">No remote request will be sent until a live XI server is connected.</small></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog class="operator-dialog" id="operatorDialog"><form method="dialog"><p class="eyebrow">CONFIRM ACTION</p><h2 id="dialogTitle">Confirm</h2><p id="dialogCopy"></p><div class="dialog-actions"><button class="text-button" value="cancel">Cancel</button><button class="command-button primary" id="dialogConfirm" value="default">Confirm</button></div></form></dialog>
+  <dialog class="operator-dialog" id="noticeDialog"><form method="dialog"><p class="eyebrow">LOCAL NOTICE</p><h2>Broadcast notice</h2><p>Draft a maintenance message for the local audit feed.</p><label class="field"><span>Message</span><textarea id="noticeInput" rows="4">Planned maintenance begins at 22:00 UTC.</textarea></label><div class="dialog-actions"><button class="text-button" value="cancel">Cancel</button><button class="command-button primary" id="noticeConfirm" value="default">Add notice</button></div></form></dialog>
+  <script src="webapps.js"></script>
+</body>
+</html>

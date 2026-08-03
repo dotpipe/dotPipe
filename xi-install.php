@@ -32,7 +32,7 @@ $xml .= '  <keys><key id="' . htmlspecialchars($keyId, ENT_XML1) . '">' . htmlsp
 $xml .= '  <dashboardTokens><token id="xi-readonly">' . htmlspecialchars($dashboardToken, ENT_XML1) . '</token></dashboardTokens>' . PHP_EOL;
 $xml .= "  <audit>\n";
 $xml .= "    <program id=\"dompipe\" name=\"domPipe runtime\" root=\".\" entry=\"domPipe.js\"><file>domPipe.js</file><file>package.json</file></program>\n";
-$xml .= "    <program id=\"xi-xi\" name=\"XI XI control plane\" root=\"dashboard\" entry=\"index.html\"><file>dashboard/index.html</file><file>dashboard/app.js</file><file>dashboard/xi-extension.js</file></program>\n";
+$xml .= "    <program id=\"xi\" name=\"XI XI control plane\" root=\"dashboard\" entry=\"index.html\"><file>dashboard/index.html</file><file>dashboard/app.js</file><file>dashboard/xi-extension.js</file></program>\n";
 $xml .= "  </audit>\n";
 $xml .= "  <allow>\n    \"**/index.php\"\n    \"dashboard/*.json\"\n    \"dashboard/*.html\"\n    \"dashboard/*.js\"\n    \"dashboard/*.css\"\n    \"*.html\"\n    \"*.css\"\n    \"*.js\"\n    \"package.json\"\n  </allow>\n";
 $xml .= "  <deny>\n    \".git**\"\n    \".xi\"\n    \".xi*\"\n    \".xi-state.json\"\n    \"*.key.json\"\n    \"*.env\"\n    \"*.log\"\n    \"vendor/**\"\n  </deny>\n</xi>\n";

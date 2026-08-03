@@ -4,9 +4,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 
-const configPath = path.resolve(process.cwd(), '.xi-xi-ssh.json');
+const configPath = path.resolve(process.cwd(), '.xi-ssh.json');
 const expandHome = value => String(value || '').replace(/^~(?=$|[\\/])/, os.homedir());
-const fail = message => { console.error(`xi-xi-ssh: ${message}`); process.exitCode = 1; };
+const fail = message => { console.error(`xi-ssh: ${message}`); process.exitCode = 1; };
 
 async function loadConfig() {
   const config = JSON.parse(await fs.readFile(configPath, 'utf8'));
