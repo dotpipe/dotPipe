@@ -7,7 +7,6 @@ class CRUD
     public $rows = [];
 
     /**
-     * @method __construct
      * @param string $config The path to the configuration file.
      * @throws RuntimeException
      * @return void
@@ -27,7 +26,6 @@ class CRUD
     }
 
     /**
-     * @method identifier
      * @param string $value
      * @throws InvalidArgumentException
      * @return string
@@ -42,7 +40,6 @@ class CRUD
     }
 
     /**
-     * @method create
      * @param array $values
      * @param string $table
      * @throws InvalidArgumentException|PDOException
@@ -80,7 +77,6 @@ class CRUD
     }
 
     /**
-     * @method read
      * @param array $ta_ky
      * @param string $where The where clause.
      * @throws InvalidArgumentException|PDOException
@@ -129,7 +125,6 @@ class CRUD
     }
 
     /**
-     * @method update
      * @param string $table
      * @param array $key_value
      * @param string $where The where clause.
@@ -170,7 +165,6 @@ class CRUD
     }
 
     /**
-     * @method delete
      * @param string $table
      * @param string $where The where clause.
      * @throws PDOException
