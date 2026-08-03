@@ -8,8 +8,9 @@ class CRUD
 
     /**
      * @method __construct
-     * @param config_filename
-     *     
+     * @param string $config The path to the configuration file.
+     * @throws RuntimeException
+     * @return void
      */
     public function __construct(string $config = "../config/config.json")
     {
@@ -25,6 +26,12 @@ class CRUD
         $this->ini->password = null;
     }
 
+    /**
+     * @method identifier
+     * @param string $value
+     * @throws InvalidArgumentException
+     * @return string
+     */
     private function identifier(string $value): string
     {
         if (!preg_match('/\\A[A-Za-z_][A-Za-z0-9_]*\\z/', $value)) {
@@ -36,9 +43,11 @@ class CRUD
 
     /**
      * @method create
-     * @param values
-     * @param tablename
-     *     
+     * @param array $values
+     * @param string $table
+     * @throws InvalidArgumentException
+     * @return int
+     *
      * $create([
      *   col1 => value,
      *   col2 => value,
@@ -72,9 +81,11 @@ class CRUD
 
     /**
      * @method read
-     * @param values
-     * @param WHERE_clause
-     * 
+     * @param array $ta_ky
+     * @param string $where The where clause.
+     * @throws InvalidArgumentException
+     * @return array
+     *
      * Use instruction:
      * $read([
      *  $table1 => [
@@ -119,10 +130,12 @@ class CRUD
 
     /**
      * @method update
-     * @param table
-     * @param values
-     * @param WHERE_CLAUSE
-     * 
+     * @param string $table
+     * @param array $key_value
+     * @param string $where The where clause.
+     * @throws InvalidArgumentException
+     * @return int
+     *
      * Use:
      *  $update(
      *      $table,
@@ -158,9 +171,10 @@ class CRUD
 
     /**
      * @method delete
-     * @param table
-     * @param WHERE_CLAUSE
-     * 
+     * @param string $table
+     * @param string $where The where clause.
+     * @return int
+     *
      * $delete($table,$where)
      */
     public function delete(string $table, string $where)
